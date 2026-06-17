@@ -59,8 +59,8 @@ WC2026_TEAM_COLORS: dict[str, dict[str, str]] = {
     "Indonesia":        {"primary": "#CE1126", "secondary": "#FFFFFF"},
 
     # Play-Off qualifiers
-    "Congo":            {"primary": "#009A44", "secondary": "#F9E300"},
     "DR Congo":         {"primary": "#007FFF", "secondary": "#F9E300"},
+    "Congo":            {"primary": "#007FFF", "secondary": "#F9E300"},
     "Uzbekistan":       {"primary": "#1EB53A", "secondary": "#FFFFFF"},
     "Austria":          {"primary": "#ED2939", "secondary": "#FFFFFF"},
     "Jordan":           {"primary": "#007A3D", "secondary": "#FFFFFF"},
