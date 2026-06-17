@@ -42,7 +42,8 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
 
-from wc2026.scraper     import fetch_and_save, fotmob_fetch_wc_matches
+from wc2026.scraper     import (fetch_and_save, fotmob_fetch_wc_matches,
+                                schedule_team_names, schedule_lookup_by_teams)
 from wc2026.renderer    import render_wc_dashboard, output_filename
 from wc2026.git_ops     import push_png_to_xworldcuptwit
 
@@ -128,9 +129,24 @@ def send_whatsapp_notification(image_url: str, text: str) -> bool:
         return False
 
 
+def _build_xml_stub(fotmob_id: int, home: str, away: str, date: str) -> dict:
+    return {
+        "id":   fotmob_id,
+        "home": {"name": home, "id": None},
+        "away": {"name": away, "id": None},
+        "status": {
+            "scoreStr": "0 - 0",
+            "utcTime":  f"{date}T12:00:00+00:00" if date else "",
+            "finished": True,
+        },
+    }
+
+
 def run_match(
     fotmob_id: int | None = None,
     from_file: str | None = None,
+    home_name: str | None = None,
+    away_name: str | None = None,
     *,
     fotmob_only: bool = False,
     do_push: bool = True,
@@ -138,7 +154,8 @@ def run_match(
 ) -> bool:
     """
     Full single-match flow. Returns True on success.
-    Either `fotmob_id` or `from_file` must be given.
+    Provide one of: fotmob_id, from_file, or home_name+away_name.
+    Team names are resolved (in order): FotMob XML → REMAINING_SCHEDULE.json → CLI args.
     """
     # ── 1. Acquire match JSON ─────────────────────────────────────────────
     if from_file:
@@ -147,17 +164,42 @@ def run_match(
             log.error("Match file not found: %s", json_path)
             return False
         log.info("Using existing match file: %s", json_path.name)
-    elif fotmob_id is not None:
+    elif fotmob_id is not None or (home_name and away_name):
+        # Resolve fotmob_id from team names if not given directly
+        date_str = ""
+        if fotmob_id is None:
+            fotmob_id, date_str = schedule_lookup_by_teams(home_name, away_name)
+            if fotmob_id is None:
+                log.error("Could not find '%s vs %s' in schedule.", home_name, away_name)
+                return False
+            log.info("Resolved fotmob_id=%d for %s vs %s", fotmob_id, home_name, away_name)
+
         log.info("Scraping match id=%d …", fotmob_id)
-        # Pull the XML stub so names/date resolve even though FotMob JSON is dead
+
+        # Step 1: try FotMob XML for team names + date
         xml_stub = None
         try:
             xml_stub = next(
                 (m for m in fotmob_fetch_wc_matches() if m.get("id") == fotmob_id),
                 None,
             )
+            if xml_stub:
+                log.info("FotMob XML: resolved %s vs %s",
+                         xml_stub["home"]["name"], xml_stub["away"]["name"])
         except Exception as exc:
-            log.warning("Could not fetch XML stub for id=%d: %s", fotmob_id, exc)
+            log.warning("FotMob XML unavailable: %s", exc)
+
+        # Step 2: fall back to REMAINING_SCHEDULE.json
+        if xml_stub is None:
+            sched_home, sched_away, sched_date = schedule_team_names(fotmob_id)
+            h = home_name or sched_home
+            a = away_name or sched_away
+            d = date_str or sched_date
+            if h and a:
+                log.info("Schedule fallback: %s vs %s", h, a)
+                xml_stub = _build_xml_stub(fotmob_id, h, a, d)
+            else:
+                log.warning("No team names found — WhoScored search may fail.")
 
         json_path = fetch_and_save(fotmob_id, fotmob_only=fotmob_only, xml_match=xml_stub)
         if not json_path:
@@ -165,7 +207,7 @@ def run_match(
             return False
         log.info("Scraped → %s", json_path)
     else:
-        log.error("Must provide either --fotmob-id or --from-file.")
+        log.error("Provide --fotmob-id, --match 'Home vs Away', or --from-file.")
         return False
 
     # ── 2. Load data ──────────────────────────────────────────────────────
@@ -223,23 +265,44 @@ def run_match(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="WC2026 one-shot: scrape → render → push → whatsapp for a single match."
+        description="WC2026 one-shot: scrape → render → push → whatsapp for a single match.",
+        epilog=(
+            "Examples:\n"
+            "  py -m wc2026.run_match --fotmob-id 4667819\n"
+            "  py -m wc2026.run_match --match 'Portugal vs Congo'\n"
+            "  py -m wc2026.run_match --from-file wc2026/matches/2026_06_17_Portugal_vs_Congo.json\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     src = parser.add_mutually_exclusive_group(required=True)
-    src.add_argument("--fotmob-id", type=int, help="FotMob match ID to scrape and process.")
-    src.add_argument("--from-file", help="Path to an existing match JSON (skip scraping).")
+    src.add_argument("--fotmob-id", type=int,
+                     help="FotMob match ID (team names resolved from schedule if FotMob is down).")
+    src.add_argument("--match", metavar="'Home vs Away'",
+                     help="Match as team names, e.g. 'Portugal vs Congo'. Looks up fotmob-id automatically.")
+    src.add_argument("--from-file",
+                     help="Path to an existing match JSON (skip scraping entirely).")
 
     parser.add_argument("--fotmob-only", action="store_true",
                         help="Skip WhoScored (FotMob shot data only).")
     parser.add_argument("--no-push", action="store_true",
                         help="Don't push the PNG to GitHub.")
     parser.add_argument("--no-post", action="store_true",
-                        help="Don't send to WhatsApp (legacy flag).")
+                        help="Don't send to WhatsApp.")
     args = parser.parse_args()
+
+    home_name = away_name = None
+    if args.match:
+        parts = [p.strip() for p in args.match.split(" vs ", 1)]
+        if len(parts) != 2 or not all(parts):
+            log.error("--match must be in format 'Home vs Away'")
+            sys.exit(1)
+        home_name, away_name = parts
 
     ok = run_match(
         fotmob_id=args.fotmob_id,
         from_file=args.from_file,
+        home_name=home_name,
+        away_name=away_name,
         fotmob_only=args.fotmob_only,
         do_push=not args.no_push,
         do_whatsapp=not args.no_post,
