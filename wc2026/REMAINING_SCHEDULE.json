@@ -1,0 +1,698 @@
+[
+  {
+    "fotmob_id": 4667805,
+    "home": "FIFA Play-Off Tournament 2",
+    "away": "Norway",
+    "group": "I",
+    "kickoff_israel": "2026-06-17 01:00",
+    "scrape_at_israel": "2026-06-17 03:00"
+  },
+  {
+    "fotmob_id": 4667812,
+    "home": "Argentina",
+    "away": "Algeria",
+    "group": "J",
+    "kickoff_israel": "2026-06-17 04:00",
+    "scrape_at_israel": "2026-06-17 06:00"
+  },
+  {
+    "fotmob_id": 4667813,
+    "home": "Austria",
+    "away": "Jordan",
+    "group": "J",
+    "kickoff_israel": "2026-06-17 07:00",
+    "scrape_at_israel": "2026-06-17 09:00"
+  },
+  {
+    "fotmob_id": 4667819,
+    "home": "Portugal",
+    "away": "FIFA Play-Off Tournament 1",
+    "group": "K",
+    "kickoff_israel": "2026-06-17 20:00",
+    "scrape_at_israel": "2026-06-17 22:00"
+  },
+  {
+    "fotmob_id": 4667825,
+    "home": "England",
+    "away": "Croatia",
+    "group": "L",
+    "kickoff_israel": "2026-06-17 23:00",
+    "scrape_at_israel": "2026-06-18 01:00"
+  },
+  {
+    "fotmob_id": 4667826,
+    "home": "Ghana",
+    "away": "Panama",
+    "group": "L",
+    "kickoff_israel": "2026-06-18 02:00",
+    "scrape_at_israel": "2026-06-18 04:00"
+  },
+  {
+    "fotmob_id": 4667820,
+    "home": "Uzbekistan",
+    "away": "Colombia",
+    "group": "K",
+    "kickoff_israel": "2026-06-18 05:00",
+    "scrape_at_israel": "2026-06-18 07:00"
+  },
+  {
+    "fotmob_id": 4667753,
+    "home": "European Play-Off D",
+    "away": "South Africa",
+    "group": "A",
+    "kickoff_israel": "2026-06-18 19:00",
+    "scrape_at_israel": "2026-06-18 21:00"
+  },
+  {
+    "fotmob_id": 4667759,
+    "home": "Switzerland",
+    "away": "European Play-Off A",
+    "group": "B",
+    "kickoff_israel": "2026-06-18 22:00",
+    "scrape_at_israel": "2026-06-19 00:00"
+  },
+  {
+    "fotmob_id": 4667760,
+    "home": "Canada",
+    "away": "Qatar",
+    "group": "B",
+    "kickoff_israel": "2026-06-19 01:00",
+    "scrape_at_israel": "2026-06-19 03:00"
+  },
+  {
+    "fotmob_id": 4667754,
+    "home": "Mexico",
+    "away": "South Korea",
+    "group": "A",
+    "kickoff_israel": "2026-06-19 04:00",
+    "scrape_at_israel": "2026-06-19 06:00"
+  },
+  {
+    "fotmob_id": 4667774,
+    "home": "USA",
+    "away": "Australia",
+    "group": "D",
+    "kickoff_israel": "2026-06-19 22:00",
+    "scrape_at_israel": "2026-06-20 00:00"
+  },
+  {
+    "fotmob_id": 4667766,
+    "home": "Scotland",
+    "away": "Morocco",
+    "group": "C",
+    "kickoff_israel": "2026-06-20 01:00",
+    "scrape_at_israel": "2026-06-20 03:00"
+  },
+  {
+    "fotmob_id": 4667767,
+    "home": "Brazil",
+    "away": "Haiti",
+    "group": "C",
+    "kickoff_israel": "2026-06-20 04:00",
+    "scrape_at_israel": "2026-06-20 06:00"
+  },
+  {
+    "fotmob_id": 4667773,
+    "home": "European Play-Off C",
+    "away": "Paraguay",
+    "group": "D",
+    "kickoff_israel": "2026-06-20 07:00",
+    "scrape_at_israel": "2026-06-20 09:00"
+  },
+  {
+    "fotmob_id": 4667786,
+    "home": "Netherlands",
+    "away": "European Play-Off B",
+    "group": "F",
+    "kickoff_israel": "2026-06-20 20:00",
+    "scrape_at_israel": "2026-06-20 22:00"
+  },
+  {
+    "fotmob_id": 4667780,
+    "home": "Germany",
+    "away": "Ivory Coast",
+    "group": "E",
+    "kickoff_israel": "2026-06-20 23:00",
+    "scrape_at_israel": "2026-06-21 01:00"
+  },
+  {
+    "fotmob_id": 4667779,
+    "home": "Ecuador",
+    "away": "Curacao",
+    "group": "E",
+    "kickoff_israel": "2026-06-21 03:00",
+    "scrape_at_israel": "2026-06-21 05:00"
+  },
+  {
+    "fotmob_id": 4667785,
+    "home": "Tunisia",
+    "away": "Japan",
+    "group": "F",
+    "kickoff_israel": "2026-06-21 07:00",
+    "scrape_at_israel": "2026-06-21 09:00"
+  },
+  {
+    "fotmob_id": 4667801,
+    "home": "Spain",
+    "away": "Saudi Arabia",
+    "group": "H",
+    "kickoff_israel": "2026-06-21 19:00",
+    "scrape_at_israel": "2026-06-21 21:00"
+  },
+  {
+    "fotmob_id": 4667793,
+    "home": "Belgium",
+    "away": "Iran",
+    "group": "G",
+    "kickoff_israel": "2026-06-21 22:00",
+    "scrape_at_israel": "2026-06-22 00:00"
+  },
+  {
+    "fotmob_id": 4667800,
+    "home": "Uruguay",
+    "away": "Cape Verde",
+    "group": "H",
+    "kickoff_israel": "2026-06-22 01:00",
+    "scrape_at_israel": "2026-06-22 03:00"
+  },
+  {
+    "fotmob_id": 4667792,
+    "home": "New Zealand",
+    "away": "Egypt",
+    "group": "G",
+    "kickoff_israel": "2026-06-22 04:00",
+    "scrape_at_israel": "2026-06-22 06:00"
+  },
+  {
+    "fotmob_id": 4667815,
+    "home": "Argentina",
+    "away": "Austria",
+    "group": "J",
+    "kickoff_israel": "2026-06-22 20:00",
+    "scrape_at_israel": "2026-06-22 22:00"
+  },
+  {
+    "fotmob_id": 4667807,
+    "home": "France",
+    "away": "FIFA Play-Off Tournament 2",
+    "group": "I",
+    "kickoff_israel": "2026-06-23 00:00",
+    "scrape_at_israel": "2026-06-23 02:00"
+  },
+  {
+    "fotmob_id": 4667806,
+    "home": "Norway",
+    "away": "Senegal",
+    "group": "I",
+    "kickoff_israel": "2026-06-23 03:00",
+    "scrape_at_israel": "2026-06-23 05:00"
+  },
+  {
+    "fotmob_id": 4667814,
+    "home": "Jordan",
+    "away": "Algeria",
+    "group": "J",
+    "kickoff_israel": "2026-06-23 06:00",
+    "scrape_at_israel": "2026-06-23 08:00"
+  },
+  {
+    "fotmob_id": 4667822,
+    "home": "Portugal",
+    "away": "Uzbekistan",
+    "group": "K",
+    "kickoff_israel": "2026-06-23 20:00",
+    "scrape_at_israel": "2026-06-23 22:00"
+  },
+  {
+    "fotmob_id": 4667828,
+    "home": "England",
+    "away": "Ghana",
+    "group": "L",
+    "kickoff_israel": "2026-06-23 23:00",
+    "scrape_at_israel": "2026-06-24 01:00"
+  },
+  {
+    "fotmob_id": 4667827,
+    "home": "Panama",
+    "away": "Croatia",
+    "group": "L",
+    "kickoff_israel": "2026-06-24 02:00",
+    "scrape_at_israel": "2026-06-24 04:00"
+  },
+  {
+    "fotmob_id": 4667821,
+    "home": "Colombia",
+    "away": "FIFA Play-Off Tournament 1",
+    "group": "K",
+    "kickoff_israel": "2026-06-24 05:00",
+    "scrape_at_israel": "2026-06-24 07:00"
+  },
+  {
+    "fotmob_id": 4667762,
+    "home": "European Play-Off A",
+    "away": "Qatar",
+    "group": "B",
+    "kickoff_israel": "2026-06-24 22:00",
+    "scrape_at_israel": "2026-06-25 00:00"
+  },
+  {
+    "fotmob_id": 4667761,
+    "home": "Switzerland",
+    "away": "Canada",
+    "group": "B",
+    "kickoff_israel": "2026-06-24 22:00",
+    "scrape_at_israel": "2026-06-25 00:00"
+  },
+  {
+    "fotmob_id": 4667769,
+    "home": "Morocco",
+    "away": "Haiti",
+    "group": "C",
+    "kickoff_israel": "2026-06-25 01:00",
+    "scrape_at_israel": "2026-06-25 03:00"
+  },
+  {
+    "fotmob_id": 4667768,
+    "home": "Scotland",
+    "away": "Brazil",
+    "group": "C",
+    "kickoff_israel": "2026-06-25 01:00",
+    "scrape_at_israel": "2026-06-25 03:00"
+  },
+  {
+    "fotmob_id": 4667755,
+    "home": "European Play-Off D",
+    "away": "Mexico",
+    "group": "A",
+    "kickoff_israel": "2026-06-25 04:00",
+    "scrape_at_israel": "2026-06-25 06:00"
+  },
+  {
+    "fotmob_id": 4667756,
+    "home": "South Africa",
+    "away": "South Korea",
+    "group": "A",
+    "kickoff_israel": "2026-06-25 04:00",
+    "scrape_at_israel": "2026-06-25 06:00"
+  },
+  {
+    "fotmob_id": 4667782,
+    "home": "Curacao",
+    "away": "Ivory Coast",
+    "group": "E",
+    "kickoff_israel": "2026-06-25 23:00",
+    "scrape_at_israel": "2026-06-26 01:00"
+  },
+  {
+    "fotmob_id": 4667781,
+    "home": "Ecuador",
+    "away": "Germany",
+    "group": "E",
+    "kickoff_israel": "2026-06-25 23:00",
+    "scrape_at_israel": "2026-06-26 01:00"
+  },
+  {
+    "fotmob_id": 4667788,
+    "home": "Japan",
+    "away": "European Play-Off B",
+    "group": "F",
+    "kickoff_israel": "2026-06-26 02:00",
+    "scrape_at_israel": "2026-06-26 04:00"
+  },
+  {
+    "fotmob_id": 4667787,
+    "home": "Tunisia",
+    "away": "Netherlands",
+    "group": "F",
+    "kickoff_israel": "2026-06-26 02:00",
+    "scrape_at_israel": "2026-06-26 04:00"
+  },
+  {
+    "fotmob_id": 4667775,
+    "home": "European Play-Off C",
+    "away": "USA",
+    "group": "D",
+    "kickoff_israel": "2026-06-26 05:00",
+    "scrape_at_israel": "2026-06-26 07:00"
+  },
+  {
+    "fotmob_id": 4667776,
+    "home": "Paraguay",
+    "away": "Australia",
+    "group": "D",
+    "kickoff_israel": "2026-06-26 05:00",
+    "scrape_at_israel": "2026-06-26 07:00"
+  },
+  {
+    "fotmob_id": 4667808,
+    "home": "Norway",
+    "away": "France",
+    "group": "I",
+    "kickoff_israel": "2026-06-26 22:00",
+    "scrape_at_israel": "2026-06-27 00:00"
+  },
+  {
+    "fotmob_id": 4667809,
+    "home": "Senegal",
+    "away": "FIFA Play-Off Tournament 2",
+    "group": "I",
+    "kickoff_israel": "2026-06-26 22:00",
+    "scrape_at_israel": "2026-06-27 00:00"
+  },
+  {
+    "fotmob_id": 4667803,
+    "home": "Cape Verde",
+    "away": "Saudi Arabia",
+    "group": "H",
+    "kickoff_israel": "2026-06-27 03:00",
+    "scrape_at_israel": "2026-06-27 05:00"
+  },
+  {
+    "fotmob_id": 4667802,
+    "home": "Uruguay",
+    "away": "Spain",
+    "group": "H",
+    "kickoff_israel": "2026-06-27 03:00",
+    "scrape_at_israel": "2026-06-27 05:00"
+  },
+  {
+    "fotmob_id": 4667795,
+    "home": "Egypt",
+    "away": "Iran",
+    "group": "G",
+    "kickoff_israel": "2026-06-27 06:00",
+    "scrape_at_israel": "2026-06-27 08:00"
+  },
+  {
+    "fotmob_id": 4667794,
+    "home": "New Zealand",
+    "away": "Belgium",
+    "group": "G",
+    "kickoff_israel": "2026-06-27 06:00",
+    "scrape_at_israel": "2026-06-27 08:00"
+  },
+  {
+    "fotmob_id": 4667830,
+    "home": "Croatia",
+    "away": "Ghana",
+    "group": "L",
+    "kickoff_israel": "2026-06-28 00:00",
+    "scrape_at_israel": "2026-06-28 02:00"
+  },
+  {
+    "fotmob_id": 4667829,
+    "home": "Panama",
+    "away": "England",
+    "group": "L",
+    "kickoff_israel": "2026-06-28 00:00",
+    "scrape_at_israel": "2026-06-28 02:00"
+  },
+  {
+    "fotmob_id": 4667823,
+    "home": "Colombia",
+    "away": "Portugal",
+    "group": "K",
+    "kickoff_israel": "2026-06-28 02:30",
+    "scrape_at_israel": "2026-06-28 04:30"
+  },
+  {
+    "fotmob_id": 4667824,
+    "home": "FIFA Play-Off Tournament 1",
+    "away": "Uzbekistan",
+    "group": "K",
+    "kickoff_israel": "2026-06-28 02:30",
+    "scrape_at_israel": "2026-06-28 04:30"
+  },
+  {
+    "fotmob_id": 4667817,
+    "home": "Algeria",
+    "away": "Austria",
+    "group": "J",
+    "kickoff_israel": "2026-06-28 05:00",
+    "scrape_at_israel": "2026-06-28 07:00"
+  },
+  {
+    "fotmob_id": 4667816,
+    "home": "Jordan",
+    "away": "Argentina",
+    "group": "J",
+    "kickoff_israel": "2026-06-28 05:00",
+    "scrape_at_israel": "2026-06-28 07:00"
+  },
+  {
+    "fotmob_id": 4653705,
+    "home": "2A",
+    "away": "2B",
+    "group": "KO",
+    "kickoff_israel": "2026-06-28 22:00",
+    "scrape_at_israel": "2026-06-29 00:00"
+  },
+  {
+    "fotmob_id": 4653711,
+    "home": "1C",
+    "away": "2F",
+    "group": "KO",
+    "kickoff_israel": "2026-06-29 20:00",
+    "scrape_at_israel": "2026-06-29 22:00"
+  },
+  {
+    "fotmob_id": 4653703,
+    "home": "1E",
+    "away": "3ABCDF",
+    "group": "KO",
+    "kickoff_israel": "2026-06-29 23:30",
+    "scrape_at_israel": "2026-06-30 01:30"
+  },
+  {
+    "fotmob_id": 4653706,
+    "home": "1F",
+    "away": "2C",
+    "group": "KO",
+    "kickoff_israel": "2026-06-30 04:00",
+    "scrape_at_israel": "2026-06-30 06:00"
+  },
+  {
+    "fotmob_id": 4653712,
+    "home": "2E",
+    "away": "2I",
+    "group": "KO",
+    "kickoff_israel": "2026-06-30 20:00",
+    "scrape_at_israel": "2026-06-30 22:00"
+  },
+  {
+    "fotmob_id": 4653704,
+    "home": "1I",
+    "away": "3CDFGH",
+    "group": "KO",
+    "kickoff_israel": "2026-07-01 00:00",
+    "scrape_at_israel": "2026-07-01 02:00"
+  },
+  {
+    "fotmob_id": 4653713,
+    "home": "1A",
+    "away": "3CEFHI",
+    "group": "KO",
+    "kickoff_israel": "2026-07-01 04:00",
+    "scrape_at_israel": "2026-07-01 06:00"
+  },
+  {
+    "fotmob_id": 4653714,
+    "home": "1L",
+    "away": "3EHIJK",
+    "group": "KO",
+    "kickoff_israel": "2026-07-01 19:00",
+    "scrape_at_israel": "2026-07-01 21:00"
+  },
+  {
+    "fotmob_id": 4653710,
+    "home": "1G",
+    "away": "3AEHIJ",
+    "group": "KO",
+    "kickoff_israel": "2026-07-01 23:00",
+    "scrape_at_israel": "2026-07-02 01:00"
+  },
+  {
+    "fotmob_id": 4653709,
+    "home": "1D",
+    "away": "3BEFIJ",
+    "group": "KO",
+    "kickoff_israel": "2026-07-02 03:00",
+    "scrape_at_israel": "2026-07-02 05:00"
+  },
+  {
+    "fotmob_id": 4653708,
+    "home": "1H",
+    "away": "2J",
+    "group": "KO",
+    "kickoff_israel": "2026-07-02 22:00",
+    "scrape_at_israel": "2026-07-03 00:00"
+  },
+  {
+    "fotmob_id": 4653707,
+    "home": "2K",
+    "away": "2L",
+    "group": "KO",
+    "kickoff_israel": "2026-07-03 02:00",
+    "scrape_at_israel": "2026-07-03 04:00"
+  },
+  {
+    "fotmob_id": 4653717,
+    "home": "1B",
+    "away": "3EFGIJ",
+    "group": "KO",
+    "kickoff_israel": "2026-07-03 06:00",
+    "scrape_at_israel": "2026-07-03 08:00"
+  },
+  {
+    "fotmob_id": 4653716,
+    "home": "2D",
+    "away": "2G",
+    "group": "KO",
+    "kickoff_israel": "2026-07-03 21:00",
+    "scrape_at_israel": "2026-07-03 23:00"
+  },
+  {
+    "fotmob_id": 4653715,
+    "home": "1J",
+    "away": "2H",
+    "group": "KO",
+    "kickoff_israel": "2026-07-04 01:00",
+    "scrape_at_israel": "2026-07-04 03:00"
+  },
+  {
+    "fotmob_id": 4653718,
+    "home": "1K",
+    "away": "3DEIJL",
+    "group": "KO",
+    "kickoff_israel": "2026-07-04 04:30",
+    "scrape_at_israel": "2026-07-04 06:30"
+  },
+  {
+    "fotmob_id": 4653843,
+    "home": "2A/2B",
+    "away": "1F/2C",
+    "group": "KO",
+    "kickoff_israel": "2026-07-04 20:00",
+    "scrape_at_israel": "2026-07-04 22:00"
+  },
+  {
+    "fotmob_id": 4653842,
+    "home": "1E/3ABCDF",
+    "away": "1I/3CDFGH",
+    "group": "KO",
+    "kickoff_israel": "2026-07-05 00:00",
+    "scrape_at_israel": "2026-07-05 02:00"
+  },
+  {
+    "fotmob_id": 4653846,
+    "home": "1C/2F",
+    "away": "2E/2I",
+    "group": "KO",
+    "kickoff_israel": "2026-07-06 00:00",
+    "scrape_at_israel": "2026-07-06 02:00"
+  },
+  {
+    "fotmob_id": 4653847,
+    "home": "1A/3CEFHI",
+    "away": "1L/3EHIJK",
+    "group": "KO",
+    "kickoff_israel": "2026-07-06 03:00",
+    "scrape_at_israel": "2026-07-06 05:00"
+  },
+  {
+    "fotmob_id": 4653844,
+    "home": "2K/2L",
+    "away": "1H/2J",
+    "group": "KO",
+    "kickoff_israel": "2026-07-06 22:00",
+    "scrape_at_israel": "2026-07-07 00:00"
+  },
+  {
+    "fotmob_id": 4653845,
+    "home": "1D/3BEFIJ",
+    "away": "1G/3AEHIJ",
+    "group": "KO",
+    "kickoff_israel": "2026-07-07 03:00",
+    "scrape_at_israel": "2026-07-07 05:00"
+  },
+  {
+    "fotmob_id": 4653848,
+    "home": "1J/2H",
+    "away": "2D/2G",
+    "group": "KO",
+    "kickoff_israel": "2026-07-07 19:00",
+    "scrape_at_israel": "2026-07-07 21:00"
+  },
+  {
+    "fotmob_id": 4653849,
+    "home": "1B/3EFGIJ",
+    "away": "1K/3DEIJL",
+    "group": "KO",
+    "kickoff_israel": "2026-07-07 23:00",
+    "scrape_at_israel": "2026-07-08 01:00"
+  },
+  {
+    "fotmob_id": 4653851,
+    "home": "Winner EF 1",
+    "away": "Winner EF 2",
+    "group": "KO",
+    "kickoff_israel": "2026-07-09 23:00",
+    "scrape_at_israel": "2026-07-10 01:00"
+  },
+  {
+    "fotmob_id": 4653853,
+    "home": "Winner EF 5",
+    "away": "Winner EF 6",
+    "group": "KO",
+    "kickoff_israel": "2026-07-10 22:00",
+    "scrape_at_israel": "2026-07-11 00:00"
+  },
+  {
+    "fotmob_id": 4653852,
+    "home": "Winner EF 3",
+    "away": "Winner EF 4",
+    "group": "KO",
+    "kickoff_israel": "2026-07-12 00:00",
+    "scrape_at_israel": "2026-07-12 02:00"
+  },
+  {
+    "fotmob_id": 4653854,
+    "home": "Winner EF 7",
+    "away": "Winner EF 8",
+    "group": "KO",
+    "kickoff_israel": "2026-07-12 04:00",
+    "scrape_at_israel": "2026-07-12 06:00"
+  },
+  {
+    "fotmob_id": 4653855,
+    "home": "Winner QF 1",
+    "away": "Winner QF 2",
+    "group": "KO",
+    "kickoff_israel": "2026-07-14 22:00",
+    "scrape_at_israel": "2026-07-15 00:00"
+  },
+  {
+    "fotmob_id": 4653856,
+    "home": "Winner QF 3",
+    "away": "Winner QF 4",
+    "group": "KO",
+    "kickoff_israel": "2026-07-15 22:00",
+    "scrape_at_israel": "2026-07-16 00:00"
+  },
+  {
+    "fotmob_id": 4653857,
+    "home": "Loser SF 1",
+    "away": "Loser SF 2",
+    "group": "KO",
+    "kickoff_israel": "2026-07-19 00:00",
+    "scrape_at_israel": "2026-07-19 02:00"
+  },
+  {
+    "fotmob_id": 4653858,
+    "home": "Winner SF 1",
+    "away": "Winner SF 2",
+    "group": "KO",
+    "kickoff_israel": "2026-07-19 22:00",
+    "scrape_at_israel": "2026-07-20 00:00"
+  }
+]

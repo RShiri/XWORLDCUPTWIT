@@ -1,0 +1,17 @@
+# Rendered infographic PNGs (should remain local only)
+wc2026/output/
+
+# Internal scraper cookie caches
+wc2026/matches/match_*_cache.json
+
+# Private configuration/credential environment files
+.env
+
+# Python caching
+__pycache__/
+*.py[cod]
+
+# Local virtual environments
+venv/
+.venv/
+env/

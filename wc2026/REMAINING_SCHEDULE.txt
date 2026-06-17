@@ -1,0 +1,146 @@
+FIFA WORLD CUP 2026 - REMAINING GAMES + SCRAPE SCHEDULE
+All times = ISRAEL local time (your PC). Scrape = kickoff + 2 hours.
+======================================================================================
+KICKOFF          SCRAPE AT        GRP   MATCH                              FOTMOB ID
+--------------------------------------------------------------------------------------
+
+  == Wednesday, 17 June 2026 ==
+17/06 01:00      17/06 03:00      I     FIFA Play-Off Tournament 2 vs Norway 4667805
+17/06 04:00      17/06 06:00      J     Argentina vs Algeria               4667812
+17/06 07:00      17/06 09:00      J     Austria vs Jordan                  4667813
+17/06 20:00      17/06 22:00      K     Portugal vs FIFA Play-Off Tournament 1 4667819
+17/06 23:00      18/06 01:00      L     England vs Croatia                 4667825
+
+  == Thursday, 18 June 2026 ==
+18/06 02:00      18/06 04:00      L     Ghana vs Panama                    4667826
+18/06 05:00      18/06 07:00      K     Uzbekistan vs Colombia             4667820
+18/06 19:00      18/06 21:00      A     European Play-Off D vs South Africa 4667753
+18/06 22:00      19/06 00:00      B     Switzerland vs European Play-Off A 4667759
+
+  == Friday, 19 June 2026 ==
+19/06 01:00      19/06 03:00      B     Canada vs Qatar                    4667760
+19/06 04:00      19/06 06:00      A     Mexico vs South Korea              4667754
+19/06 22:00      20/06 00:00      D     USA vs Australia                   4667774
+
+  == Saturday, 20 June 2026 ==
+20/06 01:00      20/06 03:00      C     Scotland vs Morocco                4667766
+20/06 04:00      20/06 06:00      C     Brazil vs Haiti                    4667767
+20/06 07:00      20/06 09:00      D     European Play-Off C vs Paraguay    4667773
+20/06 20:00      20/06 22:00      F     Netherlands vs European Play-Off B 4667786
+20/06 23:00      21/06 01:00      E     Germany vs Ivory Coast             4667780
+
+  == Sunday, 21 June 2026 ==
+21/06 03:00      21/06 05:00      E     Ecuador vs Curacao                 4667779
+21/06 07:00      21/06 09:00      F     Tunisia vs Japan                   4667785
+21/06 19:00      21/06 21:00      H     Spain vs Saudi Arabia              4667801
+21/06 22:00      22/06 00:00      G     Belgium vs Iran                    4667793
+
+  == Monday, 22 June 2026 ==
+22/06 01:00      22/06 03:00      H     Uruguay vs Cape Verde              4667800
+22/06 04:00      22/06 06:00      G     New Zealand vs Egypt               4667792
+22/06 20:00      22/06 22:00      J     Argentina vs Austria               4667815
+
+  == Tuesday, 23 June 2026 ==
+23/06 00:00      23/06 02:00      I     France vs FIFA Play-Off Tournament 2 4667807
+23/06 03:00      23/06 05:00      I     Norway vs Senegal                  4667806
+23/06 06:00      23/06 08:00      J     Jordan vs Algeria                  4667814
+23/06 20:00      23/06 22:00      K     Portugal vs Uzbekistan             4667822
+23/06 23:00      24/06 01:00      L     England vs Ghana                   4667828
+
+  == Wednesday, 24 June 2026 ==
+24/06 02:00      24/06 04:00      L     Panama vs Croatia                  4667827
+24/06 05:00      24/06 07:00      K     Colombia vs FIFA Play-Off Tournament 1 4667821
+24/06 22:00      25/06 00:00      B     European Play-Off A vs Qatar       4667762
+24/06 22:00      25/06 00:00      B     Switzerland vs Canada              4667761
+
+  == Thursday, 25 June 2026 ==
+25/06 01:00      25/06 03:00      C     Morocco vs Haiti                   4667769
+25/06 01:00      25/06 03:00      C     Scotland vs Brazil                 4667768
+25/06 04:00      25/06 06:00      A     European Play-Off D vs Mexico      4667755
+25/06 04:00      25/06 06:00      A     South Africa vs South Korea        4667756
+25/06 23:00      26/06 01:00      E     Curacao vs Ivory Coast             4667782
+25/06 23:00      26/06 01:00      E     Ecuador vs Germany                 4667781
+
+  == Friday, 26 June 2026 ==
+26/06 02:00      26/06 04:00      F     Japan vs European Play-Off B       4667788
+26/06 02:00      26/06 04:00      F     Tunisia vs Netherlands             4667787
+26/06 05:00      26/06 07:00      D     European Play-Off C vs USA         4667775
+26/06 05:00      26/06 07:00      D     Paraguay vs Australia              4667776
+26/06 22:00      27/06 00:00      I     Norway vs France                   4667808
+26/06 22:00      27/06 00:00      I     Senegal vs FIFA Play-Off Tournament 2 4667809
+
+  == Saturday, 27 June 2026 ==
+27/06 03:00      27/06 05:00      H     Cape Verde vs Saudi Arabia         4667803
+27/06 03:00      27/06 05:00      H     Uruguay vs Spain                   4667802
+27/06 06:00      27/06 08:00      G     Egypt vs Iran                      4667795
+27/06 06:00      27/06 08:00      G     New Zealand vs Belgium             4667794
+
+  == Sunday, 28 June 2026 ==
+28/06 00:00      28/06 02:00      L     Croatia vs Ghana                   4667830
+28/06 00:00      28/06 02:00      L     Panama vs England                  4667829
+28/06 02:30      28/06 04:30      K     Colombia vs Portugal               4667823
+28/06 02:30      28/06 04:30      K     FIFA Play-Off Tournament 1 vs Uzbekistan 4667824
+28/06 05:00      28/06 07:00      J     Algeria vs Austria                 4667817
+28/06 05:00      28/06 07:00      J     Jordan vs Argentina                4667816
+28/06 22:00      29/06 00:00      KO    2A vs 2B                           4653705
+
+  == Monday, 29 June 2026 ==
+29/06 20:00      29/06 22:00      KO    1C vs 2F                           4653711
+29/06 23:30      30/06 01:30      KO    1E vs 3ABCDF                       4653703
+
+  == Tuesday, 30 June 2026 ==
+30/06 04:00      30/06 06:00      KO    1F vs 2C                           4653706
+30/06 20:00      30/06 22:00      KO    2E vs 2I                           4653712
+
+  == Wednesday, 01 July 2026 ==
+01/07 00:00      01/07 02:00      KO    1I vs 3CDFGH                       4653704
+01/07 04:00      01/07 06:00      KO    1A vs 3CEFHI                       4653713
+01/07 19:00      01/07 21:00      KO    1L vs 3EHIJK                       4653714
+01/07 23:00      02/07 01:00      KO    1G vs 3AEHIJ                       4653710
+
+  == Thursday, 02 July 2026 ==
+02/07 03:00      02/07 05:00      KO    1D vs 3BEFIJ                       4653709
+02/07 22:00      03/07 00:00      KO    1H vs 2J                           4653708
+
+  == Friday, 03 July 2026 ==
+03/07 02:00      03/07 04:00      KO    2K vs 2L                           4653707
+03/07 06:00      03/07 08:00      KO    1B vs 3EFGIJ                       4653717
+03/07 21:00      03/07 23:00      KO    2D vs 2G                           4653716
+
+  == Saturday, 04 July 2026 ==
+04/07 01:00      04/07 03:00      KO    1J vs 2H                           4653715
+04/07 04:30      04/07 06:30      KO    1K vs 3DEIJL                       4653718
+04/07 20:00      04/07 22:00      KO    2A/2B vs 1F/2C                     4653843
+
+  == Sunday, 05 July 2026 ==
+05/07 00:00      05/07 02:00      KO    1E/3ABCDF vs 1I/3CDFGH             4653842
+
+  == Monday, 06 July 2026 ==
+06/07 00:00      06/07 02:00      KO    1C/2F vs 2E/2I                     4653846
+06/07 03:00      06/07 05:00      KO    1A/3CEFHI vs 1L/3EHIJK             4653847
+06/07 22:00      07/07 00:00      KO    2K/2L vs 1H/2J                     4653844
+
+  == Tuesday, 07 July 2026 ==
+07/07 03:00      07/07 05:00      KO    1D/3BEFIJ vs 1G/3AEHIJ             4653845
+07/07 19:00      07/07 21:00      KO    1J/2H vs 2D/2G                     4653848
+07/07 23:00      08/07 01:00      KO    1B/3EFGIJ vs 1K/3DEIJL             4653849
+
+  == Thursday, 09 July 2026 ==
+09/07 23:00      10/07 01:00      KO    Winner EF 1 vs Winner EF 2         4653851
+
+  == Friday, 10 July 2026 ==
+10/07 22:00      11/07 00:00      KO    Winner EF 5 vs Winner EF 6         4653853
+
+  == Sunday, 12 July 2026 ==
+12/07 00:00      12/07 02:00      KO    Winner EF 3 vs Winner EF 4         4653852
+12/07 04:00      12/07 06:00      KO    Winner EF 7 vs Winner EF 8         4653854
+
+  == Tuesday, 14 July 2026 ==
+14/07 22:00      15/07 00:00      KO    Winner QF 1 vs Winner QF 2         4653855
+
+  == Wednesday, 15 July 2026 ==
+15/07 22:00      16/07 00:00      KO    Winner QF 3 vs Winner QF 4         4653856
+
+  == Sunday, 19 July 2026 ==
+19/07 00:00      19/07 02:00      KO    Loser SF 1 vs Loser SF 2           4653857
+19/07 22:00      20/07 00:00      KO    Winner SF 1 vs Winner SF 2         4653858
