@@ -580,6 +580,19 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         "away": _bc_missed(away_tid),
     })
 
+    # Compute pass totals / accurate passes from the event stream (WhoScored data)
+    for _side, _tid in [("home", home_tid), ("away", away_tid)]:
+        _passes  = [e for e in events if e.get("teamId") == _tid
+                    and e.get("type", {}).get("displayName") == "Pass"]
+        _total   = len(_passes)
+        _accurate = sum(1 for e in _passes
+                        if e.get("outcomeType", {}).get("displayName") == "Successful")
+        if _total > 0:
+            match_stats.setdefault(f"passes_total_{_side}", _total)
+            match_stats[f"passes_accurate_{_side}"] = _accurate
+            match_stats.setdefault(f"passes_accuracy_{_side}",
+                                   int(round(100 * _accurate / _total)))
+
     pid_name = {}
     for p in home_players + away_players:
         pid = p.get("playerId")

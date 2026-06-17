@@ -96,11 +96,11 @@ powershell -ExecutionPolicy Bypass -File wc2026\unregister_tasks.ps1
 
 ## 🎨 Layout Highlights
 
-The generated infographics are rendered as **4800px × 2800px (24" × 14")** white-canvas layouts containing:
+The generated infographics are rendered as **5920px × 3419px (30" × 17")** white-canvas layouts containing:
 1. **Dynamic Headers**: Aspect-ratio-preserved team badges aligned beside larger, mobile-friendly team names.
-2. **Pass Networks**: Touch-volume scaled nodes and passing lane thresholds.
-3. **Zebra-Striped Stats Table**: High-contrast, easily-readable comparative metrics.
-4. **Shot Maps**: Attempts sized by individual xG values.
-5. **Final Third Entries**: Directional entry vectors and channel completion percentages with shaded boxes to eliminate overlapping text.
+2. **Pass Networks**: Touch-volume scaled nodes and passing lane thresholds. Home team on the left, away on the right.
+3. **Zebra-Striped Stats Table**: High-contrast comparative metrics including passes shown as `total/accurate (accuracy%)`.
+4. **Shot Maps**: Attempts sized by individual xG values, with title and stats line rendered inside the axes.
+5. **Final Third Passes**: Directional pass vectors into the final third. Home on the left, away on the right, with per-channel (LW/CTR/RW) breakdowns and completion counts below the map.
 
 For a full breakdown of the architecture, data structures, and the migration history, see the [MIGRATION_AND_DEVELOPER_DOCS.md](file:///c:/Users/puzik/XWORLDCUPTWIT/MIGRATION_AND_DEVELOPER_DOCS.md).

@@ -181,7 +181,7 @@ PITCH_LINE_DARK = "#888888"   # visible lines on white pitch
 FONT_MAIN    = "DejaVu Sans"
 FONT_BOLD    = "DejaVu Sans"
 
-FIG_W, FIG_H = 24, 14
+FIG_W, FIG_H = 30, 17
 FIG_DPI      = 200
 
 logging.basicConfig(level=logging.INFO, format="[WC2026] %(message)s")
@@ -604,12 +604,32 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
     bc_h = f"{bc_created_h} ({bc_missed_h})" if bc_created_h is not None else "—"
     bc_a = f"{bc_created_a} ({bc_missed_a})" if bc_created_a is not None else "—"
 
-    passes_h   = _stat("passes_total", "home") or _stat("passes", "home") or "—"
-    pass_acc_h = _stat("passes_accuracy", "home") or _stat("pass_accuracy", "home")
-    passes_a   = _stat("passes_total", "away") or _stat("passes", "away") or "—"
-    pass_acc_a = _stat("passes_accuracy", "away") or _stat("pass_accuracy", "away")
-    p_h = f"{passes_h} ({pass_acc_h}%)" if pass_acc_h is not None else str(passes_h)
-    p_a = f"{passes_a} ({pass_acc_a}%)" if pass_acc_a is not None else str(passes_a)
+    passes_total_h  = _stat("passes_total", "home") or _stat("passes", "home")
+    passes_accur_h  = _stat("passes_accurate", "home")
+    pass_pct_h      = _stat("passes_accuracy", "home") or _stat("pass_accuracy", "home")
+    passes_total_a  = _stat("passes_total", "away") or _stat("passes", "away")
+    passes_accur_a  = _stat("passes_accurate", "away")
+    pass_pct_a      = _stat("passes_accuracy", "away") or _stat("pass_accuracy", "away")
+
+    # Derive accurate count from total × accuracy if not stored directly
+    if passes_accur_h is None and passes_total_h and pass_pct_h:
+        passes_accur_h = int(round(passes_total_h * pass_pct_h / 100))
+    if passes_accur_a is None and passes_total_a and pass_pct_a:
+        passes_accur_a = int(round(passes_total_a * pass_pct_a / 100))
+
+    def _fmt_passes(total, accurate, pct):
+        if total is None:
+            return "—"
+        if accurate is not None and pct is not None:
+            return f"{total}/{accurate} ({pct}%)"
+        if accurate is not None:
+            return f"{total}/{accurate}"
+        if pct is not None:
+            return f"{total} ({pct}%)"
+        return str(total)
+
+    p_h = _fmt_passes(passes_total_h, passes_accur_h, pass_pct_h)
+    p_a = _fmt_passes(passes_total_a, passes_accur_a, pass_pct_a)
 
     rows: list[tuple[str, str, str]] = [
         (f"{xg_h:.2f}" if xg_h is not None else "—",  "xG",                   f"{xg_a:.2f}" if xg_a is not None else "—"),
@@ -700,6 +720,11 @@ def _draw_shot_map(ax: plt.Axes, match_data: dict,
     )
     pitch.draw(ax=ax)
 
+    # Push pitch down by extending the top of the y-axis — title text (axes fraction)
+    # then sits in clear white space above the pitch drawing.
+    _ymin, _ymax = ax.get_ylim()
+    ax.set_ylim(_ymin, _ymax + (_ymax - _ymin) * 0.26)
+
     try:
         df = build_shot_df(match_data, team_name)
     except Exception:
@@ -708,8 +733,9 @@ def _draw_shot_map(ax: plt.Axes, match_data: dict,
     if df.empty:
         ax.text(0.5, 0.5, "No shots", ha="center", va="center",
                 fontsize=11, color="white", transform=ax.transAxes)
-        ax.set_title(f"{team_name} — Shot Map",
-                     fontsize=11, fontweight="bold", color=TEXT_DARK, pad=4)
+        ax.text(0.5, 0.97, f"{team_name} — Shot Map",
+                ha="center", va="top", fontsize=11, fontweight="bold", color=TEXT_DARK,
+                fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
         return
 
     import matplotlib.colors as mcolors
@@ -745,12 +771,13 @@ def _draw_shot_map(ax: plt.Axes, match_data: dict,
     n_target  = int(df["is_on_target"].sum())
     total_xg  = float(df["xG"].sum())
 
-    ax.set_title(
-        f"{team_name} — Shot Map\n"
-        f"Shots {n_shots} | On Target {n_target} | Goals {n_goals} | xG {total_xg:.2f}",
-        fontsize=14, fontweight="bold", color=TEXT_DARK,
-        fontfamily=FONT_BOLD, pad=4,
-    )
+    ax.text(0.5, 0.97, f"{team_name} — Shot Map",
+            ha="center", va="top", fontsize=17, fontweight="bold", color=TEXT_DARK,
+            fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
+    ax.text(0.5, 0.89,
+            f"Shots {n_shots}  |  On Target {n_target}  |  Goals {n_goals}  |  xG {total_xg:.2f}",
+            ha="center", va="top", fontsize=14, fontweight="bold", color=TEXT_MID,
+            fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
 
     # Mini legend
     legend_handles = [
@@ -787,6 +814,10 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
                   linewidth=1.2)
     pitch.draw(ax=ax)
 
+    # Push pitch down to create whitespace at top for the title
+    _ymin, _ymax = ax.get_ylim()
+    ax.set_ylim(_ymin, _ymax + (_ymax - _ymin) * 0.18)
+
     SCALE_X = 1.2
 
     def _extract_entries(team_side: str) -> pd.DataFrame:
@@ -814,15 +845,15 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
     home_df = _extract_entries("home")
     away_df = _extract_entries("away")
 
-    # Mirror away entries so they appear on the left side of pitch
-    if not away_df.empty:
-        away_df_m = away_df.copy()
-        away_df_m["x"]     = 120 - away_df["x"]
-        away_df_m["end_x"] = 120 - away_df["end_x"]
-        away_df_m["y"]     = away_df["y"]
-        away_df_m["end_y"] = away_df["end_y"]
+    # Mirror HOME entries so they appear on the LEFT side (matching dashboard layout)
+    if not home_df.empty:
+        home_df_m = home_df.copy()
+        home_df_m["x"]     = 120 - home_df["x"]
+        home_df_m["end_x"] = 120 - home_df["end_x"]
+        home_df_m["y"]     = home_df["y"]
+        home_df_m["end_y"] = home_df["end_y"]
     else:
-        away_df_m = pd.DataFrame()
+        home_df_m = pd.DataFrame()
 
     def _plot_entries(df: pd.DataFrame, color: str, alpha: float = 0.55) -> None:
         if df.empty:
@@ -841,8 +872,8 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
                 zorder=2,
             )
 
-    _plot_entries(home_df, home_color, alpha=0.6)
-    _plot_entries(away_df_m, away_color, alpha=0.6)
+    _plot_entries(home_df_m, home_color, alpha=0.6)   # home on LEFT
+    _plot_entries(away_df,   away_color, alpha=0.6)   # away on RIGHT
 
     # ── Channel breakdown labels ──────────────────────────────────────
     def _channel_counts(df: pd.DataFrame) -> dict[str, int]:
@@ -858,18 +889,18 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
     hc = _channel_counts(home_df)
     ac = _channel_counts(away_df)
 
-    # Home channel bar (right side annotation) with a clean semi-transparent white bounding box
+    # Home channel bar — LEFT side (matches dashboard layout)
     bbox_h_chan = dict(boxstyle="round,pad=0.2", facecolor="#ffffff", edgecolor="none", alpha=0.75)
     for i, (label, key) in enumerate([("LW", "L"), ("CTR", "C"), ("RW", "R")]):
-        ax.text(118, 15 + i * 25, f"{label}: {hc[key]}",
-                ha="right", va="center", fontsize=12,
+        ax.text(2, 15 + i * 25, f"{label}: {hc[key]}",
+                ha="left", va="center", fontsize=12,
                 color=home_color, fontfamily=FONT_MAIN, fontweight="bold", zorder=5, bbox=bbox_h_chan)
 
-    # Away channel bar (left side annotation, mirrored labels)
+    # Away channel bar — RIGHT side (matches dashboard layout)
     bbox_a_chan = dict(boxstyle="round,pad=0.2", facecolor="#ffffff", edgecolor="none", alpha=0.75)
     for i, (label, key) in enumerate([("LW", "L"), ("CTR", "C"), ("RW", "R")]):
-        ax.text(2, 15 + i * 25, f"{label}: {ac[key]}",
-                ha="left", va="center", fontsize=12,
+        ax.text(118, 15 + i * 25, f"{label}: {ac[key]}",
+                ha="right", va="center", fontsize=12,
                 color=away_color, fontfamily=FONT_MAIN, fontweight="bold", zorder=5, bbox=bbox_a_chan)
 
     # Success / attempt counts
@@ -880,23 +911,20 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
     h_pct     = f"{100 * n_h_succ // n_h}%" if n_h else "—"
     a_pct     = f"{100 * n_a_succ // n_a}%" if n_a else "—"
 
-    # Combined team name + made/attempted badge with box to prevent overlap with arrows
-    home_text = f"{home_name}\n{n_h_succ}/{n_h} made ({h_pct})"
-    bbox_home = dict(boxstyle="round,pad=0.3", facecolor="#ffffff", edgecolor=DIVIDER_CLR, linewidth=0.5, alpha=0.85)
-    ax.text(90, 75, home_text, ha="center", va="top",
-            fontsize=12, fontweight="bold", color=home_color,
-            fontfamily=FONT_BOLD, zorder=5, bbox=bbox_home)
+    # Team counts — single centered line below the pitch, split by |
+    ax.text(0.488, -0.04, f"{home_name}  {n_h_succ}/{n_h} made ({h_pct})",
+            ha="right", va="top", fontsize=15, fontweight="bold", color=home_color,
+            fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
+    ax.text(0.500, -0.04, "  |  ",
+            ha="center", va="top", fontsize=15, color=TEXT_MID,
+            fontfamily=FONT_MAIN, transform=ax.transAxes, zorder=5)
+    ax.text(0.512, -0.04, f"{away_name}  {n_a_succ}/{n_a} made ({a_pct})",
+            ha="left", va="top", fontsize=15, fontweight="bold", color=away_color,
+            fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
 
-    away_text = f"{away_name}\n{n_a_succ}/{n_a} made ({a_pct})"
-    bbox_away = dict(boxstyle="round,pad=0.3", facecolor="#ffffff", edgecolor=DIVIDER_CLR, linewidth=0.5, alpha=0.85)
-    ax.text(30, 75, away_text, ha="center", va="top",
-            fontsize=12, fontweight="bold", color=away_color,
-            fontfamily=FONT_BOLD, zorder=5, bbox=bbox_away)
-
-    ax.set_title(
-        f"Final Third Entries\n{home_name}: {n_h_succ}/{n_h}  |  {away_name}: {n_a_succ}/{n_a}",
-        fontsize=15, fontweight="bold", color=TEXT_DARK, pad=4,
-    )
+    ax.text(0.5, 0.98, "Final Third Passes",
+            ha="center", va="top", fontsize=15, fontweight="bold", color=TEXT_DARK,
+            fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -937,8 +965,8 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     gs  = GridSpec(
         nrows=3, ncols=3,
         figure=fig,
-        height_ratios=[1.55, 4.20, 4.25],
-        hspace=0.06,
+        height_ratios=[1.35, 5.50, 5.00],
+        hspace=0.08,
         wspace=0.04,
         left=0.01, right=0.99,
         top=0.98, bottom=0.01,
