@@ -56,10 +56,10 @@ POLL_INTERVAL = int(os.environ.get("WC2026_SCRAPE_POLL_SECONDS", 300))  # 5 min
 # FotMob World Cup 2026 tournament ID (update if FotMob changes it)
 WC2026_FOTMOB_ID = int(os.environ.get("WC2026_FOTMOB_LEAGUE_ID", 77))
 
-# WhoScored World Cup 2026 competition URL base
+# WhoScored World Cup 2026 fixtures page (season/stage-specific for WC2026)
 WC2026_WS_BASE = os.environ.get(
     "WC2026_WHOSCORED_URL",
-    "https://www.whoscored.com/Competitions/361/Matches",  # 361 = FIFA World Cup
+    "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/10498/Stages/25505/Fixtures/International-FIFA-World-Cup-2026",
 )
 
 _fetched_ids: set[int] = set()  # avoid re-fetching in the same run
