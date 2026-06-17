@@ -64,6 +64,48 @@ WC2026_WS_BASE = os.environ.get(
 
 _fetched_ids: set[int] = set()  # avoid re-fetching in the same run
 
+# ══════════════════════════════════════════════════════════════════════════
+# SCHEDULE HELPERS – team name resolution without FotMob
+# ══════════════════════════════════════════════════════════════════════════
+
+_SCHEDULE_PATH  = Path(__file__).parent / "REMAINING_SCHEDULE.json"
+_schedule_cache: list[dict] | None = None
+
+
+def _load_schedule() -> list[dict]:
+    global _schedule_cache
+    if _schedule_cache is None:
+        try:
+            _schedule_cache = json.loads(_SCHEDULE_PATH.read_text(encoding="utf-8"))
+        except Exception as exc:
+            log.warning("Could not load schedule file: %s", exc)
+            _schedule_cache = []
+    return _schedule_cache
+
+
+def schedule_team_names(fotmob_id: int) -> tuple[str, str, str]:
+    """Return (home, away, YYYY-MM-DD) from REMAINING_SCHEDULE for a FotMob ID."""
+    for m in _load_schedule():
+        if m.get("fotmob_id") == fotmob_id:
+            date = m.get("scrape_at_israel", "")[:10]
+            return m.get("home", ""), m.get("away", ""), date
+    return "", "", ""
+
+
+def schedule_lookup_by_teams(home: str, away: str) -> tuple[int | None, str]:
+    """
+    Return (fotmob_id, YYYY-MM-DD) by fuzzy-matching team names in the schedule.
+    Partial, case-insensitive match so 'Congo' finds 'DR Congo' etc.
+    """
+    h_low, a_low = home.strip().lower(), away.strip().lower()
+    for m in _load_schedule():
+        sched_h = m.get("home", "").lower()
+        sched_a = m.get("away", "").lower()
+        if (h_low in sched_h or sched_h in h_low) and \
+           (a_low in sched_a or sched_a in a_low):
+            return m["fotmob_id"], m.get("scrape_at_israel", "")[:10]
+    return None, ""
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # FOTMOB – no browser required
