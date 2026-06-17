@@ -102,7 +102,7 @@ foreach ($g in $games) {
 
     $action  = New-ScheduledTaskAction -Execute $PythonExe -Argument $pyArgs -WorkingDirectory $RepoRoot
     $trigger = New-ScheduledTaskTrigger -Once -At $scrapeAt
-    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 20)
+    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 20) -WakeToRun
 
     Register-ScheduledTask -TaskName $taskName -TaskPath $TaskFolder -Action $action -Trigger $trigger -Settings $settings -Description ("WC2026 auto scrape render post " + $g.home + " vs " + $g.away) -Force | Out-Null
 
