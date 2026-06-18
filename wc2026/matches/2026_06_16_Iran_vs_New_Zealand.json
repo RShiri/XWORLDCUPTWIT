@@ -3331,7 +3331,8 @@
         "stats": {}
       }
     ],
-    "teamId": 1293
+    "teamId": 1293,
+    "score": 2
   },
   "away": {
     "name": "New Zealand",
@@ -6726,7 +6727,8 @@
         "stats": {}
       }
     ],
-    "teamId": 1918
+    "teamId": 1918,
+    "score": 2
   },
   "events": [
     {
@@ -107331,9 +107333,46 @@
       "isTouch": false
     }
   ],
-  "match_stats": {},
+  "match_stats": {
+    "shots": {
+      "home": 10,
+      "away": 10
+    },
+    "shots_on_target": {
+      "home": 9,
+      "away": 10
+    },
+    "possession": {
+      "home": 49,
+      "away": 51
+    },
+    "passes_total": {
+      "home": 459,
+      "away": 477
+    },
+    "passes_accurate": {
+      "home": 342,
+      "away": 391
+    },
+    "passes_accuracy": {
+      "home": 75,
+      "away": 82
+    },
+    "big_chances_created": {
+      "home": 2,
+      "away": 2
+    },
+    "big_chances_missed": {
+      "home": 0,
+      "away": 0
+    },
+    "saves": {
+      "home": 8,
+      "away": 7
+    }
+  },
   "_sources": [
-    "stub",
+    "fotmob",
     "whoscored"
   ]
 }

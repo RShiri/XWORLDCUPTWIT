@@ -12,7 +12,7 @@
   "home": {
     "teamId": 1563,
     "name": "Uzbekistan",
-    "score": 0,
+    "score": 1,
     "penalty_score": null,
     "players": [
       {
@@ -2718,7 +2718,7 @@
   "away": {
     "teamId": 408,
     "name": "Colombia",
-    "score": 0,
+    "score": 2,
     "penalty_score": null,
     "players": [
       {
@@ -2957,7 +2957,7 @@
       {
         "playerId": 400496,
         "shirtNo": 2,
-        "name": "Daniel Mu\u00f1oz",
+        "name": "Daniel Muñoz",
         "position": "DR",
         "height": 181,
         "weight": 78,
@@ -3254,7 +3254,7 @@
       {
         "playerId": 322655,
         "shirtNo": 23,
-        "name": "Davinson S\u00e1nchez",
+        "name": "Davinson Sánchez",
         "position": "DC",
         "height": 187,
         "weight": 82,
@@ -3645,7 +3645,7 @@
       {
         "playerId": 363653,
         "shirtNo": 3,
-        "name": "Jhon Lucum\u00ed",
+        "name": "Jhon Lucumí",
         "position": "DC",
         "height": 187,
         "weight": 84,
@@ -5170,7 +5170,7 @@
       {
         "playerId": 71182,
         "shirtNo": 10,
-        "name": "James Rodr\u00edguez",
+        "name": "James Rodríguez",
         "position": "FWR",
         "height": 180,
         "weight": 74,
@@ -5470,7 +5470,7 @@
       {
         "playerId": 402887,
         "shirtNo": 25,
-        "name": "Luis Su\u00e1rez",
+        "name": "Luis Suárez",
         "position": "FW",
         "height": 181,
         "weight": 83,
@@ -5614,7 +5614,7 @@
       {
         "playerId": 377168,
         "shirtNo": 7,
-        "name": "Luis D\u00edaz",
+        "name": "Luis Díaz",
         "position": "FWL",
         "height": 180,
         "weight": 70,
@@ -5848,7 +5848,7 @@
       {
         "playerId": 402213,
         "shirtNo": 6,
-        "name": "Richard R\u00edos",
+        "name": "Richard Ríos",
         "position": "Sub",
         "height": 185,
         "weight": 85,
@@ -6008,7 +6008,7 @@
       {
         "playerId": 446166,
         "shirtNo": 26,
-        "name": "Andr\u00e9s G\u00f3mez",
+        "name": "Andrés Gómez",
         "position": "Sub",
         "height": 171,
         "weight": 71,
@@ -6043,7 +6043,7 @@
       {
         "playerId": 473940,
         "shirtNo": 5,
-        "name": "Kevin Casta\u00f1o",
+        "name": "Kevin Castaño",
         "position": "Sub",
         "height": 177,
         "weight": 73,
@@ -6065,7 +6065,7 @@
       {
         "playerId": 362501,
         "shirtNo": 19,
-        "name": "Cucho Hern\u00e1ndez",
+        "name": "Cucho Hernández",
         "position": "Sub",
         "height": 176,
         "weight": 79,
@@ -6177,7 +6177,7 @@
       {
         "playerId": 136904,
         "shirtNo": 9,
-        "name": "Jhon C\u00f3rdoba",
+        "name": "Jhon Córdoba",
         "position": "Sub",
         "height": 188,
         "weight": 85,
@@ -6189,7 +6189,7 @@
       {
         "playerId": 244024,
         "shirtNo": 24,
-        "name": "\u00c1lvaro Montero",
+        "name": "Álvaro Montero",
         "position": "Sub",
         "height": 201,
         "weight": 98,
@@ -96412,7 +96412,39 @@
     "passes_accuracy_home": 75,
     "passes_total_away": 558,
     "passes_accurate_away": 475,
-    "passes_accuracy_away": 85
+    "passes_accuracy_away": 85,
+    "shots": {
+      "home": 3,
+      "away": 8
+    },
+    "shots_on_target": {
+      "home": 3,
+      "away": 7
+    },
+    "possession": {
+      "home": 38,
+      "away": 62
+    },
+    "passes_total": {
+      "home": 349,
+      "away": 558
+    },
+    "passes_accurate": {
+      "home": 263,
+      "away": 475
+    },
+    "passes_accuracy": {
+      "home": 75,
+      "away": 85
+    },
+    "big_chances_created": {
+      "home": 1,
+      "away": 3
+    },
+    "saves": {
+      "home": 5,
+      "away": 2
+    }
   },
   "playerIdNameDictionary": {
     "455408": "Utkir Yusupov",
@@ -96442,26 +96474,26 @@
     "621921": "Avazbek O'lmasaliev",
     "455413": "Odiljon Khamrobekov",
     "53362": "Camilo Vargas",
-    "400496": "Daniel Mu\u00f1oz",
-    "322655": "Davinson S\u00e1nchez",
-    "363653": "Jhon Lucum\u00ed",
+    "400496": "Daniel Muñoz",
+    "322655": "Davinson Sánchez",
+    "363653": "Jhon Lucumí",
     "135098": "Johan Mojica",
     "133464": "Jefferson Lerma",
     "424039": "Jhon Arias",
     "472904": "Gustavo Puerta",
-    "71182": "James Rodr\u00edguez",
-    "402887": "Luis Su\u00e1rez",
-    "377168": "Luis D\u00edaz",
-    "402213": "Richard R\u00edos",
+    "71182": "James Rodríguez",
+    "402887": "Luis Suárez",
+    "377168": "Luis Díaz",
+    "402213": "Richard Ríos",
     "417909": "Jaminton Campaz",
-    "446166": "Andr\u00e9s G\u00f3mez",
-    "473940": "Kevin Casta\u00f1o",
-    "362501": "Cucho Hern\u00e1ndez",
+    "446166": "Andrés Gómez",
+    "473940": "Kevin Castaño",
+    "362501": "Cucho Hernández",
     "36745": "David Ospina",
     "88112": "Santiago Arias",
     "91989": "Juan Fernando Quintero",
-    "136904": "Jhon C\u00f3rdoba",
-    "244024": "\u00c1lvaro Montero",
+    "136904": "Jhon Córdoba",
+    "244024": "Álvaro Montero",
     "318432": "Yerry Mina",
     "371036": "Jorge Carrascal",
     "416148": "Deiver Machado",

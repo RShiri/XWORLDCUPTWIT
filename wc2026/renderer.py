@@ -299,8 +299,14 @@ def _draw_header(fig: plt.Figure, ax: plt.Axes, match_data: dict) -> None:
 
     home_name  = home_d.get("name", "Home")
     away_name  = away_d.get("name", "Away")
-    home_score = home_d.get("score", 0)
-    away_score = away_d.get("score", 0)
+    def _score(team_d):
+        scores = team_d.get("scores")
+        if isinstance(scores, dict) and scores.get("fulltime") is not None:
+            return scores["fulltime"]
+        s = team_d.get("score")
+        return s if s is not None else 0
+    home_score = _score(home_d)
+    away_score = _score(away_d)
     home_pk    = home_d.get("penalty_score")
     away_pk    = away_d.get("penalty_score")
 
@@ -945,23 +951,31 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
     ax.axis("off")
 
     players = match_data.get(side, {}).get("players", [])
+    _POS_ORDER = {
+        "GK": 0,
+        "DR": 1, "DC": 1, "DL": 1,
+        "DMC": 2,
+        "MR": 3, "MC": 3, "ML": 3,
+        "AMR": 4, "AMC": 4, "AML": 4,
+        "SS": 5, "FW": 6,
+    }
     starters = [p for p in players if p.get("isFirstEleven")]
-    starters = sorted(starters, key=lambda p: p.get("shirtNo", 99))
+    starters = sorted(starters, key=lambda p: (_POS_ORDER.get(p.get("position", ""), 99), p.get("shirtNo", 99)))
 
     has_ratings = any(bool(p.get("stats", {}).get("ratings")) for p in starters)
 
     ax.text(
         0.5, 0.97,
-        team_name,
+        f"{team_name}\nLineup",
         ha="center", va="top",
-        fontsize=9.9, fontweight="bold",
-        color=team_color,
+        fontsize=5.5, fontweight="bold",
+        color=TEXT_DARK,
         transform=ax.transAxes,
     )
 
     if not starters:
         ax.text(0.5, 0.5, "No lineup data", ha="center", va="center",
-                fontsize=9, color=TEXT_MID, transform=ax.transAxes)
+                fontsize=5, color=TEXT_MID, transform=ax.transAxes)
         return
 
     n = len(starters)
@@ -989,7 +1003,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         # Shirt number
         ax.text(0.10 if not flip else 0.90, y,
                 shirt, ha="center", va="center",
-                fontsize=9, fontweight="bold", color=team_color,
+                fontsize=5, fontweight="bold", color=team_color,
                 transform=ax.transAxes)
 
         # Name
@@ -997,7 +1011,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         name_ha = "left" if not flip else "right"
         ax.text(name_x, y, short,
                 ha=name_ha, va="center",
-                fontsize=9, color=TEXT_DARK,
+                fontsize=5, color=TEXT_DARK,
                 transform=ax.transAxes,
                 clip_on=True)
 
@@ -1012,7 +1026,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
                            "#cc4400")
                 ax.text(rating_x, y, f"{r_val:.1f}",
                         ha="center", va="center",
-                        fontsize=9, fontweight="bold", color=r_color,
+                        fontsize=5, fontweight="bold", color=r_color,
                         transform=ax.transAxes)
 
 
@@ -1121,7 +1135,7 @@ def output_filename(match_data: dict, output_dir: str = ".") -> str:
     Generate canonical output filename:
       YYYY_MM_DD_[HomeTeam]_vs_[AwayTeam].png
     """
-    meta   = match_data.get("wc_metadata", {})
+    meta   = match_data.get("wc_metadata") or {}
     date   = (meta.get("date") or match_data.get("date") or "2026_06_01").replace("-", "_")
     home   = match_data.get("home", {}).get("name", "Home").replace(" ", "_")
     away   = match_data.get("away", {}).get("name", "Away").replace(" ", "_")
