@@ -1,0 +1,42 @@
+{
+  "matchId": 4667826,
+  "wc_metadata": {
+    "stage": "Group Stage",
+    "group": null,
+    "venue": "",
+    "city": "",
+    "country": "United States",
+    "date": "2026-06-18",
+    "attendance": null
+  },
+  "home": {
+    "teamId": "6714",
+    "name": "Ghana",
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "home"
+  },
+  "away": {
+    "teamId": "5922",
+    "name": "Panama",
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "away"
+  },
+  "events": [],
+  "match_stats": {
+    "big_chances_missed": {
+      "home": 0,
+      "away": 0
+    }
+  },
+  "playerIdNameDictionary": {},
+  "_scraped_at": "2026-06-18T01:01:32.602737+00:00",
+  "_sources": [
+    "fotmob"
+  ]
+}
