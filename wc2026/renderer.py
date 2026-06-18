@@ -16,6 +16,7 @@ import os
 import math
 import json
 import logging
+import unicodedata
 from pathlib import Path
 from typing import Optional
 
@@ -64,11 +65,16 @@ def _estimate_xg(x_sb: float, y_sb: float,
     return round(min(max(xg, 0.01), 0.95), 3)
 
 
+def _ascii_name(name: str) -> str:
+    """Transliterate accented / special characters to their ASCII base letters."""
+    return unicodedata.normalize("NFKD", name).encode("ASCII", "ignore").decode("ASCII").strip()
+
+
 def _player_name(match_data: dict, player_id) -> str:
     for side in ("home", "away"):
         for p in match_data.get(side, {}).get("players", []):
             if p.get("playerId") == player_id:
-                name = p.get("name", "")
+                name = _ascii_name(p.get("name", ""))
                 parts = name.split()
                 return parts[-1] if len(parts) >= 2 else name
     return str(player_id)
@@ -78,7 +84,7 @@ def _player_full_name(match_data: dict, player_id) -> str:
     for side in ("home", "away"):
         for p in match_data.get(side, {}).get("players", []):
             if p.get("playerId") == player_id:
-                return p.get("name", str(player_id))
+                return _ascii_name(p.get("name", str(player_id)))
     return str(player_id)
 
 
@@ -544,7 +550,7 @@ def _draw_pass_network(ax: plt.Axes, match_data: dict,
                         facecolor="#f5f5f5", edgecolor=DIVIDER_CLR)
         leg.get_title().set_color(TEXT_MID)
 
-    ax.set_title(f"{team_name}\nPass Network",
+    ax.set_title(f"{team_name} — Pass Network",
                  fontsize=15, fontweight="bold", color=TEXT_DARK,
                  fontfamily=FONT_BOLD, pad=4)
 
@@ -558,7 +564,7 @@ def _draw_empty_pass_network(ax: plt.Axes, team_name: str,
     ax.text(0.5, 0.5, reason or "No data",
             ha="center", va="center", fontsize=14, color=TEXT_LIGHT,
             transform=ax.transAxes)
-    ax.set_title(f"{team_name}\nPass Network",
+    ax.set_title(f"{team_name} — Pass Network",
                  fontsize=15, fontweight="bold", color=TEXT_DARK, pad=4)
 
 
@@ -621,9 +627,9 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
         if total is None:
             return "—"
         if accurate is not None and pct is not None:
-            return f"{total}/{accurate} ({pct}%)"
+            return f"{accurate}/{total} ({pct}%)"
         if accurate is not None:
-            return f"{total}/{accurate}"
+            return f"{accurate}/{total}"
         if pct is not None:
             return f"{total} ({pct}%)"
         return str(total)
@@ -928,6 +934,89 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# LINEUP PANEL
+# ══════════════════════════════════════════════════════════════════════════
+
+def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
+                 team_name: str, team_color: str, flip: bool = False) -> None:
+    """Draw a starting XI with shirt numbers, names, and optional ratings."""
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+
+    players = match_data.get(side, {}).get("players", [])
+    starters = [p for p in players if p.get("isFirstEleven")]
+    starters = sorted(starters, key=lambda p: p.get("shirtNo", 99))
+
+    has_ratings = any(bool(p.get("stats", {}).get("ratings")) for p in starters)
+
+    ax.text(
+        0.5, 0.97,
+        f"{team_name}\nLineup",
+        ha="center", va="top",
+        fontsize=5.5, fontweight="bold",
+        color=TEXT_DARK,
+        transform=ax.transAxes,
+    )
+
+    if not starters:
+        ax.text(0.5, 0.5, "No lineup data", ha="center", va="center",
+                fontsize=5, color=TEXT_MID, transform=ax.transAxes)
+        return
+
+    n = len(starters)
+    row_h = 0.85 / max(n, 1)
+    y_top = 0.90
+
+    for i, p in enumerate(starters):
+        y = y_top - i * row_h
+        shirt = str(p.get("shirtNo", ""))
+        name = _ascii_name(p.get("name", ""))
+        # Shortened name: first initial + surname, or surname only
+        parts = name.split()
+        if len(parts) >= 2:
+            short = f"{parts[0][0]}. {parts[-1]}"
+        else:
+            short = name
+
+        ratings_dict = p.get("stats", {}).get("ratings", {})
+        if ratings_dict:
+            vals = list(ratings_dict.values())
+            rating = vals[-1] if vals else None
+        else:
+            rating = None
+
+        # Shirt number
+        ax.text(0.10 if not flip else 0.90, y,
+                shirt, ha="center", va="center",
+                fontsize=5, fontweight="bold", color=team_color,
+                transform=ax.transAxes)
+
+        # Name
+        name_x = 0.20 if not flip else 0.80
+        name_ha = "left" if not flip else "right"
+        ax.text(name_x, y, short,
+                ha=name_ha, va="center",
+                fontsize=5, color=TEXT_DARK,
+                transform=ax.transAxes,
+                clip_on=True)
+
+        # Rating
+        if has_ratings:
+            rating_x = 0.92 if not flip else 0.08
+            if rating is not None:
+                r_val = float(rating)
+                r_color = ("#1a8a1a" if r_val >= 7.5 else
+                           "#5b9e1e" if r_val >= 6.5 else
+                           TEXT_MID   if r_val >= 6.0 else
+                           "#cc4400")
+                ax.text(rating_x, y, f"{r_val:.1f}",
+                        ha="center", va="center",
+                        fontsize=5, fontweight="bold", color=r_color,
+                        transform=ax.transAxes)
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # MAIN RENDER FUNCTION
 # ══════════════════════════════════════════════════════════════════════════
 
@@ -979,17 +1068,26 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     # ── Vertical dividers between main sections ───────────────────
     # (Handled via tight_layout spacing + individual subplot borders)
 
-    # ── Middle row ───────────────────────────────────────────────────
-    ax_pn_home  = fig.add_subplot(gs[1, 0])
-    ax_stats    = fig.add_subplot(gs[1, 1])
-    ax_pn_away  = fig.add_subplot(gs[1, 2])
+    # ── Middle row — 5-column layout: lineup | pass-net | stats | pass-net | lineup
+    gs_mid = gs[1, :].subgridspec(
+        1, 5,
+        width_ratios=[1.4, 2.1, 3.5, 2.1, 1.4],
+        wspace=0.03,
+    )
+    ax_lu_home  = fig.add_subplot(gs_mid[0, 0])
+    ax_pn_home  = fig.add_subplot(gs_mid[0, 1])
+    ax_stats    = fig.add_subplot(gs_mid[0, 2])
+    ax_pn_away  = fig.add_subplot(gs_mid[0, 3])
+    ax_lu_away  = fig.add_subplot(gs_mid[0, 4])
 
-    _draw_pass_network(ax_pn_home,  match_data, "home", home_name, home_color)
-    _draw_stats_table(ax_stats,     match_data, home_name, away_name, home_color, away_color)
-    _draw_pass_network(ax_pn_away,  match_data, "away", away_name, away_color)
+    _draw_lineup(ax_lu_home, match_data, "home", home_name, home_color, flip=False)
+    _draw_pass_network(ax_pn_home, match_data, "home", home_name, home_color)
+    _draw_stats_table(ax_stats,    match_data, home_name, away_name, home_color, away_color)
+    _draw_pass_network(ax_pn_away, match_data, "away", away_name, away_color)
+    _draw_lineup(ax_lu_away, match_data, "away", away_name, away_color, flip=True)
 
-    # Section divider between rows 1 and 2
-    for ax in (ax_pn_home, ax_stats, ax_pn_away):
+    # Section dividers
+    for ax in (ax_lu_home, ax_pn_home, ax_stats, ax_pn_away, ax_lu_away):
         for spine in ax.spines.values():
             spine.set_color(DIVIDER_CLR)
             spine.set_linewidth(0.7)

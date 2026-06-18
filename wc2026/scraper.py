@@ -64,6 +64,12 @@ WC2026_WS_BASE = os.environ.get(
 
 _fetched_ids: set[int] = set()  # avoid re-fetching in the same run
 
+# FotMob uses placeholder names for late-qualifying teams; map to real names
+FOTMOB_NAME_OVERRIDES: dict[str, str] = {
+    "FIFA Play-Off Tournament 1": "DR Congo",
+    "FIFA Play-Off Tournament 2": "Iraq",
+}
+
 # ══════════════════════════════════════════════════════════════════════════
 # SCHEDULE HELPERS – team name resolution without FotMob
 # ══════════════════════════════════════════════════════════════════════════
@@ -390,7 +396,7 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
-        driver = uc.Chrome(options=options)
+        driver = uc.Chrome(options=options, version_main=149)
     except ImportError:
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
@@ -400,11 +406,6 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
-        options.add_argument(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0.0.0 Safari/537.36"
-        )
         driver = webdriver.Chrome(options=options)
 
     log.info("WhoScored: loading %s …", ws_url)
@@ -451,20 +452,79 @@ def whoscored_fetch_match(ws_url: str, timeout: int = 30) -> dict | None:
             pass
 
 
+# WhoScored uses different names for some teams; map to the slug fragment they use.
+_WS_NAME_ALIASES: dict[str, str] = {
+    "south korea":            "republic-of-korea",
+    "korea republic":         "republic-of-korea",
+    "cape verde":             "cabo-verde",
+    "ivory coast":            "ivory-coast",
+    "cote d'ivoire":          "ivory-coast",
+    "côte d'ivoire":          "ivory-coast",
+    "dr congo":               "dr-congo",
+    "democratic republic of congo": "dr-congo",
+    "bosnia and herzegovina": "bosnia-and-herzegovina",
+    "new zealand":            "new-zealand",
+    "saudi arabia":           "saudi-arabia",
+    "united states":          "usa",
+    "turkiye":                "turkiye",
+    "turkey":                 "turkiye",
+}
+
+
+def _ws_slug_key(name: str) -> str:
+    """Normalise a team name to the slug fragment WhoScored would use."""
+    lower = name.lower().strip()
+    if lower in _WS_NAME_ALIASES:
+        return _WS_NAME_ALIASES[lower]
+    return re.sub(r"[^a-z0-9]+", "-", lower).strip("-")
+
+
+def _ws_cache_lookup(home_name: str, away_name: str) -> int | None:
+    """Check whoscored_ids.json for a pre-known match ID."""
+    cache_path = Path(__file__).parent / "whoscored_ids.json"
+    if not cache_path.exists():
+        return None
+    try:
+        cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        h_key = _ws_slug_key(home_name)
+        a_key = _ws_slug_key(away_name)
+        for ws_id, entry in cache.items():
+            slug = entry.get("slug", "")
+            if h_key in slug and a_key in slug:
+                log.info("WhoScored: cache hit — ID %s for %s vs %s", ws_id, home_name, away_name)
+                return int(ws_id)
+    except Exception as exc:
+        log.warning("WhoScored: cache lookup error: %s", exc)
+    return None
+
+
 def _build_whoscored_url(home_name: str, away_name: str, ws_match_id: int | None) -> str | None:
-    """Construct a WhoScored match URL from a known match ID."""
+    """Construct a WhoScored match URL. Uses cached slug when the ID is known."""
     if ws_match_id is None:
         return None
-    h = re.sub(r"[^a-zA-Z0-9]", "-", home_name).strip("-")
-    a = re.sub(r"[^a-zA-Z0-9]", "-", away_name).strip("-")
-    return f"https://www.whoscored.com/Matches/{ws_match_id}/Live/World-Cup-2026-{h}-{a}"
+    # Prefer the cached slug so aliased names (Cape Verde → cabo-verde) work correctly
+    cache_path = Path(__file__).parent / "whoscored_ids.json"
+    if cache_path.exists():
+        try:
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+            entry = cache.get(str(ws_match_id))
+            if entry and entry.get("slug"):
+                slug = entry["slug"]
+                return f"https://www.whoscored.com/matches/{ws_match_id}/live/international-fifa-world-cup-2026-{slug}"
+        except Exception:
+            pass
+    # Fallback: derive slug from team names
+    h = _ws_slug_key(home_name)
+    a = _ws_slug_key(away_name)
+    return f"https://www.whoscored.com/matches/{ws_match_id}/live/international-fifa-world-cup-2026-{h}-{a}"
 
 
 def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
-    """
-    Search WhoScored WC2026 fixtures page for a specific match and return its ID.
-    Uses Selenium since WhoScored is JS-rendered.
-    """
+    """Return WhoScored match ID: cache first, then live competition page search."""
+    cached = _ws_cache_lookup(home_name, away_name)
+    if cached:
+        return cached
+
     try:
         import undetected_chromedriver as uc
         options = uc.ChromeOptions()
@@ -472,7 +532,7 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
             options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        driver = uc.Chrome(options=options)
+        driver = uc.Chrome(options=options, version_main=149)
     except ImportError:
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
@@ -486,19 +546,17 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
         driver.get(WC2026_WS_BASE)
-        time.sleep(12)
-
-        links = driver.find_elements("css selector", "a[href*='/Matches/']")
-        for el in links:
-            href  = el.get_attribute("href") or ""
-            title = el.get_attribute("title") or el.text or ""
-            h_hit = home_name.lower() in title.lower() or home_name.lower() in href.lower()
-            a_hit = away_name.lower() in title.lower() or away_name.lower() in href.lower()
-            if h_hit and a_hit:
-                m = re.search(r"/Matches/(\d+)/", href)
+        time.sleep(14)
+        h_key = re.sub(r"[^a-z0-9]", "", home_name.lower())
+        a_key = re.sub(r"[^a-z0-9]", "", away_name.lower())
+        for el in driver.find_elements("css selector", "a[href*='/matches/']"):
+            href = el.get_attribute("href") or ""
+            combined = re.sub(r"[^a-z0-9]", "", href.lower())
+            if h_key in combined and a_key in combined:
+                m = re.search(r"/matches/(\d+)/", href)
                 if m:
                     mid = int(m.group(1))
-                    log.info("WhoScored: found match ID %d (%s)", mid, href)
+                    log.info("WhoScored: found match ID %d", mid)
                     return mid
         log.warning("WhoScored: match ID not found for %s vs %s", home_name, away_name)
         return None
@@ -530,8 +588,8 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
 
     # ── Team names & IDs ─────────────────────────────────────────────────────
     if fotmob_unavailable and xml_match:
-        home_name = xml_match.get("home", {}).get("name", "Home")
-        away_name = xml_match.get("away", {}).get("name", "Away")
+        home_name = FOTMOB_NAME_OVERRIDES.get(xml_match.get("home", {}).get("name", "Home"), xml_match.get("home", {}).get("name", "Home"))
+        away_name = FOTMOB_NAME_OVERRIDES.get(xml_match.get("away", {}).get("name", "Away"), xml_match.get("away", {}).get("name", "Away"))
         home_id   = xml_match.get("home", {}).get("id")
         away_id   = xml_match.get("away", {}).get("id")
         score_str = xml_match.get("status", {}).get("scoreStr", "0 - 0")
@@ -545,8 +603,8 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         away_info = teams[1] if len(teams) > 1 else {}
         home_id   = home_info.get("id")
         away_id   = away_info.get("id")
-        home_name = home_info.get("name", "Home")
-        away_name = away_info.get("name", "Away")
+        home_name = FOTMOB_NAME_OVERRIDES.get(home_info.get("name", "Home"), home_info.get("name", "Home"))
+        away_name = FOTMOB_NAME_OVERRIDES.get(away_info.get("name", "Away"), away_info.get("name", "Away"))
         score_str = header.get("status", {}).get("scoreStr", "0 - 0")
         utc_time  = header.get("status", {}).get("utcTime", "")
 
@@ -745,8 +803,8 @@ def watch_loop(fotmob_only: bool = False) -> None:
                 if mid and mid not in _fetched_ids:
                     # Check output file doesn't already exist
                     teams     = [m.get("home", {}), m.get("away", {})]
-                    home_name = teams[0].get("name", "")
-                    away_name = teams[1].get("name", "")
+                    home_name = FOTMOB_NAME_OVERRIDES.get(teams[0].get("name", ""), teams[0].get("name", ""))
+                    away_name = FOTMOB_NAME_OVERRIDES.get(teams[1].get("name", ""), teams[1].get("name", ""))
                     utc_time  = status.get("utcTime", "")
                     try:
                         date_str = datetime.fromisoformat(

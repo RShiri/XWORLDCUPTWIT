@@ -1,0 +1,42 @@
+{
+  "matchId": 4667819,
+  "wc_metadata": {
+    "stage": "Group Stage",
+    "group": null,
+    "venue": "",
+    "city": "",
+    "country": "United States",
+    "date": "2026-06-17",
+    "attendance": null
+  },
+  "home": {
+    "teamId": "8361",
+    "name": "Portugal",
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "home"
+  },
+  "away": {
+    "teamId": "1862059",
+    "name": "DR Congo",
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "away"
+  },
+  "events": [],
+  "match_stats": {
+    "big_chances_missed": {
+      "home": 0,
+      "away": 0
+    }
+  },
+  "playerIdNameDictionary": {},
+  "_scraped_at": "2026-06-18T02:02:19.197972+00:00",
+  "_sources": [
+    "fotmob"
+  ]
+}
