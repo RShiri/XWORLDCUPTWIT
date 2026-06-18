@@ -952,10 +952,10 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
 
     ax.text(
         0.5, 0.97,
-        f"{team_name}\nLineup",
+        team_name,
         ha="center", va="top",
         fontsize=9.9, fontweight="bold",
-        color=TEXT_DARK,
+        color=team_color,
         transform=ax.transAxes,
     )
 
