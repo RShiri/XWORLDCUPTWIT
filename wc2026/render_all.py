@@ -14,9 +14,14 @@ for f in match_files:
         with open(f, encoding='utf-8') as fh:
             md = json.load(fh)
         # Skip matches with no score (not yet played / empty placeholder JSONs)
-        h_score = md.get("home", {}).get("scores", {}).get("fulltime")
-        a_score = md.get("away", {}).get("scores", {}).get("fulltime")
-        if h_score is None and a_score is None:
+        # Two schema variants: FotMob uses home.scores.fulltime; WhoScored-only uses home.score
+        h = md.get("home", {})
+        a = md.get("away", {})
+        h_score = (h.get("scores") or {}).get("fulltime") if h.get("scores") else h.get("score")
+        a_score = (a.get("scores") or {}).get("fulltime") if a.get("scores") else a.get("score")
+        h_starters = sum(1 for p in h.get("players", []) if p.get("isFirstEleven"))
+        a_starters = sum(1 for p in a.get("players", []) if p.get("isFirstEleven"))
+        if (h_score is None and a_score is None) or (h_starters == 0 and a_starters == 0):
             print(f"SKIP {os.path.basename(f)} — no score yet")
             continue
         out = output_filename(md, 'wc2026/output')
