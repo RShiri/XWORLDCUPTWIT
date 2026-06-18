@@ -191,8 +191,30 @@ def whoscored_to_wc2026(mcd: dict, *, stage: str = "Group Stage",
             })
         return out
 
-    h_score = home.get("scores", {}).get("fulltime", home.get("scores", {}).get("running", 0)) or 0
-    a_score = away.get("scores", {}).get("fulltime", away.get("scores", {}).get("running", 0)) or 0
+    def _resolve_score(side: dict, tid, evts: list) -> int:
+        """
+        Extract the fulltime score from a WhoScored team dict.
+        .get(key, default) only uses default when the key is absent — if
+        scores.fulltime exists but is null, get() returns None, not the default.
+        We therefore check each field explicitly and fall back to counting
+        Goal events so a match scraped before WhoScored writes fulltime scores
+        still shows the correct result.
+        """
+        s = side.get("scores", {})
+        ft = s.get("fulltime")
+        if ft is not None:
+            return int(ft)
+        run = s.get("running")
+        if run is not None:
+            return int(run)
+        return sum(
+            1 for e in evts
+            if e.get("teamId") == tid
+            and e.get("type", {}).get("displayName") == "Goal"
+        )
+
+    h_score = _resolve_score(home, h_id, events)
+    a_score = _resolve_score(away, a_id, events)
 
     date_str = str(mcd.get("startDate", mcd.get("startTime", "")))[:10]
 

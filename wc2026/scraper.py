@@ -634,13 +634,30 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         away_tid     = ws_away.get("teamId", away_id)
         home_players = ws_home.get("players", [])
         away_players = ws_away.get("players", [])
-        # WhoScored has the real fulltime scores — use them
+        # WhoScored has the real fulltime scores — use them.
+        # .get(key, default) returns None when the key exists but is null, so
+        # we check fulltime first, then running, then count goal events.
         ws_home_score = ws_home.get("scores", {}).get("fulltime")
+        if ws_home_score is None:
+            ws_home_score = ws_home.get("scores", {}).get("running")
         ws_away_score = ws_away.get("scores", {}).get("fulltime")
+        if ws_away_score is None:
+            ws_away_score = ws_away.get("scores", {}).get("running")
         if ws_home_score is not None:
             home_score = int(ws_home_score)
         if ws_away_score is not None:
             away_score = int(ws_away_score)
+        # Last resort: if score is still 0-0 but goals exist in the stream,
+        # derive the score by counting Goal events.
+        if home_score == 0 and away_score == 0:
+            h_goals = sum(1 for e in events
+                          if e.get("teamId") == home_tid
+                          and e.get("type", {}).get("displayName") == "Goal")
+            a_goals = sum(1 for e in events
+                          if e.get("teamId") == away_tid
+                          and e.get("type", {}).get("displayName") == "Goal")
+            if h_goals > 0 or a_goals > 0:
+                home_score, away_score = h_goals, a_goals
         # Patch names into WhoScored data if FotMob was unavailable
         if fotmob_unavailable:
             ws_home["name"] = home_name

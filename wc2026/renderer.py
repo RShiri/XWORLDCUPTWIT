@@ -301,6 +301,16 @@ def _draw_header(fig: plt.Figure, ax: plt.Axes, match_data: dict) -> None:
     away_name  = away_d.get("name", "Away")
     home_score = home_d.get("score", 0)
     away_score = away_d.get("score", 0)
+    # Safety net: if the stored score is 0-0 but goal events exist, derive
+    # from the event stream so a mis-scraped JSON still displays correctly.
+    if home_score == 0 and away_score == 0:
+        evts  = match_data.get("events", [])
+        h_tid = home_d.get("teamId")
+        a_tid = away_d.get("teamId")
+        h_g = sum(1 for e in evts if e.get("teamId") == h_tid and e.get("type", {}).get("displayName") == "Goal")
+        a_g = sum(1 for e in evts if e.get("teamId") == a_tid and e.get("type", {}).get("displayName") == "Goal")
+        if h_g > 0 or a_g > 0:
+            home_score, away_score = h_g, a_g
     home_pk    = home_d.get("penalty_score")
     away_pk    = away_d.get("penalty_score")
 
