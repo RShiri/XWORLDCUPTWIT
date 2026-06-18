@@ -185,7 +185,7 @@ py -m wc2026.run_match --fotmob-id 4670000 --no-post
 py wc2026/render_all.py
 ```
 
-Iterates every `wc2026/matches/2026_*.json`, skips files with no score (unplayed), writes PNGs to `wc2026/output/`.
+Iterates every `wc2026/matches/2026_*.json`, skips files with no score or no starters (unplayed / placeholder JSONs), writes PNGs to `wc2026/output/`.
 
 ### Backfill WhoScored ratings for FotMob-only matches
 
