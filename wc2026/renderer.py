@@ -608,6 +608,16 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
 
     xg_h = _stat("xg", "home")
     xg_a = _stat("xg", "away")
+    # No real (FotMob/Opta) xG? Fall back to the geometric shot-model estimate
+    # — the same per-shot xG the shot maps display, so the two stay consistent.
+    if xg_h is None:
+        df_h = build_shot_df(match_data, home_name)
+        if not df_h.empty:
+            xg_h = float(df_h["xG"].sum())
+    if xg_a is None:
+        df_a = build_shot_df(match_data, away_name)
+        if not df_a.empty:
+            xg_a = float(df_a["xG"].sum())
 
     bc_created_h = _stat("big_chances_created", "home")
     bc_missed_h  = _stat("big_chances_missed",  "home") or 0
