@@ -954,14 +954,14 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         0.5, 0.97,
         f"{team_name}\nLineup",
         ha="center", va="top",
-        fontsize=5.5, fontweight="bold",
+        fontsize=8, fontweight="bold",
         color=TEXT_DARK,
         transform=ax.transAxes,
     )
 
     if not starters:
         ax.text(0.5, 0.5, "No lineup data", ha="center", va="center",
-                fontsize=5, color=TEXT_MID, transform=ax.transAxes)
+                fontsize=7, color=TEXT_MID, transform=ax.transAxes)
         return
 
     n = len(starters)
@@ -989,7 +989,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         # Shirt number
         ax.text(0.10 if not flip else 0.90, y,
                 shirt, ha="center", va="center",
-                fontsize=5, fontweight="bold", color=team_color,
+                fontsize=7, fontweight="bold", color=team_color,
                 transform=ax.transAxes)
 
         # Name
@@ -997,7 +997,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         name_ha = "left" if not flip else "right"
         ax.text(name_x, y, short,
                 ha=name_ha, va="center",
-                fontsize=5, color=TEXT_DARK,
+                fontsize=7, color=TEXT_DARK,
                 transform=ax.transAxes,
                 clip_on=True)
 
@@ -1012,7 +1012,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
                            "#cc4400")
                 ax.text(rating_x, y, f"{r_val:.1f}",
                         ha="center", va="center",
-                        fontsize=5, fontweight="bold", color=r_color,
+                        fontsize=7, fontweight="bold", color=r_color,
                         transform=ax.transAxes)
 
 
@@ -1122,7 +1122,7 @@ def output_filename(match_data: dict, output_dir: str = ".") -> str:
       YYYY_MM_DD_[HomeTeam]_vs_[AwayTeam].png
     """
     meta   = match_data.get("wc_metadata", {})
-    date   = meta.get("date", "2026_06_01").replace("-", "_")
+    date   = (meta.get("date") or match_data.get("date") or "2026_06_01").replace("-", "_")
     home   = match_data.get("home", {}).get("name", "Home").replace(" ", "_")
     away   = match_data.get("away", {}).get("name", "Away").replace(" ", "_")
     fname  = f"{date}_{home}_vs_{away}.png"
