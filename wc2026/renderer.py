@@ -655,6 +655,9 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
         (_v("fouls", "home"),                           "Fouls",                 _v("fouls", "away")),
     ]
 
+    # Drop any stat with no data on either side (e.g. xG when only WhoScored data exists)
+    rows = [r for r in rows if not (r[0] == "—" and r[2] == "—")]
+
     # Column header with team names
     ax.text(0.18, 0.97, home_name, ha="center", va="top",
             fontsize=14, fontweight="bold", color=home_color,

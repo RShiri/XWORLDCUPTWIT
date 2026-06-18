@@ -107335,8 +107335,8 @@
   ],
   "match_stats": {
     "shots": {
-      "home": 10,
-      "away": 10
+      "home": 17,
+      "away": 14
     },
     "shots_on_target": {
       "home": 9,
@@ -107367,8 +107367,16 @@
       "away": 0
     },
     "saves": {
-      "home": 8,
+      "home": 7,
       "away": 7
+    },
+    "fouls": {
+      "home": 10,
+      "away": 8
+    },
+    "duels_won": {
+      "home": 57,
+      "away": 43
     }
   },
   "_sources": [

@@ -221,6 +221,75 @@ def fotmob_fetch_match_details(match_id: int) -> dict:
     return {"_fotmob_unavailable": True, "general": {}, "header": {}, "content": {}}
 
 
+def _compute_ws_stats(events: list, home_tid, away_tid) -> dict:
+    """Compute match stats from the WhoScored event stream.
+
+    Used as the stats source when FotMob's matchDetails API is unavailable.
+    xG is intentionally absent — WhoScored events carry no expected-goals data.
+    """
+    SHOT_ALL = {"Goal", "SavedShot", "MissedShots", "ShotOnPost", "BlockedShot"}
+    SHOT_ON  = {"Goal", "SavedShot"}
+    DUEL     = {"Aerial", "Tackle", "TakeOn"}
+
+    def _t(e): return e.get("type", {}).get("displayName", "")
+    def _o(e): return e.get("outcomeType", {}).get("displayName", "")
+
+    def per_team(fn):
+        return {"home": fn(home_tid), "away": fn(away_tid)}
+
+    shots = per_team(lambda tid: sum(1 for e in events if _t(e) in SHOT_ALL and e.get("teamId") == tid))
+    sot   = per_team(lambda tid: sum(1 for e in events if _t(e) in SHOT_ON  and e.get("teamId") == tid))
+    # Save events belong to the goalkeeper's (defending) team.
+    saves = per_team(lambda tid: sum(1 for e in events if _t(e) == "Save" and e.get("teamId") == tid))
+    # A Foul event is logged twice — Successful for the team that won it,
+    # Unsuccessful for the team that committed it. "Fouls" = fouls committed.
+    fouls = per_team(lambda tid: sum(1 for e in events
+                                     if _t(e) == "Foul" and _o(e) == "Unsuccessful"
+                                     and e.get("teamId") == tid))
+    bc    = per_team(lambda tid: sum(1 for e in events if e.get("teamId") == tid
+                                     and any(q.get("type", {}).get("displayName") == "BigChance"
+                                             for q in e.get("qualifiers", []))))
+
+    # Duels won = won aerials/tackles/take-ons. Every duel has one winner, so the
+    # percentage is each team's share of all won duels.
+    dw = per_team(lambda tid: sum(1 for e in events if _t(e) in DUEL
+                                  and _o(e) == "Successful" and e.get("teamId") == tid))
+    dw_total = dw["home"] + dw["away"]
+    duels_won = {
+        "home": int(round(100 * dw["home"] / dw_total)) if dw_total else 0,
+        "away": int(round(100 * dw["away"] / dw_total)) if dw_total else 0,
+    }
+
+    # Passes (total / accurate / accuracy%).
+    pt = per_team(lambda tid: sum(1 for e in events if _t(e) == "Pass" and e.get("teamId") == tid))
+    pa = per_team(lambda tid: sum(1 for e in events if _t(e) == "Pass"
+                                  and _o(e) == "Successful" and e.get("teamId") == tid))
+    passes_accuracy = {
+        "home": int(round(100 * pa["home"] / pt["home"])) if pt["home"] else 0,
+        "away": int(round(100 * pa["away"] / pt["away"])) if pt["away"] else 0,
+    }
+
+    # Possession proxy: share of total passes (touch-time data is not available).
+    pt_total = pt["home"] + pt["away"]
+    possession = {
+        "home": int(round(100 * pt["home"] / pt_total)) if pt_total else 50,
+        "away": int(round(100 * pt["away"] / pt_total)) if pt_total else 50,
+    }
+
+    return {
+        "shots":               shots,
+        "shots_on_target":     sot,
+        "saves":               saves,
+        "fouls":               fouls,
+        "big_chances_created": bc,
+        "duels_won":           duels_won,
+        "possession":          possession,
+        "passes_total":        pt,
+        "passes_accurate":     pa,
+        "passes_accuracy":     passes_accuracy,
+    }
+
+
 def _parse_fotmob_stats(fm_data: dict) -> dict:
     """Extract match_stats dict from FotMob matchDetails response."""
     stats = {}
@@ -692,6 +761,11 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             match_stats[f"passes_accurate_{_side}"] = _accurate
             match_stats.setdefault(f"passes_accuracy_{_side}",
                                    int(round(100 * _accurate / _total)))
+
+    # Fill remaining stats from WhoScored events when FotMob didn't provide them.
+    if events:
+        for _k, _v in _compute_ws_stats(events, home_tid, away_tid).items():
+            match_stats.setdefault(_k, _v)
 
     pid_name = {}
     for p in home_players + away_players:

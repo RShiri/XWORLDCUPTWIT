@@ -3136,7 +3136,7 @@
       {
         "playerId": 255182,
         "shirtNo": 19,
-        "name": "I\u00f1aki Williams",
+        "name": "Iñaki Williams",
         "position": "Sub",
         "height": 186,
         "weight": 81,
@@ -3405,7 +3405,7 @@
       {
         "playerId": 397267,
         "shirtNo": 16,
-        "name": "Andr\u00e9s Andrade",
+        "name": "Andrés Andrade",
         "position": "DC",
         "height": 187,
         "weight": 86,
@@ -4256,7 +4256,7 @@
       {
         "playerId": 458339,
         "shirtNo": 3,
-        "name": "Jos\u00e9 C\u00f3rdoba",
+        "name": "José Córdoba",
         "position": "DC",
         "height": 187,
         "weight": 88,
@@ -5007,7 +5007,7 @@
       {
         "playerId": 401721,
         "shirtNo": 2,
-        "name": "C\u00e9sar Blackman",
+        "name": "César Blackman",
         "position": "DML",
         "height": 174,
         "weight": 77,
@@ -5316,7 +5316,7 @@
       {
         "playerId": 143611,
         "shirtNo": 11,
-        "name": "Yoel B\u00e1rcenas",
+        "name": "Yoel Bárcenas",
         "position": "MC",
         "height": 175,
         "weight": 75,
@@ -5991,7 +5991,7 @@
       {
         "playerId": 318250,
         "shirtNo": 6,
-        "name": "Cristian Mart\u00ednez",
+        "name": "Cristian Martínez",
         "position": "FWR",
         "height": 170,
         "weight": 72,
@@ -6283,7 +6283,7 @@
       {
         "playerId": 358868,
         "shirtNo": 7,
-        "name": "Jos\u00e9 Luis Rodr\u00edguez",
+        "name": "José Luis Rodríguez",
         "position": "FWL",
         "height": 180,
         "weight": 77,
@@ -6489,7 +6489,7 @@
       {
         "playerId": 111779,
         "shirtNo": 20,
-        "name": "An\u00edbal Godoy",
+        "name": "Aníbal Godoy",
         "position": "Sub",
         "height": 183,
         "weight": 75,
@@ -6547,7 +6547,7 @@
       {
         "playerId": 238549,
         "shirtNo": 10,
-        "name": "Ismael D\u00edaz",
+        "name": "Ismael Díaz",
         "position": "Sub",
         "height": 182,
         "weight": 81,
@@ -6648,7 +6648,7 @@
       {
         "playerId": 455374,
         "shirtNo": 24,
-        "name": "Azar\u00edas Londo\u00f1o",
+        "name": "Azarías Londoño",
         "position": "Sub",
         "height": 185,
         "weight": 87,
@@ -6767,7 +6767,7 @@
       {
         "playerId": 458334,
         "shirtNo": 17,
-        "name": "Jos\u00e9 Fajardo",
+        "name": "José Fajardo",
         "position": "Sub",
         "height": 181,
         "weight": 80,
@@ -6829,7 +6829,7 @@
       {
         "playerId": 87247,
         "shirtNo": 1,
-        "name": "Luis Mej\u00eda",
+        "name": "Luis Mejía",
         "position": "Sub",
         "height": 193,
         "weight": 80,
@@ -6841,7 +6841,7 @@
       {
         "playerId": 138484,
         "shirtNo": 15,
-        "name": "\u00c9ric Davis",
+        "name": "Éric Davis",
         "position": "Sub",
         "height": 180,
         "weight": 78,
@@ -6889,7 +6889,7 @@
       {
         "playerId": 455358,
         "shirtNo": 12,
-        "name": "C\u00e9sar Samudio",
+        "name": "César Samudio",
         "position": "Sub",
         "height": 188,
         "weight": 88,
@@ -6901,7 +6901,7 @@
       {
         "playerId": 455359,
         "shirtNo": 26,
-        "name": "Jorge Guti\u00e9rrez",
+        "name": "Jorge Gutiérrez",
         "position": "Sub",
         "height": 171,
         "weight": 68,
@@ -6913,7 +6913,7 @@
       {
         "playerId": 455371,
         "shirtNo": 21,
-        "name": "C\u00e9sar Yanis",
+        "name": "César Yanis",
         "position": "Sub",
         "height": 160,
         "weight": 58,
@@ -6925,7 +6925,7 @@
       {
         "playerId": 458333,
         "shirtNo": 9,
-        "name": "Tom\u00e1s Rodr\u00edguez",
+        "name": "Tomás Rodríguez",
         "position": "Sub",
         "height": 183,
         "weight": 75,
@@ -6937,7 +6937,7 @@
       {
         "playerId": 476588,
         "shirtNo": 5,
-        "name": "Edgardo Fari\u00f1a",
+        "name": "Edgardo Fariña",
         "position": "Sub",
         "height": 194,
         "weight": 84,
@@ -111363,7 +111363,47 @@
     "passes_accuracy_home": 80,
     "passes_total_away": 629,
     "passes_accurate_away": 532,
-    "passes_accuracy_away": 85
+    "passes_accuracy_away": 85,
+    "shots": {
+      "home": 8,
+      "away": 11
+    },
+    "shots_on_target": {
+      "home": 4,
+      "away": 6
+    },
+    "saves": {
+      "home": 6,
+      "away": 4
+    },
+    "fouls": {
+      "home": 9,
+      "away": 11
+    },
+    "big_chances_created": {
+      "home": 1,
+      "away": 2
+    },
+    "duels_won": {
+      "home": 56,
+      "away": 44
+    },
+    "possession": {
+      "home": 39,
+      "away": 61
+    },
+    "passes_total": {
+      "home": 394,
+      "away": 629
+    },
+    "passes_accurate": {
+      "home": 317,
+      "away": 532
+    },
+    "passes_accuracy": {
+      "home": 80,
+      "away": 85
+    }
   },
   "playerIdNameDictionary": {
     "377714": "Lawrence Ati Zigi",
@@ -111386,37 +111426,37 @@
     "470625": "Augustine Boakye",
     "479290": "Christopher Bonsu Baah",
     "114845": "Abdul Rahman Baba",
-    "255182": "I\u00f1aki Williams",
+    "255182": "Iñaki Williams",
     "573388": "Kojo Peprah Oppong",
     "400844": "Abdul Mumin",
     "231140": "Derrick Luckassen",
     "390006": "Joseph Anang",
     "448768": "Orlando Mosquera",
-    "397267": "Andr\u00e9s Andrade",
+    "397267": "Andrés Andrade",
     "455372": "Jiovany Ramos",
-    "458339": "Jos\u00e9 C\u00f3rdoba",
+    "458339": "José Córdoba",
     "280972": "Amir Murillo",
-    "401721": "C\u00e9sar Blackman",
-    "143611": "Yoel B\u00e1rcenas",
+    "401721": "César Blackman",
+    "143611": "Yoel Bárcenas",
     "396239": "Carlos Harvey",
-    "318250": "Cristian Mart\u00ednez",
+    "318250": "Cristian Martínez",
     "113022": "Cecilio Waterman",
-    "358868": "Jos\u00e9 Luis Rodr\u00edguez",
-    "111779": "An\u00edbal Godoy",
-    "238549": "Ismael D\u00edaz",
-    "455374": "Azar\u00edas Londo\u00f1o",
-    "458334": "Jos\u00e9 Fajardo",
+    "358868": "José Luis Rodríguez",
+    "111779": "Aníbal Godoy",
+    "238549": "Ismael Díaz",
+    "455374": "Azarías Londoño",
+    "458334": "José Fajardo",
     "79700": "Alberto Quintero",
-    "87247": "Luis Mej\u00eda",
-    "138484": "\u00c9ric Davis",
+    "87247": "Luis Mejía",
+    "138484": "Éric Davis",
     "318559": "Roderick Miller",
     "318565": "Fidel Escobar",
     "422036": "Adalberto Carrasquilla",
-    "455358": "C\u00e9sar Samudio",
-    "455359": "Jorge Guti\u00e9rrez",
-    "455371": "C\u00e9sar Yanis",
-    "458333": "Tom\u00e1s Rodr\u00edguez",
-    "476588": "Edgardo Fari\u00f1a"
+    "455358": "César Samudio",
+    "455359": "Jorge Gutiérrez",
+    "455371": "César Yanis",
+    "458333": "Tomás Rodríguez",
+    "476588": "Edgardo Fariña"
   },
   "_scraped_at": "2026-06-18T02:29:36.300581+00:00",
   "_sources": [

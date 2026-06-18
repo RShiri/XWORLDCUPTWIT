@@ -99894,8 +99894,8 @@
     "passes_accurate_away": 476,
     "passes_accuracy_away": 85,
     "shots": {
-      "home": 5,
-      "away": 9
+      "home": 8,
+      "away": 15
     },
     "shots_on_target": {
       "home": 4,
@@ -99923,7 +99923,15 @@
     },
     "saves": {
       "home": 5,
-      "away": 3
+      "away": 4
+    },
+    "fouls": {
+      "home": 14,
+      "away": 11
+    },
+    "duels_won": {
+      "home": 57,
+      "away": 43
     }
   },
   "playerIdNameDictionary": {

@@ -112420,6 +112420,46 @@
     "big_chances_missed": {
       "home": 0,
       "away": 0
+    },
+    "shots": {
+      "home": 7,
+      "away": 8
+    },
+    "shots_on_target": {
+      "home": 3,
+      "away": 5
+    },
+    "saves": {
+      "home": 3,
+      "away": 2
+    },
+    "fouls": {
+      "home": 9,
+      "away": 10
+    },
+    "big_chances_created": {
+      "home": 0,
+      "away": 1
+    },
+    "duels_won": {
+      "home": 43,
+      "away": 57
+    },
+    "possession": {
+      "home": 75,
+      "away": 25
+    },
+    "passes_total": {
+      "home": 827,
+      "away": 279
+    },
+    "passes_accurate": {
+      "home": 751,
+      "away": 215
+    },
+    "passes_accuracy": {
+      "home": 91,
+      "away": 77
     }
   },
   "playerIdNameDictionary": {},
