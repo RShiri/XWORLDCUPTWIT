@@ -15,3 +15,9 @@ __pycache__/
 venv/
 .venv/
 env/
+
+# Quarantined junk / temp files (local only)
+useless/
+
+# Log files
+*.log
