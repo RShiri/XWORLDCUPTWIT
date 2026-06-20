@@ -68,6 +68,15 @@ _fetched_ids: set[int] = set()  # avoid re-fetching in the same run
 FOTMOB_NAME_OVERRIDES: dict[str, str] = {
     "FIFA Play-Off Tournament 1": "DR Congo",
     "FIFA Play-Off Tournament 2": "Iraq",
+    # UEFA play-off path winners — FotMob keeps serving the placeholder slot
+    # name even after the matches are played, which breaks the WhoScored slug
+    # search. Map each slot to the real qualifier (confirmed via group fixtures
+    # already in whoscored_ids.json: Canada–Bosnia, Korea–Czechia,
+    # Australia–Türkiye, Sweden–Tunisia).
+    "European Play-Off A": "Bosnia and Herzegovina",
+    "European Play-Off B": "Sweden",
+    "European Play-Off C": "Turkiye",
+    "European Play-Off D": "Czechia",
 }
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -831,7 +840,10 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
 
     fm_data = fotmob_fetch_match_details(fotmob_id)  # now returns stub if API is down
 
-    # Resolve team names: prefer FotMob JSON, fall back to XML match data
+    # Resolve team names: prefer FotMob JSON, fall back to XML match data.
+    # Apply FOTMOB_NAME_OVERRIDES here too so placeholder slot names (e.g.
+    # "European Play-Off C") become the real qualifier before the WhoScored
+    # slug search runs — otherwise the search can never match the real fixture.
     if fm_data.get("_fotmob_unavailable") and xml_match:
         home_name = xml_match.get("home", {}).get("name", "Home")
         away_name = xml_match.get("away", {}).get("name", "Away")
@@ -839,6 +851,8 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
         teams     = fm_data.get("header", {}).get("teams", [{}, {}])
         home_name = teams[0].get("name", "Home") if teams else "Home"
         away_name = teams[1].get("name", "Away") if len(teams) > 1 else "Away"
+    home_name = FOTMOB_NAME_OVERRIDES.get(home_name, home_name)
+    away_name = FOTMOB_NAME_OVERRIDES.get(away_name, away_name)
 
     ws_data = None
     if not fotmob_only:

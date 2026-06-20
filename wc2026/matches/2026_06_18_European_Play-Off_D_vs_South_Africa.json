@@ -1,18 +1,42 @@
 {
-  "match_id": 4667753,
-  "date": "2026-06-18",
-  "stage": "Group A",
+  "matchId": 4667753,
+  "wc_metadata": {
+    "stage": "Group Stage",
+    "group": null,
+    "venue": "",
+    "city": "",
+    "country": "United States",
+    "date": "2026-06-18",
+    "attendance": null
+  },
   "home": {
+    "teamId": "1862057",
     "name": "European Play-Off D",
-    "score": null,
-    "players": []
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "home"
   },
   "away": {
+    "teamId": "6316",
     "name": "South Africa",
-    "score": null,
-    "players": []
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "away"
   },
   "events": [],
-  "match_stats": {},
-  "_sources": []
+  "match_stats": {
+    "big_chances_missed": {
+      "home": 0,
+      "away": 0
+    }
+  },
+  "playerIdNameDictionary": {},
+  "_scraped_at": "2026-06-18T18:00:35.660236+00:00",
+  "_sources": [
+    "fotmob"
+  ]
 }

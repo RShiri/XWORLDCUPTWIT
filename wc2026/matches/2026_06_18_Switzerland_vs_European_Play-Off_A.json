@@ -1,18 +1,42 @@
 {
-  "match_id": 4667759,
-  "date": "2026-06-18",
-  "stage": "Group B",
+  "matchId": 4667759,
+  "wc_metadata": {
+    "stage": "Group Stage",
+    "group": null,
+    "venue": "",
+    "city": "",
+    "country": "United States",
+    "date": "2026-06-18",
+    "attendance": null
+  },
   "home": {
+    "teamId": "6717",
     "name": "Switzerland",
-    "score": null,
-    "players": []
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "home"
   },
   "away": {
+    "teamId": "1862054",
     "name": "European Play-Off A",
-    "score": null,
-    "players": []
+    "score": 0,
+    "penalty_score": null,
+    "players": [],
+    "stats": {},
+    "field": "away"
   },
   "events": [],
-  "match_stats": {},
-  "_sources": []
+  "match_stats": {
+    "big_chances_missed": {
+      "home": 0,
+      "away": 0
+    }
+  },
+  "playerIdNameDictionary": {},
+  "_scraped_at": "2026-06-18T21:00:29.748814+00:00",
+  "_sources": [
+    "fotmob"
+  ]
 }

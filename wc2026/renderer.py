@@ -956,9 +956,52 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
 # LINEUP PANEL
 # ══════════════════════════════════════════════════════════════════════════
 
+def _lineup_extras(match_data: dict):
+    """Scan the event stream once for per-playerId goals, assists, and the
+    minute each player was subbed on / off, plus the match's final minute."""
+    goals: dict = {}
+    assists: dict = {}
+    on_min: dict = {}
+    off_min: dict = {}
+    end_min = 90
+    for e in match_data.get("events", []):
+        m = e.get("minute") or 0
+        if m > end_min:
+            end_min = m
+        pid = e.get("playerId")
+        if pid is None:
+            continue
+        t = e.get("type", {}).get("displayName", "")
+        quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
+        if t == "Goal" and "OwnGoal" not in quals:
+            goals[pid] = goals.get(pid, 0) + 1
+        if "IntentionalGoalAssist" in quals:
+            assists[pid] = assists.get(pid, 0) + 1
+        if t == "SubstitutionOn":
+            on_min[pid] = m
+        elif t == "SubstitutionOff":
+            off_min[pid] = m
+    return goals, assists, on_min, off_min, end_min
+
+
+def _short_player_name(p: dict) -> str:
+    """First-initial + surname (or surname only) from a player record."""
+    name = _ascii_name(p.get("name", ""))
+    parts = name.split()
+    return f"{parts[0][0]}. {parts[-1]}" if len(parts) >= 2 else name
+
+
+def _rating_color(r_val: float) -> str:
+    return ("#1a8a1a" if r_val >= 7.5 else
+            "#5b9e1e" if r_val >= 6.5 else
+            TEXT_MID  if r_val >= 6.0 else
+            "#cc4400")
+
+
 def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
                  team_name: str, team_color: str, flip: bool = False) -> None:
-    """Draw a starting XI with shirt numbers, names, and optional ratings."""
+    """Draw the starting XI plus used substitutes, with shirt numbers, names,
+    ratings, goal/assist markers and substitution minutes."""
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
@@ -975,13 +1018,21 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
     starters = [p for p in players if p.get("isFirstEleven")]
     starters = sorted(starters, key=lambda p: (_POS_ORDER.get(p.get("position", ""), 99), p.get("shirtNo", 99)))
 
+    goals, assists, on_min, off_min, end_min = _lineup_extras(match_data)
+
+    # Subs that actually came on (skip the unused bench).
+    subs = [p for p in players
+            if not p.get("isFirstEleven")
+            and (p.get("playerId") in on_min or p.get("subbedInExpandedMinute") is not None)]
+    subs.sort(key=lambda p: on_min.get(p.get("playerId"), p.get("subbedInExpandedMinute") or 999))
+
     has_ratings = any(bool(p.get("stats", {}).get("ratings")) for p in starters)
 
     ax.text(
-        0.5, 0.97,
+        0.5, 0.985,
         f"{team_name}\nLineup",
         ha="center", va="top",
-        fontsize=9.9, fontweight="bold",
+        fontsize=9.4, fontweight="bold",
         color=TEXT_DARK,
         transform=ax.transAxes,
     )
@@ -991,56 +1042,84 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
                 fontsize=9, color=TEXT_MID, transform=ax.transAxes)
         return
 
-    n = len(starters)
-    row_h = 0.85 / max(n, 1)
-    y_top = 0.90
+    # Column anchors (mirrored for the away/flip side).
+    if not flip:
+        shirt_x, name_x, name_ha = 0.05, 0.12, "left"
+        min_x, goal_x, ast_x, rate_x = 0.62, 0.78, 0.86, 0.95
+    else:
+        shirt_x, name_x, name_ha = 0.95, 0.88, "right"
+        min_x, goal_x, ast_x, rate_x = 0.38, 0.22, 0.14, 0.05
 
-    for i, p in enumerate(starters):
-        y = y_top - i * row_h
-        shirt = str(p.get("shirtNo", ""))
-        name = _ascii_name(p.get("name", ""))
-        # Shortened name: first initial + surname, or surname only
-        parts = name.split()
-        if len(parts) >= 2:
-            short = f"{parts[0][0]}. {parts[-1]}"
-        else:
-            short = name
+    def _markers(y, pid):
+        g = goals.get(pid, 0)
+        a = assists.get(pid, 0)
+        if g:
+            gtxt = "●" * g if g <= 3 else f"● x{g}"
+            ax.text(goal_x, y, gtxt, ha="center", va="center",
+                    fontsize=7.0, color="#111111", transform=ax.transAxes)
+        if a:
+            atxt = "A" if a == 1 else f"A{a}"
+            ax.text(ast_x, y, atxt, ha="center", va="center",
+                    fontsize=7.2, fontweight="bold", color="#c8881b",
+                    transform=ax.transAxes)
 
-        ratings_dict = p.get("stats", {}).get("ratings", {})
-        if ratings_dict:
-            vals = list(ratings_dict.values())
-            rating = vals[-1] if vals else None
-        else:
-            rating = None
+    def _rating(y, p, fs):
+        if not has_ratings:
+            return
+        rd = p.get("stats", {}).get("ratings", {})
+        rating = list(rd.values())[-1] if rd else None
+        if rating is not None:
+            rv = float(rating)
+            ax.text(rate_x, y, f"{rv:.1f}", ha="center", va="center",
+                    fontsize=fs, fontweight="bold", color=_rating_color(rv),
+                    transform=ax.transAxes)
 
-        # Shirt number
-        ax.text(0.10 if not flip else 0.90, y,
-                shirt, ha="center", va="center",
-                fontsize=9, fontweight="bold", color=team_color,
+    n_sub = len(subs)
+    total_rows = len(starters) + (1 + n_sub if n_sub else 0)
+    avail = 0.90
+    row_h = avail / max(total_rows, 1)
+    fs = 8.3 if total_rows <= 13 else 7.5
+    y = 0.90
+
+    # ── Starting XI ───────────────────────────────────────────────────
+    for p in starters:
+        pid = p.get("playerId")
+        ax.text(shirt_x, y, str(p.get("shirtNo", "")), ha="center", va="center",
+                fontsize=fs - 0.7, fontweight="bold", color=team_color,
                 transform=ax.transAxes)
+        ax.text(name_x, y, _short_player_name(p), ha=name_ha, va="center",
+                fontsize=fs, color=TEXT_DARK, transform=ax.transAxes, clip_on=True)
+        if pid in off_min:
+            ax.text(min_x, y, f"↓{off_min[pid]}'", ha="center", va="center",
+                    fontsize=6.6, color="#cc4400", transform=ax.transAxes)
+        _markers(y, pid)
+        _rating(y, p, fs - 0.5)
+        y -= row_h
 
-        # Name
-        name_x = 0.20 if not flip else 0.80
-        name_ha = "left" if not flip else "right"
-        ax.text(name_x, y, short,
-                ha=name_ha, va="center",
-                fontsize=9, color=TEXT_DARK,
-                transform=ax.transAxes,
-                clip_on=True)
-
-        # Rating
-        if has_ratings:
-            rating_x = 0.92 if not flip else 0.08
-            if rating is not None:
-                r_val = float(rating)
-                r_color = ("#1a8a1a" if r_val >= 7.5 else
-                           "#5b9e1e" if r_val >= 6.5 else
-                           TEXT_MID   if r_val >= 6.0 else
-                           "#cc4400")
-                ax.text(rating_x, y, f"{r_val:.1f}",
-                        ha="center", va="center",
-                        fontsize=9, fontweight="bold", color=r_color,
-                        transform=ax.transAxes)
+    # ── Substitutes ───────────────────────────────────────────────────
+    if subs:
+        ax.axhline(y + row_h * 0.5, xmin=0.03, xmax=0.97,
+                   color=DIVIDER_CLR, linewidth=0.6)
+        ax.text(name_x, y, "SUBS", ha=name_ha, va="center",
+                fontsize=6.6, fontweight="bold", color=TEXT_MID,
+                transform=ax.transAxes)
+        y -= row_h
+        for p in subs:
+            pid = p.get("playerId")
+            on = on_min.get(pid, p.get("subbedInExpandedMinute") or 0)
+            off = off_min.get(pid, end_min)
+            played = max(off - on, 0)
+            ax.text(shirt_x, y, str(p.get("shirtNo", "")), ha="center", va="center",
+                    fontsize=fs - 1.3, fontweight="bold", color=team_color,
+                    alpha=0.85, transform=ax.transAxes)
+            ax.text(name_x, y, _short_player_name(p), ha=name_ha, va="center",
+                    fontsize=fs - 0.8, color=TEXT_MID, transform=ax.transAxes,
+                    clip_on=True)
+            ax.text(min_x, y, f"{played}'", ha="center", va="center",
+                    fontsize=6.6, color=TEXT_LIGHT, transform=ax.transAxes)
+            _markers(y, pid)
+            _rating(y, p, fs - 1.0)
+            y -= row_h
 
 
 # ══════════════════════════════════════════════════════════════════════════
