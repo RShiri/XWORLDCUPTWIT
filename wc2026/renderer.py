@@ -1032,7 +1032,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         0.5, 0.985,
         f"{team_name}\nLineup",
         ha="center", va="top",
-        fontsize=9.4, fontweight="bold",
+        fontsize=13.5, fontweight="bold",
         color=TEXT_DARK,
         transform=ax.transAxes,
     )
@@ -1056,11 +1056,11 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         if g:
             gtxt = "●" * g if g <= 3 else f"● x{g}"
             ax.text(goal_x, y, gtxt, ha="center", va="center",
-                    fontsize=7.0, color="#111111", transform=ax.transAxes)
+                    fontsize=10.2, color="#111111", transform=ax.transAxes)
         if a:
             atxt = "A" if a == 1 else f"A{a}"
             ax.text(ast_x, y, atxt, ha="center", va="center",
-                    fontsize=7.2, fontweight="bold", color="#c8881b",
+                    fontsize=10.4, fontweight="bold", color="#c8881b",
                     transform=ax.transAxes)
 
     def _rating(y, p, fs):
@@ -1078,7 +1078,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
     total_rows = len(starters) + (1 + n_sub if n_sub else 0)
     avail = 0.90
     row_h = avail / max(total_rows, 1)
-    fs = 8.3 if total_rows <= 13 else 7.5
+    fs = 14.0 if total_rows <= 13 else 12.0
     y = 0.90
 
     # ── Starting XI ───────────────────────────────────────────────────
@@ -1091,32 +1091,46 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
                 fontsize=fs, color=TEXT_DARK, transform=ax.transAxes, clip_on=True)
         if pid in off_min:
             ax.text(min_x, y, f"↓{off_min[pid]}'", ha="center", va="center",
-                    fontsize=6.6, color="#cc4400", transform=ax.transAxes)
+                    fontsize=9.4, color="#cc4400", transform=ax.transAxes)
         _markers(y, pid)
         _rating(y, p, fs - 0.5)
         y -= row_h
 
     # ── Substitutes ───────────────────────────────────────────────────
     if subs:
+        # Surname lookup for "came on for <player>" labels.
+        surname_by_pid: dict = {}
+        for pp in players:
+            nm = _ascii_name(pp.get("name", ""))
+            surname_by_pid[pp.get("playerId")] = nm.split()[-1] if nm.split() else nm
+        out_x, ha_out = (0.70, "right") if not flip else (0.30, "left")
+
         ax.axhline(y + row_h * 0.5, xmin=0.03, xmax=0.97,
                    color=DIVIDER_CLR, linewidth=0.6)
         ax.text(name_x, y, "SUBS", ha=name_ha, va="center",
-                fontsize=6.6, fontweight="bold", color=TEXT_MID,
+                fontsize=9.4, fontweight="bold", color=TEXT_MID,
                 transform=ax.transAxes)
         y -= row_h
         for p in subs:
             pid = p.get("playerId")
-            on = on_min.get(pid, p.get("subbedInExpandedMinute") or 0)
-            off = off_min.get(pid, end_min)
-            played = max(off - on, 0)
+            on = on_min.get(pid, p.get("subbedInExpandedMinute"))
+            out_name = surname_by_pid.get(p.get("subbedOutPlayerId"), "")
+            if out_name and on is not None:
+                info = f"for {out_name} {on}'"
+            elif on is not None:
+                info = f"{on}'"
+            else:
+                info = ""
             ax.text(shirt_x, y, str(p.get("shirtNo", "")), ha="center", va="center",
                     fontsize=fs - 1.3, fontweight="bold", color=team_color,
                     alpha=0.85, transform=ax.transAxes)
             ax.text(name_x, y, _short_player_name(p), ha=name_ha, va="center",
                     fontsize=fs - 0.8, color=TEXT_MID, transform=ax.transAxes,
                     clip_on=True)
-            ax.text(min_x, y, f"{played}'", ha="center", va="center",
-                    fontsize=6.6, color=TEXT_LIGHT, transform=ax.transAxes)
+            if info:
+                ax.text(out_x, y, info, ha=ha_out, va="center",
+                        fontsize=9.0, color=TEXT_LIGHT, transform=ax.transAxes,
+                        clip_on=True)
             _markers(y, pid)
             _rating(y, p, fs - 1.0)
             y -= row_h
@@ -1177,8 +1191,8 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     # ── Middle row — 5-column layout: lineup | pass-net | stats | pass-net | lineup
     gs_mid = gs[1, :].subgridspec(
         1, 5,
-        width_ratios=[1.4, 2.1, 3.5, 2.1, 1.4],
-        wspace=0.03,
+        width_ratios=[2.35, 1.8, 3.0, 1.8, 2.35],
+        wspace=0.012,
     )
     ax_lu_home  = fig.add_subplot(gs_mid[0, 0])
     ax_pn_home  = fig.add_subplot(gs_mid[0, 1])
