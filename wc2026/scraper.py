@@ -719,6 +719,33 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             home_score = int(ws_home_score)
         if ws_away_score is not None:
             away_score = int(ws_away_score)
+        # On a freshly-finished match WhoScored sometimes returns no fulltime
+        # score, which would leave the FotMob stub's 0-0 in the header even
+        # though the goals are in the event stream. Derive the score from the
+        # goals instead — own goals are tagged with the scoring player's team,
+        # so credit them to the opponent (matches the true result).
+        if ws_home_score is None or ws_away_score is None:
+            _gh = _ga = 0
+            for _e in events:
+                if _e.get("type", {}).get("displayName") != "Goal":
+                    continue
+                if "Shoot" in _e.get("period", {}).get("displayName", ""):
+                    continue
+                _quals = {q.get("type", {}).get("displayName", "")
+                          for q in _e.get("qualifiers", [])}
+                _tid = _e.get("teamId")
+                if "OwnGoal" in _quals:
+                    _tid = away_tid if _tid == home_tid else home_tid
+                if _tid == home_tid:
+                    _gh += 1
+                elif _tid == away_tid:
+                    _ga += 1
+            if ws_home_score is None:
+                home_score = _gh
+            if ws_away_score is None:
+                away_score = _ga
+            log.info("WhoScored fulltime missing — derived score %d-%d from goal events",
+                     home_score, away_score)
         # Patch names into WhoScored data if FotMob was unavailable
         if fotmob_unavailable:
             ws_home["name"] = home_name

@@ -12,13 +12,13 @@
   "home": {
     "teamId": 1160,
     "name": "Canada",
-    "score": 0,
+    "score": 6,
     "penalty_score": null,
     "players": [
       {
         "playerId": 137263,
         "shirtNo": 16,
-        "name": "Maxime Cr\u00e9peau",
+        "name": "Maxime Crépeau",
         "position": "GK",
         "height": 180,
         "weight": 88,
@@ -1988,7 +1988,7 @@
       {
         "playerId": 422851,
         "shirtNo": 8,
-        "name": "Isma\u00ebl Kon\u00e9",
+        "name": "Ismaël Koné",
         "position": "MC",
         "height": 188,
         "weight": 76,
@@ -2818,7 +2818,7 @@
       {
         "playerId": 474201,
         "shirtNo": 15,
-        "name": "Mo\u00efse Bombito",
+        "name": "Moïse Bombito",
         "position": "Sub",
         "height": 190,
         "weight": 83,
@@ -3627,7 +3627,7 @@
       {
         "playerId": 360292,
         "shirtNo": 6,
-        "name": "Mathieu Choini\u00e8re",
+        "name": "Mathieu Choinière",
         "position": "Sub",
         "height": 174,
         "weight": 68,
@@ -3698,7 +3698,10 @@
       }
     ],
     "stats": {},
-    "field": "home"
+    "field": "home",
+    "scores": {
+      "fulltime": 6
+    }
   },
   "away": {
     "teamId": 2379,
@@ -4974,7 +4977,7 @@
       {
         "playerId": 327718,
         "shirtNo": 8,
-        "name": "Edm\u00edlson Junior",
+        "name": "Edmílson Junior",
         "position": "FWR",
         "height": 181,
         "weight": 71,
@@ -5838,7 +5841,10 @@
       }
     ],
     "stats": {},
-    "field": "away"
+    "field": "away",
+    "scores": {
+      "fulltime": 0
+    }
   },
   "events": [
     {
@@ -93119,18 +93125,18 @@
     }
   },
   "playerIdNameDictionary": {
-    "137263": "Maxime Cr\u00e9peau",
+    "137263": "Maxime Crépeau",
     "397859": "Alistair Johnston",
     "492688": "Luc De Fougerolles",
     "371029": "Derek Cornelius",
     "313012": "Richie Laryea",
     "371027": "Tajon Buchanan",
     "351744": "Stephen Eustaquio",
-    "422851": "Isma\u00ebl Kon\u00e9",
+    "422851": "Ismaël Koné",
     "437419": "Ali Ahmed",
     "273229": "Cyle Larin",
     "383855": "Jonathan David",
-    "474201": "Mo\u00efse Bombito",
+    "474201": "Moïse Bombito",
     "377467": "Jacob Shaffelburg",
     "445119": "Nathan Saliba",
     "484837": "Niko Sigur",
@@ -93138,7 +93144,7 @@
     "532188": "Promise David",
     "127148": "Jonathan Osorio",
     "320040": "Alphonso Davies",
-    "360292": "Mathieu Choini\u00e8re",
+    "360292": "Mathieu Choinière",
     "374613": "Dayne St. Clair",
     "391821": "Liam Millar",
     "393088": "Joel Waterman",
@@ -93152,7 +93158,7 @@
     "377211": "Assim Madibo",
     "454469": "Jassem Gaber",
     "602023": "Issa Laye",
-    "327718": "Edm\u00edlson Junior",
+    "327718": "Edmílson Junior",
     "454474": "Yusuf Abdurisag",
     "260819": "Akram Afif",
     "43670": "Lucas Mendes",

@@ -12,7 +12,7 @@
   "home": {
     "teamId": 461,
     "name": "USA",
-    "score": 0,
+    "score": 2,
     "penalty_score": null,
     "players": [
       {
@@ -1246,7 +1246,7 @@
       {
         "playerId": 379205,
         "shirtNo": 2,
-        "name": "Sergi\u00f1o Dest",
+        "name": "Sergiño Dest",
         "position": "DMR",
         "height": 173,
         "weight": 62,
@@ -3355,7 +3355,7 @@
       {
         "playerId": 275858,
         "shirtNo": 26,
-        "name": "\u00c1lex Zendejas",
+        "name": "Álex Zendejas",
         "position": "Sub",
         "height": 167,
         "weight": 66,
@@ -3474,7 +3474,10 @@
       }
     ],
     "stats": {},
-    "field": "home"
+    "field": "home",
+    "scores": {
+      "fulltime": 2
+    }
   },
   "away": {
     "teamId": 328,
@@ -5439,7 +5442,7 @@
       {
         "playerId": 481083,
         "shirtNo": 9,
-        "name": "Mohamed Tour\u00e9",
+        "name": "Mohamed Touré",
         "position": "FW",
         "height": 186,
         "weight": 78,
@@ -6309,7 +6312,10 @@
       }
     ],
     "stats": {},
-    "field": "away"
+    "field": "away",
+    "scores": {
+      "fulltime": 0
+    }
   },
   "events": [
     {
@@ -101926,7 +101932,7 @@
     "85006": "Tim Ream",
     "395401": "Chris Richards",
     "440159": "Alex Freeman",
-    "379205": "Sergi\u00f1o Dest",
+    "379205": "Sergiño Dest",
     "306581": "Antonee Robinson",
     "315275": "Tyler Adams",
     "338275": "Weston McKennie",
@@ -101937,7 +101943,7 @@
     "363069": "Joe Scally",
     "393132": "Sebastian Berhalter",
     "271592": "Cristian Roldan",
-    "275858": "\u00c1lex Zendejas",
+    "275858": "Álex Zendejas",
     "319712": "Matt Turner",
     "333962": "Miles Robinson",
     "338274": "Haji Wright",
@@ -101957,7 +101963,7 @@
     "323097": "Aiden O'Neill",
     "570078": "Paul Okon-Engstler",
     "614551": "Nishan Velupillay",
-    "481083": "Mohamed Tour\u00e9",
+    "481083": "Mohamed Touré",
     "118837": "Jackson Irvine",
     "123099": "Jason Geria",
     "477369": "Nestory Irankunda",

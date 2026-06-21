@@ -2404,7 +2404,7 @@
       {
         "playerId": 256419,
         "shirtNo": 10,
-        "name": "Ch\u00e9 Adams",
+        "name": "Ché Adams",
         "position": "FW",
         "height": 175,
         "weight": 70,
@@ -3081,12 +3081,15 @@
       }
     ],
     "stats": {},
-    "field": "home"
+    "field": "home",
+    "scores": {
+      "fulltime": 0
+    }
   },
   "away": {
     "teamId": 495,
     "name": "Morocco",
-    "score": 0,
+    "score": 1,
     "penalty_score": null,
     "players": [
       {
@@ -5221,7 +5224,7 @@
       {
         "playerId": 317541,
         "shirtNo": 10,
-        "name": "Brahim D\u00edaz",
+        "name": "Brahim Díaz",
         "position": "AMR",
         "height": 170,
         "weight": 68,
@@ -6455,7 +6458,7 @@
       {
         "playerId": 467223,
         "shirtNo": 17,
-        "name": "Amine Sba\u00ef",
+        "name": "Amine Sbaï",
         "position": "Sub",
         "height": 175,
         "weight": 72,
@@ -6586,7 +6589,10 @@
       }
     ],
     "stats": {},
-    "field": "away"
+    "field": "away",
+    "scores": {
+      "fulltime": 1
+    }
   },
   "events": [
     {
@@ -115414,7 +115420,7 @@
     "128882": "Ryan Christie",
     "297403": "Kieran Tierney",
     "336915": "Scott McTominay",
-    "256419": "Ch\u00e9 Adams",
+    "256419": "Ché Adams",
     "396795": "Lyndon Dykes",
     "397143": "Ross Stewart",
     "430350": "Ben Gannon-Doak",
@@ -115437,7 +115443,7 @@
     "349932": "Noussair Mazraoui",
     "486734": "Neil El Aynaoui",
     "504830": "Ayyoub Bouaddi",
-    "317541": "Brahim D\u00edaz",
+    "317541": "Brahim Díaz",
     "392361": "Azzedine Ounahi",
     "433572": "Bilal El Khannouss",
     "404776": "Ismael Saibari",
@@ -115445,7 +115451,7 @@
     "512740": "Samir El Mourabet",
     "430982": "Soufiane Rahimi",
     "605380": "Ayoube Amaimouni-Echghouyab",
-    "467223": "Amine Sba\u00ef",
+    "467223": "Amine Sbaï",
     "425471": "Redouane Halhal",
     "346110": "Ayoub El Kaabi",
     "358796": "Ahmed Reda Tagnaouti",

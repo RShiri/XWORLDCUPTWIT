@@ -12,7 +12,7 @@
   "home": {
     "teamId": 336,
     "name": "Germany",
-    "score": 0,
+    "score": 2,
     "penalty_score": null,
     "players": [
       {
@@ -2095,7 +2095,7 @@
       {
         "playerId": 144711,
         "shirtNo": 19,
-        "name": "Leroy San\u00e9",
+        "name": "Leroy Sané",
         "position": "AMR",
         "height": 183,
         "weight": 80,
@@ -3147,7 +3147,7 @@
       {
         "playerId": 104010,
         "shirtNo": 2,
-        "name": "Antonio R\u00fcdiger",
+        "name": "Antonio Rüdiger",
         "position": "Sub",
         "height": 190,
         "weight": 85,
@@ -3707,7 +3707,7 @@
       {
         "playerId": 71824,
         "shirtNo": 13,
-        "name": "Pascal Gro\u00df",
+        "name": "Pascal Groß",
         "position": "Sub",
         "height": 181,
         "weight": 78,
@@ -3731,7 +3731,7 @@
       {
         "playerId": 260770,
         "shirtNo": 21,
-        "name": "Alexander N\u00fcbel",
+        "name": "Alexander Nübel",
         "position": "Sub",
         "height": 193,
         "weight": 86,
@@ -3815,7 +3815,7 @@
       {
         "playerId": 487063,
         "shirtNo": 25,
-        "name": "Assan Ou\u00e9draogo",
+        "name": "Assan Ouédraogo",
         "position": "Sub",
         "height": 191,
         "weight": 84,
@@ -3826,12 +3826,15 @@
       }
     ],
     "stats": {},
-    "field": "home"
+    "field": "home",
+    "scores": {
+      "fulltime": 2
+    }
   },
   "away": {
     "teamId": 973,
     "name": "Ivory Coast",
-    "score": 0,
+    "score": 1,
     "penalty_score": null,
     "players": [
       {
@@ -5247,7 +5250,7 @@
       {
         "playerId": 328075,
         "shirtNo": 18,
-        "name": "Ibrahim Sangar\u00e9",
+        "name": "Ibrahim Sangaré",
         "position": "DMC",
         "height": 191,
         "weight": 77,
@@ -5887,7 +5890,7 @@
       {
         "playerId": 547352,
         "shirtNo": 26,
-        "name": "Christ Inao Oula\u00ef",
+        "name": "Christ Inao Oulaï",
         "position": "MC",
         "height": 173,
         "weight": 69,
@@ -6679,7 +6682,7 @@
       {
         "playerId": 447449,
         "shirtNo": 17,
-        "name": "Gu\u00e9la Dou\u00e9",
+        "name": "Guéla Doué",
         "position": "Sub",
         "height": 187,
         "weight": 88,
@@ -6847,7 +6850,7 @@
       {
         "playerId": 239872,
         "shirtNo": 19,
-        "name": "Nicolas P\u00e9p\u00e9",
+        "name": "Nicolas Pépé",
         "position": "Sub",
         "height": 183,
         "weight": 75,
@@ -7019,7 +7022,7 @@
       {
         "playerId": 329386,
         "shirtNo": 13,
-        "name": "Christopher Op\u00e9ri",
+        "name": "Christopher Opéri",
         "position": "Sub",
         "height": 183,
         "weight": 80,
@@ -7067,7 +7070,7 @@
       {
         "playerId": 136262,
         "shirtNo": 4,
-        "name": "Jean Micha\u00ebl Seri",
+        "name": "Jean Michaël Seri",
         "position": "Sub",
         "height": 169,
         "weight": 74,
@@ -7079,7 +7082,7 @@
       {
         "playerId": 454324,
         "shirtNo": 14,
-        "name": "Oumar Diakit\u00e9",
+        "name": "Oumar Diakité",
         "position": "Sub",
         "height": 185,
         "weight": 77,
@@ -7091,7 +7094,7 @@
       {
         "playerId": 455922,
         "shirtNo": 16,
-        "name": "Mohamed Kon\u00e9",
+        "name": "Mohamed Koné",
         "position": "Sub",
         "height": 186,
         "weight": 78,
@@ -7115,7 +7118,7 @@
       {
         "playerId": 551965,
         "shirtNo": 24,
-        "name": "Bazoumana Tour\u00e9",
+        "name": "Bazoumana Touré",
         "position": "Sub",
         "height": 178,
         "weight": 70,
@@ -7126,7 +7129,10 @@
       }
     ],
     "stats": {},
-    "field": "away"
+    "field": "away",
+    "scores": {
+      "fulltime": 1
+    }
   },
   "events": [
     {
@@ -118351,51 +118357,51 @@
     "445354": "Nathaniel Brown",
     "367783": "Felix Nmecha",
     "481079": "Aleksandar Pavlovic",
-    "144711": "Leroy San\u00e9",
+    "144711": "Leroy Sané",
     "395252": "Jamal Musiala",
     "394786": "Florian Wirtz",
     "326413": "Kai Havertz",
-    "104010": "Antonio R\u00fcdiger",
+    "104010": "Antonio Rüdiger",
     "115519": "Leon Goretzka",
     "261021": "Nadiem Amiri",
     "357091": "Deniz Undav",
     "379252": "Jamie Leweling",
-    "71824": "Pascal Gro\u00df",
+    "71824": "Pascal Groß",
     "77440": "Oliver Baumann",
-    "260770": "Alexander N\u00fcbel",
+    "260770": "Alexander Nübel",
     "296768": "Waldemar Anton",
     "330538": "David Raum",
     "386606": "Nick Woltemade",
     "387125": "Maximilian Beier",
     "393355": "Malick Thiaw",
     "407476": "Angelo Stiller",
-    "487063": "Assan Ou\u00e9draogo",
+    "487063": "Assan Ouédraogo",
     "439446": "Yahia Fofana",
     "371063": "Wilfried Singo",
     "402810": "Emmanuel Agbadou",
     "384516": "Odilon Kossounou",
     "331567": "Ghislain Konan",
-    "328075": "Ibrahim Sangar\u00e9",
+    "328075": "Ibrahim Sangaré",
     "386634": "Amad Diallo",
     "277269": "Franck Kessie",
-    "547352": "Christ Inao Oula\u00ef",
+    "547352": "Christ Inao Oulaï",
     "557000": "Yan Diomande",
     "447489": "Ange-Yoan Bonny",
     "382587": "Evann Guessand",
-    "447449": "Gu\u00e9la Dou\u00e9",
+    "447449": "Guéla Doué",
     "443004": "Simon Adingra",
-    "239872": "Nicolas P\u00e9p\u00e9",
+    "239872": "Nicolas Pépé",
     "254562": "Seko Fofana",
     "300590": "Alban Lafont",
-    "329386": "Christopher Op\u00e9ri",
+    "329386": "Christopher Opéri",
     "407661": "Elye Wahi",
     "443663": "Ousmane Diomande",
     "323450": "Evan Ndicka",
-    "136262": "Jean Micha\u00ebl Seri",
-    "454324": "Oumar Diakit\u00e9",
-    "455922": "Mohamed Kon\u00e9",
+    "136262": "Jean Michaël Seri",
+    "454324": "Oumar Diakité",
+    "455922": "Mohamed Koné",
     "498846": "Parfait Guiagon",
-    "551965": "Bazoumana Tour\u00e9"
+    "551965": "Bazoumana Touré"
   },
   "_scraped_at": "2026-06-20T22:00:58.088139+00:00",
   "_sources": [
