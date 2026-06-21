@@ -75,7 +75,7 @@ py -m wc2026.run_match --fotmob-id 4667812 --no-push --no-post
 ```
 
 ### Automate Scrapes via Windows Task Scheduler
-The system automatically parses the tournament schedule to register a Single-Trigger Scheduled Task for each remaining match. The task runs precisely at **kick-off + 2 hours** (expected final whistle).
+The system automatically parses the tournament schedule to register a Single-Trigger Scheduled Task for each remaining match. The task runs at **kick-off + 3 hours** — enough margin to clear stoppage time/VAR so the scrape captures the finalized score (was +2h, which occasionally snapshotted a match still in injury time). After editing `REMAINING_SCHEDULE.json`, re-run `register_tasks.ps1` to apply new trigger times (it overwrites existing tasks with `-Force`).
 
 Run from PowerShell (elevated/admin prompt recommended):
 ```powershell
@@ -98,9 +98,10 @@ powershell -ExecutionPolicy Bypass -File wc2026\unregister_tasks.ps1
 
 The generated infographics are rendered as **5920px × 3419px (30" × 17")** white-canvas layouts containing:
 1. **Dynamic Headers**: Aspect-ratio-preserved team badges aligned beside larger, mobile-friendly team names.
-2. **Pass Networks**: Touch-volume scaled nodes and passing lane thresholds. Home team on the left, away on the right.
-3. **Zebra-Striped Stats Table**: High-contrast comparative metrics including passes shown as `total/accurate (accuracy%)`.
-4. **Shot Maps**: Attempts sized by individual xG values, with title and stats line rendered inside the axes.
-5. **Final Third Passes**: Directional pass vectors into the final third. Home on the left, away on the right, with per-channel (LW/CTR/RW) breakdowns and completion counts below the map.
+2. **Lineup Panels** (outer columns): large, readable starting XI with shirt number, name and color-coded rating, plus a goal ball (`●`) per goal scored and an `A` per assist beside the rating, and a `↓min` exit marker on substituted players. A **SUBS** block lists the used substitutes with their rating and who they came on for (`for <player> <min'>`).
+3. **Pass Networks**: Touch-volume scaled nodes and passing lane thresholds, pulled in tight against the central stats table. Home team on the left, away on the right.
+4. **Zebra-Striped Stats Table**: High-contrast comparative metrics including passes shown as `accurate/total (accuracy%)`.
+5. **Shot Maps**: Attempts sized by individual xG values, with title and stats line rendered inside the axes.
+6. **Final Third Passes**: Directional pass vectors into the final third. Home on the left, away on the right, with per-channel (LW/CTR/RW) breakdowns and completion counts below the map.
 
 For a full breakdown of the architecture, data structures, and the migration history, see the [MIGRATION_AND_DEVELOPER_DOCS.md](file:///c:/Users/puzik/XWORLDCUPTWIT/MIGRATION_AND_DEVELOPER_DOCS.md).

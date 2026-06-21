@@ -47,6 +47,31 @@ To ensure infographics are readable when posted on X/Twitter feeds or viewed on 
 In the **Final Third Entries** plot, arrows showing entry passes often crossed directly behind player labels and channel completion percentages.
 * **White Background Bounding Boxes**: Added a bounding box (`bbox`) with `facecolor='white'`, `edgecolor='none'`, and `alpha=0.85` (or `0.75`) behind all channel annotation labels. This masks the background lines and entry arrows, guaranteeing text readability.
 
+### E. Lineup Panel — Goals, Assists & Substitutions (2026-06-21)
+`renderer.py::_draw_lineup` was extended via the `_lineup_extras()` helper, which scans the
+event stream once to collect per-player goals, assists, and substitution minutes:
+* **Goals** — one `●` per Goal event (own goals excluded); **assists** — one `A` per
+  `IntentionalGoalAssist` qualifier; both drawn beside the rating.
+* **Substituted-off starters** carry a red `↓<min>'` exit marker.
+* A **SUBS** block lists used substitutes (those with a `SubstitutionOn` event) with their
+  rating and **who they replaced + when** (`for <Surname> <min>'`, from `subbedOutPlayerId`).
+* Lineup fonts were enlarged (~14pt names) in wider lineup columns, and the pass-network
+  pitches pulled in tight against the central stats table (`width_ratios`/`wspace` tuned).
+* Note: `⚽` (U+26BD) is absent from DejaVu Sans, so a filled circle `●` is used.
+
+### F. Play-off Slot Names & Score Resolution (2026-06-21)
+* **Play-off placeholders**: FotMob keeps serving "European Play-Off A/B/C/D" even after the
+  matches are played, breaking the WhoScored slug search. `FOTMOB_NAME_OVERRIDES` now maps
+  them to the real qualifiers (Bosnia / Sweden / Turkiye / Czechia) and the override is
+  applied inside `fetch_and_save()` **before** the WhoScored search, not only in
+  `build_match_json()`.
+* **0-0 headline fix**: when WhoScored omits `scores.fulltime` on a just-finished match, the
+  score is derived from the goal events, **crediting own goals to the opponent** (WhoScored
+  tags an own goal with the scoring player's `teamId`).
+* **Scrape window**: `scrape_at_israel` moved from kick-off +2h to **+3h** to clear stoppage
+  time. Re-run `register_tasks.ps1` after editing the schedule. Auto-push is unattended-safe
+  (`GIT_TOKEN` in the URL + `GIT_TERMINAL_PROMPT=0` + disabled credential helper).
+
 ---
 
 ## 3. System Architecture & Component Flow
@@ -62,13 +87,13 @@ sequenceDiagram
     participant Git as git_ops.py
     participant Alert as Twilio/CallMeBot
 
-    Scheduler->>CLI: Triggers at (Kick-off + 2 hours)
+    Scheduler->>CLI: Triggers at (Kick-off + 3 hours)
     CLI->>Scraper: Request scrape by Match ID
     Scraper->>Scraper: Launch Chrome (visible if WC2026_VISIBLE=1)
     Scraper-->>CLI: Return event coordinates & stats JSON
     CLI->>CLI: Write JSON to wc2026/matches/
     CLI->>Renderer: Compile stats & render layout
-    Renderer->>Renderer: Render 4800x2800px Infographic
+    Renderer->>Renderer: Render ~5920x3433px Infographic
     Renderer-->>CLI: Save PNG to wc2026/output/
     CLI->>Git: Push PNG to XWORLDCUPTWIT
     Git->>Git: Clone repo in temp directory, commit & push
