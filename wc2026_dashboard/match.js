@@ -483,14 +483,18 @@
     function compute() {
       var nodes = {}; // name -> {sx,sy,n, passes}
       var links = {}; // "a|b" -> count
+      // Pass networks show the starting XI only; ignore passes involving subs.
+      var starter = {};
+      D.lineups[state.side].starters.forEach(function (p) { starter[p.name] = true; });
       function node(name) {
         return nodes[name] || (nodes[name] = { name: name, x: 0, y: 0, n: 0, passes: 0 });
       }
       D.passes.forEach(function (p) {
         if (p.team !== state.side || !p.ok || p.min > state.upper) return;
+        if (!starter[p.player]) return;            // passer must be a starter
         var passer = node(p.player);
         passer.x += p.x; passer.y += p.y; passer.n++; passer.passes++;
-        if (p.recv) {
+        if (p.recv && starter[p.recv]) {           // receiver must be a starter too
           var r = node(p.recv);
           r.x += p.ex; r.y += p.ey; r.n++; r.passes++;
           var key = [p.player, p.recv].sort().join("|");
