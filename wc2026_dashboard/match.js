@@ -81,13 +81,18 @@
     document.documentElement.style.setProperty("--c-home", D.home.color);
     document.documentElement.style.setProperty("--c-away", D.away.color);
 
+    var rec = matchRecord();                       // head-to-head team stats from data.js
+    var hasStats = !!(rec && rec.stats);
+
     var root = document.getElementById("matchRoot");
-    root.innerHTML = scoreboard(D) + tabsBar() +
-      '<section id="mv-shots" class="mview active"></section>' +
+    root.innerHTML = scoreboard(D) + tabsBar(hasStats) +
+      (hasStats ? '<section id="mv-stats" class="mview active"></section>' : "") +
+      '<section id="mv-shots" class="mview' + (hasStats ? "" : " active") + '"></section>' +
       '<section id="mv-passes" class="mview"></section>' +
       '<section id="mv-network" class="mview"></section>' +
       '<section id="mv-lineups" class="mview"></section>';
 
+    if (hasStats) buildMatchStats(rec, D);
     buildShots(D);
     buildPasses(D);
     buildNetwork(D);
@@ -136,12 +141,61 @@
       "</div>";
   }
 
-  function tabsBar() {
+  function tabsBar(hasStats) {
     return '<div class="mtabs">' +
-      '<button data-v="shots" class="active">Shot map</button>' +
+      (hasStats ? '<button data-v="stats" class="active">Match stats</button>' : "") +
+      '<button data-v="shots"' + (hasStats ? "" : ' class="active"') + '>Shot map</button>' +
       '<button data-v="passes">Pass explorer</button>' +
       '<button data-v="network">Pass network</button>' +
       '<button data-v="lineups">Line-ups</button></div>';
+  }
+
+  /* ================= MATCH STATS (head-to-head, from data.js) ================= */
+  var STAT_DEFS = [
+    ["possession", "Possession", true, true],
+    ["xg", "Expected goals (xG)", false, true],
+    ["shots", "Shots", false, true],
+    ["sot", "Shots on target", false, true],
+    ["big_chances", "Big chances", false, true],
+    ["passes", "Passes", false, true],
+    ["pass_acc", "Pass accuracy", true, true],
+    ["saves", "Saves", false, true],
+    ["duels_won", "Duels won", true, true],
+    ["fouls", "Fouls", false, false],
+  ];
+
+  function matchRecord() {
+    var arr = (window.WC_DATA && window.WC_DATA.matches) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i];
+    return null;
+  }
+
+  function buildMatchStats(rec, D) {
+    var host = document.getElementById("mv-stats");
+    if (!host) return;
+    var s = rec.stats || {};
+    var rows = STAT_DEFS.map(function (def) {
+      var pair = s[def[0]] || [null, null];
+      var h = pair[0], a = pair[1];
+      if (h == null && a == null) return "";
+      var hv = h == null ? 0 : h, av = a == null ? 0 : a;
+      var total = hv + av;
+      var hpct = total > 0 ? (hv / total) * 100 : 50;
+      var suffix = def[2] ? "%" : "";
+      function disp(x) { return x == null ? "–" : (def[0] === "xg" ? x.toFixed(2) : x) + suffix; }
+      var hBetter = def[3] ? hv > av : hv < av;
+      var aBetter = def[3] ? av > hv : av < hv;
+      return '<div class="stat-cmp">' +
+        '<div class="sc-val ' + (hBetter ? "win" : "") + '">' + disp(h) + "</div>" +
+        '<div class="sc-mid"><div class="sc-label">' + def[1] + '</div>' +
+          '<div class="sc-bar"><div class="sc-fill h" style="width:' + hpct.toFixed(1) + '%"></div>' +
+          '<div class="sc-fill a" style="width:' + (100 - hpct).toFixed(1) + '%"></div></div></div>' +
+        '<div class="sc-val ' + (aBetter ? "win" : "") + '">' + disp(a) + "</div>" +
+        "</div>";
+    }).join("");
+    host.innerHTML = '<div class="stat-panel" style="border-top:none">' +
+      '<div class="sp-head"><span>' + esc(D.home.name) + "</span><span>" + esc(D.away.name) + "</span></div>" +
+      rows + "</div>";
   }
 
   /* ================= SHOT MAP ================= */

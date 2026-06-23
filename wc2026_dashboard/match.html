@@ -28,7 +28,10 @@
 
 <div class="tooltip" id="tooltip"></div>
 
-<!-- the match-specific data file is injected by match.js based on ?id= -->
-<script>document.write('<scr' + 'ipt src="match.js?v=' + Date.now() + '"></scr' + 'ipt>');</script>
+<!-- data.js gives match.js the head-to-head team stats; the match-specific
+     event file is injected by match.js based on ?id= -->
+<script>var _mv=Date.now();
+  document.write('<scr'+'ipt src="data.js?v='+_mv+'"></scr'+'ipt>');
+  document.write('<scr'+'ipt src="match.js?v='+_mv+'"></scr'+'ipt>');</script>
 </body>
 </html>

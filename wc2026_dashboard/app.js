@@ -108,6 +108,8 @@
       dayWrap.appendChild(el("div", "day-label", fmtDate(day) || day));
       byDay[day].forEach(function (m) {
         var expandable = m.played && m.has_stats;
+        var toCentre = m.has_events;            // has event data → open the full Match Centre on click
+        var clickable = toCentre || expandable;
         var hWin = m.played && m.hs > m.as, aWin = m.played && m.as > m.hs;
         var score = m.played
           ? '<div class="score">' + m.hs + " – " + m.as + "</div>"
@@ -124,7 +126,7 @@
           ? '<div class="xgline">' + xgline + (xgline && links.length ? " &nbsp;·&nbsp; " : "") + links.join(" ") + "</div>"
           : "";
 
-        var row = el("div", "db-match" + (expandable ? "" : " noexp"));
+        var row = el("div", "db-match" + (clickable ? "" : " noexp"));
         row.dataset.id = m.id;
         row.innerHTML =
           '<div class="db-match-head">' +
@@ -133,12 +135,18 @@
             score +
             '<div class="side away">' + logoImg(m.away) + '<span class="nm" style="' +
               (aWin ? "color:var(--good)" : "") + '">' + esc(m.away) + "</span></div>" +
-            (expandable ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev">▾</span></div>' : "") +
+            (toCentre ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev nav">↗</span></div>'
+              : expandable ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev">▾</span></div>' : "") +
             meta +
           "</div>";
         dayWrap.appendChild(row);
 
-        if (expandable) {
+        if (toCentre) {
+          row.querySelector(".db-match-head").addEventListener("click", function (e) {
+            if (e.target.closest("a.open-match")) return;   // let explicit links handle themselves
+            window.location.href = "match.html?id=" + encodeURIComponent(m.id);
+          });
+        } else if (expandable) {
           row.querySelector(".db-match-head").addEventListener("click", function (e) {
             if (e.target.closest("a.open-match")) return;
             var open = row.classList.toggle("open");
