@@ -83,7 +83,11 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_22_New_Zealand_vs_Egypt,2026-06-22,Egypt,New Zealand,away,3,1,,,,,86,,,,,,3.21
 2026_06_22_Uruguay_vs_Cape_Verde,2026-06-22,Uruguay,Cape Verde,home,2,2,,,,,79,,,,,,1.99
 2026_06_22_Uruguay_vs_Cape_Verde,2026-06-22,Cape Verde,Uruguay,away,2,2,,,,,72,,,,,,0.39
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,home,0,0,,,,,90,,,,,,1.99
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,away,0,0,,,,,73,,,,,,0.53
 2026_06_23_Jordan_vs_Algeria,2026-06-23,Jordan,Algeria,home,1,2,,,,,72,,,,,,0.72
 2026_06_23_Jordan_vs_Algeria,2026-06-23,Algeria,Jordan,away,2,1,,,,,86,,,,,,2.63
 2026_06_23_Norway_vs_Senegal,2026-06-23,Norway,Senegal,home,3,2,,,,,80,,,,,,2.95
 2026_06_23_Norway_vs_Senegal,2026-06-23,Senegal,Norway,away,2,3,,,,,86,,,,,,3.11
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,home,5,0,,,,,88,,,,,,4.5
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,away,0,5,,,,,79,,,,,,0.33

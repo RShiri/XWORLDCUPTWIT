@@ -1321,6 +1321,37 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_22_Uruguay_vs_Cape_Verde,2026-06-22,Cape Verde,Uruguay,493061,Helio Varela,Sub,0,40,1,0,0,0,7.0,0.11,1,1,2,2,0,8,1,0,0,1,0,1,2,0
 2026_06_22_Uruguay_vs_Cape_Verde,2026-06-22,Cape Verde,Uruguay,379742,Laros Duarte,Sub,0,28,0,0,0,0,6.8,0.05,2,2,8,8,2,15,0,0,0,1,0,2,0,0
 2026_06_22_Uruguay_vs_Cape_Verde,2026-06-22,Cape Verde,Uruguay,328549,Deroy Duarte,Sub,0,53,0,0,0,0,6.5,0.0,0,0,10,8,0,16,2,2,0,0,1,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,110189,Jordan Pickford,GK,1,96,0,0,0,0,6.3,0.0,0,0,23,21,0,26,0,0,1,0,0,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,361330,Reece James,DR,1,96,0,0,0,0,7.2,0.0,0,0,65,61,2,87,2,1,1,0,0,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,301440,Ezri Konsa,DC,1,96,0,0,0,0,6.8,0.0,0,0,118,116,0,125,1,0,0,0,2,1,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,374631,Marc Guehi,DC,1,96,0,0,0,0,7.4,0.08,1,0,129,126,0,143,0,0,5,0,2,4,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,362219,Djed Spence,DL,1,65,0,0,0,0,6.6,0.0,0,0,45,43,0,53,1,0,0,0,0,1,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,332325,Declan Rice,DMC,1,96,0,0,1,0,7.5,0.21,3,0,45,42,6,69,2,0,1,2,1,0,1,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,402596,Elliot Anderson,DMC,1,73,0,0,0,0,7.1,0.21,4,0,74,66,0,91,4,0,3,0,2,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,389935,Noni Madueke,AMR,1,82,0,0,0,0,6.5,0.09,2,0,27,21,2,50,1,0,0,0,0,0,1,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,379868,Jude Bellingham,AMC,1,72,0,0,0,0,6.1,0.05,1,0,31,27,1,40,4,0,0,0,2,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,349669,Anthony Gordon,AML,1,64,0,0,0,0,6.8,0.03,1,1,22,20,2,41,1,0,0,2,1,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,83532,Harry Kane,FW,1,96,0,0,0,0,6.4,0.77,3,1,10,7,0,19,0,0,2,1,1,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,300299,Marcus Rashford,Sub,0,14,0,0,0,0,6.1,0.0,0,0,7,6,0,11,0,0,0,0,2,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,332403,Eberechi Eze,Sub,0,23,0,0,0,0,6.1,0.0,0,0,10,8,1,13,0,0,0,0,0,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,362824,Morgan Rogers,Sub,0,24,0,0,0,0,6.0,0.0,0,0,7,4,0,9,0,0,0,0,1,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,367185,Bukayo Saka,Sub,0,32,0,0,0,0,6.4,0.1,2,1,7,7,0,17,0,0,0,1,0,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,England,Ghana,468847,Nico O'Reilly,Sub,0,31,0,0,0,0,6.6,0.44,2,0,13,11,0,18,1,0,4,0,0,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,512761,Benjamin Asare,GK,1,96,0,0,0,0,7.2,0.0,0,0,26,15,0,31,0,0,0,0,0,1,0,3
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,404952,Marvin Senaya,DR,1,86,0,0,0,0,7.3,0.1,1,0,8,7,0,37,8,2,0,0,2,4,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,382364,Jerome Opoku,DC,1,96,0,0,0,0,7.2,0.0,0,0,15,11,1,30,1,1,2,0,1,5,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,561185,Jonas Adjetey,DC,1,96,0,0,0,0,6.4,0.0,0,0,21,16,0,31,3,0,0,0,1,6,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,402749,Gideon Mensah,DL,1,96,0,0,0,0,7.8,0.0,0,0,16,13,0,40,6,2,1,1,2,9,1,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,238940,Thomas Partey,DMC,1,96,0,0,0,0,7.3,0.0,0,0,27,23,0,45,4,2,1,1,1,5,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,255182,Inaki Williams,MR,1,65,0,0,1,0,5.9,0.0,0,0,12,9,0,16,0,0,0,0,2,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,463426,Kwasi Sibo,MC,1,96,0,0,0,0,6.5,0.0,0,0,15,15,0,23,0,1,1,0,4,2,1,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,561984,Caleb Yirenkyi,MC,1,96,0,0,0,0,6.2,0.0,0,0,11,6,0,23,2,0,0,0,3,2,1,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,357073,Antoine Semenyo,ML,1,96,0,0,0,0,6.0,0.0,0,0,5,3,0,20,0,0,1,1,3,0,2,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,67491,Jordan Ayew,FW,1,66,0,0,0,0,6.4,0.0,0,0,12,7,0,26,3,0,2,0,4,1,1,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,430985,Abdul Fatawu,Sub,0,31,0,0,0,0,6.2,0.0,0,0,2,1,0,7,1,0,0,0,0,1,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,114845,Abdul Rahman Baba,Sub,0,2,0,0,0,0,6.0,0.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,533865,Prince Adu,Sub,0,30,0,0,0,0,6.0,0.43,1,1,1,1,0,6,0,0,0,0,1,0,0,0
+2026_06_23_England_vs_Ghana,2026-06-23,Ghana,England,573388,Kojo Peprah Oppong,Sub,0,10,0,0,0,0,6.2,0.0,0,0,2,1,0,6,0,0,0,0,0,3,0,0
 2026_06_23_Jordan_vs_Algeria,2026-06-23,Jordan,Algeria,457086,Yazeed Abulaila,GK,1,97,0,0,0,0,7.3,0.0,0,0,18,10,0,33,0,0,2,0,0,3,0,6
 2026_06_23_Jordan_vs_Algeria,2026-06-23,Jordan,Algeria,457088,Yazan Al Arab,DC,1,97,0,0,0,0,5.9,0.0,0,0,26,19,0,38,2,1,2,0,1,5,0,0
 2026_06_23_Jordan_vs_Algeria,2026-06-23,Jordan,Algeria,457089,Abdallah Nasib,DC,1,97,0,0,0,0,6.8,0.0,0,0,23,16,0,52,3,0,3,0,0,7,0,0
@@ -1385,3 +1416,35 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_23_Norway_vs_Senegal,2026-06-23,Senegal,Norway,422963,Pathe Ciss,Sub,0,38,0,0,0,0,6.8,0.0,0,0,22,19,0,25,1,0,0,0,1,0,0,0
 2026_06_23_Norway_vs_Senegal,2026-06-23,Senegal,Norway,349699,Ismail Jakobs,Sub,0,47,0,0,0,0,6.6,0.0,0,0,11,10,1,25,2,0,0,0,0,1,0,0
 2026_06_23_Norway_vs_Senegal,2026-06-23,Senegal,Norway,403859,Pape Matar Sarr,Sub,0,29,0,0,0,0,6.1,0.03,2,0,21,18,0,23,0,0,0,0,1,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,373842,Diogo Costa,GK,1,95,0,0,0,0,7.5,0.0,0,0,15,11,0,25,0,0,1,0,0,3,0,2
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,128967,Joao Cancelo,DR,1,45,0,1,0,0,7.9,0.03,1,0,28,27,2,47,0,1,0,1,2,2,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,313171,Ruben Dias,DC,1,95,0,0,0,0,7.8,0.0,0,0,63,62,0,74,2,1,3,1,1,3,2,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,434077,Renato Veiga,DC,1,95,0,0,1,0,7.1,0.0,0,0,68,62,0,76,0,1,2,0,1,4,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,395221,Nuno Mendes,DL,1,95,1,0,0,0,8.8,0.05,1,1,56,43,3,98,2,0,1,2,3,2,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,384887,Vitinha,DMC,1,82,0,0,0,0,7.1,0.02,1,0,98,95,1,100,1,0,0,0,2,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,465388,Joao Neves,DMC,1,75,0,0,0,0,7.0,0.0,0,0,54,52,0,64,2,0,0,0,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,337916,Pedro Neto,AMR,1,45,0,0,0,0,6.7,0.0,0,0,18,16,0,25,0,0,0,1,1,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,123761,Bruno Fernandes,AMC,1,95,0,1,0,0,8.7,0.15,2,1,74,63,2,94,4,0,3,1,1,0,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,362431,Joao Felix,AML,1,63,0,0,0,0,7.4,1.01,3,1,22,19,0,43,4,0,0,4,1,0,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,5583,Cristiano Ronaldo,FW,1,95,2,0,0,0,9.0,3.04,7,5,19,13,0,34,2,1,1,0,1,1,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,136741,Bernardo Silva,Sub,0,20,0,0,0,0,6.3,0.0,0,0,19,19,0,20,1,1,0,0,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,296363,Nelson Semedo,Sub,0,50,0,0,0,0,6.4,0.0,0,0,42,38,0,46,0,0,0,0,0,1,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,349207,Rafael Leao,Sub,0,13,1,0,0,0,7.3,0.1,1,1,4,3,0,10,1,0,0,2,1,0,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,368409,Trincao,Sub,0,32,0,0,0,0,6.3,0.1,1,0,15,12,0,20,1,0,0,0,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,409221,Francisco Conceicao,Sub,0,50,0,0,0,0,7.0,0.0,0,0,29,26,1,40,2,0,0,2,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,457150,Abduvokhid Nematov,GK,1,95,0,0,0,0,4.8,0.01,0,0,22,10,0,31,0,0,0,0,0,2,0,4
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,280961,Rustam Ashurmatov,DC,1,95,0,0,0,0,5.8,0.0,0,0,43,36,0,69,3,2,0,0,1,8,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,455411,Abdulla Abdullaev,DC,1,95,0,0,0,0,5.8,0.0,0,0,31,27,0,52,2,3,0,0,2,5,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,493206,Abdukodir Khusanov,DC,1,95,0,0,0,0,6.5,0.0,0,0,23,21,0,40,0,4,0,1,0,3,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,616229,Bekhruz Karimov,DMR,1,91,0,0,0,0,6.3,0.0,0,0,25,20,1,54,8,0,0,4,5,3,3,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,457149,Sherzod Nasrullaev,DML,1,45,0,0,0,0,6.0,0.05,1,1,12,8,0,15,1,1,0,0,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,274624,Otabek Shukurov,MC,1,91,0,0,0,0,5.3,0.04,2,0,40,35,0,57,5,0,1,0,1,2,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,455413,Odiljon Khamrobekov,MC,1,45,0,0,1,0,5.5,0.09,1,0,21,18,0,27,2,0,0,0,1,1,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,458631,Aziz G'aniev,AMC,1,95,0,0,0,0,6.0,0.02,1,0,36,30,0,51,3,0,0,1,1,1,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,495568,Abbosbek Fayzullaev,AMC,1,72,0,0,0,0,6.2,0.06,1,1,17,13,1,32,2,1,0,0,1,2,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,262707,Eldor Shomurodov,FW,1,95,0,0,0,0,6.5,0.06,1,0,28,21,4,45,3,0,4,1,2,1,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,98309,Igor Sergeev,Sub,0,23,0,0,0,0,6.0,0.0,0,0,4,3,0,4,0,0,1,0,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,455410,Khojiakbar Alijonov,Sub,0,50,0,0,0,0,6.3,0.0,0,0,8,6,1,17,1,2,0,1,1,0,1,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,465046,Ruslanbek Jiyanov,Sub,0,4,0,0,0,0,6.1,0.0,0,0,0,0,0,1,1,0,0,0,0,0,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,534438,Sherzod Esanov,Sub,0,4,0,0,0,0,6.2,0.0,0,0,0,0,0,2,0,1,0,0,0,1,0,0
+2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,455427,Akmal Mozgovoy,Sub,0,50,0,0,0,0,5.7,0.0,0,0,15,14,0,20,1,0,0,0,0,0,0,0
