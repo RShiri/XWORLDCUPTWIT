@@ -2014,7 +2014,7 @@ window.WC_DATA = {
    "xg_home": 1.74,
    "xg_away": 1.31,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_18_Czechia_vs_South_Africa.png",
+   "png": "../WorldCup2026/2026_06_18_Czechia_vs_South_Africa.png",
    "stats": {
     "xg": [
      1.74,
@@ -2329,7 +2329,7 @@ window.WC_DATA = {
    "xg_home": 2.32,
    "xg_away": 0.35,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_19_Switzerland_vs_Bosnia_and_Herzegovina.png",
+   "png": "../WorldCup2026/2026_06_19_Switzerland_vs_Bosnia_and_Herzegovina.png",
    "stats": {
     "xg": [
      2.32,
@@ -2770,7 +2770,7 @@ window.WC_DATA = {
    "xg_home": 2.33,
    "xg_away": 0.59,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_21_Belgium_vs_Iran.png",
+   "png": "../WorldCup2026/2026_06_21_Belgium_vs_Iran.png",
    "stats": {
     "xg": [
      2.33,
@@ -2896,7 +2896,7 @@ window.WC_DATA = {
    "xg_home": 3.66,
    "xg_away": 0.08,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_21_Spain_vs_Saudi_Arabia.png",
+   "png": "../WorldCup2026/2026_06_21_Spain_vs_Saudi_Arabia.png",
    "stats": {
     "xg": [
      3.66,
@@ -3022,7 +3022,7 @@ window.WC_DATA = {
    "xg_home": 2.49,
    "xg_away": 0.65,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_22_Argentina_vs_Austria.png",
+   "png": "../WorldCup2026/2026_06_22_Argentina_vs_Austria.png",
    "stats": {
     "xg": [
      2.49,
@@ -3085,7 +3085,7 @@ window.WC_DATA = {
    "xg_home": 2.94,
    "xg_away": 0.89,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_22_France_vs_Iraq.png",
+   "png": "../WorldCup2026/2026_06_22_France_vs_Iraq.png",
    "stats": {
     "xg": [
      2.94,
@@ -3148,7 +3148,7 @@ window.WC_DATA = {
    "xg_home": 1.75,
    "xg_away": 3.21,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_22_New_Zealand_vs_Egypt.png",
+   "png": "../WorldCup2026/2026_06_22_New_Zealand_vs_Egypt.png",
    "stats": {
     "xg": [
      1.75,
@@ -3211,7 +3211,7 @@ window.WC_DATA = {
    "xg_home": 1.99,
    "xg_away": 0.39,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_22_Uruguay_vs_Cape_Verde.png",
+   "png": "../WorldCup2026/2026_06_22_Uruguay_vs_Cape_Verde.png",
    "stats": {
     "xg": [
      1.99,
@@ -3337,7 +3337,7 @@ window.WC_DATA = {
    "xg_home": 0.72,
    "xg_away": 2.63,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_23_Jordan_vs_Algeria.png",
+   "png": "../WorldCup2026/2026_06_23_Jordan_vs_Algeria.png",
    "stats": {
     "xg": [
      0.72,
@@ -3400,7 +3400,7 @@ window.WC_DATA = {
    "xg_home": 2.95,
    "xg_away": 3.11,
    "xg_estimated": true,
-   "png": "../wc2026/output/2026_06_23_Norway_vs_Senegal.png",
+   "png": "../WorldCup2026/2026_06_23_Norway_vs_Senegal.png",
    "stats": {
     "xg": [
      2.95,
