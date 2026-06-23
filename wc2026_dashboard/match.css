@@ -30,15 +30,12 @@
 .timeline .goal-ev.away { flex-direction: row-reverse; }
 .timeline .goal-ev .as { color: var(--muted); }
 
-.mtabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-.mtabs button {
-  background: var(--card); color: var(--muted); border: 1px solid var(--line);
-  padding: 9px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+/* Single-page Match Centre: each section stacked with a heading. */
+.mv-block { margin-bottom: 34px; }
+.mv-title {
+  font-size: 18px; font-weight: 700; margin: 0 0 14px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--line);
 }
-.mtabs button.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-
-.mview { display: none; }
-.mview.active { display: block; }
 
 /* pitch */
 .pitch-wrap { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);

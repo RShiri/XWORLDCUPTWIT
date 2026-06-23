@@ -115,8 +115,7 @@
           ? '<div class="score">' + m.hs + " – " + m.as + "</div>"
           : '<div class="score upcoming">vs</div>';
         var links = [];
-        if (m.has_events) links.push('<a class="open-match" href="match.html?id=' +
-          encodeURIComponent(m.id) + '">Match centre ↗</a>');
+        // The whole played-match row opens the Match Centre now, so no separate link.
         if (m.png) links.push('<a class="open-match png" href="' + esc(m.png) +
           '" target="_blank" rel="noopener">PNG 🖼️</a>');
         var xgline = "";
@@ -128,8 +127,10 @@
 
         var row = el("div", "db-match" + (clickable ? "" : " noexp"));
         row.dataset.id = m.id;
+        var headTitle = toCentre ? ' title="Open Match Centre"'
+          : m.played ? "" : ' title="Not played yet — no data to show"';
         row.innerHTML =
-          '<div class="db-match-head">' +
+          '<div class="db-match-head"' + headTitle + '>' +
             '<div class="side home"><span class="nm" style="' + (hWin ? "color:var(--good)" : "") + '">' +
               esc(m.home) + "</span>" + logoImg(m.home) + "</div>" +
             score +

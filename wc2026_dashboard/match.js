@@ -85,28 +85,22 @@
     var hasStats = !!(rec && rec.stats);
 
     var root = document.getElementById("matchRoot");
-    root.innerHTML = scoreboard(D) + tabsBar(hasStats) +
-      (hasStats ? '<section id="mv-stats" class="mview active"></section>' : "") +
-      '<section id="mv-shots" class="mview' + (hasStats ? "" : " active") + '"></section>' +
-      '<section id="mv-passes" class="mview"></section>' +
-      '<section id="mv-network" class="mview"></section>' +
-      '<section id="mv-lineups" class="mview"></section>';
+    // Single scrolling page: every section is rendered one under the other.
+    function block(title, id) {
+      return '<section class="mv-block"><h2 class="mv-title">' + title + '</h2><div id="' + id + '"></div></section>';
+    }
+    root.innerHTML = scoreboard(D) +
+      (hasStats ? block("Match stats", "mv-stats") : "") +
+      block("Shot map", "mv-shots") +
+      block("Pass explorer", "mv-passes") +
+      block("Pass network", "mv-network") +
+      block("Line-ups", "mv-lineups");
 
     if (hasStats) buildMatchStats(rec, D);
     buildShots(D);
     buildPasses(D);
     buildNetwork(D);
     buildLineups(D);
-
-    var btns = root.querySelectorAll(".mtabs button");
-    btns.forEach(function (b) {
-      b.addEventListener("click", function () {
-        btns.forEach(function (x) { x.classList.remove("active"); });
-        b.classList.add("active");
-        root.querySelectorAll(".mview").forEach(function (v) { v.classList.remove("active"); });
-        document.getElementById("mv-" + b.dataset.v).classList.add("active");
-      });
-    });
   }
 
   function scoreboard(D) {
@@ -141,15 +135,6 @@
       "</div>";
   }
 
-  function tabsBar(hasStats) {
-    return '<div class="mtabs">' +
-      (hasStats ? '<button data-v="stats" class="active">Match stats</button>' : "") +
-      '<button data-v="shots"' + (hasStats ? "" : ' class="active"') + '>Shot map</button>' +
-      '<button data-v="passes">Pass explorer</button>' +
-      '<button data-v="network">Pass network</button>' +
-      '<button data-v="lineups">Line-ups</button></div>';
-  }
-
   /* ================= MATCH STATS (head-to-head, from data.js) ================= */
   var STAT_DEFS = [
     ["possession", "Possession", true, true],
@@ -170,12 +155,37 @@
     return null;
   }
 
+  // Stats we can derive from the shot/pass event stream when the provider feed
+  // is missing them (e.g. re-scraped matches that only carry xG + pass accuracy).
+  function eventStats(D) {
+    function compute(t) {
+      var sh = D.shots.filter(function (x) { return x.team === t; });
+      var ps = D.passes.filter(function (x) { return x.team === t; });
+      var okp = ps.filter(function (p) { return p.ok; }).length;
+      return {
+        xg: +sh.reduce(function (a, s) { return a + s.xg; }, 0).toFixed(2),
+        shots: sh.length,
+        sot: sh.filter(function (s) { return s.onTarget; }).length,
+        big_chances: sh.filter(function (s) { return s.big; }).length,
+        passes: ps.length,
+        pass_acc: ps.length ? Math.round((100 * okp) / ps.length) : null,
+      };
+    }
+    return { home: compute("home"), away: compute("away") };
+  }
+
   function buildMatchStats(rec, D) {
     var host = document.getElementById("mv-stats");
     if (!host) return;
     var s = rec.stats || {};
+    var es = eventStats(D);
     var rows = STAT_DEFS.map(function (def) {
-      var pair = s[def[0]] || [null, null];
+      var key = def[0];
+      var pair = s[key] || [null, null];
+      // fall back to event-derived numbers when the provider gave us nothing
+      if (pair[0] == null && pair[1] == null && es.home[key] != null) {
+        pair = [es.home[key], es.away[key]];
+      }
       var h = pair[0], a = pair[1];
       if (h == null && a == null) return "";
       var hv = h == null ? 0 : h, av = a == null ? 0 : a;
