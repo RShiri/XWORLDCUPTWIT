@@ -1,0 +1,310 @@
+#!/usr/bin/env python3
+"""Build per-match detail files for the interactive match dashboard.
+
+For every match that has WhoScored events, extract the full shot list (with the
+same xG model as the PNG renderer), every pass with its end coordinates, the goal
+timeline and the line-ups. Each match is written to matches_detail/<id>.js as
+
+    window.MATCH_DETAIL = {...}
+
+so match.html can load one game via a plain <script> tag (works on file:// too).
+
+Usage:
+    py wc2026_dashboard/build_match_details.py            # build all
+    (the renderer hook calls build_one(match_data) for the game it just rendered)
+"""
+import json
+import glob
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+sys.path.insert(0, ROOT)
+
+from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name)
+
+MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
+OUT_DIR = os.path.join(HERE, "matches_detail")
+
+NAME_MAP = {
+    "European Play-Off A": "Bosnia and Herzegovina",
+    "European Play-Off B": "Sweden",
+    "European Play-Off C": "Turkiye",
+    "European Play-Off D": "Czechia",
+    "FIFA Play-Off Tournament 2": "Iraq",
+}
+
+
+import re as _re
+_MATCH_NAME_RE = _re.compile(r"^\d{4}_\d{2}_\d{2}_.+_vs_.+$")
+
+
+def is_match_file(path):
+    """True for real match JSONs (YYYY_MM_DD_Home_vs_Away.json), excluding the
+    scraper's WhoScored cache files (match_<id>_cache.json) that share the folder."""
+    return bool(_MATCH_NAME_RE.match(os.path.basename(path)[:-5]))
+
+
+def norm(name):
+    return NAME_MAP.get(name, name)
+
+
+def _team_color(name):
+    try:
+        from wc2026.team_colors import get_team_colors
+        c = get_team_colors(name, fallback_home=True)
+        return c.get("primary", "#4ea1ff")
+    except Exception:
+        return "#4ea1ff"
+
+
+def _match_extras(match_data):
+    """Per-playerId goals, assists, cards and sub on/off minutes from events."""
+    goals, assists, yellow, red, on_min, off_min = {}, {}, {}, {}, {}, {}
+    end_min = 90
+    for e in match_data.get("events", []):
+        m = e.get("minute") or 0
+        if m > end_min:
+            end_min = m
+        pid = e.get("playerId")
+        if pid is None:
+            continue
+        t = e.get("type", {}).get("displayName", "")
+        quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
+        if t == "Goal" and "OwnGoal" not in quals:
+            goals[pid] = goals.get(pid, 0) + 1
+        if "IntentionalGoalAssist" in quals:
+            assists[pid] = assists.get(pid, 0) + 1
+        if t == "Card":
+            if "Red" in quals or "SecondYellow" in quals:
+                red[pid] = red.get(pid, 0) + 1
+                if "SecondYellow" in quals:
+                    yellow[pid] = yellow.get(pid, 0) + 1
+            elif "Yellow" in quals:
+                yellow[pid] = yellow.get(pid, 0) + 1
+        if t == "SubstitutionOn":
+            on_min[pid] = m
+        elif t == "SubstitutionOff":
+            off_min[pid] = m
+    return dict(goals=goals, assists=assists, yellow=yellow, red=red,
+                on_min=on_min, off_min=off_min, end_min=end_min)
+
+
+def _player_rating(p):
+    rd = (p.get("stats") or {}).get("ratings") or {}
+    if not rd:
+        return None
+    try:
+        return round(float(list(rd.values())[-1]), 1)
+    except (TypeError, ValueError):
+        return None
+
+
+def _lineup(side, ex):
+    starters, subs = [], []
+    for p in side.get("players", []):
+        pid = p.get("playerId")
+        starter = bool(p.get("isFirstEleven"))
+        on_m = ex["on_min"].get(pid)
+        off_m = ex["off_min"].get(pid)
+        # minutes played
+        if starter:
+            mins = (off_m if off_m is not None else ex["end_min"])
+        elif on_m is not None:
+            mins = ex["end_min"] - on_m
+        else:
+            mins = 0
+        entry = {
+            "num": p.get("shirtNo"),
+            "name": ascii_name(p.get("name", "")),
+            "pos": p.get("position", ""),
+            "motm": bool(p.get("isManOfTheMatch")),
+            "rating": _player_rating(p),
+            "g": ex["goals"].get(pid, 0),
+            "a": ex["assists"].get(pid, 0),
+            "yc": ex["yellow"].get(pid, 0),
+            "rc": ex["red"].get(pid, 0),
+            "on": on_m,
+            "off": off_m,
+            "mins": max(0, mins),
+        }
+        (starters if starter else subs).append(entry)
+    # only keep subs that actually came on
+    subs = [s for s in subs if s["on"] is not None]
+    subs.sort(key=lambda s: s["on"])
+    return {"starters": starters, "subs": subs}
+
+
+def find_png(match_id):
+    """Relative path (from the dashboard folder) to the rendered infographic, or None.
+    Prefers the published WorldCup2026 collection, falls back to wc2026/output."""
+    for rel in (os.path.join("WorldCup2026", match_id + ".png"),
+                os.path.join("wc2026", "output", match_id + ".png")):
+        if os.path.exists(os.path.join(ROOT, rel)):
+            return "../" + rel.replace("\\", "/")
+    return None
+
+
+def extract(match_data):
+    """Build the detail dict for one match (assumes it has events)."""
+    home, away = match_data.get("home", {}), match_data.get("away", {})
+    hid, aid = home.get("teamId"), away.get("teamId")
+    side_of = {hid: "home", aid: "away"}
+    ex = _match_extras(match_data)
+
+    # Receiver of each successful pass = the next same-team successful event's player
+    # (mirrors the renderer's pass-network method). Keyed by event index.
+    events = match_data.get("events", [])
+    receiver = {}
+    for i, ev in enumerate(events):
+        t = ev.get("type", {})
+        if not isinstance(t, dict) or t.get("displayName") != "Pass":
+            continue
+        if ev.get("outcomeType", {}).get("displayName") != "Successful":
+            continue
+        tid = ev.get("teamId")
+        for j in range(i + 1, min(i + 6, len(events))):
+            nxt = events[j]
+            if nxt.get("teamId") != tid:
+                break
+            if nxt.get("outcomeType", {}).get("displayName") == "Successful" \
+                    and nxt.get("playerId") is not None:
+                receiver[i] = player_full_name(match_data, nxt.get("playerId"))
+                break
+
+    shots, passes, goals = [], [], []
+    max_min = 0
+    for _i, ev in enumerate(events):
+        tid = ev.get("teamId")
+        side = side_of.get(tid)
+        if side is None:
+            continue
+        tname = ev.get("type", {})
+        tname = tname.get("displayName") if isinstance(tname, dict) else ""
+        minute = ev.get("minute", 0)
+        if minute and minute > max_min:
+            max_min = minute
+
+        if tname in SHOT_TYPES:
+            xg, meta = shot_xg(ev)
+            shots.append({
+                "team": side,
+                "x": round(ev.get("x", 0), 1),
+                "y": round(ev.get("y", 0), 1),
+                "min": minute,
+                "sec": ev.get("second", 0),
+                "player": player_full_name(match_data, ev.get("playerId")),
+                "xg": xg,
+                "goal": tname == "Goal",
+                "onTarget": tname in ("Goal", "SavedShot"),
+                "blocked": tname == "BlockedShot",
+                "post": tname == "ShotOnPost",
+                "body": meta["body"],
+                "sit": meta["situation"],
+                "big": meta["big_chance"],
+            })
+            if tname == "Goal":
+                goals.append({
+                    "team": side,
+                    "min": minute,
+                    "scorer": player_full_name(match_data, ev.get("playerId")),
+                    "assist": (player_full_name(match_data, ev.get("relatedPlayerId"))
+                               if ev.get("relatedPlayerId") else None),
+                    "pen": meta["penalty"],
+                })
+        elif tname == "Pass":
+            quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+            ok = ev.get("outcomeType", {}).get("displayName") == "Successful"
+            x, y = ev.get("x", 0), ev.get("y", 0)
+            ex_, ey_ = ev.get("endX", x), ev.get("endY", y)
+            # progressive = meaningful forward advance toward the opponent goal
+            prog = (ex_ - x) >= 15
+            passes.append({
+                "team": side,
+                "x": round(x, 1),
+                "y": round(y, 1),
+                "ex": round(ex_, 1),
+                "ey": round(ey_, 1),
+                "min": minute,
+                "sec": ev.get("second", 0),
+                "player": player_full_name(match_data, ev.get("playerId")),
+                "recv": receiver.get(_i),
+                "ok": ok,
+                "key": "KeyPass" in quals,
+                "assist": "IntentionalGoalAssist" in quals,
+                "cross": "Cross" in quals,
+                "through": "Throughball" in quals,
+                "prog": prog,
+            })
+
+    meta = match_data.get("wc_metadata", {})
+    mid_date = meta.get("date", "")
+
+    return {
+        "home": {"name": norm(home.get("name", "Home")), "raw": home.get("name", ""),
+                 "score": home.get("score"), "color": _team_color(home.get("name", ""))},
+        "away": {"name": norm(away.get("name", "Away")), "raw": away.get("name", ""),
+                 "score": away.get("score"), "color": _team_color(away.get("name", ""))},
+        "date": mid_date,
+        "venue": meta.get("venue", ""),
+        "stage": meta.get("stage", ""),
+        "maxMin": max_min,
+        "shots": shots,
+        "passes": passes,
+        "goals": sorted(goals, key=lambda g: g["min"]),
+        "lineups": {"home": _lineup(home, ex), "away": _lineup(away, ex)},
+    }
+
+
+def _match_id_from_file(path):
+    return os.path.basename(path)[:-5]
+
+
+def write_detail(match_data, match_id=None):
+    """Write matches_detail/<id>.js for one match. Returns the path or None."""
+    if not (match_data.get("events")):
+        return None
+    if match_id is None:
+        meta = match_data.get("wc_metadata", {})
+        date = (meta.get("date") or "2026_06_01").replace("-", "_")
+        h = match_data.get("home", {}).get("name", "Home").replace(" ", "_")
+        a = match_data.get("away", {}).get("name", "Away").replace(" ", "_")
+        match_id = f"{date}_{h}_vs_{a}"
+    os.makedirs(OUT_DIR, exist_ok=True)
+    detail = extract(match_data)
+    detail["id"] = match_id
+    detail["png"] = find_png(match_id)
+    out = os.path.join(OUT_DIR, match_id + ".js")
+    with open(out, "w", encoding="utf-8") as fh:
+        fh.write("window.MATCH_DETAIL = ")
+        json.dump(detail, fh, ensure_ascii=False, separators=(",", ":"))
+        fh.write(";\n")
+    return out
+
+
+def main():
+    os.makedirs(OUT_DIR, exist_ok=True)
+    built = 0
+    index = []
+    for f in sorted(glob.glob(os.path.join(MATCH_DIR, "*.json"))):
+        if not is_match_file(f):
+            continue  # skip scraper cache files
+        d = json.load(open(f, encoding="utf-8"))
+        if not d.get("events") or d["home"].get("score") is None:
+            continue  # only finished games with events get an interactive page
+        mid = _match_id_from_file(f)
+        write_detail(d, mid)
+        index.append(mid)
+        built += 1
+    # index of which matches have a detail page (used by the main site to link)
+    with open(os.path.join(OUT_DIR, "_index.js"), "w", encoding="utf-8") as fh:
+        fh.write("window.MATCH_DETAIL_INDEX = ")
+        json.dump(index, fh, ensure_ascii=False)
+        fh.write(";\n")
+    print(f"Wrote {built} match detail files to {OUT_DIR}")
+
+
+if __name__ == "__main__":
+    main()

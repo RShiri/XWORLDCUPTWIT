@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>World Cup 2026 — Dashboard & xG Lab</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="site">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="title">FIFA World Cup <span>2026</span> · Dashboard</div>
+      <div class="sub">Group tables · fixtures & results · xG efficiency lab</div>
+    </div>
+    <nav class="tabs">
+      <button data-view="tables" class="active">Tables</button>
+      <button data-view="matches">Matches</button>
+      <button data-view="players">Players</button>
+      <button data-view="xg">xG Analysis</button>
+      <button data-view="data">Data</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- TABLES -->
+  <section id="view-tables" class="view active">
+    <div class="section-head">
+      <h2>Group Standings</h2>
+      <p>Live group tables built from played matches. Ranking by points, then goal difference, then goals for.</p>
+    </div>
+    <div class="stats-strip" id="overviewStats"></div>
+    <div class="group-grid" id="groupGrid"></div>
+    <div class="legend">
+      <span><i class="q1"></i> 1st — advance</span>
+      <span><i class="q2"></i> 2nd — advance</span>
+      <span>3rd place may advance as one of the best third-placed teams</span>
+    </div>
+  </section>
+
+  <!-- MATCHES (fixtures, results & full stats merged) -->
+  <section id="view-matches" class="view">
+    <div class="section-head">
+      <h2>Matches</h2>
+      <p>Every fixture and result in one place. Tap a played match to open its full head-to-head
+         stat line, or jump into the interactive Match Centre. Switch to Team totals for season aggregates.</p>
+    </div>
+    <div class="controls">
+      <div class="seg">
+        <button id="mModeList" class="seg-btn active">Fixtures &amp; results</button>
+        <button id="mModeTeam" class="seg-btn">Team totals</button>
+      </div>
+      <input id="mSearch" type="text" placeholder="Search a team…" />
+      <select id="mStatus">
+        <option value="all">All matches</option>
+        <option value="played">Played only</option>
+        <option value="upcoming">Upcoming only</option>
+        <option value="xg">With xG data</option>
+      </select>
+    </div>
+    <div id="mListView">
+      <p class="hint" style="margin:0 0 12px">
+        The <span class="est-tag">est</span> tag next to an xG value means it was <b>estimated</b> from each shot's
+        location and type (the same model used for the match infographics), because the official xG wasn't published
+        for that game. Untagged xG comes straight from the data provider.
+      </p>
+      <div id="matchList"></div>
+    </div>
+    <div id="mTeamView" style="display:none">
+      <div class="card" style="padding:0; overflow:hidden">
+        <div class="table-scroll"><div id="teamTable"></div></div>
+      </div>
+      <p class="hint" style="margin-top:10px">Averages are per game played. Tap a column header to sort.</p>
+    </div>
+  </section>
+
+  <!-- PLAYERS -->
+  <section id="view-players" class="view">
+    <div class="section-head">
+      <h2>Player Statistics</h2>
+      <p>Aggregated across every played match from the WhoScored player feeds and the event stream —
+         goals, assists, ratings, shots, key passes, cards and more. Pick a leaderboard or sort any column.</p>
+    </div>
+    <div class="stats-strip" id="playerLeaders"></div>
+    <div class="controls">
+      <div class="seg" id="playerPresets">
+        <button class="seg-btn active" data-preset="ga">G + A</button>
+        <button class="seg-btn" data-preset="g">Goals</button>
+        <button class="seg-btn" data-preset="a">Assists</button>
+        <button class="seg-btn" data-preset="rating">Rating</button>
+        <button class="seg-btn" data-preset="xg">xG</button>
+        <button class="seg-btn" data-preset="keyPasses">Creativity</button>
+      </div>
+      <input id="playerSearch" type="text" placeholder="Search a player…" />
+      <select id="playerTeam"><option value="">All teams</option></select>
+    </div>
+    <div class="card" style="padding:0; overflow:hidden">
+      <div class="table-scroll"><div id="playersTable"></div></div>
+    </div>
+    <p class="hint" style="margin-top:10px">Min. = minutes · Rt = average match rating · xG±= goals minus xG (finishing).
+       Only games with player-level data are counted.</p>
+
+    <h2 style="margin:30px 0 4px;font-size:20px">Leaderboards</h2>
+    <p class="hint" style="margin:0 0 16px">Top eight players in each category so far.</p>
+    <div class="lboards" id="playerBoards"></div>
+  </section>
+
+  <!-- XG -->
+  <section id="view-xg" class="view">
+    <div class="section-head">
+      <h2>xG Efficiency Lab</h2>
+      <p>Do teams score as much as the quality of their chances says they should? These charts compare
+         <b>expected goals (xG)</b> with what actually happened.</p>
+    </div>
+
+    <div class="explainer">
+      <h3>New here? What is xG?</h3>
+      <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1.
+         A tap-in from the six-yard box might be 0.7 xG (scored ~70% of the time); a hopeful shot from 30 metres
+         might be 0.03 xG (3%). Add up a team's shots and you get how many goals an <i>average</i> finisher would
+         have scored from those chances.</p>
+      <p>So if a team racks up <b>2.5 xG but scores 1</b>, they created good chances and wasted them (or met a great
+         keeper). Score <b>3 from 1.0 xG</b> and they finished brilliantly — or got lucky. Over a few games xG tends to
+         predict results better than the scoreline alone, which is why it's the go-to "who deserved it" number.</p>
+      <p class="explainer-note">Note: where the official xG wasn't published, we estimate it from each shot's location
+         and type using the same model that draws the match infographics — those games are tagged <span class="est-tag">est</span>.</p>
+    </div>
+
+    <div class="stats-strip" id="xgStats"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Did chances turn into goals?</h3>
+        <p class="hint">Every dot is one team's performance in one match: how many goals an average team would expect
+           from their chances (across →) versus how many they actually scored (up ↑). The dashed line is "scored exactly
+           what the chances were worth". <b>Above the line = clinical finishing; below = chances wasted.</b> The green
+           line is the overall trend.</p>
+        <div class="scatter-wrap" id="scatter"></div>
+      </div>
+      <div class="card">
+        <h3>How closely do goals follow xG?</h3>
+        <p class="hint">If xG were perfect, goals would track it exactly. This measures how strong that link has been
+           so far — and how much finishing skill or luck is adding noise on top.</p>
+        <div id="corrBox"></div>
+        <div class="insight" id="corrInsight"></div>
+      </div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Finishing: goals scored minus xG</h3>
+      <p class="hint">For each team, total goals minus total xG. <b style="color:var(--good)">Green = clinical</b>
+         (scored more than their chances were worth — sharp finishing or good luck);
+         <b style="color:var(--bad)">red = wasteful</b> (scored fewer — poor finishing or unlucky).
+         Around zero means they scored about what was expected.</p>
+      <div class="bars" id="finishingBars"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Who's good at both ends?</h3>
+      <p class="hint">Every team placed by the quality of chances they <b>create</b> per game (further right = more
+         dangerous attack) and the quality of chances they <b>allow</b> per game (higher up = meaner defence).
+         Top-right = strong both ways; bottom-left = leaky and blunt.</p>
+      <div class="scatter-wrap" id="quadrant"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Are teams getting the points they deserve?</h3>
+      <p class="hint"><b>Expected points</b> turns each game's xG into the points an average team would win from
+         those chances. Compare it with real points: above the line = winning more than the performances merit
+         (clinical or lucky); below = deserved more than they've got.</p>
+      <div class="scatter-wrap" id="xpts"></div>
+      <div class="insight" id="xptsInsight"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Quality vs quantity of shots</h3>
+      <p class="hint">Shots per game (across →) vs average xG per shot (up ↑ = better chances). <b>Top-right</b> =
+         lots of good chances; <b>top-left</b> = few but excellent looks; <b>bottom-right</b> = high-volume
+         long-range shooting; <b>bottom-left</b> = struggling to create anything.</p>
+      <div class="scatter-wrap" id="shotquality"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Is there a home advantage?</h3>
+      <p class="hint">Average xG created by teams listed as "home" vs "away". A clear gap suggests the designated
+         home side tends to create better chances — the classic home advantage, in chance-quality terms.</p>
+      <div id="homeAway"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Team-by-team xG ledger</h3>
+      <p class="hint">The full breakdown — click any column header to sort. <b>xG</b> = quality of chances created;
+         <b>xGA</b> = quality of chances allowed; <b>G−xG</b> = attacking finishing (＋ = clinical);
+         <b>xGA−GA</b> = goalkeeping/defending vs the chances faced (＋ = kept out more than expected);
+         <b>xGD</b> = xG minus xGA, i.e. how much a team out-chanced opponents overall ("deserved" goal difference).</p>
+      <div class="table-scroll" id="ledger"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Did the team that "deserved" it actually win?</h3>
+      <p class="hint">For every game with xG, we check whether the side with more xG (the better chances) got the
+         result. A high match rate means xG is tracking reality; mismatches (✘) are the games that defied the
+         underlying play — often decided by a worldie, a penalty, or a red card.</p>
+      <div class="table-scroll" id="agreement"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Unluckiest results (deserved more)</h3>
+        <p class="hint">Games where the side that <b>out-created</b> their opponent by the most xG still failed to win —
+           they made the better chances but didn't get the result. The biggest "should have won this" performances.</p>
+        <div class="table-scroll" id="unlucky"></div>
+      </div>
+      <div class="card">
+        <h3>Luckiest results (got away with it)</h3>
+        <p class="hint">The flip side: games where the side that won or drew was <b>out-chanced</b> by the most xG —
+           the scoreline flattered them.</p>
+        <div class="table-scroll" id="upsets"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section id="view-data" class="view">
+    <div class="section-head">
+      <h2>Full Database</h2>
+      <p>The complete dataset behind this site — game results, per-game team stats, per-game and
+         aggregate player stats, and standings — exported from both scraped sources (FotMob + WhoScored).
+         Download the tables as CSV, the whole thing as a SQLite database, or browse the raw match files.</p>
+    </div>
+    <div class="data-grid" id="dataDownloads"></div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>SQLite database</h3>
+      <p class="hint">One file with every table (matches, team_match_stats, player_match_stats, players, standings),
+         ready for SQL queries in any tool (DB Browser for SQLite, Python, etc.).</p>
+      <a class="png-btn" id="sqliteLink" href="database/wc2026.sqlite" download>⬇ wc2026.sqlite</a>
+    </div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>Raw match files</h3>
+      <p class="hint" id="rawNote">The original scraped JSON for every match (FotMob + WhoScored merged), including
+         the full event stream, lives in <code>wc2026/matches/</code>.</p>
+    </div>
+  </section>
+
+  <div class="footer-note" id="footerNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  // Cache-bust the generated data + app so a refresh after an auto-update always
+  // shows the latest results (the local dev server sends no-cache too).
+  (function () {
+    var v = Date.now();
+    document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="database/manifest.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
+  })();
+</script>
+</body>
+</html>
