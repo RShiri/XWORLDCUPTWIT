@@ -89,16 +89,19 @@
     function block(title, id) {
       return '<section class="mv-block"><h2 class="mv-title">' + title + '</h2><div id="' + id + '"></div></section>';
     }
+    var hasDribbles = !!(D.dribbles && D.dribbles.length);
     root.innerHTML = scoreboard(D) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
       block("Shot map", "mv-shots") +
       block("Pass explorer", "mv-passes") +
+      (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
       block("Pass network", "mv-network") +
       block("Line-ups", "mv-lineups");
 
     if (hasStats) buildMatchStats(rec, D);
     buildShots(D);
     buildPasses(D);
+    if (hasDribbles) buildDribbles(D);
     buildNetwork(D);
     buildLineups(D);
   }
@@ -424,6 +427,123 @@
     // play animation
     var timer = null;
     var playBtn = document.getElementById("paPlay");
+    function stopPlay() { if (timer) { clearInterval(timer); timer = null; playBtn.classList.remove("playing"); playBtn.textContent = "▶"; } }
+    playBtn.addEventListener("click", function () {
+      if (timer) { stopPlay(); return; }
+      if (state.upper >= (D.maxMin || 90)) { range.value = 0; setUpper(0); }
+      playBtn.classList.add("playing"); playBtn.textContent = "❚❚";
+      timer = setInterval(function () {
+        var v = state.upper + 1;
+        if (v > (D.maxMin || 90)) { stopPlay(); return; }
+        range.value = v; setUpper(v);
+      }, 180);
+    });
+
+    setUpper(state.upper);
+  }
+
+  /* ================= DRIBBLES (take-ons) ================= */
+  function buildDribbles(D) {
+    var host = document.getElementById("mv-dribbles");
+    if (!host) return;
+    var players = {};
+    D.dribbles.forEach(function (p) { (players[p.team] = players[p.team] || {})[p.player] = 1; });
+    function opts(side) {
+      return Object.keys(players[side] || {}).sort().map(function (n) {
+        return '<option value="' + esc(n) + '">' + esc(n) + "</option>"; }).join("");
+    }
+
+    host.innerHTML =
+      '<div class="controls-bar">' +
+        '<span class="chip-toggle on home" id="drHome">' + esc(D.home.name) + "</span>" +
+        '<span class="chip-toggle on away" id="drAway">' + esc(D.away.name) + "</span>" +
+        '<span class="grp">Player <select id="drPlayer"><option value="">All players</option>' +
+          '<optgroup label="' + esc(D.home.name) + '">' + opts("home") + "</optgroup>" +
+          '<optgroup label="' + esc(D.away.name) + '">' + opts("away") + "</optgroup></select></span>" +
+        '<span class="grp">Outcome <select id="drType">' +
+          '<option value="all">All dribbles</option><option value="ok">Successful</option>' +
+          '<option value="fail">Unsuccessful</option></select></span>' +
+        '<span class="chip-toggle" id="drWindow">5-min window</span>' +
+      "</div>" +
+      '<div class="timeline-scrub">' +
+        '<button class="play-btn" id="drPlay">▶</button>' +
+        '<input type="range" id="drRange" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
+        '<span class="minlab" id="drMinLab"></span>' +
+      "</div>" +
+      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
+        pitchMarkup() +
+        '<text class="dir-label" x="3" y="' + (PH + 4) + '">◀ ' + esc(D.away.name) + "</text>" +
+        '<text class="dir-label" x="' + (PW - 3) + '" y="' + (PH + 4) + '" text-anchor="end">' + esc(D.home.name) + " ▶</text>" +
+        '<g id="dribLayer"></g>' +
+      "</svg></div>" +
+      '<div class="legend-row">' +
+        '<span><i class="dot" style="background:#43e8a0"></i>successful</span>' +
+        '<span><i class="dot" style="background:transparent;border:1px solid #ff5e7a"></i>unsuccessful</span>' +
+        '<span>● = where the take-on happened</span>' +
+      "</div>" +
+      '<div class="stat-note" id="drCount"></div>';
+
+    var state = { home: true, away: true, player: "", type: "all", windowMode: false, upper: D.maxMin || 90 };
+    var layer = document.getElementById("dribLayer");
+    var minLab = document.getElementById("drMinLab");
+    var countEl = document.getElementById("drCount");
+    var SVGNS = "http://www.w3.org/2000/svg";
+
+    function filt(p) {
+      if (!state[p.team]) return false;
+      if (state.player && p.player !== state.player) return false;
+      if (state.type === "ok" && !p.ok) return false;
+      if (state.type === "fail" && p.ok) return false;
+      if (p.min > state.upper) return false;
+      if (state.windowMode && p.min < state.upper - 5) return false;
+      return true;
+    }
+
+    function draw() {
+      layer.innerHTML = "";
+      var shown = 0, ok = 0;
+      var frag = document.createDocumentFragment();
+      D.dribbles.forEach(function (p) {
+        if (!filt(p)) return;
+        shown++; if (p.ok) ok++;
+        var cx = tx(p.team, p.x), cy = ty(p.team, p.y);
+        var col = p.ok ? "#43e8a0" : "#ff5e7a";
+        var c = document.createElementNS(SVGNS, "circle");
+        c.setAttribute("class", "drib-dot");
+        c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
+        c.setAttribute("r", "1.1");
+        c.setAttribute("fill", p.ok ? col : "none");
+        c.setAttribute("stroke", col); c.setAttribute("stroke-width", "0.4");
+        c.setAttribute("fill-opacity", "0.85");
+        c.addEventListener("mousemove", function (e) {
+          showTip(e, "<b>" + esc(p.player) + "</b> " + p.min + "'<br>" +
+            (p.ok ? "Successful dribble" : "Unsuccessful dribble"));
+        });
+        c.addEventListener("mouseleave", hideTip);
+        frag.appendChild(c);
+      });
+      layer.appendChild(frag);
+      var pct = shown ? Math.round((100 * ok) / shown) : 0;
+      countEl.textContent = shown + " dribbles · " + ok + " successful (" + pct + "%)" +
+        (state.windowMode ? " · minutes " + Math.max(0, state.upper - 5) + "–" + state.upper
+          : " · up to " + state.upper + "'");
+    }
+    function setUpper(v) {
+      state.upper = v;
+      minLab.textContent = (state.windowMode ? Math.max(0, v - 5) + "–" + v : "0–" + v) + "'";
+      draw();
+    }
+
+    document.getElementById("drHome").addEventListener("click", function () { state.home = !state.home; this.classList.toggle("on"); draw(); });
+    document.getElementById("drAway").addEventListener("click", function () { state.away = !state.away; this.classList.toggle("on"); draw(); });
+    document.getElementById("drPlayer").addEventListener("change", function () { state.player = this.value; draw(); });
+    document.getElementById("drType").addEventListener("change", function () { state.type = this.value; draw(); });
+    document.getElementById("drWindow").addEventListener("click", function () { state.windowMode = !state.windowMode; this.classList.toggle("on"); setUpper(state.upper); });
+    var range = document.getElementById("drRange");
+    range.addEventListener("input", function () { stopPlay(); setUpper(parseInt(this.value, 10)); });
+
+    var timer = null;
+    var playBtn = document.getElementById("drPlay");
     function stopPlay() { if (timer) { clearInterval(timer); timer = null; playBtn.classList.remove("playing"); playBtn.textContent = "▶"; } }
     playBtn.addEventListener("click", function () {
       if (timer) { stopPlay(); return; }

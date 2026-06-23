@@ -174,7 +174,7 @@ def extract(match_data):
                 receiver[i] = player_full_name(match_data, nxt.get("playerId"))
                 break
 
-    shots, passes, goals = [], [], []
+    shots, passes, goals, dribbles = [], [], [], []
     max_min = 0
     for _i, ev in enumerate(events):
         tid = ev.get("teamId")
@@ -239,6 +239,17 @@ def extract(match_data):
                 "prog": prog,
             })
 
+        elif tname == "TakeOn":   # dribble / take-on (point event, success = beat the man)
+            dribbles.append({
+                "team": side,
+                "x": round(ev.get("x", 0), 1),
+                "y": round(ev.get("y", 0), 1),
+                "min": minute,
+                "sec": ev.get("second", 0),
+                "player": player_full_name(match_data, ev.get("playerId")),
+                "ok": ev.get("outcomeType", {}).get("displayName") == "Successful",
+            })
+
     meta = match_data.get("wc_metadata", {})
     mid_date = meta.get("date", "")
 
@@ -253,6 +264,7 @@ def extract(match_data):
         "maxMin": max_min,
         "shots": shots,
         "passes": passes,
+        "dribbles": dribbles,
         "goals": sorted(goals, key=lambda g: g["min"]),
         "lineups": {"home": _lineup(home, ex), "away": _lineup(away, ex)},
     }

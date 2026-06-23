@@ -45,7 +45,7 @@ if hasattr(sys.stderr, "reconfigure"):
 from wc2026.scraper     import (fetch_and_save, fotmob_fetch_wc_matches,
                                 schedule_team_names, schedule_lookup_by_teams)
 from wc2026.renderer    import render_wc_dashboard, output_filename
-from wc2026.git_ops     import push_png_to_xworldcuptwit
+from wc2026.git_ops     import push_png_to_xworldcuptwit, push_match_update
 
 log = logging.getLogger("wc2026.run_match")
 logging.basicConfig(
@@ -233,15 +233,17 @@ def run_match(
         log.error("Render failed for %s vs %s: %s", home, away, exc)
         return False
 
-    # ── 4. Push PNG to XWORLDCUPTWIT (non-fatal) ──────────────────────────
+    # ── 4. Push PNG + regenerated web dashboard to XWORLDCUPTWIT (non-fatal) ─
+    # render_wc_dashboard() already refreshed the local dashboard files, so this
+    # commit makes the live website (and the PNG) update for the new match.
     raw_url = None
     if do_push:
         try:
-            raw_url = push_png_to_xworldcuptwit(
+            raw_url = push_match_update(
                 png_path,
                 commit_message=f"[WC2026] {home} vs {away} analytics dashboard",
             )
-            log.info("PNG pushed → %s", raw_url)
+            log.info("Match update pushed (PNG + site) → %s", raw_url)
         except Exception as exc:
             log.error("Git push failed (continuing): %s", exc)
     else:
