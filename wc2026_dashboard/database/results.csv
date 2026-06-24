@@ -47,3 +47,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Group Stage,,Portugal,Uzbekistan,5,0,4.5,0.33,1
 2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Group Stage,,Colombia,DR Congo,1,0,2.17,0.41,1
 2026_06_24_Panama_vs_Croatia,2026-06-24,Group Stage,,Panama,Croatia,0,1,0.64,1.68,1
+2026_06_24_Switzerland_vs_Canada,2026-06-24,Group Stage,,Switzerland,Canada,2,1,1.49,1.78,1
