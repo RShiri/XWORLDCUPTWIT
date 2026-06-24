@@ -1448,6 +1448,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,465046,Ruslanbek Jiyanov,Sub,0,4,0,0,0,0,6.1,0.0,0,0,0,0,0,1,1,0,0,0,0,0,0,0
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,534438,Sherzod Esanov,Sub,0,4,0,0,0,0,6.2,0.0,0,0,0,0,0,2,0,1,0,0,0,1,0,0
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,455427,Akmal Mozgovoy,Sub,0,50,0,0,0,0,5.7,0.0,0,0,15,14,0,20,1,0,0,0,0,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,145304,Nikola Vasilj,GK,1,96,0,0,0,0,6.3,0.0,0,0,41,32,0,48,0,0,0,0,0,1,0,2
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,532323,Arjan Malic,DR,1,45,0,0,0,0,6.1,0.0,0,0,26,23,0,34,1,0,0,0,1,0,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,425313,Stjepan Radeljic,DC,1,96,0,0,0,0,6.7,0.09,1,0,88,81,0,95,0,0,0,0,0,4,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,363666,Nikola Katic,DC,1,63,0,0,0,0,6.4,0.08,1,0,65,62,0,72,1,0,3,0,0,4,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,110260,Sead Kolasinac,DL,1,96,0,0,0,0,7.0,0.0,0,0,48,44,2,73,1,1,2,0,0,4,3,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,445302,Esmir Bajraktarevic,MR,1,96,0,0,0,0,6.6,0.04,2,1,25,21,2,37,1,1,0,0,0,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,418212,Ivan Basic,MC,1,96,0,0,0,0,7.3,0.07,4,0,69,66,1,87,1,1,0,1,0,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,363683,Ivan Sunjic,MC,1,45,0,0,0,0,6.9,0.02,1,1,36,31,2,42,1,0,1,0,1,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,538923,Kerim Alajbegovic,ML,1,81,1,0,0,0,8.5,0.05,2,1,33,28,2,61,1,0,0,6,2,1,2,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,24845,Edin Dzeko,FW,1,63,0,0,0,0,6.6,0.35,1,0,17,10,0,19,0,0,1,0,0,1,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,351339,Ermedin Demirovic,FW,1,96,0,0,0,0,6.7,0.03,1,1,13,9,0,26,0,0,0,1,4,2,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,328490,Dennis Hadzikadunic,Sub,0,33,0,1,0,0,7.0,0.0,0,0,11,9,1,17,2,0,0,0,1,3,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,428102,Amar Memic,Sub,0,51,0,0,0,0,6.5,0.0,0,0,9,7,0,13,1,0,2,0,0,1,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,460297,Benjamin Tahirovic,Sub,0,51,0,0,0,0,6.6,0.0,0,0,26,21,0,35,2,1,1,0,0,1,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,306672,Dzenis Burnic,Sub,0,15,0,0,0,0,6.0,0.0,0,0,5,5,0,5,0,0,0,0,0,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Bosnia and Herzegovina,Qatar,600740,Ermin Mahmic,Sub,0,33,1,0,1,0,7.2,0.13,1,1,3,3,1,9,1,0,0,0,0,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,458348,Mahmoud Abunada,GK,1,96,0,0,0,0,5.4,0.01,0,0,25,14,0,31,0,0,0,0,0,0,0,3
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,377210,Pedro Miguel,DR,1,96,0,0,0,0,6.5,0.43,3,1,33,28,0,58,6,1,0,0,0,1,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,111998,Boualem Khoukhi,DC,1,96,0,0,0,0,6.1,0.01,1,0,58,50,0,74,2,0,1,0,0,5,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,602023,Issa Laye,DC,1,96,0,0,0,0,6.1,0.0,0,0,45,42,1,56,0,0,0,0,0,8,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,452620,Sultan Al Brake,DL,1,96,0,0,0,0,6.2,0.0,0,0,35,27,1,49,1,2,0,0,2,2,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,377214,Ahmed Fathy,MC,1,78,0,0,1,0,6.2,0.0,0,0,45,41,0,61,4,1,0,0,1,1,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,454469,Jassem Gaber,MC,1,45,0,0,0,0,5.7,0.0,0,0,18,16,0,20,1,0,0,0,4,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,112080,Karim Boudiaf,MC,1,71,0,0,0,0,6.2,0.0,0,0,48,45,1,57,1,0,1,0,0,2,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,327718,Edmilson Junior,FWR,1,78,0,1,0,0,7.1,0.0,0,0,20,17,2,31,1,0,1,1,1,2,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,260819,Akram Afif,FW,1,96,0,0,0,0,6.4,0.12,2,0,47,44,2,63,0,0,0,0,0,0,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,37757,Hassan Al Haydos,FWL,1,55,1,0,0,0,6.9,0.65,1,1,10,7,1,17,0,0,0,1,1,1,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,513008,Ahmed Al Ganehi,Sub,0,41,0,0,0,0,6.3,0.02,1,0,9,8,1,20,2,0,0,1,1,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,101530,Ahmed Alaa,Sub,0,18,0,0,0,0,6.0,0.0,0,0,3,1,0,4,0,0,1,0,1,0,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,111987,Abdulaziz Hatem,Sub,0,51,0,0,0,0,6.2,0.0,0,0,30,25,1,37,2,0,0,0,1,2,0,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,281129,Almoez Ali,Sub,0,25,0,0,0,0,6.0,0.08,1,1,3,2,0,5,0,0,0,0,0,0,1,0
+2026_06_24_Bosnia_and_Herzegovina_vs_Qatar,2026-06-24,Qatar,Bosnia and Herzegovina,578636,Mohammad Al Manai,Sub,0,18,0,0,0,0,5.9,0.0,0,0,5,4,0,10,1,0,0,0,2,0,1,0
 2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,53362,Camilo Vargas,GK,1,96,0,0,0,0,6.8,0.0,0,0,31,25,1,37,0,0,0,0,0,1,0,1
 2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,400496,Daniel Munoz,DR,1,96,1,0,0,0,7.9,0.71,2,1,51,47,0,69,2,0,1,0,2,2,1,0
 2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,322655,Davinson Sanchez,DC,1,96,0,0,0,0,7.5,0.05,1,1,66,63,1,82,1,2,2,0,1,3,0,0
