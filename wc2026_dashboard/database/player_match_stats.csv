@@ -1448,6 +1448,36 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,465046,Ruslanbek Jiyanov,Sub,0,4,0,0,0,0,6.1,0.0,0,0,0,0,0,1,1,0,0,0,0,0,0,0
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,534438,Sherzod Esanov,Sub,0,4,0,0,0,0,6.2,0.0,0,0,0,0,0,2,0,1,0,0,0,1,0,0
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,455427,Akmal Mozgovoy,Sub,0,50,0,0,0,0,5.7,0.0,0,0,15,14,0,20,1,0,0,0,0,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,53362,Camilo Vargas,GK,1,96,0,0,0,0,6.8,0.0,0,0,31,25,1,37,0,0,0,0,0,1,0,1
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,400496,Daniel Munoz,DR,1,96,1,0,0,0,7.9,0.71,2,1,51,47,0,69,2,0,1,0,2,2,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,322655,Davinson Sanchez,DC,1,96,0,0,0,0,7.5,0.05,1,1,66,63,1,82,1,2,2,0,1,3,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,363653,Jhon Lucumi,DC,1,96,0,0,1,0,7.0,0.07,1,0,53,50,0,63,0,1,2,0,1,6,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,135098,Johan Mojica,DL,1,96,0,0,0,0,7.5,0.01,1,1,67,55,1,87,1,2,3,0,0,3,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,133464,Jefferson Lerma,MC,1,96,0,0,1,0,7.0,0.0,0,0,47,42,1,57,0,1,6,0,1,2,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,424039,Jhon Arias,MC,1,76,0,0,0,0,7.2,0.24,2,1,48,45,1,66,3,2,1,0,0,0,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,472904,Gustavo Puerta,MC,1,96,0,0,0,0,7.3,0.1,5,2,51,47,0,75,1,1,1,2,1,1,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,71182,James Rodriguez,FWR,1,57,0,0,0,0,7.1,0.01,1,1,45,37,5,58,0,1,0,0,0,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,402887,Luis Suarez,FW,1,57,0,0,0,0,6.2,0.04,1,0,8,6,0,14,0,0,2,0,1,0,2,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,377168,Luis Diaz,FWL,1,96,0,0,0,0,6.7,0.93,5,2,40,31,2,54,1,0,0,1,3,0,2,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,91989,Juan Fernando Quintero,Sub,0,39,0,0,0,0,6.5,0.01,1,0,26,20,2,33,0,0,0,0,0,1,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,136904,Jhon Cordoba,Sub,0,39,0,0,0,0,6.1,0.0,0,0,4,3,0,6,0,0,0,0,1,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Colombia,DR Congo,402213,Richard Rios,Sub,0,20,0,0,0,0,6.2,0.0,0,0,3,2,0,8,1,0,0,0,1,0,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,461465,Lionel Mpasi,GK,1,96,0,0,0,0,7.9,0.0,0,0,28,18,0,44,0,0,0,0,0,2,0,8
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,331924,Aaron Wan-Bissaka,DR,1,96,0,0,0,0,6.6,0.0,0,0,22,15,0,48,5,3,0,0,0,1,2,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,104368,Chancel Mbemba,DC,1,96,0,0,0,0,6.1,0.0,0,0,38,28,0,46,1,0,0,0,0,2,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,566738,Steve Kapuadi,DC,1,96,0,0,0,0,6.1,0.0,0,0,35,29,1,41,0,1,0,0,2,2,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,299271,Axel Tuanzebe,DC,1,96,0,0,0,0,6.4,0.0,0,0,25,22,0,36,1,0,0,0,2,6,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,122980,Arthur Masuaku,DL,1,71,0,0,0,0,6.6,0.0,0,0,24,19,1,41,1,0,0,0,0,2,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,363718,Edo Kayembe,MC,1,71,0,0,0,0,5.9,0.01,1,0,16,13,0,31,0,0,0,0,3,1,3,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,342571,Samuel Moutoussamy,MC,1,81,0,0,0,0,6.2,0.01,1,0,28,21,0,36,3,1,1,0,3,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,468938,Ngal'ayel Mukau,MC,1,45,0,0,0,0,6.2,0.0,0,0,14,9,1,22,1,1,0,0,0,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,296240,Yoane Wissa,FW,1,96,0,0,0,0,6.1,0.09,1,0,13,10,1,20,0,0,3,0,1,0,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,86513,Cedric Bakambu,FW,1,56,0,0,0,0,6.1,0.08,1,0,11,6,0,15,0,0,2,0,1,1,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,141392,Joris Kayembe,Sub,0,25,0,0,0,0,6.4,0.02,1,0,4,4,1,14,2,1,0,0,0,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,437449,Noah Sadiki,Sub,0,51,0,0,0,0,6.1,0.0,0,0,16,12,0,23,2,0,0,0,0,1,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,300483,Simon Banza,Sub,0,40,0,0,0,0,6.2,0.0,0,0,7,3,1,8,1,0,2,0,1,0,0,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,380614,Nathanael Mbuku,Sub,0,15,0,0,0,0,6.4,0.01,1,1,5,4,1,11,1,0,0,0,1,0,1,0
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,DR Congo,Colombia,316532,Charles Pickel,Sub,0,25,0,0,1,0,6.0,0.17,1,0,13,11,0,20,0,0,1,0,2,1,0,0
 2026_06_24_Panama_vs_Croatia,2026-06-24,Panama,Croatia,448768,Orlando Mosquera,GK,1,95,0,0,0,0,6.1,0.0,0,0,22,15,0,30,0,0,0,0,0,0,0,1
 2026_06_24_Panama_vs_Croatia,2026-06-24,Panama,Croatia,280972,Amir Murillo,DR,1,95,0,0,0,0,7.0,0.1,3,1,28,19,1,57,2,1,2,2,1,3,1,0
 2026_06_24_Panama_vs_Croatia,2026-06-24,Panama,Croatia,397267,Andres Andrade,DC,1,95,0,0,0,0,6.9,0.0,0,0,45,36,0,67,0,1,6,1,1,7,2,0

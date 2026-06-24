@@ -45,4 +45,5 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 2026_06_23_Jordan_vs_Algeria,2026-06-23,Group Stage,,Jordan,Algeria,1,2,0.72,2.63,1
 2026_06_23_Norway_vs_Senegal,2026-06-23,Group Stage,,Norway,Senegal,3,2,2.95,3.11,1
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Group Stage,,Portugal,Uzbekistan,5,0,4.5,0.33,1
+2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Group Stage,,Colombia,DR Congo,1,0,2.17,0.41,1
 2026_06_24_Panama_vs_Croatia,2026-06-24,Group Stage,,Panama,Croatia,0,1,0.64,1.68,1
