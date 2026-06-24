@@ -10,28 +10,43 @@ Originally part of the `BCNFINAL` project, this codebase and its national team a
 
 ```
 XWORLDCUPTWIT/
-├── wc2026/                    # Core pipeline package
+├── wc2026/                    # Core pipeline package (live per-match flow ONLY)
 │   ├── matches/               # Scraped match event JSON caches
 │   ├── output/                # Rendered infographic PNGs (git-ignored)
-│   ├── download_badges.py     # Batch flag downloader script
-│   ├── git_ops.py             # Temp-clone git publishing module
-│   ├── pipeline.py            # File watcher and FastAPI webhook server
-│   ├── register_tasks.ps1     # Scheduled task automation script (Windows)
-│   ├── unregister_tasks.ps1   # Scheduled task cleanup script (Windows)
-│   ├── renderer.py            # Matplotlib / mplsoccer infographic generator
-│   ├── run_match.py           # CLI orchestrator entrypoint
-│   ├── scrape_wc.py           # WhoScored crawler and parser
+│   ├── run_match.py           # CLI orchestrator entrypoint (scrape→render→push→post)
 │   ├── scraper.py             # FotMob data acquisition module
+│   ├── renderer.py            # Matplotlib / mplsoccer PNG generator (+ refreshes dashboard)
+│   ├── git_ops.py             # Temp-clone git publishing module
+│   ├── team_colors.py         # National team colour palettes
+│   ├── register_tasks.ps1     # Windows Task Scheduler: arm one task per match
+│   ├── unregister_tasks.ps1   # Windows Task Scheduler: remove WC2026 tasks
 │   ├── whoscored_ids.json     # WhoScored tournament match ID mapping
 │   ├── REMAINING_SCHEDULE.json# Compiled match kick-offs and scrape times
 │   └── README.md              # Package-specific setup guide
-├── team_logos/
-│   └── wc2026/                # High-resolution circular nation crests
+├── tools/                     # Maintenance / one-time / legacy scripts (NOT the live flow)
+│   ├── schedule.py            # Fetch fixtures from FotMob → REMAINING_SCHEDULE.json
+│   ├── catchup.py             # Backfill matches whose scheduled run was missed
+│   ├── scrape_wc.py           # Manual WhoScored scraper (CAPTCHA by hand)
+│   ├── render_all.py          # Re-render every cached match JSON
+│   ├── push_all_pngs.py       # Bulk-push re-rendered PNGs in one commit
+│   ├── patch_ws_players.py    # Backfill player ratings on FotMob-only JSONs
+│   ├── download_badges.py     # One-time flag downloader (flagcdn.com)
+│   ├── generate_placeholders.py # One-time shield-crest badge generator
+│   ├── pipeline.py            # LEGACY file-watcher pipeline (superseded by run_match)
+│   ├── twitter_bot.py         # LEGACY X/Twitter posting (live flow uses WhatsApp)
+│   └── README.md              # Per-script guide
+├── wc2026_dashboard/          # Interactive static website (auto-deployed per match)
+├── team_logos/wc2026/         # High-resolution nation crests
 ├── WorldCup2026/              # Archive of published match infographics
 ├── .gitignore                 # Secrets, cache, and temp file patterns
-├── .env.template              # Environment variables template
+├── .env.template              # Environment variables template (copy → .env)
+├── CLAUDE.md                  # Guide for AI sessions (start here)
 └── MIGRATION_AND_DEVELOPER_DOCS.md # Full technical and architecture documentation
 ```
+
+> **`wc2026/` = the live pipeline; `tools/` = everything you run by hand.** The Windows
+> scheduled tasks invoke only `py -m wc2026.run_match`, so nothing in `tools/` is on the
+> automated path. Run `tools/` scripts from the repo root: `py tools/<script>.py`.
 
 ---
 
@@ -104,7 +119,7 @@ The generated infographics are rendered as **5920px × 3419px (30" × 17")** whi
 5. **Shot Maps**: Attempts sized by individual xG values, with title and stats line rendered inside the axes.
 6. **Final Third Passes**: Directional pass vectors into the final third. Home on the left, away on the right, with per-channel (LW/CTR/RW) breakdowns and completion counts below the map.
 
-For a full breakdown of the architecture, data structures, and the migration history, see the [MIGRATION_AND_DEVELOPER_DOCS.md](file:///c:/Users/puzik/XWORLDCUPTWIT/MIGRATION_AND_DEVELOPER_DOCS.md).
+For a full breakdown of the architecture, data structures, and the migration history, see the [MIGRATION_AND_DEVELOPER_DOCS.md](MIGRATION_AND_DEVELOPER_DOCS.md).
 
 ---
 
@@ -122,3 +137,14 @@ match JSON — so the live website updates automatically the same way the PNG do
 generated outputs are auto-pushed; edits to the dashboard *source* (`app.js`, `match.js`,
 CSS, HTML) need a manual `git push`. See [wc2026_dashboard/README.md](wc2026_dashboard/README.md)
 for the full feature list and build commands.
+
+> ⚠️ **The auto-push needs a VALID `GIT_TOKEN`.** `git_ops` deliberately disables the
+> system credential manager, so the bot can authenticate **only** via `GIT_TOKEN` from
+> `.env`. If that token is missing or expired, the push fails **silently** —
+> `run_match` logs `Git push failed (continuing)` and moves on, leaving the rendered PNG
+> and refreshed dashboard files sitting **uncommitted in your working tree** while the
+> live site stays stale. Tell-tale sign: recent "deploy" commits are authored by you, not
+> by `WC2026 Analytics Bot`. Sanity-check the token with:
+> `curl -s -H "Authorization: token <TOKEN>" https://api.github.com/user` — it must return
+> your login, **not** `Bad credentials`. To recover a stuck match, see the recovery steps
+> in [CLAUDE.md](CLAUDE.md).

@@ -2,6 +2,15 @@
 
 This document provides a comprehensive overview of the architecture, technical implementations, operational guidelines, and recent migration details for the FIFA World Cup 2026 Match Analytics Pipeline.
 
+> **Layout note (current, 2026-06):** The `wc2026/` package now holds **only** the live
+> pipeline (`run_match.py`, `scraper.py`, `renderer.py`, `git_ops.py`, `team_colors.py`).
+> The maintenance / one-time / legacy scripts referenced throughout this historical
+> document — including `scrape_wc.py`, `catchup.py`, `pipeline.py`, `twitter_bot.py` —
+> now live in the top-level **`tools/`** folder (run `py tools/<script>.py`). The live
+> automated scrape uses `scraper.py`; `scrape_wc.py` is the manual WhoScored fallback.
+> See `tools/README.md` and the root `CLAUDE.md`/`README.md` for the authoritative
+> current structure.
+
 ---
 
 ## 1. Migration Overview

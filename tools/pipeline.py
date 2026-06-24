@@ -29,13 +29,14 @@ from datetime import datetime, timezone
 # ── Bootstrap path ────────────────────────────────────────────────────────
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_REPO_ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # tools/ for sibling imports
 
 from dotenv import load_dotenv
 load_dotenv(_REPO_ROOT / ".env", override=False)
 
 from wc2026.renderer    import render_wc_dashboard, output_filename
 from wc2026.git_ops     import push_png_to_xworldcuptwit
-from wc2026.twitter_bot import post_match_infographic
+from twitter_bot        import post_match_infographic  # sibling module in tools/
 
 log = logging.getLogger("wc2026.pipeline")
 logging.basicConfig(
