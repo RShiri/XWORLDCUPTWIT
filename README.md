@@ -105,3 +105,20 @@ The generated infographics are rendered as **5920px × 3419px (30" × 17")** whi
 6. **Final Third Passes**: Directional pass vectors into the final third. Home on the left, away on the right, with per-channel (LW/CTR/RW) breakdowns and completion counts below the map.
 
 For a full breakdown of the architecture, data structures, and the migration history, see the [MIGRATION_AND_DEVELOPER_DOCS.md](file:///c:/Users/puzik/XWORLDCUPTWIT/MIGRATION_AND_DEVELOPER_DOCS.md).
+
+---
+
+## 🌐 Interactive Web Dashboard
+
+Alongside the static PNGs, `wc2026_dashboard/` is a self-contained static website
+(group tables, matches, players, an xG efficiency lab, and a per-match **Match Centre**
+with shot map, pass explorer, dribbles, pass network and line-ups). It is published with
+**GitHub Pages** and is live at **https://rshiri.github.io/XWORLDCUPTWIT/**.
+
+**It auto-deploys per match.** Running a match through `run_match` (without `--no-push`)
+publishes, in one commit, the infographic PNG **and** the regenerated dashboard data
+(`data.js`, `players.js`, `matches_detail/<id>.js`, the SQLite/CSV export) plus the raw
+match JSON — so the live website updates automatically the same way the PNG does. Only
+generated outputs are auto-pushed; edits to the dashboard *source* (`app.js`, `match.js`,
+CSS, HTML) need a manual `git push`. See [wc2026_dashboard/README.md](wc2026_dashboard/README.md)
+for the full feature list and build commands.

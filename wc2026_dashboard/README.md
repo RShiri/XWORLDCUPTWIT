@@ -9,9 +9,9 @@ A self-contained static website built from the WC2026 scraping pipeline data
   top two highlighted as qualifiers.
 - **Matches** — every fixture & result in one place (this merges what used to be
   two near-identical tabs). Grouped by day, searchable, filterable by status / xG.
-  - Tap any played game to expand its complete head-to-head stat line (possession,
-    xG, shots, SoT, big chances, passes, pass accuracy, saves, duels, fouls).
-  - Each played game links to its Match Centre and infographic PNG.
+  - **Click any played game to open its Match Centre** (the whole row is the link;
+    it shows a `↗` cue). Upcoming games are intentionally inert with a tooltip.
+  - Each row also has an infographic-PNG link.
   - *Team totals* sub-view — sortable aggregate table (record, GF/GA, xG/xGA, shots
     & SoT per game, average possession & pass accuracy, big chances per game).
 - **Players** — aggregated player statistics across every played match: goals,
@@ -20,24 +20,35 @@ A self-contained static website built from the WC2026 scraping pipeline data
   (scorers / assists / rating / xG / creativity), team filter, search, sortable
   on any column.
 - **Match Centre** (`match.html?id=<match_id>`) — an interactive dashboard for a
-  single game, linked from every match with event data:
+  single game, opened by clicking any played match. It is **one scrolling page**
+  (no tabs) with all sections stacked, plus an *Infographic PNG* button:
+  - *Match stats* (default section) — the head-to-head comparison (possession, xG,
+    shots, SoT, big chances, passes, pass accuracy, saves, duels, fouls), read from
+    `data.js`. Any stat the provider didn't supply is **filled from the event stream**
+    (shots/SoT/big chances/passes/pass accuracy/xG), so event-only games still show a
+    full set; stats that can't be derived (possession/saves/duels/fouls) are skipped.
   - *Shot map* — every shot as a clickable dot on the pitch (home attacks right,
     away attacks left); dot size = xG. **Goals are drawn in the team's colour** with
-    a gold ring; on/off-target and blocked are styled distinctly. Click a dot to see
-    who took it, the minute, xG, body part and situation. Toggle teams / goals-only /
-    minimum xG.
+    a gold ring. The across-pitch (y) axis is flipped (`PH - y`) to match the PNG /
+    broadcast orientation — without it the map is mirrored about the centreline.
+    Click a dot for who/minute/xG/body part/situation. Toggle teams / goals-only / min xG.
   - *Pass explorer* — every pass drawn on the pitch, **colour-coded by outcome**:
     two greens for completed (bright = progressive/key/assist, dim = normal) and two
-    reds for incomplete (bright = forward/key attempt, dim = normal). Minute timeline
-    you can scrub or play back; filter by team, player, and pass type.
-  - *Pass network* — average-position passing network per team: nodes are players at
-    their average pitch position (sized by passes involved, labelled with shirt
-    number), links are passes between each pair (thickness = volume). Home/away toggle,
-    a minimum-passes threshold, and a minute scrubber/▶ to watch the network build live.
+    reds for incomplete. Minute timeline you can scrub or play back; filter by team,
+    player, and pass type.
+  - *Dribbles* — every take-on as a dot where it happened (green = successful, red
+    ring = unsuccessful). Team/player/outcome filters, minute scrubber/▶, and a
+    success-rate readout. Mirrors the pass explorer for `TakeOn` events.
+  - *Pass network* — average-position passing network per team for the **starting XI,
+    using passes up to that side's first substitution** (the window all 11 were on
+    together — the standard convention; there is intentionally **no** minute scrubber).
+    Nodes = players at average position (sized by passes involved, labelled with shirt
+    number), links = passes between each pair (thickness = volume). Home/away toggle and
+    a minimum-combined-passes threshold.
   - *Line-ups* — starting XI + substitutes with each player's **rating**
     (colour-coded), **goals/assists**, **yellow/red cards** and **minutes played**.
-  - *Infographic PNG* button — opens the rendered match infographic from our PNG
-    collection (`WorldCup2026/`, falling back to `wc2026/output/`).
+  - The page loads `data.js` (for Match stats) plus the per-match
+    `matches_detail/<id>.js` event file.
 - **xG Analysis** — the efficiency lab:
   - Pearson correlation (r) and r² between xG and actual goals across every
     team-match with xG data.
@@ -70,15 +81,32 @@ Then visit http://localhost:8777/wc2026_dashboard/. You can also open `index.htm
 directly from disk; serving is only needed so the flag images under `../team_logos/`
 and the PNG collection resolve.
 
-## Refreshing the data
+## Live site & auto-deploy
+
+The site is published with **GitHub Pages** from `main` (repo root): **https://rshiri.github.io/XWORLDCUPTWIT/**
+(the root `index.html` redirects to `wc2026_dashboard/index.html`). Because Pages serves
+the repo root, the site's `../team_logos/` and `../WorldCup2026/` paths resolve.
+Stylesheets are cache-busted (`styles.css?v=Date.now()`) so CSS changes reach browsers
+without a hard refresh; new match PNGs must live in the tracked `WorldCup2026/` (not the
+git-ignored `wc2026/output/`) or their Infographic-PNG links 404.
+
+**Per-match auto-deploy:** `run_match` step 4 calls `git_ops.push_match_update()` (needs
+`GIT_TOKEN`; skip with `--no-push`). It clones the repo to a temp dir and, in one commit,
+publishes the PNG **plus** the regenerated `data.js` / `players.js` / `matches_detail/` /
+`database/` and the raw match JSON — so the whole live site updates per match, like the
+PNG. It only pushes generated outputs; hand-edited source (`app.js`/`match.js`/CSS/HTML)
+still needs a manual `git push`.
+
+## Refreshing the data (local)
 
 The site reads `data.js` (a generated `window.WC_DATA = {...}` blob).
 
-**It updates itself automatically.** `wc2026/renderer.py` calls
+**It refreshes itself automatically (locally).** `wc2026/renderer.py` calls
 `_refresh_web_dashboard_db()` at the end of `render_wc_dashboard()`, so every time
 the pipeline renders a finished game (via `pipeline.py`, `run_match.py`,
 `render_all.py`, etc.) `data.js` is regenerated with the latest results and stats.
 The refresh is best-effort and wrapped in try/except — it can never break a render.
+(The push to the live site is the separate `push_match_update()` step above.)
 
 To rebuild it manually:
 
@@ -117,9 +145,9 @@ the 3 matches that have no shot events at all (FotMob-only scrapes).
 ### Match Centre data
 
 `build_match_details.py` writes one `matches_detail/<id>.js` per game with events
-(shots, passes, goals, line-ups). `match.html` loads a single game's file via a
-`<script>` tag (so it works on `file://`). The renderer rebuilds the just-played
-game's file automatically; rebuild them all manually with:
+(shots, passes, **dribbles/take-ons**, goals, line-ups). `match.html` loads a single
+game's file via a `<script>` tag (so it works on `file://`). The renderer rebuilds the
+just-played game's file automatically; rebuild them all manually with:
 
 ```
 py wc2026_dashboard/build_match_details.py

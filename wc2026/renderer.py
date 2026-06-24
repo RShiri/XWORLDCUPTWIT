@@ -880,21 +880,26 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
     else:
         home_df_m = pd.DataFrame()
 
+    PASS_MADE   = "#2e9e4f"   # made passes → green
+    PASS_UNMADE = "#d6312b"   # unmade passes → red
+
     def _plot_entries(df: pd.DataFrame, color: str, alpha: float = 0.55) -> None:
         if df.empty:
             return
-        for _, row in df.iterrows():
+        # Draw successful passes on top of failed ones so green stays legible
+        for _, row in df.sort_values("success").iterrows():
+            arrow_color = PASS_MADE if row["success"] else PASS_UNMADE
             ax.annotate("",
                 xy=(row["end_x"], row["end_y"]),
                 xytext=(row["x"], row["y"]),
                 arrowprops=dict(
                     arrowstyle="-|>",
-                    color=color,
+                    color=arrow_color,
                     linewidth=1.2,
                     alpha=alpha,
                     connectionstyle="arc3,rad=0.0",
                 ),
-                zorder=2,
+                zorder=3 if row["success"] else 2,
             )
 
     _plot_entries(home_df_m, home_color, alpha=0.6)   # home on LEFT
@@ -1233,7 +1238,50 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     plt.close(fig)
 
     log.info("Dashboard saved → %s", output_path)
+
+    # Keep the web dashboard in sync: every time a finished game is rendered,
+    # rebuild the interactive match page for it and regenerate the index data.js.
+    # Never let this break a render.
+    _refresh_web_dashboard_db(match_data)
+
     return output_path
+
+
+def _load_dashboard_module(name: str, filename: str):
+    import importlib.util
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path = os.path.join(repo_root, "wc2026_dashboard", filename)
+    if not os.path.exists(path):
+        return None
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _refresh_web_dashboard_db(match_data: dict | None = None) -> None:
+    """Rebuild the interactive match page + the index data.js (best-effort)."""
+    try:
+        if match_data is not None:
+            details = _load_dashboard_module("wc_dashboard_details", "build_match_details.py")
+            if details is not None:
+                out = details.write_detail(match_data)
+                if out:
+                    log.info("Match centre page refreshed → %s", os.path.basename(out))
+    except Exception as exc:  # pragma: no cover - never block rendering
+        log.warning("Could not refresh match centre page: %s", exc)
+    for modname, filename, label in (
+        ("wc_dashboard_build", "build_data.py", "data.js"),
+        ("wc_dashboard_players", "build_players.py", "players.js"),
+        ("wc_dashboard_database", "build_database.py", "database export"),
+    ):
+        try:
+            mod = _load_dashboard_module(modname, filename)
+            if mod is not None:
+                mod.main()
+                log.info("Web dashboard refreshed (%s)", label)
+        except Exception as exc:  # pragma: no cover - never block rendering
+            log.warning("Could not refresh %s: %s", label, exc)
 
 
 def output_filename(match_data: dict, output_dir: str = ".") -> str:

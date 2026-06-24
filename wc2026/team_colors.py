@@ -83,6 +83,20 @@ WC2026_TEAM_COLORS: dict[str, dict[str, str]] = {
     "Greece":           {"primary": "#0D5EAF", "secondary": "#FFFFFF"},
     "Ukraine":          {"primary": "#005BBB", "secondary": "#FFD500"},
     "Venezuela":        {"primary": "#CF142B", "secondary": "#003087"},
+
+    # Additional qualified nations (were falling back to the default colour)
+    "USA":              {"primary": "#1A3A6B", "secondary": "#BF0A30"},
+    "Bosnia and Herzegovina": {"primary": "#00339A", "secondary": "#FFD100"},
+    "Cape Verde":       {"primary": "#0033A0", "secondary": "#CF2027"},
+    "Curacao":          {"primary": "#0038A8", "secondary": "#FFD100"},
+    "Czechia":          {"primary": "#11457E", "secondary": "#D7141A"},  # Czech blue (distinct from the many reds)
+    "Egypt":            {"primary": "#C8102E", "secondary": "#000000"},
+    "Haiti":            {"primary": "#00209F", "secondary": "#D21034"},
+    "Ivory Coast":      {"primary": "#FF8200", "secondary": "#009E60"},
+    "Norway":           {"primary": "#BA0C2F", "secondary": "#00205B"},
+    "Scotland":         {"primary": "#0065BF", "secondary": "#FFFFFF"},
+    "Sweden":           {"primary": "#FECC02", "secondary": "#005293"},
+    "Turkiye":          {"primary": "#1f7a3d", "secondary": "#E30A17"},  # green (distinct from red neighbours)
 }
 
 
@@ -96,4 +110,4 @@ def get_team_colors(team_name: str, fallback_home: bool = True) -> dict[str, str
     for k, v in WC2026_TEAM_COLORS.items():
         if k.lower() == lower:
             return v
-    return {"primary": "#a50044" if fallback_home else "#004d98", "secondary": "#FFFFFF"}
+    return {"primary": "#6b7a99" if fallback_home else "#4a5870", "secondary": "#FFFFFF"}

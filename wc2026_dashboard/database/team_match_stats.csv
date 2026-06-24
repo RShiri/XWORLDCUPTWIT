@@ -91,3 +91,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_23_Norway_vs_Senegal,2026-06-23,Senegal,Norway,away,2,3,,,,,86,,,,,,3.11
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Portugal,Uzbekistan,home,5,0,,,,,88,,,,,,4.5
 2026_06_23_Portugal_vs_Uzbekistan,2026-06-23,Uzbekistan,Portugal,away,0,5,,,,,79,,,,,,0.33
+2026_06_24_Panama_vs_Croatia,2026-06-24,Panama,Croatia,home,0,1,,,,,74,,,,,,0.64
+2026_06_24_Panama_vs_Croatia,2026-06-24,Croatia,Panama,away,1,0,,,,,83,,,,,,1.68

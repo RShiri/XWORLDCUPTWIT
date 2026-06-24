@@ -89,7 +89,7 @@
   "a": 1,
   "played": true
  },
-"1953888": {
+ "1953888": {
   "slug": "france-senegal",
   "h": 3,
   "a": 1,
@@ -125,6 +125,12 @@
  },
  "1953901": {
   "slug": "ghana-panama",
+  "played": true
+ },
+ "1953885": {
+  "slug": "uruguay-cabo-verde",
+  "h": 0,
+  "a": 0,
   "played": true
  }
 }
