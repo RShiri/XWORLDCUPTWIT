@@ -576,11 +576,6 @@
         '<span class="chip-toggle away" id="nwAway">' + esc(D.away.name) + "</span>" +
         '<span class="grp">Min. combined passes <input type="range" id="nwMin" min="1" max="10" value="3" style="width:90px"> <b id="nwMinLab">3</b></span>' +
       "</div>" +
-      '<div class="timeline-scrub">' +
-        '<button class="play-btn" id="nwPlay">▶</button>' +
-        '<input type="range" id="nwRange" min="5" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
-        '<span class="minlab" id="nwMinuteLab"></span>' +
-      "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
         pitchMarkup() +
         '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle" id="nwDir">attacking →</text>' +
@@ -589,28 +584,34 @@
       '<div class="legend-row">' +
         '<span>● node = player at average position · size = passes involved</span>' +
         '<span>line thickness = passes between the pair</span>' +
-        '<span>numbers = shirt</span>' +
+        '<span>starting XI, until the first substitution</span>' +
       "</div>" +
       '<div class="stat-note" id="nwNote"></div>';
 
-    var state = { side: "home", upper: D.maxMin || 90, minLink: 3 };
+    var state = { side: "home", minLink: 3 };
     var linkG = document.getElementById("nwLinks");
     var nodeG = document.getElementById("nwNodes");
-    var minuteLab = document.getElementById("nwMinuteLab");
     var note = document.getElementById("nwNote");
     var NS = "http://www.w3.org/2000/svg";
+
+    // Standard pass network: the starting XI, using passes up to the first
+    // substitution (the window in which all 11 were on the pitch together).
+    function cutoffFor(side) {
+      var subs = D.lineups[side].subs;
+      return (subs && subs.length && subs[0].on != null) ? subs[0].on : (D.maxMin || 90);
+    }
 
     function compute() {
       var nodes = {}; // name -> {sx,sy,n, passes}
       var links = {}; // "a|b" -> count
-      // Pass networks show the starting XI only; ignore passes involving subs.
       var starter = {};
       D.lineups[state.side].starters.forEach(function (p) { starter[p.name] = true; });
+      var cutoff = cutoffFor(state.side);
       function node(name) {
         return nodes[name] || (nodes[name] = { name: name, x: 0, y: 0, n: 0, passes: 0 });
       }
       D.passes.forEach(function (p) {
-        if (p.team !== state.side || !p.ok || p.min > state.upper) return;
+        if (p.team !== state.side || !p.ok || p.min > cutoff) return;
         if (!starter[p.player]) return;            // passer must be a starter
         var passer = node(p.player);
         passer.x += p.x; passer.y += p.y; passer.n++; passer.passes++;
@@ -624,7 +625,7 @@
       Object.keys(nodes).forEach(function (k) {
         var nd = nodes[k]; if (nd.n) { nd.x /= nd.n; nd.y /= nd.n; }
       });
-      return { nodes: nodes, links: links };
+      return { nodes: nodes, links: links, cutoff: cutoff };
     }
 
     function draw() {
@@ -685,11 +686,10 @@
       });
       var teamName = state.side === "home" ? D.home.name : D.away.name;
       note.textContent = teamName + " · " + Object.keys(net.nodes).length + " players · " +
-        nLinks + " passing links (min " + state.minLink + ") · up to " + state.upper + "'";
+        nLinks + " passing links (min " + state.minLink + ") · positions up to the first sub (" + net.cutoff + "')";
       document.getElementById("nwDir").textContent =
         (state.side === "home" ? teamName + " attacking →" : "← " + teamName + " attacking");
     }
-    function setUpper(v) { state.upper = v; minuteLab.textContent = "0–" + v + "'"; draw(); }
 
     function setSide(side) {
       state.side = side;
@@ -702,21 +702,7 @@
     document.getElementById("nwMin").addEventListener("input", function () {
       state.minLink = parseInt(this.value, 10); document.getElementById("nwMinLab").textContent = this.value; draw();
     });
-    var range = document.getElementById("nwRange");
-    var timer = null, playBtn = document.getElementById("nwPlay");
-    function stopPlay() { if (timer) { clearInterval(timer); timer = null; playBtn.classList.remove("playing"); playBtn.textContent = "▶"; } }
-    range.addEventListener("input", function () { stopPlay(); setUpper(parseInt(this.value, 10)); });
-    playBtn.addEventListener("click", function () {
-      if (timer) { stopPlay(); return; }
-      if (state.upper >= (D.maxMin || 90)) { range.value = 5; setUpper(5); }
-      playBtn.classList.add("playing"); playBtn.textContent = "❚❚";
-      timer = setInterval(function () {
-        var v = state.upper + 2;
-        if (v > (D.maxMin || 90)) { v = D.maxMin || 90; range.value = v; setUpper(v); stopPlay(); return; }
-        range.value = v; setUpper(v);
-      }, 220);
-    });
-    setUpper(state.upper);
+    draw();
   }
 
   /* ================= LINE-UPS ================= */
