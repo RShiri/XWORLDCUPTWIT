@@ -101,5 +101,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,away,1,2,,,,,74,,,,,,1.78
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Czechia,Mexico,home,0,3,,,,,80,,,,,,0.61
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Mexico,Czechia,away,3,0,,,,,83,,,,,,2.6
+2026_06_25_Morocco_vs_Haiti,2026-06-25,Morocco,Haiti,home,4,2,,,,,86,,,,,,3.74
+2026_06_25_Morocco_vs_Haiti,2026-06-25,Haiti,Morocco,away,2,4,,,,,80,,,,,,0.89
 2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,home,0,3,,,,,88,,,,,,2.04
 2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,away,3,0,,,,,91,,,,,,3.9
