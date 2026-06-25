@@ -52,3 +52,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Group Stage,,Czechia,Mexico,0,3,0.61,2.6,1
 2026_06_25_Morocco_vs_Haiti,2026-06-25,Group Stage,,Morocco,Haiti,4,2,3.74,0.89,1
 2026_06_25_Scotland_vs_Brazil,2026-06-25,Group Stage,,Scotland,Brazil,0,3,2.04,3.9,1
+2026_06_25_South_Africa_vs_South_Korea,2026-06-25,Group Stage,,South Africa,South Korea,1,0,1.13,1.08,1

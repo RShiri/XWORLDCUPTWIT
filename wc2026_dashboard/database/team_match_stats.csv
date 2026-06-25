@@ -105,3 +105,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_25_Morocco_vs_Haiti,2026-06-25,Haiti,Morocco,away,2,4,,,,,80,,,,,,0.89
 2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,home,0,3,,,,,88,,,,,,2.04
 2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,away,3,0,,,,,91,,,,,,3.9
+2026_06_25_South_Africa_vs_South_Korea,2026-06-25,South Africa,South Korea,home,1,0,,,,,80,,,,,,1.13
+2026_06_25_South_Africa_vs_South_Korea,2026-06-25,South Korea,South Africa,away,0,1,,,,,87,,,,,,1.08
