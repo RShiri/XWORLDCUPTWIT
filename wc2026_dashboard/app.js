@@ -213,6 +213,7 @@
       s.innerHTML = '<div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div>";
       wrap.appendChild(s);
     });
+    wrap.insertAdjacentHTML("afterend", '<p class="hint" style="margin-top:8px">Avg. match duration (incl. stoppage time): ~97 min across 54 matches played.</p>');
   }
 
   /* Scatter plot (hand-rolled SVG) */
@@ -418,22 +419,30 @@
     var rated = PLAYERS.filter(function (p) { return p.mp >= 2 && p.rating != null; })
       .sort(function (a, b) { return b.rating - a.rating; });
     var xgSub = function (p) { return p.g + "G vs " + p.xg.toFixed(2) + " xG"; };
-    function goalsVal(p) {
-      var mpg = p.g > 0 ? Math.round(p.mins / p.g) : null;
-      return p.g + (mpg ? '<span style="font-weight:400;color:var(--muted);font-size:12px"> / ' + mpg + "\'</span>" : "");
-    }
     var shooters = PLAYERS.filter(function (p) { return p.shots >= 3; })
       .map(function (p) { return Object.assign({}, p, { conv: Math.round(p.g / p.shots * 100) }); })
       .sort(function (a, b) { return b.conv - a.conv; });
-    var dribblers = PLAYERS.filter(function (p) { return p.mins >= 45 && p.dribbles > 0; })
-      .slice().sort(function (a, b) { return b.dribbles - a.dribbles; });
+    var goalsPer90 = PLAYERS.filter(function (p) { return p.mins >= 90 && p.g > 0; })
+      .map(function (p) { return Object.assign({}, p, { gp90: p.g / p.mins * 90 }); })
+      .sort(function (a, b) { return b.gp90 - a.gp90; });
+    var dribblers = PLAYERS.filter(function (p) { return p.mins >= 90 && p.dribbles > 0; })
+      .map(function (p) { return Object.assign({}, p, { dp90: p.dribbles / p.mins * 90 }); })
+      .sort(function (a, b) { return b.dp90 - a.dp90; });
+    var chancesPer90 = PLAYERS.filter(function (p) { return p.mins >= 90 && p.keyPasses > 0; })
+      .map(function (p) { return Object.assign({}, p, { kpp90: p.keyPasses / p.mins * 90 }); })
+      .sort(function (a, b) { return b.kpp90 - a.kpp90; });
+    var passersPer90 = PLAYERS.filter(function (p) { return p.mins >= 90 && p.passes > 0; })
+      .map(function (p) { return Object.assign({}, p, { pp90: p.passes / p.mins * 90 }); })
+      .sort(function (a, b) { return b.pp90 - a.pp90; });
+    var tacklersPer90 = PLAYERS.filter(function (p) { return p.mins >= 90 && p.tackles > 0; })
+      .map(function (p) { return Object.assign({}, p, { tp90: p.tackles / p.mins * 90 }); })
+      .sort(function (a, b) { return b.tp90 - a.tp90; });
     var boards = [
-      card("Top scorers", "Goals scored + minutes per goal.", rows(desc("g"), goalsVal, function (p) { return p.team; })),
-      card("Most dribbles", "Successful dribbles, min. 45 mins played.",
-        rows(dribblers, function (p) { return p.dribbles; }, function (p) {
-          var per90 = (p.dribbles / p.mins * 90).toFixed(1);
-          return per90 + " per 90";
-        })),
+      card("Top scorers", "Goals scored.", rows(desc("g"), function (p) { return p.g; }, function (p) { return p.team; })),
+      card("Goals per 90'", "Goals per 90 minutes, min. 90 mins played.",
+        rows(goalsPer90, function (p) { return p.gp90.toFixed(2); }, function (p) { return p.team; })),
+      card("Dribbles per 90'", "Successful dribbles per 90 minutes, min. 90 mins played.",
+        rows(dribblers, function (p) { return p.dp90.toFixed(1); }, function (p) { return p.dribbles + " total"; })),
       card("Best shot conversion", "Goals per shot %, min. 3 attempts.",
         rows(shooters, function (p) { return p.conv + "%"; }, function (p) { return p.g + "G / " + p.shots + " shots"; })),
       card("Most assists", "Assists provided.", rows(desc("a"), function (p) { return p.a; }, function (p) { return p.team; })),
@@ -445,12 +454,14 @@
       card("Wasteful in front of goal", "Goals below shot xG (min. 1.0 xG faced).",
         rows(fin.slice().sort(function (a, b) { return a.xg_diff - b.xg_diff; }),
           function (p) { return p.xg_diff.toFixed(2); }, xgSub, "neg")),
-      card("Top chance creators", "Key passes (a pass that led to a shot).", rows(desc("keyPasses"), function (p) { return p.keyPasses; }, function (p) { return p.team; })),
+      card("Chances created per 90'", "Key passes per 90 minutes, min. 90 mins played.",
+        rows(chancesPer90, function (p) { return p.kpp90.toFixed(2); }, function (p) { return p.keyPasses + " total"; })),
       card("Most shots on target", "Shots that hit the target.", rows(desc("sot"), function (p) { return p.sot; }, function (p) { return p.shots + " shots"; })),
       card("Most shots taken", "Total attempts.", rows(desc("shots"), function (p) { return p.shots; }, function (p) { return p.team; })),
-      card("Busiest passers", "Total passes completed.", rows(desc("passes"), function (p) { return p.passes; }, function (p) { return p.pass_pct + "%"; })),
-      card("Top tacklers", "Tackles made.", rows(desc("tackles"), function (p) { return p.tackles; }, function (p) { return p.team; })),
-      card("Most minutes played", "Time on the pitch.", rows(desc("mins"), function (p) { return p.mins + "'"; }, function (p) { return p.mp + " gms"; })),
+      card("Passes per 90'", "Passes completed per 90 minutes, min. 90 mins played.",
+        rows(passersPer90, function (p) { return Math.round(p.pp90); }, function (p) { return p.pass_pct + "%"; })),
+      card("Tackles per 90'", "Tackles per 90 minutes, min. 90 mins played.",
+        rows(tacklersPer90, function (p) { return p.tp90.toFixed(1); }, function (p) { return p.team; })),
     ];
     host.innerHTML = boards.join("");
   }
