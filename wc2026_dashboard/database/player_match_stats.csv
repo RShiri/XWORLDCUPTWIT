@@ -1573,3 +1573,35 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,391821,Liam Millar,Sub,0,39,0,0,1,0,6.3,0.04,1,0,11,9,2,22,0,0,0,0,1,0,2,0
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,532188,Promise David,Sub,0,22,1,0,0,0,7.4,0.7,3,3,2,1,0,7,0,1,1,0,0,0,0,0
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,445292,Tani Oluwaseyi,Sub,0,39,0,0,0,0,6.1,0.0,0,0,4,4,0,8,1,0,0,0,0,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,318896,Angus Gunn,GK,1,96,0,0,0,0,6.7,0.0,0,0,35,23,0,50,1,0,0,0,0,0,0,5
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,396975,Nathan Patterson,DR,1,81,0,0,0,0,6.0,0.0,0,0,56,51,0,73,4,1,0,0,1,1,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,364624,Scott McKenna,DC,1,96,0,0,0,0,5.0,0.0,0,0,53,49,0,61,0,0,0,0,0,3,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,280210,Jack Hendry,DC,1,96,0,0,0,0,5.8,0.0,0,0,54,52,1,58,0,0,1,0,1,2,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,115726,Andy Robertson,DL,1,45,0,0,0,0,5.9,0.0,0,0,35,31,0,45,2,0,1,0,0,1,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,396971,Lewis Ferguson,DMC,1,96,0,0,0,0,7.0,0.04,2,1,91,86,1,112,5,0,1,0,2,1,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,82917,Kenny McLean,DMC,1,96,0,0,0,0,5.7,0.01,1,0,47,42,0,56,2,1,0,0,0,1,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,430350,Ben Gannon-Doak,AMR,1,81,0,0,0,0,5.6,0.09,2,0,19,19,0,34,1,0,0,0,1,0,1,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,336915,Scott McTominay,AMC,1,96,0,0,0,0,6.2,1.47,4,3,31,27,0,46,1,0,1,1,1,1,3,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,318449,John McGinn,AML,1,90,0,0,0,0,5.5,0.0,0,0,30,28,1,44,2,0,0,1,0,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,384861,Lawrence Shankland,FW,1,90,0,0,0,0,6.2,0.18,2,0,18,13,3,28,1,0,1,0,1,2,1,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,533012,Findlay Curtis,Sub,0,6,0,0,0,0,6.1,0.0,0,0,0,0,0,3,0,0,0,0,0,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,128882,Ryan Christie,Sub,0,15,0,0,1,0,6.0,0.08,1,0,3,3,0,9,0,0,0,0,1,0,1,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,256419,Che Adams,Sub,0,6,0,0,0,0,6.0,0.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,291944,Anthony Ralston,Sub,0,15,0,0,0,0,6.3,0.1,1,1,1,1,1,5,2,0,0,0,1,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Scotland,Brazil,297403,Kieran Tierney,Sub,0,51,0,0,0,0,6.4,0.07,1,0,27,23,3,39,1,0,0,0,1,1,1,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,114147,Alisson Becker,GK,1,96,0,0,0,0,8.0,0.0,0,0,18,16,0,30,0,0,0,0,0,2,0,5
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,88300,Danilo,DR,1,96,0,0,1,0,7.2,0.0,0,0,68,64,1,82,1,2,1,0,3,2,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,101949,Marquinhos,DC,1,96,0,0,0,0,6.8,0.0,0,0,88,84,0,92,0,0,0,0,0,2,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,334087,Gabriel Magalhaes,DC,1,96,0,0,0,0,7.6,0.14,1,0,98,93,0,107,2,1,5,0,0,4,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,115097,Douglas Santos,DL,1,81,0,0,0,0,6.9,0.03,1,0,39,38,0,48,1,2,0,0,0,1,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,88526,Casemiro,MC,1,64,0,0,0,0,7.5,0.01,1,0,36,34,0,51,4,2,0,0,1,4,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,319756,Lucas Paqueta,MC,1,65,0,0,0,0,7.5,0.05,1,0,56,48,4,68,1,1,1,1,0,1,1,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,338780,Bruno Guimaraes,MC,1,96,0,2,0,0,8.2,0.02,1,0,46,38,3,62,2,0,1,1,1,2,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,472122,Rayan,FWR,1,81,0,0,0,0,8.1,0.37,2,1,25,25,4,43,2,1,2,2,1,0,1,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,362758,Matheus Cunha,FW,1,75,1,0,0,0,8.4,0.78,5,2,26,24,1,38,1,1,2,2,0,2,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,337782,Vinicius Junior,FWL,1,96,2,0,0,0,9.4,2.47,8,5,30,25,2,55,1,0,0,5,1,0,2,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,50835,Neymar,Sub,0,21,0,0,0,0,6.1,0.02,1,1,13,12,3,24,0,0,0,0,0,0,2,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,100995,Alex Sandro,Sub,0,15,0,0,0,0,6.0,0.0,0,0,12,12,0,13,0,0,0,0,1,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,115916,Fabinho,Sub,0,32,0,0,1,0,6.5,0.0,0,0,28,27,0,33,0,2,2,0,1,3,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,380706,Gabriel Martinelli,Sub,0,31,0,0,0,0,6.0,0.0,0,0,16,16,0,18,0,0,0,0,2,0,0,0
+2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,445649,Endrick,Sub,0,15,0,0,0,0,6.4,0.0,0,0,8,8,0,12,1,1,0,0,0,0,0,0
