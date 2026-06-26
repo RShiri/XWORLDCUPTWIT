@@ -690,6 +690,8 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
             fontweight="bold", transform=ax.transAxes)
 
     n_rows = len(rows)
+    if n_rows == 0:          # no stats to show — skip the table rather than /0
+        return
     row_h  = 0.86 / n_rows  # vertical space per row
     for i, (lv, label, rv) in enumerate(rows):
         y_center = 0.89 - (i + 0.5) * row_h
@@ -1161,6 +1163,18 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     away_d = match_data.get("away", {})
     home_name = home_d.get("name", "Home")
     away_name = away_d.get("name", "Away")
+
+    # Fail safe: refuse to render an empty stub (a crashed/timed-out scrape that
+    # produced no events and no lineups). Otherwise the stats table divides by
+    # zero and the run dies with an opaque "division by zero". Raising a clear
+    # error lets run_match log the real reason and the catch-up sweep retry it.
+    if not (match_data.get("events") or []) \
+            and not (home_d.get("players") or []) \
+            and not (away_d.get("players") or []):
+        raise ValueError(
+            f"Refusing to render {home_name} vs {away_name}: match JSON is an "
+            f"empty stub (no events, no lineups) — the scrape returned no data."
+        )
 
     home_colors = get_team_colors(home_name, fallback_home=True)
     away_colors = get_team_colors(away_name, fallback_home=False)

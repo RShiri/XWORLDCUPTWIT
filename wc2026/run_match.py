@@ -23,6 +23,7 @@ from __future__ import annotations
 import os
 import sys
 import json
+import time
 import logging
 import argparse
 from pathlib import Path
@@ -46,6 +47,7 @@ from wc2026.scraper     import (fetch_and_save, fotmob_fetch_wc_matches,
                                 schedule_team_names, schedule_lookup_by_teams)
 from wc2026.renderer    import render_wc_dashboard, output_filename
 from wc2026.git_ops     import push_png_to_xworldcuptwit, push_match_update
+from wc2026._runlock    import scrape_lock
 
 log = logging.getLogger("wc2026.run_match")
 logging.basicConfig(
@@ -57,6 +59,26 @@ logging.basicConfig(
         logging.FileHandler(_REPO_ROOT / "wc2026" / "run_match.log", encoding="utf-8"),
     ],
 )
+
+# scraper.py calls logging.basicConfig() at import time (above imports run first),
+# so the basicConfig() here is a no-op and its FileHandler never attaches — which
+# is why scheduled-run crashes left run_match.log empty and undiagnosable. Force a
+# file handler onto the root logger so every run (especially failures) is recorded.
+_root_logger = logging.getLogger()
+if not any(isinstance(h, logging.FileHandler) for h in _root_logger.handlers):
+    _file_handler = logging.FileHandler(_REPO_ROOT / "wc2026" / "run_match.log", encoding="utf-8")
+    _file_handler.setFormatter(
+        logging.Formatter("%(asctime)s [RUN] %(levelname)s %(message)s", "%Y-%m-%dT%H:%M:%S")
+    )
+    _root_logger.addHandler(_file_handler)
+
+# Scrape robustness. The WhoScored step launches a flaky headless browser
+# (undetected-chromedriver throws transient WinError 6 / Cloudflare blocks). A
+# single crash there used to abort the whole match with exit 1 and NO retry,
+# silently leaving that game unpublished forever (the task already "ran", so
+# StartWhenAvailable never re-fires it). Retry the scrape before giving up.
+SCRAPE_ATTEMPTS    = 3
+SCRAPE_RETRY_DELAY = 20  # seconds between attempts
 
 OUTPUT_DIR = _REPO_ROOT / "wc2026" / "output"
 
@@ -201,9 +223,34 @@ def run_match(
             else:
                 log.warning("No team names found — WhoScored search may fail.")
 
-        json_path = fetch_and_save(fotmob_id, fotmob_only=fotmob_only, xml_match=xml_stub)
+        json_path = None
+        last_exc: Exception | None = None
+        # Serialise the browser scrape across processes. undetected-chromedriver
+        # patches a SHARED chromedriver executable, so two scrapers launching at
+        # once collide (WinError 183 on one, a wedged/timed-out Chrome on the
+        # other → zero events). Task Scheduler can fire several matches together
+        # (wake-batching with -StartWhenAvailable), so a schedule stagger is not
+        # enough — we take an OS lock and let the second match wait. See
+        # wc2026/_runlock.py.
+        with scrape_lock():
+            for attempt in range(1, SCRAPE_ATTEMPTS + 1):
+                try:
+                    json_path = fetch_and_save(
+                        fotmob_id, fotmob_only=fotmob_only, xml_match=xml_stub
+                    )
+                    if json_path:
+                        break
+                    log.warning("Scrape attempt %d/%d returned no data for id=%d.",
+                                attempt, SCRAPE_ATTEMPTS, fotmob_id)
+                except Exception as exc:           # browser/network flake — retry
+                    last_exc = exc
+                    log.warning("Scrape attempt %d/%d crashed for id=%d: %s",
+                                attempt, SCRAPE_ATTEMPTS, fotmob_id, exc, exc_info=True)
+                if attempt < SCRAPE_ATTEMPTS:
+                    time.sleep(SCRAPE_RETRY_DELAY)
         if not json_path:
-            log.error("Scrape failed for id=%d — aborting.", fotmob_id)
+            log.error("Scrape failed for id=%d after %d attempts (last error: %s) — aborting.",
+                      fotmob_id, SCRAPE_ATTEMPTS, last_exc)
             return False
         log.info("Scraped → %s", json_path)
     else:
