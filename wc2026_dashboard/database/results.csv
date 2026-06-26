@@ -49,6 +49,7 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 2026_06_24_Colombia_vs_DR_Congo,2026-06-24,Group Stage,,Colombia,DR Congo,1,0,2.17,0.41,1
 2026_06_24_Panama_vs_Croatia,2026-06-24,Group Stage,,Panama,Croatia,0,1,0.64,1.68,1
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Group Stage,,Switzerland,Canada,2,1,1.49,1.78,1
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Group Stage,,Curacao,Ivory Coast,0,2,0.51,1.71,1
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Group Stage,,Czechia,Mexico,0,3,0.61,2.6,1
 2026_06_25_Ecuador_vs_Germany,2026-06-25,Group Stage,,Ecuador,Germany,2,1,1.78,1.2,1
 2026_06_25_Morocco_vs_Haiti,2026-06-25,Group Stage,,Morocco,Haiti,4,2,3.74,0.89,1

@@ -1573,6 +1573,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,391821,Liam Millar,Sub,0,39,0,0,1,0,6.3,0.04,1,0,11,9,2,22,0,0,0,0,1,0,2,0
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,532188,Promise David,Sub,0,22,1,0,0,0,7.4,0.7,3,3,2,1,0,7,0,1,1,0,0,0,0,0
 2026_06_24_Switzerland_vs_Canada,2026-06-24,Canada,Switzerland,445292,Tani Oluwaseyi,Sub,0,39,0,0,0,0,6.1,0.0,0,0,4,4,0,8,1,0,0,0,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,67114,Eloy Room,GK,1,96,0,0,0,0,5.9,0.0,0,0,16,12,0,19,0,0,0,0,0,1,0,1
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,119741,Joshua Brenet,DR,1,89,0,0,0,0,5.4,0.0,0,0,21,18,0,43,3,1,0,1,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,582294,Deveron Fonville,DC,1,76,0,0,0,0,7.0,0.0,0,0,28,26,0,44,3,2,2,3,1,3,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,345333,Armando Obispo,DC,1,96,0,0,0,0,6.4,0.0,0,0,43,38,0,57,1,3,1,0,1,4,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,379706,Jurien Gaari,DC,1,76,0,0,0,0,6.0,0.09,2,0,35,30,0,45,1,0,1,0,2,3,1,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,322157,Sherel Floranus,DL,1,96,0,0,0,0,6.6,0.03,1,0,51,44,1,69,5,1,1,1,1,1,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,365244,Tahith Chong,MR,1,96,0,0,0,0,6.7,0.06,3,2,22,20,0,42,3,1,0,2,1,0,3,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,79967,Leandro Bacuna,MC,1,96,0,0,0,0,6.7,0.16,2,0,48,41,2,60,3,0,1,1,0,1,1,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,444161,Livano Comenencia,MC,1,60,0,0,0,0,6.7,0.0,0,0,21,16,0,33,3,5,1,0,1,1,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,261143,Juninho Bacuna,ML,1,96,0,0,1,0,6.5,0.08,1,0,23,17,3,52,4,0,1,3,3,1,3,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,107622,Jurgen Locadia,FW,1,89,0,0,0,0,6.2,0.0,0,0,19,14,2,25,0,1,1,0,1,1,3,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,290850,Brandley Kuwas,Sub,0,7,0,0,0,0,6.0,0.0,0,0,4,3,0,7,0,0,0,0,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,404225,Shurandy Sambo,Sub,0,7,0,0,0,0,6.3,0.0,0,0,3,3,0,5,0,1,0,0,0,1,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,484530,Tyrese Noslin,Sub,0,20,0,0,0,0,6.1,0.0,0,0,8,4,0,14,1,0,0,0,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,119109,Gervane Kastaneer,Sub,0,20,0,0,1,0,5.8,0.04,1,0,1,1,0,4,1,0,0,0,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Curacao,Ivory Coast,409538,Jeremy Antonisse,Sub,0,36,0,0,0,0,6.4,0.06,1,0,11,8,1,22,2,0,0,1,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,439446,Yahia Fofana,GK,1,96,0,0,0,0,7.1,0.0,0,0,28,22,0,34,0,0,0,0,0,2,0,2
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,447449,Guela Doue,DR,1,96,0,0,0,0,6.8,0.0,0,0,53,49,0,81,2,1,1,0,0,2,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,443663,Ousmane Diomande,DC,1,96,0,0,0,0,6.9,0.0,0,0,74,72,0,80,0,1,0,0,0,3,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,384516,Odilon Kossounou,DC,1,96,0,0,0,0,6.8,0.0,0,0,60,57,0,66,2,0,0,0,0,3,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,329386,Christopher Operi,DL,1,96,0,0,0,0,7.3,0.0,0,0,70,64,0,91,4,1,0,2,2,2,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,277269,Franck Kessie,DMC,1,76,0,0,0,0,6.6,0.1,1,0,51,38,1,55,2,0,0,0,1,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,328075,Ibrahim Sangare,DMC,1,96,0,1,0,0,7.6,0.0,0,0,98,82,1,110,6,2,3,0,1,3,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,386634,Amad Diallo,AMR,1,45,0,0,0,0,6.7,0.26,3,0,22,21,0,35,3,0,0,1,0,0,2,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,239872,Nicolas Pepe,AMC,1,66,2,0,1,0,8.2,1.0,2,2,43,40,1,56,3,2,1,1,1,0,4,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,557000,Yan Diomande,AML,1,66,0,1,0,0,7.7,0.0,0,0,36,34,3,60,2,1,0,2,0,1,3,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,447489,Ange-Yoan Bonny,FW,1,66,0,0,0,0,6.8,0.0,0,0,5,5,0,18,1,1,0,0,0,2,1,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,407661,Elye Wahi,Sub,0,30,0,0,0,0,6.0,0.36,1,1,8,6,0,11,0,0,0,0,0,0,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,136262,Jean Michael Seri,Sub,0,20,0,0,0,0,6.2,0.0,0,0,17,16,0,23,1,0,0,0,0,1,0,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,454324,Oumar Diakite,Sub,0,30,0,0,0,0,6.4,0.0,0,0,13,12,0,22,1,0,1,2,0,0,1,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,547352,Christ Inao Oulai,Sub,0,51,0,0,0,0,6.8,0.0,0,0,34,31,0,44,2,3,1,0,1,0,1,0
+2026_06_25_Curacao_vs_Ivory_Coast,2026-06-25,Ivory Coast,Curacao,551965,Bazoumana Toure,Sub,0,30,0,0,0,0,6.3,0.0,0,0,11,9,0,16,0,0,0,2,0,0,0,0
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Czechia,Mexico,388668,Matej Kovar,GK,1,96,0,0,0,0,5.8,0.0,0,0,32,22,0,42,0,0,0,0,0,1,0,2
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Czechia,Mexico,110868,Tomas Holes,DC,1,63,0,0,0,0,5.7,0.0,0,0,34,30,0,46,3,1,1,0,1,3,0,0
 2026_06_25_Czechia_vs_Mexico,2026-06-25,Czechia,Mexico,404245,Ladislav Krejci,DC,1,96,0,0,0,0,5.8,0.0,0,0,67,59,0,75,2,0,1,0,0,5,0,0
