@@ -111,3 +111,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_25_Scotland_vs_Brazil,2026-06-25,Brazil,Scotland,away,3,0,,,,,91,,,,,,3.9
 2026_06_25_South_Africa_vs_South_Korea,2026-06-25,South Africa,South Korea,home,1,0,,,,,80,,,,,,1.13
 2026_06_25_South_Africa_vs_South_Korea,2026-06-25,South Korea,South Africa,away,0,1,,,,,87,,,,,,1.08
+2026_06_26_Japan_vs_Sweden,2026-06-26,Japan,Sweden,home,1,1,,,,,83,,,,,,1.4
+2026_06_26_Japan_vs_Sweden,2026-06-26,Sweden,Japan,away,1,1,,,,,77,,,,,,1.01
