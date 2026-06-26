@@ -3,8 +3,8 @@ window.WC_DATA = {
  "generated": "2026-06-26 05:01",
  "counts": {
   "total": 104,
-  "played": 57,
-  "with_xg": 57,
+  "played": 58,
+  "with_xg": 58,
   "teams": 48,
   "groups": 12
  },
@@ -291,6 +291,17 @@ window.WC_DATA = {
   ],
   "F": [
    {
+    "team": "Netherlands",
+    "P": 3,
+    "W": 2,
+    "D": 1,
+    "L": 0,
+    "GF": 10,
+    "GA": 4,
+    "GD": 6,
+    "Pts": 7
+   },
+   {
     "team": "Japan",
     "P": 3,
     "W": 1,
@@ -300,17 +311,6 @@ window.WC_DATA = {
     "GA": 3,
     "GD": 4,
     "Pts": 5
-   },
-   {
-    "team": "Netherlands",
-    "P": 2,
-    "W": 1,
-    "D": 1,
-    "L": 0,
-    "GF": 7,
-    "GA": 3,
-    "GD": 4,
-    "Pts": 4
    },
    {
     "team": "Sweden",
@@ -325,13 +325,13 @@ window.WC_DATA = {
    },
    {
     "team": "Tunisia",
-    "P": 2,
+    "P": 3,
     "W": 0,
     "D": 0,
-    "L": 2,
-    "GF": 1,
-    "GA": 9,
-    "GD": -8,
+    "L": 3,
+    "GF": 2,
+    "GA": 12,
+    "GD": -10,
     "Pts": 0
    }
   ],
@@ -4460,22 +4460,22 @@ window.WC_DATA = {
    "id": "2026_06_26_Tunisia_vs_Netherlands",
    "date": "2026-06-26",
    "venue": "",
-   "stage": "",
+   "stage": "Group Stage",
    "home": "Tunisia",
    "away": "Netherlands",
-   "hs": null,
-   "as": null,
-   "played": false,
-   "has_stats": false,
-   "has_events": false,
-   "xg_home": null,
-   "xg_away": null,
-   "xg_estimated": false,
-   "png": null,
+   "hs": 1,
+   "as": 3,
+   "played": true,
+   "has_stats": true,
+   "has_events": true,
+   "xg_home": 1.37,
+   "xg_away": 2.47,
+   "xg_estimated": true,
+   "png": "../WorldCup2026/2026_06_26_Tunisia_vs_Netherlands.png",
    "stats": {
     "xg": [
-     null,
-     null
+     1.37,
+     2.47
     ],
     "shots": [
      null,
@@ -4494,8 +4494,8 @@ window.WC_DATA = {
      null
     ],
     "pass_acc": [
-     null,
-     null
+     75,
+     90
     ],
     "big_chances": [
      null,
@@ -8304,6 +8304,26 @@ window.WC_DATA = {
    "ga": 1,
    "xgf": 1.01,
    "xga": 1.4,
+   "home": false,
+   "date": "2026-06-26"
+  },
+  {
+   "team": "Tunisia",
+   "opp": "Netherlands",
+   "gf": 1,
+   "ga": 3,
+   "xgf": 1.37,
+   "xga": 2.47,
+   "home": true,
+   "date": "2026-06-26"
+  },
+  {
+   "team": "Netherlands",
+   "opp": "Tunisia",
+   "gf": 3,
+   "ga": 1,
+   "xgf": 2.47,
+   "xga": 1.37,
    "home": false,
    "date": "2026-06-26"
   }
