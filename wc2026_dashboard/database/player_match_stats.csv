@@ -1795,6 +1795,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_26_Japan_vs_Sweden,2026-06-26,Sweden,Japan,378626,Carl Starfelt,Sub,0,10,0,0,0,0,6.1,0.0,0,0,11,11,0,13,0,0,0,0,0,2,0,0
 2026_06_26_Japan_vs_Sweden,2026-06-26,Sweden,Japan,399618,Benjamin Nygren,Sub,0,10,0,0,0,0,6.1,0.0,0,0,8,6,1,10,0,0,0,0,0,0,0,0
 2026_06_26_Japan_vs_Sweden,2026-06-26,Sweden,Japan,418584,Daniel Svensson,Sub,0,23,0,0,0,0,6.0,0.02,1,0,11,9,0,13,0,0,0,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,372297,Egil Selvik,GK,1,95,0,0,0,0,6.4,0.0,0,0,25,13,0,39,1,0,0,0,0,1,0,5
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,303544,Fredrik Aursnes,DR,1,95,0,0,0,0,6.7,0.02,1,0,53,47,1,74,5,0,0,1,1,3,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,369971,Leo stigard,DC,1,95,0,0,0,0,5.5,0.09,1,0,66,52,0,73,3,1,1,0,1,1,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,396782,Henrik Falchener,DC,1,65,0,0,0,0,5.5,0.0,0,0,24,19,0,30,0,1,0,0,0,3,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,320971,Fredrik Bjrkan,DL,1,45,0,0,0,0,6.2,0.0,0,0,18,18,1,26,2,2,0,0,0,1,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,320986,Patrick Berg,MC,1,95,0,0,1,0,5.9,0.04,1,0,56,48,1,72,2,1,0,0,1,2,1,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,372407,Kristian Thorstvedt,MC,1,45,0,0,0,0,6.3,0.01,1,1,14,8,0,26,2,0,1,2,2,2,1,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,400127,Thelo Aasgaard,MC,1,95,1,0,0,0,6.9,0.36,2,1,40,34,1,64,3,3,1,0,0,0,4,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,430709,Oscar Bobb,FWR,1,82,0,0,0,0,6.7,0.42,2,1,28,25,0,41,1,1,0,1,1,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,333048,Jrgen Strand Larsen,FW,1,95,0,0,0,0,5.6,1.37,2,1,23,17,2,36,2,0,3,1,0,0,2,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,424588,Andreas Schjelderup,FWL,1,82,0,1,0,0,7.0,0.0,0,0,26,21,1,44,1,3,0,1,2,0,1,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,128839,Morten Thorsby,Sub,0,50,0,0,0,0,6.2,0.0,0,0,19,19,0,25,1,1,0,0,1,1,2,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,320977,Jens Petter Hauge,Sub,0,13,0,0,0,0,5.9,0.0,0,0,3,2,0,4,0,0,0,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,357133,Marcus Pedersen,Sub,0,50,0,0,0,0,6.2,0.0,0,0,12,11,0,26,1,0,1,0,0,2,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,416030,Antonio Nusa,Sub,0,13,0,0,0,0,6.0,0.0,0,0,3,1,0,5,0,0,0,1,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,Norway,France,495919,Sondre Langas,Sub,0,30,0,0,0,0,5.9,0.0,0,0,10,9,0,10,0,0,0,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,141646,Mike Maignan,GK,1,95,0,0,0,0,7.7,0.0,0,0,21,14,0,29,0,0,0,0,0,1,0,3
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,301019,Jules Kounde,DR,1,86,0,0,0,0,6.6,0.0,0,0,57,45,1,73,4,1,1,0,1,2,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,327721,Dayot Upamecano,DC,1,75,0,0,0,0,7.2,0.0,0,0,46,39,0,60,1,2,3,2,1,6,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,401130,Maxence Lacroix,DC,1,95,0,0,0,0,6.4,0.0,0,0,46,43,0,57,2,1,1,0,2,5,1,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,303115,Theo Hernandez,DL,1,95,0,0,0,0,6.3,0.03,2,0,45,43,1,64,0,0,2,0,2,2,1,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,353423,Aurelien Tchouameni,DMC,1,95,0,1,1,0,8.5,0.04,1,0,69,63,2,86,9,2,3,1,3,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,369570,Manu Kone,DMC,1,95,0,0,0,0,6.7,0.07,1,1,55,51,1,66,3,0,0,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,299513,Ousmane Dembele,AMR,1,64,3,0,0,0,9.4,0.17,3,3,41,30,2,51,0,0,0,0,0,0,1,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,371281,Michael Olise,AMC,1,64,0,0,0,0,6.4,0.3,3,0,43,37,0,60,2,0,0,1,0,0,1,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,433183,Desire Doue,AML,1,95,1,0,0,0,8.4,0.39,4,3,49,39,3,73,3,1,0,2,0,0,3,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,300713,Kylian Mbappe,FW,1,86,0,0,0,0,7.8,0.28,4,2,33,29,4,46,0,0,0,1,0,0,1,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,328096,Jean-Philippe Mateta,Sub,0,9,0,0,0,0,6.1,0.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,345957,Ibrahima Konate,Sub,0,20,0,0,0,0,6.5,0.0,0,0,12,11,0,15,0,3,1,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,386153,Rayan Cherki,Sub,0,31,0,0,0,0,6.1,0.0,0,0,21,20,0,25,0,0,0,0,1,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,403850,Malo Gusto,Sub,0,9,0,0,0,0,6.1,0.0,0,0,10,8,0,12,1,1,0,0,0,0,0,0
+2026_06_26_Norway_vs_France,2026-06-26,France,Norway,425366,Bradley Barcola,Sub,0,31,0,1,0,0,7.2,0.0,0,0,9,8,2,14,0,0,2,0,1,2,0,0
 2026_06_26_Paraguay_vs_Australia,2026-06-26,Paraguay,Australia,540684,Orlando Gill,GK,1,95,0,0,0,0,7.6,0.0,0,0,17,8,0,24,0,0,0,0,0,0,0,5
 2026_06_26_Paraguay_vs_Australia,2026-06-26,Paraguay,Australia,392316,Juan Jose Caceres,DR,1,95,0,0,0,0,6.7,0.01,1,0,30,16,0,57,2,0,3,0,2,4,2,0
 2026_06_26_Paraguay_vs_Australia,2026-06-26,Paraguay,Australia,433247,Gustavo Velazquez,DC,1,95,0,0,0,0,7.0,0.0,0,0,56,46,0,64,0,0,4,0,0,4,0,0
