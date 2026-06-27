@@ -894,29 +894,55 @@
       "</style>";
   }
   function agmSanitize(s) { return String(s || "").replace(/[^A-Za-z0-9_]+/g, "_").replace(/^_+|_+$/g, ""); }
+  function agmFmtDate(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); if (!m) return s || "";
+    var mo = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return (+m[3]) + " " + mo[(+m[2]) - 1] + " " + m[1];
+  }
   // Export one goal's SVG to a PNG (dependency-free) with an "Rshiri" watermark.
   function exportGoalPNG(svgEl, g, D, btn) {
     try {
       var rc = getComputedStyle(document.documentElement);
-      var bg = (rc.getPropertyValue("--card") || "#161d31").trim();
+      function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
+      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
+          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var clone = svgEl.cloneNode(true);
       clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       clone.insertAdjacentHTML("afterbegin", agmExportStyle());   // embed resolved styles
-      var scale = 12, W = (PW + 4) * scale, H = (PH + 8) * scale;  // viewBox 104 x 72 → crisp px
-      clone.setAttribute("width", W); clone.setAttribute("height", H);
+      var scale = 12, W = (PW + 4) * scale, SH = (PH + 8) * scale; // svg (pitch) area
+      var band = Math.round(W * 0.11);                            // header band height
+      var H = SH + band;
+      clone.setAttribute("width", W); clone.setAttribute("height", SH);
       var svgStr = new XMLSerializer().serializeToString(clone);
       var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
       var img = new Image();
       img.onload = function () {
         var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         var ctx = cv.getContext("2d");
-        ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);          // dark card background
-        ctx.drawImage(img, 0, 0, W, H);
-        // "Rshiri" watermark — semi-transparent, bottom-right corner
-        ctx.font = "bold " + Math.round(H * 0.05) + "px -apple-system,'Segoe UI',Arial,sans-serif";
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);            // dark card background
+        var pad = Math.round(W * 0.022);
+        // ---- header band ----
+        var hn = (D.home && D.home.name) || "Home", an = (D.away && D.away.name) || "Away";
+        var hs = (D.home && D.home.score != null) ? D.home.score : "", as = (D.away && D.away.score != null) ? D.away.score : "";
+        var title = hn + "  " + hs + "–" + as + "  " + an;   // en-dash score
+        var sub = [(D.stage || "").trim(), agmFmtDate(D.date)].filter(Boolean).join("   ·   ");
+        ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = text; ctx.font = "bold " + Math.round(band * 0.32) + "px " + F;
+        ctx.fillText(title, pad, Math.round(band * 0.40));
+        ctx.fillStyle = muted; ctx.font = Math.round(band * 0.20) + "px " + F;
+        ctx.fillText(sub, pad, Math.round(band * 0.74));
+        // scorer · minute (right side of band, accent red)
+        ctx.textAlign = "right"; ctx.fillStyle = bad; ctx.font = "bold " + Math.round(band * 0.24) + "px " + F;
+        ctx.fillText("⚽ " + (g.scorer || "") + "  " + g.min + "'", W - pad, Math.round(band * 0.55));
+        // divider under band
+        ctx.strokeStyle = line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, band - 1); ctx.lineTo(W, band - 1); ctx.stroke();
+        // ---- pitch diagram below the band ----
+        ctx.drawImage(img, 0, band, W, SH);
+        // ---- credit, bottom-right corner ----
         ctx.textAlign = "right"; ctx.textBaseline = "bottom";
-        ctx.fillStyle = "rgba(255,255,255,0.30)";
-        ctx.fillText("Rshiri", W - Math.round(W * 0.015), H - Math.round(H * 0.02));
+        ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.font = "bold " + Math.round(W * 0.017) + "px " + F;
+        ctx.fillText("All rights reserved to @RShiri", W - pad, H - Math.round(W * 0.012));
         var fname = agmSanitize((D.id || "match") + "_" + (g.scorer || "goal") + "_" + g.min) + ".png";
         cv.toBlob(function (blob) {
           var a = document.createElement("a"); a.download = fname; a.href = URL.createObjectURL(blob);
