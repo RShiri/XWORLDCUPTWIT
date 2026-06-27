@@ -123,5 +123,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_26_Tunisia_vs_Netherlands,2026-06-26,Netherlands,Tunisia,away,3,1,,,,,90,,,,,,2.47
 2026_06_26_Turkiye_vs_USA,2026-06-26,Turkiye,USA,home,3,2,,,,,76,,,,,,2.99
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,away,2,3,,,,,83,,,,,,2.9
+2026_06_27_Egypt_vs_Iran,2026-06-27,Egypt,Iran,home,1,1,,,,,86,,,,,,0.87
+2026_06_27_Egypt_vs_Iran,2026-06-27,Iran,Egypt,away,1,1,,,,,75,,,,,,3.09
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,home,0,1,,,,,73,,,,,,0.29
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,away,1,0,,,,,88,,,,,,0.71
