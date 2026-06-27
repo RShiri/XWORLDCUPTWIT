@@ -268,15 +268,30 @@ def extract(match_data):
             })
 
         elif tname == "TakeOn":   # dribble / take-on (point event, success = beat the man)
-            dribbles.append({
+            dx, dy = ev.get("x", 0), ev.get("y", 0)
+            d_entry = {
                 "team": side,
-                "x": round(ev.get("x", 0), 1),
-                "y": round(ev.get("y", 0), 1),
+                "x": round(dx, 1),
+                "y": round(dy, 1),
                 "min": minute,
                 "sec": ev.get("second", 0),
                 "player": player_full_name(match_data, ev.get("playerId")),
                 "ok": ev.get("outcomeType", {}).get("displayName") == "Successful",
-            })
+            }
+            # The feed gives no end coordinate for a take-on, so the carry destination is the
+            # SAME player's next on-ball event (any type — pass, ball-touch, recovery, …)
+            # within ~7s. The dashboard uses ex/ey to draw a direction arrow.
+            pid = ev.get("playerId")
+            t0 = minute * 60 + (ev.get("second") or 0)
+            for nxt in events[_i + 1:]:
+                if (nxt.get("minute") or 0) * 60 + (nxt.get("second") or 0) - t0 > 7:
+                    break
+                if nxt.get("playerId") == pid and nxt.get("x") is not None:
+                    nx, ny = nxt.get("x"), nxt.get("y") or 0
+                    if abs(nx - dx) > 0.8 or abs(ny - dy) > 0.8:
+                        d_entry["ex"], d_entry["ey"] = round(nx, 1), round(ny, 1)
+                    break
+            dribbles.append(d_entry)
 
         elif tname == "Save":     # goalkeeper save (point event) — powers the All Goals Map
             saves.append({        # rebound chain's grey keeper-save node

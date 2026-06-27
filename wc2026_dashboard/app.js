@@ -82,8 +82,19 @@
     var plotW = W - padL - padR, plotH = H - padT - padB;
     // Floors default to 0 so the axis fits the data. Don't force a floor of 1 — for tiny
     // metrics like xG-per-shot (~0.1–0.3) that squashed every dot to the bottom.
-    var xMax = niceMax(Math.max.apply(null, rows.map(function (r) { return r.x; }).concat([cfg.xMin || 0])) * 1.08);
-    var yMax = niceMax(Math.max.apply(null, rows.map(function (r) { return r.y; }).concat([cfg.yMin || 0])) * 1.08);
+    var xMax, yMax;
+    if (cfg.centerAvg && cfg.avgX != null && cfg.avgY != null) {
+      // Centre the avg lines: span each axis from 0 to avg + the farthest point's distance
+      // from avg, so the avg intersection sits near the middle and there's no dead space —
+      // without clipping outliers (the extreme dot lands exactly on the far edge).
+      var dx = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.x - cfg.avgX); }));
+      var dy = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.y - cfg.avgY); }));
+      xMax = cfg.avgX + dx;
+      yMax = cfg.avgY + dy;
+    } else {
+      xMax = niceMax(Math.max.apply(null, rows.map(function (r) { return r.x; }).concat([cfg.xMin || 0])) * 1.08);
+      yMax = niceMax(Math.max.apply(null, rows.map(function (r) { return r.y; }).concat([cfg.yMin || 0])) * 1.08);
+    }
     function sx(v) { return padL + (v / xMax) * plotW; }
     function sy(v) { return cfg.flipY ? padT + (v / yMax) * plotH : (padT + plotH) - (v / yMax) * plotH; }
     var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" width="100%" class="scatter-svg">'];
@@ -605,7 +616,7 @@
       return { team: r.team, x: r.spg, y: r.xgPerShot, col: col, _s: r.spg, _q: r.xgPerShot };
     });
     teamScatter("shotquality", rows, {
-      h: 560, avgX: avgX, avgY: avgY,
+      h: 560, avgX: avgX, avgY: avgY, centerAvg: true,
       xLabel: "Shots per game  →  (volume)",
       yLabel: "xG per shot  (chance quality)",
       corners: [
