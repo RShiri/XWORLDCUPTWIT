@@ -869,6 +869,66 @@
     for (var j = 0; j < P.length; j++) if (P[j].k === "save") { a.push('<text class="agm-savelab" x="' + P[j].x.toFixed(2) + '" y="' + (P[j].y - 2.0).toFixed(2) + '" text-anchor="middle">SAVE</text>'); break; }
     return '<svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' + a.join("") + "</svg>";
   }
+  // Self-contained <style> for export: the live SVG relies on external match.css
+  // classes + CSS vars, which don't travel into a serialized/standalone SVG. Resolve
+  // the theme vars to literal colours and embed the needed rules so the PNG matches.
+  function agmExportStyle() {
+    var rc = getComputedStyle(document.documentElement);
+    function v(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
+    var TEXT = v("--text", "#e8edf7"), BAD = v("--bad", "#ff6b81"), WARN = v("--warn", "#ffb454"),
+        MUTED = v("--muted", "#93a0bd"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#0b0f1a");
+    return "<style>" +
+      ".pitch-bg{fill:#14361f}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
+      ".dir-label{fill:rgba(255,255,255,.5);font-size:2.4px;font-weight:700;font-family:sans-serif}" +
+      ".agm-pass{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
+      ".agm-cross{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
+      ".agm-carry{stroke:" + TEXT + ";stroke-width:.34;fill:none}" +
+      ".agm-shotln{stroke:" + BAD + ";stroke-width:.45;fill:none}" +
+      ".agm-mk{fill:" + TEXT + "}.agm-mk-shot{fill:" + BAD + "}" +
+      ".agm-node{fill:" + CARD2 + ";stroke:" + TEXT + ";stroke-width:.22}" +
+      ".agm-node.start{fill:" + WARN + ";stroke:#c98a2e}.agm-node.shot{fill:" + BAD + ";stroke:#c9455a}.agm-node.save{fill:" + MUTED + ";stroke:#6b7488}" +
+      ".agm-nt{font-size:1.35px;font-weight:700;fill:" + TEXT + ";text-anchor:middle;dominant-baseline:central;font-family:sans-serif}.agm-nt.dark{fill:" + BG + "}" +
+      ".agm-scorelab{font-size:2px;font-weight:700;fill:" + TEXT + ";text-anchor:middle;font-family:sans-serif}" +
+      ".agm-xglab{font-size:1.7px;font-weight:700;fill:" + BAD + ";text-anchor:middle;font-family:sans-serif}" +
+      ".agm-savelab{font-size:1.5px;font-weight:600;fill:" + MUTED + ";text-anchor:middle;font-family:sans-serif}" +
+      "</style>";
+  }
+  function agmSanitize(s) { return String(s || "").replace(/[^A-Za-z0-9_]+/g, "_").replace(/^_+|_+$/g, ""); }
+  // Export one goal's SVG to a PNG (dependency-free) with an "Rshiri" watermark.
+  function exportGoalPNG(svgEl, g, D, btn) {
+    try {
+      var rc = getComputedStyle(document.documentElement);
+      var bg = (rc.getPropertyValue("--card") || "#161d31").trim();
+      var clone = svgEl.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.insertAdjacentHTML("afterbegin", agmExportStyle());   // embed resolved styles
+      var scale = 12, W = (PW + 4) * scale, H = (PH + 8) * scale;  // viewBox 104 x 72 → crisp px
+      clone.setAttribute("width", W); clone.setAttribute("height", H);
+      var svgStr = new XMLSerializer().serializeToString(clone);
+      var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
+      var img = new Image();
+      img.onload = function () {
+        var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+        var ctx = cv.getContext("2d");
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);          // dark card background
+        ctx.drawImage(img, 0, 0, W, H);
+        // "Rshiri" watermark — semi-transparent, bottom-right corner
+        ctx.font = "bold " + Math.round(H * 0.05) + "px -apple-system,'Segoe UI',Arial,sans-serif";
+        ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+        ctx.fillStyle = "rgba(255,255,255,0.30)";
+        ctx.fillText("Rshiri", W - Math.round(W * 0.015), H - Math.round(H * 0.02));
+        var fname = agmSanitize((D.id || "match") + "_" + (g.scorer || "goal") + "_" + g.min) + ".png";
+        cv.toBlob(function (blob) {
+          var a = document.createElement("a"); a.download = fname; a.href = URL.createObjectURL(blob);
+          document.body.appendChild(a); a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 200);
+          if (btn) { btn.textContent = "✓ Saved"; setTimeout(function () { btn.textContent = "⤓ Download PNG"; }, 1500); }
+        }, "image/png");
+      };
+      img.onerror = function () { if (btn) btn.textContent = "Export failed"; };
+      img.src = url;
+    } catch (e) { if (btn) btn.textContent = "Export failed"; }
+  }
   function buildAllGoals(D) {
     var host = document.getElementById("mv-goals");
     if (!host) return;
@@ -911,7 +971,13 @@
     function sel(i) {
       [].forEach.call(host.querySelectorAll(".agm-tab"), function (b, j) { b.classList.toggle("active", j === i); });
       var g = seqs[i];
-      feat.innerHTML = meta(g) + roster(g) + '<div class="pitch-wrap">' + agmSeqSVG(g, numMap, D) + "</div>" + legend;
+      feat.innerHTML = meta(g) +
+        '<div class="agm-actions"><button type="button" class="agm-dl">⤓ Download PNG</button></div>' +
+        roster(g) + '<div class="pitch-wrap">' + agmSeqSVG(g, numMap, D) + "</div>" + legend;
+      var btn = feat.querySelector(".agm-dl");
+      if (btn) btn.addEventListener("click", function () {
+        exportGoalPNG(feat.querySelector("svg.pitch-svg"), g, D, btn);
+      });
     }
     host.querySelector(".agm-tabs").addEventListener("click", function (e) {
       var b = e.target.closest(".agm-tab"); if (!b) return; sel(+b.getAttribute("data-i"));
