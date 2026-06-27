@@ -99,7 +99,9 @@
       block("Pass network", "mv-network") +
       block("Line-ups", "mv-lineups") +
       // All Goals Map sits below every stats section (last block on the page).
-      (hasGoals ? block("All goals map", "mv-goals") : "");
+      (hasGoals ? block("All goals map", "mv-goals") : "") +
+      // Animated "movie" replays of each goal sit directly below the static map.
+      (hasGoals ? block("Goal replays", "mv-goals-anim") : "");
 
     if (hasStats) buildMatchStats(rec, D);
     buildShots(D);
@@ -108,6 +110,7 @@
     buildNetwork(D);
     buildLineups(D);
     if (hasGoals) buildAllGoals(D);
+    if (hasGoals) buildGoalReplays(D);
   }
 
   function scoreboard(D) {
@@ -1033,6 +1036,309 @@
       var b = e.target.closest(".agm-tab"); if (!b) return; sel(+b.getAttribute("data-i"));
     });
     var def = 0; seqs.forEach(function (g, i) { if (g.players > seqs[def].players) def = i; });  // open on the richest move
+    sel(def);
+  }
+
+  /* ================= ANIMATED GOAL REPLAYS ================= */
+  // A "movie" version of the All Goals Map: the ball physically travels the build-up —
+  // gliding along passes, curving on crosses, carrying on dribbles, then firing the shot
+  // into the net. Reuses the SAME geometry (tx/ty, pitchMarkup, buildGoalSequences) and
+  // CSS classes as the static map, so the still frame at rest IS the All Goals Map.
+  var AGM_ANIM_LABEL = { pass: "Pass", cross: "Cross", carry: "Carry / dribble", shotln: "Shot", shot: "Shot" };
+  function agmClamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function agmSegClass(t) { return t === "pass" ? "agm-pass" : t === "cross" ? "agm-cross" : t === "carry" ? "agm-carry" : "agm-shotln"; }
+  function agmSegMarker(t) { return t === "pass" ? "agmAp2" : t === "cross" ? "agmAc2" : t === "carry" ? "agmAc2" : "agmAs2"; }
+  function agmSegDpath(m) {
+    if (m.type === "cross") {
+      var dx = m.x2 - m.x1, dy = m.y2 - m.y1, len = Math.hypot(dx, dy) || 1, off = Math.min(7, len * 0.2);
+      var mx = (m.x1 + m.x2) / 2, my = (m.y1 + m.y2) / 2, cx = mx + (-dy / len) * off, cy = my + (dx / len) * off;
+      return "M" + m.x1.toFixed(2) + "," + m.y1.toFixed(2) + " Q" + cx.toFixed(2) + "," + cy.toFixed(2) + " " + m.x2.toFixed(2) + "," + m.y2.toFixed(2);
+    }
+    return "M" + m.x1.toFixed(2) + "," + m.y1.toFixed(2) + " L" + m.x2.toFixed(2) + "," + m.y2.toFixed(2);
+  }
+  // Order the goal's steps into ball-travel "moves": node→(pass)→pass-end→(carry)→next
+  // node … →(shot)→goal. Mirrors agmSeqSVG's segment logic so the path matches exactly.
+  function agmJourney(P) {
+    var mv = [];
+    for (var i = 0; i < P.length; i++) {
+      var pt = P[i];
+      if (pt.k === "pass") {
+        mv.push({ type: pt.cross ? "cross" : "pass", x1: pt.x, y1: pt.y, x2: pt.ex, y2: pt.ey, litNode: null });
+        if (i < P.length - 1) {
+          var nx = P[i + 1], L = Math.hypot(nx.x - pt.ex, nx.y - pt.ey);
+          mv.push({ type: nx.k === "save" ? "shotln" : "carry", x1: pt.ex, y1: pt.ey, x2: nx.x, y2: nx.y, litNode: i + 1, hidden: !(L > 1.0 && L <= AGM_MAX_SEG) });
+        }
+      } else if (i < P.length - 1) {
+        var nx2 = P[i + 1], L2 = Math.hypot(nx2.x - pt.x, nx2.y - pt.y);
+        mv.push({ type: nx2.k === "save" ? "shotln" : "carry", x1: pt.x, y1: pt.y, x2: nx2.x, y2: nx2.y, litNode: i + 1, hidden: !(L2 > 1.0 && L2 <= AGM_MAX_SEG) });
+      }
+    }
+    var Lp = P[P.length - 1], gx = tx(Lp.team, 99.4), gy = ty(Lp.team, 50), sl = Math.hypot(gx - Lp.x, gy - Lp.y);
+    mv.push({ type: "shot", x1: Lp.x, y1: Lp.y, x2: gx, y2: gy, litNode: null, hidden: !(sl <= AGM_MAX_SEG) });
+    mv.forEach(function (m) {
+      var len = Math.hypot(m.x2 - m.x1, m.y2 - m.y1);
+      if (m.hidden) { m.dur = 160; m.dwell = 0; }
+      else if (m.type === "pass" || m.type === "cross") { m.dur = agmClamp(380 + len * 9, 380, 950); m.dwell = 150; }
+      else if (m.type === "shot") { m.dur = 470; m.dwell = 0; }
+      else if (m.type === "shotln") { m.dur = 380; m.dwell = 120; }
+      else { m.dur = agmClamp(360 + len * 30, 360, 1500); m.dwell = 220; }   // carry/dribble — deliberately slower than a pass (you can't dribble at pass speed)
+    });
+    return mv;
+  }
+  // Generic rAF driver. R = { node(i), seg(i,state), action(type), ball(x,y), trail(pts[]) }.
+  // Returns a cancel fn. Used by BOTH the live SVG and the canvas video export.
+  function agmAnimateMove(mv, speed, R, done) {
+    var i = 0, t0 = performance.now(), arrived = false, trail = [], raf = null;
+    R.node(0);
+    function lerp(m, f) { return { x: m.x1 + (m.x2 - m.x1) * f, y: m.y1 + (m.y2 - m.y1) * f }; }
+    function loop(now) {
+      var m = mv[i], dur = Math.max(60, m.dur / speed), e = now - t0, f = Math.min(e, dur) / dur;
+      var pos = m.el ? m.el.getPointAtLength(f * m.len) : lerp(m, f);
+      R.seg(i, true); R.action(m.type); R.ball(pos.x, pos.y);
+      trail.push([pos.x, pos.y]); if (trail.length > 16) trail.shift(); R.trail(trail);
+      if (e >= dur && !arrived) { arrived = true; if (m.litNode != null) R.node(m.litNode); R.seg(i, "done"); }
+      if (e >= dur + (m.dwell || 0) / speed) { i++; arrived = false; t0 = now; if (i >= mv.length) { done(); return; } }
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
+    return function () { if (raf) cancelAnimationFrame(raf); };
+  }
+  function agmBuildAnimSVG(seq, numMap, D) {
+    function E(n, a) { var e = document.createElementNS("http://www.w3.org/2000/svg", n); if (a) for (var k in a) e.setAttribute(k, a[k]); return e; }
+    var P = seq.steps.map(function (st) {
+      var sd = st.team || seq.side;
+      return { k: st.k, player: st.player, xg: st.xg, team: sd, cross: !!st.cross, og: !!st.og,
+               x: tx(sd, st.x), y: ty(sd, st.y), ex: tx(sd, st.ex != null ? st.ex : st.x), ey: ty(sd, st.ey != null ? st.ey : st.y) };
+    });
+    var mv = agmJourney(P);
+    var teamName = seq.side === "home" ? D.home.name : D.away.name;
+    var dirTxt = seq.side === "home" ? (esc(teamName) + " attacking ▶") : ("◀ " + esc(teamName) + " attacking");
+    var defs = '<defs>' +
+      '<marker id="agmAp2" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk"/></marker>' +
+      '<marker id="agmAc2" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk"/></marker>' +
+      '<marker id="agmAs2" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk-shot"/></marker></defs>';
+    var L = P[P.length - 1], ly = Math.max(3.4, L.y - 2.0), labels = "";
+    labels += '<text class="agm-scorelab" x="' + L.x.toFixed(2) + '" y="' + (ly - 1.7).toFixed(2) + '">' + esc(seq.scorer) + "</text>";
+    if (L.xg != null) labels += '<text class="agm-xglab" x="' + L.x.toFixed(2) + '" y="' + ly.toFixed(2) + '">xG ' + L.xg.toFixed(2) + "</text>";
+    for (var j = 0; j < P.length; j++) if (P[j].k === "save") { labels += '<text class="agm-savelab" x="' + P[j].x.toFixed(2) + '" y="' + (P[j].y - 2.0).toFixed(2) + '" text-anchor="middle">SAVE</text>'; break; }
+    var svg = E("svg", { class: "pitch-svg", viewBox: "-2 -2 " + (PW + 4) + " " + (PH + 8) });
+    var gPitch = E("g", {});
+    gPitch.innerHTML = defs + pitchMarkup() +
+      '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + dirTxt + "</text>" + labels;
+    svg.appendChild(gPitch);
+    mv.forEach(function (m) {
+      if (m.hidden) { m.len = Math.hypot(m.x2 - m.x1, m.y2 - m.y1); m.el = null; return; }
+      var p = E("path", { class: agmSegClass(m.type), d: agmSegDpath(m), "marker-end": "url(#" + agmSegMarker(m.type) + ")" });
+      svg.appendChild(p); m.el = p; m.len = p.getTotalLength();
+    });
+    var nodeEls = P.map(function (pt, i) {
+      var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
+      var num = numMap[agmNorm(pt.player)], label = pt.og ? "OG" : ((num != null) ? num : (agmIni(pt.player) || (i + 1)));
+      var dark = (cls === "start" || cls === "shot" || cls === "save");
+      var ttl = pt.og ? ("Own goal — " + (pt.player || "")) :
+        ((pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
+        (pt.player || ("Touch " + (i + 1))) + (pt.k === "pass" && pt.cross ? " · cross" : "") + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : ""));
+      var g = E("g", {});
+      var t = E("title"); t.textContent = ttl; g.appendChild(t);
+      g.appendChild(E("circle", { class: "agm-node" + (cls ? " " + cls : ""), cx: pt.x.toFixed(2), cy: pt.y.toFixed(2), r: 1.3 }));
+      var tx2 = E("text", { class: "agm-nt" + (dark ? " dark" : ""), x: pt.x.toFixed(2), y: pt.y.toFixed(2) }); tx2.textContent = label;
+      g.appendChild(tx2); svg.appendChild(g); return g;
+    });
+    var trail = E("polyline", { class: "agm-trail", points: "" }); svg.appendChild(trail);
+    var ball = E("circle", { class: "agm-ball", cx: P[0].x.toFixed(2), cy: P[0].y.toFixed(2), r: 1.45 }); ball.style.opacity = "0"; svg.appendChild(ball);
+    var glast = mv[mv.length - 1], gx = glast.x2, gy = glast.y2;
+    var goalText = E("text", { class: "agm-goalflash", x: (seq.side === "home" ? gx - 10 : gx + 10).toFixed(2), y: Math.max(6, gy - 7).toFixed(2), "text-anchor": "middle" });
+    goalText.textContent = "Goal!"; goalText.style.opacity = "0"; svg.appendChild(goalText);
+
+    // Scorer-as-player: the finishing node (last shot touch) runs ONTO the ball — i.e. it
+    // travels with the ball through the carry that delivers play to the scorer, then plants
+    // and shoots. Skipped for own goals (no real scorer movement to show).
+    var scorerIdx = P.length - 1, moveScorer = scorerIdx > 0 && !P[scorerIdx].og, carryMoveIdx = null;
+    for (var mi = 0; mi < mv.length; mi++) if (mv[mi].litNode === scorerIdx) { carryMoveIdx = mi; break; }
+    if (carryMoveIdx == null) moveScorer = false;
+    var scorerG = nodeEls[scorerIdx], restX = P[scorerIdx].x, restY = P[scorerIdx].y;
+    if (moveScorer) svg.appendChild(scorerG);   // keep the scorer marker above the ball while it runs with it
+
+    var api = { svg: svg, mv: mv, P: P, gx: gx, gy: gy, onAction: null, onDone: null, _cancel: null };
+    function goalFlash() { var t0 = performance.now(); (function f(now) { var e = (now - t0) / 600; if (e >= 1) { goalText.style.opacity = "1"; return; } goalText.style.opacity = String(e); requestAnimationFrame(f); })(performance.now()); }
+    api.stop = function () { if (api._cancel) { api._cancel(); api._cancel = null; } };
+    api.restState = function () {
+      api.stop();
+      mv.forEach(function (m) { if (m.el) m.el.style.opacity = "1"; });
+      nodeEls.forEach(function (g) { g.style.opacity = "1"; g.removeAttribute("transform"); });
+      ball.style.opacity = "0"; trail.setAttribute("points", ""); goalText.style.opacity = "0";
+    };
+    api.play = function (speed) {
+      api.stop();
+      mv.forEach(function (m) { if (m.el) m.el.style.opacity = "0.16"; });
+      nodeEls.forEach(function (g, i) { g.style.opacity = i === 0 ? "1" : "0.28"; g.removeAttribute("transform"); });
+      if (moveScorer) scorerG.style.opacity = "0";   // scorer appears only once they get on the ball
+      goalText.style.opacity = "0"; trail.setAttribute("points", "");
+      ball.style.opacity = "1"; ball.setAttribute("cx", P[0].x.toFixed(2)); ball.setAttribute("cy", P[0].y.toFixed(2));
+      var curMove = -1;
+      var R = {
+        node: function (i) { if (nodeEls[i]) nodeEls[i].style.opacity = "1"; },
+        seg: function (i, st) { curMove = i; if (mv[i].el) mv[i].el.style.opacity = (st === "done") ? "0.6" : "1"; },
+        action: function (t) { if (api.onAction) api.onAction(t); },
+        ball: function (x, y) {
+          ball.setAttribute("cx", x.toFixed(2)); ball.setAttribute("cy", y.toFixed(2));
+          if (moveScorer && curMove === carryMoveIdx) {   // scorer runs onto the ball and carries it to the shot
+            scorerG.style.opacity = "1";
+            scorerG.setAttribute("transform", "translate(" + (x - restX).toFixed(2) + "," + (y - restY).toFixed(2) + ")");
+          }
+        },
+        trail: function (pts) { trail.setAttribute("points", pts.map(function (p) { return p[0].toFixed(2) + "," + p[1].toFixed(2); }).join(" ")); }
+      };
+      api._cancel = agmAnimateMove(mv, speed, R, function () { api._cancel = null; if (moveScorer) scorerG.removeAttribute("transform"); goalFlash(); if (api.onDone) api.onDone(); });
+    };
+    api.restState();
+    return api;
+  }
+  // Record the replay to a WebM video (dependency-free: MediaRecorder + canvas.captureStream).
+  // Backdrop = the canonical static All Goals Map (agmSeqSVG) rasterised once; the ball +
+  // comet trail are drawn per frame on top, with the same header band + credit as the PNG.
+  function exportGoalVideo(anim, seq, g, D, numMap, btn, speed) {
+    var canRec = window.MediaRecorder && typeof document.createElement("canvas").captureStream === "function";
+    if (!canRec) { if (btn) btn.textContent = "Saving PNG…"; exportGoalPNG(anim.svg, g, D, btn); return; }
+    try {
+      var rc = getComputedStyle(document.documentElement);
+      function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
+      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
+          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var F = "-apple-system,'Segoe UI',Arial,sans-serif";
+      var wrap = document.createElement("div"); wrap.innerHTML = agmSeqSVG(seq, numMap, D);
+      var s = wrap.firstChild; s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      s.insertAdjacentHTML("afterbegin", agmExportStyle());
+      var scale = 10, W = (PW + 4) * scale, SH = (PH + 8) * scale, band = Math.round(W * 0.11), H = SH + band;
+      s.setAttribute("width", W); s.setAttribute("height", SH);
+      var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(s));
+      var img = new Image();
+      img.onerror = function () { if (btn) btn.textContent = "Export failed"; };
+      img.onload = function () {
+        var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+        var ctx = cv.getContext("2d");
+        function MX(x) { return (x + 2) * scale; } function MY(y) { return band + (y + 2) * scale; }
+        function drawBase() {
+          ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+          var pad = Math.round(W * 0.022);
+          var hn = (D.home && D.home.name) || "Home", an = (D.away && D.away.name) || "Away";
+          var hs = (D.home && D.home.score != null) ? D.home.score : "", as = (D.away && D.away.score != null) ? D.away.score : "";
+          ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+          ctx.fillStyle = text; ctx.font = "bold " + Math.round(band * 0.32) + "px " + F;
+          ctx.fillText(hn + "  " + hs + "–" + as + "  " + an, pad, Math.round(band * 0.40));
+          ctx.fillStyle = muted; ctx.font = Math.round(band * 0.20) + "px " + F;
+          ctx.fillText([(D.stage || "").trim(), agmFmtDate(D.date)].filter(Boolean).join("   ·   "), pad, Math.round(band * 0.74));
+          ctx.textAlign = "right"; ctx.fillStyle = bad; ctx.font = "bold " + Math.round(band * 0.24) + "px " + F;
+          ctx.fillText("⚽ " + (g.scorer || "") + "  " + g.min + "'", W - pad, Math.round(band * 0.55));
+          ctx.strokeStyle = line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, band - 1); ctx.lineTo(W, band - 1); ctx.stroke();
+          ctx.drawImage(img, 0, band, W, SH);
+          ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+          ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.font = "bold " + Math.round(W * 0.017) + "px " + F;
+          ctx.fillText("All rights reserved to @RShiri", W - pad, H - Math.round(W * 0.012));
+        }
+        function drawBall(pos, trail) {
+          if (trail && trail.length > 1) {
+            ctx.strokeStyle = "#fff7c2"; ctx.lineWidth = 0.7 * scale; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.globalAlpha = 0.6;
+            ctx.beginPath(); trail.forEach(function (p, k) { var X = MX(p[0]), Y = MY(p[1]); if (k) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }); ctx.stroke(); ctx.globalAlpha = 1;
+          }
+          ctx.fillStyle = "#fff"; ctx.strokeStyle = bg; ctx.lineWidth = 0.3 * scale;
+          ctx.beginPath(); ctx.arc(MX(pos[0]), MY(pos[1]), 1.45 * scale, 0, 6.2832); ctx.fill(); ctx.stroke();
+        }
+        drawBase();
+        var stream = cv.captureStream(30);
+        var mime = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0] || "video/webm";
+        var rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4000000 }), chunks = [];
+        rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+        rec.onstop = function () {
+          var blob = new Blob(chunks, { type: mime });
+          var fname = agmSanitize((D.id || "match") + "_" + (g.scorer || "goal") + "_" + g.min) + ".webm";
+          var a = document.createElement("a"); a.download = fname; a.href = URL.createObjectURL(blob);
+          document.body.appendChild(a); a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 200);
+          if (btn) { btn.textContent = "✓ Saved"; setTimeout(function () { btn.textContent = "⤓ Download video"; }, 1800); }
+        };
+        rec.start();
+        var cur = [anim.P[0].x, anim.P[0].y], curTrail = [];
+        var R = {
+          node: function () {}, seg: function () {}, action: function () {},
+          ball: function (x, y) { cur = [x, y]; },
+          trail: function (pts) { curTrail = pts.slice(); drawBase(); drawBall(cur, curTrail); }
+        };
+        agmAnimateMove(anim.mv, speed, R, function () {
+          var t0 = performance.now();
+          (function gf(now) {
+            var e = (now - t0) / 800; drawBase(); drawBall([anim.gx, anim.gy], curTrail);
+            ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.globalAlpha = Math.min(1, e * 1.4);
+            ctx.fillStyle = bad; ctx.font = "bold " + Math.round(band * 0.55) + "px " + F;
+            ctx.fillText("Goal!", MX(anim.gx) + (seq.side === "home" ? -10 * scale : 10 * scale), MY(anim.gy) - 7 * scale);
+            ctx.globalAlpha = 1;
+            if (e < 1) requestAnimationFrame(gf); else setTimeout(function () { try { rec.stop(); } catch (z) {} }, 140);
+          })(performance.now());
+        });
+        if (btn) btn.textContent = "● Recording…";
+      };
+      img.src = url;
+    } catch (e) { if (btn) btn.textContent = "Export failed"; }
+  }
+  function buildGoalReplays(D) {
+    var host = document.getElementById("mv-goals-anim");
+    if (!host) return;
+    var seqs = buildGoalSequences(D);
+    if (!seqs.length) { if (host.parentNode) host.parentNode.style.display = "none"; return; }
+    var numMap = agmNumMap(D);
+    var legend = '<div class="agm-legend">' +
+      '<span class="it"><span class="agm-lz">7</span>Touch (shirt #)</span>' +
+      '<span class="it"><span class="agm-lz start"></span>Move start</span>' +
+      '<span class="it"><span class="agm-lz shot"></span>Shot (xG)</span>' +
+      '<span class="it"><span class="agm-lln"></span>Pass</span>' +
+      '<span class="it"><svg class="agm-crosslg" width="20" height="9" viewBox="0 0 20 9"><path d="M1,7 Q10,0 19,7"/></svg>Cross</span>' +
+      '<span class="it"><span class="agm-lln carry"></span>Carry / dribble</span>' +
+      '<span class="it"><span class="agm-lln shot"></span>Shot</span></div>';
+    function metaLine(g) {
+      var counts = g.players + " player" + (g.players === 1 ? "" : "s") + " · " + g.passes + " pass" + (g.passes === 1 ? "" : "es") +
+        " · " + g.dribbles + " dribble" + (g.dribbles === 1 ? "" : "s");
+      return '<div class="agm-meta"><span class="agm-pill lead">' + counts + '</span>' +
+        (g.xg != null ? '<span class="agm-pill">xG <b>' + g.xg.toFixed(2) + "</b></span>" : "") +
+        (g.assist ? '<span class="agm-pill">assist <b>' + esc(g.assist) + "</b></span>" : "") + "</div>";
+    }
+    var tabs = '<div class="agm-tabs">' + seqs.map(function (g, i) {
+      var col = g.side === "home" ? D.home.color : D.away.color;
+      return '<button class="agm-tab" data-i="' + i + '"><span class="sw" style="background:' + col + '"></span><span class="mm">' +
+        g.min + "'</span> " + esc(g.scorer) + "</button>";
+    }).join("") + "</div>";
+    host.innerHTML = tabs + '<div id="agm-anim-feat"></div>';
+    var feat = document.getElementById("agm-anim-feat");
+    var current = null;
+    function sel(i) {
+      [].forEach.call(host.querySelectorAll(".agm-tab"), function (b, j) { b.classList.toggle("active", j === i); });
+      if (current) current.stop();
+      var g = seqs[i];
+      feat.innerHTML = metaLine(g) +
+        '<div class="agm-anim-bar">' +
+          '<button type="button" class="agm-dl agm-play">▶ Play</button>' +
+          '<span class="spd">Speed <input type="range" class="agm-spd" min="0.5" max="2" step="0.5" value="1"><b class="agm-spdv">1×</b></span>' +
+          '<button type="button" class="agm-dl agm-vid">⤓ Download video</button>' +
+          '<span class="agm-action">Press play</span>' +
+        "</div>" +
+        '<div class="pitch-wrap"></div>' + legend;
+      var anim = agmBuildAnimSVG(g, numMap, D);
+      current = anim;
+      var actionEl = feat.querySelector(".agm-action");
+      anim.onAction = function (t) { actionEl.innerHTML = "now: <b>" + (AGM_ANIM_LABEL[t] || t) + "</b>"; };
+      anim.onDone = function () { actionEl.innerHTML = "now: <b>Goal!</b>"; };
+      feat.querySelector(".pitch-wrap").appendChild(anim.svg);
+      var spd = feat.querySelector(".agm-spd"), spdv = feat.querySelector(".agm-spdv");
+      var speed = 1;
+      spd.addEventListener("input", function () { speed = parseFloat(spd.value); spdv.textContent = speed + "×"; });
+      var playBtn = feat.querySelector(".agm-play");
+      playBtn.addEventListener("click", function () { playBtn.textContent = "↻ Replay"; anim.play(speed); });
+      var vidBtn = feat.querySelector(".agm-vid");
+      vidBtn.addEventListener("click", function () { exportGoalVideo(anim, g, g, D, numMap, vidBtn, speed); });
+    }
+    host.querySelector(".agm-tabs").addEventListener("click", function (e) {
+      var b = e.target.closest(".agm-tab"); if (!b) return; sel(+b.getAttribute("data-i"));
+    });
+    var def = 0; seqs.forEach(function (g, i) { if (g.players > seqs[def].players) def = i; });
     sel(def);
   }
 
