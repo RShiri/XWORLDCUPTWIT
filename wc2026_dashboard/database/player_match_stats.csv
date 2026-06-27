@@ -1983,6 +1983,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_27_Egypt_vs_Iran,2026-06-27,Iran,Egypt,403866,Shahriyar Moghanloo,Sub,0,32,0,0,0,0,6.4,0.0,0,0,9,5,2,13,1,0,3,0,0,0,0,0
 2026_06_27_Egypt_vs_Iran,2026-06-27,Iran,Egypt,447553,Saleh Hardani,Sub,0,53,0,0,0,0,6.5,0.0,0,0,22,18,0,33,2,1,0,0,0,0,1,0
 2026_06_27_Egypt_vs_Iran,2026-06-27,Iran,Egypt,133390,Alireza Jahanbakhsh,Sub,0,8,0,0,0,0,6.3,0.0,0,0,0,0,1,1,0,0,0,0,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,134040,Max Crocombe,GK,1,95,0,0,0,0,6.3,0.0,0,0,28,21,0,41,0,0,0,0,0,2,0,5
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,114686,Tim Payne,DR,1,63,0,0,0,0,6.1,0.02,1,0,26,19,0,41,1,0,0,1,0,2,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,483919,Finn Surman,DC,1,95,0,0,0,0,4.6,0.0,0,0,50,45,0,63,2,0,0,0,1,2,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,496299,Tyler Bindon,DC,1,95,0,0,0,0,5.9,0.08,1,0,50,43,0,74,2,1,1,0,1,10,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,402095,Liberato Cacace,DL,1,78,0,0,0,0,6.6,0.0,0,0,30,24,0,53,2,1,1,2,0,5,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,443658,Marko Stamenic,DMC,1,95,0,0,1,0,6.0,0.0,0,0,60,58,0,74,1,0,1,1,2,4,2,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,395377,Joe Bell,DMC,1,63,0,0,0,0,6.0,0.0,0,0,38,32,0,50,0,1,3,0,0,5,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,379696,Sarpreet Singh,AMR,1,45,0,0,0,0,6.1,0.0,0,0,15,10,0,21,1,0,0,0,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,137327,Ryan Thomas,AMC,1,45,0,0,0,0,6.1,0.0,0,0,13,10,0,21,2,0,0,0,1,0,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,455336,Elijah Just,AML,1,95,1,0,1,0,7.3,0.25,3,2,43,35,0,59,3,1,0,2,1,0,2,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,73380,Chris Wood,FW,1,95,0,0,0,0,6.1,0.0,0,0,7,7,2,16,2,0,0,0,1,1,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,556000,Jesse Randall,Sub,0,50,0,0,0,0,5.8,0.03,1,0,13,10,1,23,0,0,0,0,0,1,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,42898,Michael Boxall,Sub,0,32,0,0,0,0,5.9,0.0,0,0,17,17,0,18,0,0,0,0,1,1,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,455329,Francis de Vries,Sub,0,17,0,0,0,0,6.2,0.0,0,0,7,5,0,10,0,1,0,1,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,455331,Callum McCowatt,Sub,0,32,0,0,0,0,5.7,0.0,0,0,24,22,0,27,1,0,0,0,2,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,New Zealand,Belgium,457096,Ben Old,Sub,0,50,0,0,0,0,6.1,0.0,0,0,14,11,0,20,0,1,0,1,0,1,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,73798,Thibaut Courtois,GK,1,95,0,0,0,0,6.9,0.0,0,0,31,22,0,44,0,0,2,0,0,3,0,1
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,141169,Timothy Castagne,DR,1,95,0,0,0,0,7.0,0.05,1,0,44,41,0,70,1,4,0,0,0,4,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,129832,Brandon Mechele,DC,1,95,0,0,0,0,6.9,0.07,1,0,58,54,0,71,1,0,1,1,2,7,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,399961,Arthur Theate,DC,1,95,0,0,0,0,7.0,0.29,4,1,46,42,0,58,1,2,2,0,0,5,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,392647,Maxim De Cuyper,DL,1,95,0,0,0,0,7.3,0.05,2,1,59,52,3,76,1,2,0,0,1,1,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,136345,Youri Tielemans,DMC,1,84,0,0,0,0,6.4,0.01,1,0,56,53,0,65,1,0,1,0,1,1,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,243567,Hans Vanaken,DMC,1,95,0,0,0,0,7.4,0.24,2,0,51,50,7,61,2,0,0,0,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,388098,Jeremy Doku,AMR,1,55,0,0,0,0,7.0,0.11,2,1,25,19,2,38,0,0,0,2,0,0,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,73084,Kevin De Bruyne,AMC,1,71,1,0,0,0,8.5,0.36,7,2,47,41,4,66,3,0,0,2,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,113994,Leandro Trossard,AML,1,71,2,0,0,0,9.3,1.7,7,2,30,26,4,49,1,1,0,1,1,2,2,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,386390,Charles De Ketelaere,FW,1,84,0,0,0,0,7.2,0.11,1,1,34,23,2,54,3,0,1,1,2,2,1,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,78498,Romelu Lukaku,Sub,0,11,1,1,0,0,7.5,0.48,1,1,4,4,1,5,0,0,0,0,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,365308,Alexis Saelemaekers,Sub,0,24,1,0,0,0,7.2,0.12,2,1,16,13,0,22,2,0,0,0,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,399999,Nicolas Raskin,Sub,0,11,0,1,0,0,7.1,0.0,0,0,5,5,1,8,2,0,1,0,0,1,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,400815,Amadou Onana,Sub,0,24,0,0,0,0,6.0,0.02,2,0,10,9,0,15,1,1,0,0,0,0,0,0
+2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,475462,Matias Fernandez-Pardo,Sub,0,40,0,0,0,0,6.7,0.54,2,0,10,9,4,18,2,0,0,0,0,0,1,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,30966,Fernando Muslera,GK,1,45,0,0,0,0,5.0,0.0,0,0,13,7,0,15,0,0,0,0,0,0,0,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,145385,Guillermo Varela,DR,1,96,0,0,1,0,6.3,0.0,0,0,21,17,0,41,0,2,1,0,0,3,0,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,347178,Mathias Olivera,DC,1,96,0,0,0,0,7.3,0.0,0,0,46,38,0,58,7,1,0,1,2,1,1,0
