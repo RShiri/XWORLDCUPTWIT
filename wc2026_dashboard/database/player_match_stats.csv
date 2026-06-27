@@ -1953,3 +1953,34 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,379205,Sergino Dest,Sub,0,24,0,0,0,0,6.2,0.0,0,0,3,3,1,8,0,1,0,1,0,0,0,0
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,397465,Malik Tillman,Sub,0,14,0,0,0,0,5.8,0.0,0,0,1,1,0,5,0,0,0,0,0,0,1,0
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,440159,Alex Freeman,Sub,0,23,0,0,0,0,6.3,0.0,0,0,7,5,1,17,1,0,0,0,0,4,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,30966,Fernando Muslera,GK,1,45,0,0,0,0,5.0,0.0,0,0,13,7,0,15,0,0,0,0,0,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,145385,Guillermo Varela,DR,1,96,0,0,1,0,6.3,0.0,0,0,21,17,0,41,0,2,1,0,0,3,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,347178,Mathias Olivera,DC,1,96,0,0,0,0,7.3,0.0,0,0,46,38,0,58,7,1,0,1,2,1,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,448735,Sebastian Caceres,DC,1,96,0,0,0,0,6.0,0.0,0,0,37,33,0,44,0,2,0,0,0,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,403752,Juan Manuel Sanabria,DL,1,69,0,0,1,0,6.7,0.0,0,0,11,7,0,30,8,1,0,0,1,3,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,408962,Manuel Ugarte,DMC,1,44,0,0,0,0,6.4,0.0,0,0,15,10,1,21,3,1,0,0,0,2,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,436657,Agustin Canobbio,MR,1,96,0,0,0,1,4.8,0.06,1,0,13,11,0,29,1,0,0,0,3,1,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,303657,Rodrigo Bentancur,MC,1,96,0,0,0,0,6.7,0.01,1,0,43,35,0,64,6,3,0,0,3,3,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,344644,Federico Valverde,MC,1,56,0,0,0,0,6.3,0.0,0,0,15,10,1,24,3,1,0,0,0,0,2,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,460758,Maxi Araujo,ML,1,96,0,0,0,0,6.6,0.0,0,0,20,19,2,45,3,0,0,4,0,0,3,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,400828,Darwin Nunez,FW,1,96,0,0,0,0,6.0,0.01,1,0,19,12,1,28,0,1,2,0,0,0,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,231141,Sergio Rochet,Sub,0,51,0,0,0,0,6.0,0.0,0,0,18,8,0,20,0,0,0,0,0,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,345389,Nicolas de la Cruz,Sub,0,52,0,0,1,0,6.5,0.01,1,1,18,14,0,32,1,1,1,1,2,0,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,382265,Brian Rodriguez,Sub,0,27,0,0,0,0,6.0,0.0,0,0,7,4,0,17,0,0,0,1,0,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,484254,Federico Vinas,Sub,0,40,0,0,0,0,6.3,0.2,1,0,5,3,0,14,3,1,0,0,3,1,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,332823,Unai Simon,GK,1,96,0,0,0,0,7.4,0.0,0,0,35,30,0,55,0,0,1,0,0,1,0,2
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,254582,Marcos Llorente,DR,1,96,0,1,0,0,8.0,0.0,0,0,50,47,1,65,7,1,0,1,1,4,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,122117,Aymeric Laporte,DC,1,96,0,0,0,0,7.7,0.0,0,0,102,94,1,117,0,3,5,0,1,8,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,498386,Pau Cubarsi,DC,1,96,0,0,0,0,7.0,0.11,1,0,87,85,0,96,0,0,3,0,1,5,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,363496,Marc Cucurella,DL,1,96,0,0,0,0,6.6,0.0,0,0,42,36,0,55,1,1,0,0,0,1,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,303139,Rodri,DMC,1,96,0,0,0,0,7.0,0.0,0,0,106,100,0,118,8,0,1,0,3,1,2,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,402197,Pedri,DMC,1,59,0,0,0,0,7.0,0.0,0,0,49,43,1,63,3,0,0,1,1,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,480249,Lamine Yamal,AMR,1,75,0,0,0,0,7.1,0.03,1,0,27,19,1,52,1,1,0,5,0,0,3,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,238916,Mikel Merino,AMC,1,59,0,0,0,0,6.7,0.0,0,0,23,19,0,32,1,3,1,0,2,0,2,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,395242,Alex Baena,AML,1,65,1,0,1,0,7.4,0.1,1,1,24,18,1,40,3,0,1,0,4,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,298839,Mikel Oyarzabal,FW,1,75,0,0,0,0,6.1,0.01,1,0,20,15,0,33,0,0,1,0,0,1,3,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,261212,Dani Olmo,Sub,0,37,0,0,0,0,6.4,0.11,1,0,17,14,0,24,0,0,0,2,1,0,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,294193,Fabian Ruiz,Sub,0,37,0,0,0,0,6.3,0.0,0,0,25,22,1,28,0,0,0,0,0,1,0,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,349760,Ferran Torres,Sub,0,21,0,0,0,0,6.4,0.35,1,0,2,2,0,10,0,0,1,1,0,0,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,403865,Yeremy Pino,Sub,0,31,0,0,0,0,6.0,0.0,0,0,9,7,0,13,0,0,1,0,0,0,1,0
+2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,408449,Nico Williams,Sub,0,21,0,0,0,0,6.1,0.0,0,0,5,2,0,9,0,0,1,0,0,1,0,0
