@@ -121,7 +121,7 @@
     var goals = D.goals.map(function (g) {
       var as = g.assist ? '<span class="as">(' + esc(g.assist) + ")</span>" : "";
       return '<span class="goal-ev ' + g.team + '"><span class="min">' + g.min + "'</span> ⚽ " +
-        esc(g.scorer) + (g.pen ? " (P)" : "") + " " + as + "</span>";
+        esc(g.scorer) + (g.pen ? " (P)" : "") + (g.own ? " (OG)" : "") + " " + as + "</span>";
     }).join("");
 
     var pngBtn = D.png
@@ -829,6 +829,7 @@
       '" cx="' + x.toFixed(2) + '" cy="' + y.toFixed(2) + '" r="1.3"/>' +
       '<text class="agm-nt' + (dark ? " dark" : "") + '" x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '">' + esc(label) + "</text></g>";
   }
+  var AGM_MAX_SEG = 52;  // pitch units (~half length); drop diagram segments longer than this (glitched source coords)
   function agmSeqSVG(seq, numMap, D) {
     var defs = '<defs>' +
       '<marker id="agmAp" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk"/></marker>' +
@@ -850,11 +851,16 @@
         var nx = P[i + 1];
         var fx = pt.k === "pass" ? pt.ex : pt.x, fy = pt.k === "pass" ? pt.ey : pt.y;
         var cls = (nx.k === "save") ? "agm-shotln" : "agm-carry";                   // saved effort→keeper = red; else solid carry
-        if (Math.hypot(nx.x - fx, nx.y - fy) > 1.0) a.push(agmLine(fx, fy, nx.x, nx.y, cls));
+        var dcon = Math.hypot(nx.x - fx, nx.y - fy);
+        if (dcon > 1.0 && dcon <= AGM_MAX_SEG) a.push(agmLine(fx, fy, nx.x, nx.y, cls)); // skip cross-pitch spans from bad source coords
       }
     }
     var L = P[P.length - 1];
-    a.push(agmLine(L.x, L.y, tx(L.team, 99.4), ty(L.team, 50), "agm-shotln"));      // finishing shot → goal
+    var gx = tx(L.team, 99.4), gy = ty(L.team, 50);
+    // Only draw the shot→goal line when the shot is plausibly in the attacking half.
+    // A few feeds carry a glitched goal coordinate (e.g. at the wrong end); without
+    // this guard that produced a line straight across the whole pitch.
+    if (Math.hypot(gx - L.x, gy - L.y) <= AGM_MAX_SEG) a.push(agmLine(L.x, L.y, gx, gy, "agm-shotln"));
     P.forEach(function (pt, i) {
       var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
       var num = numMap[agmNorm(pt.player)];

@@ -73,7 +73,7 @@ def _match_extras(match_data):
             continue
         t = e.get("type", {}).get("displayName", "")
         quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
-        if t == "Goal" and "OwnGoal" not in quals:
+        if t == "Goal" and not (e.get("isOwnGoal") or "OwnGoal" in quals):
             goals[pid] = goals.get(pid, 0) + 1
         if "IntentionalGoalAssist" in quals:
             assists[pid] = assists.get(pid, 0) + 1
@@ -194,6 +194,23 @@ def extract(match_data):
             max_min = minute
 
         if tname in SHOT_TYPES:
+            ev_quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+            is_own_goal = bool(ev.get("isOwnGoal")) or ("OwnGoal" in ev_quals)
+            if tname == "Goal" and is_own_goal:
+                # Own goal: counts for the OPPONENT (the beneficiary), and is NOT a shot
+                # by either side. The raw event sits at the scorer's own-goal end with the
+                # conceding team's id, which previously credited the wrong team and drew a
+                # cross-pitch line on the All Goals Map. Record a goal-timeline entry for the
+                # opponent and skip the shot list so shot maps / xG / All Goals Map stay clean.
+                goals.append({
+                    "team": "away" if side == "home" else "home",
+                    "min": minute,
+                    "scorer": player_full_name(match_data, ev.get("playerId")),
+                    "assist": None,
+                    "pen": False,
+                    "own": True,
+                })
+                continue
             xg, meta = shot_xg(ev)
             shots.append({
                 "team": side,
@@ -219,6 +236,7 @@ def extract(match_data):
                     "assist": (player_full_name(match_data, ev.get("relatedPlayerId"))
                                if ev.get("relatedPlayerId") else None),
                     "pen": meta["penalty"],
+                    "own": False,
                 })
         elif tname == "Pass":
             quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}

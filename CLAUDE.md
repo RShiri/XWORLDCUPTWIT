@@ -64,7 +64,33 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   (shots/passes/dribbles/goals/lineups), `build_players.py`→players.js,
   `build_database.py`→database/.
 
+## Match dashboard view (`match.js`)
+- **All Goals Map** (last section on each match page, below all stats): a per-goal,
+  Opta-style build-up reconstructed from `D.shots`/`D.passes`/`D.dribbles`/`D.saves` —
+  numbered shirt-# touch nodes, **dotted** passes, **curved dotted** crosses (`p.cross`),
+  **solid** carries/dribbles, orange move-start, red shot (scorer + xG floated above the
+  node), and a grey keeper-save node for rebounds. Reuses `tx()/ty()/pitchMarkup()`; 0–0
+  games render nothing. A per-goal **"Download PNG"** button serialises that goal's
+  SVG→canvas (dependency-free) with a metadata header (teams+score · stage · date ·
+  scorer+min) and an "All rights reserved to @RShiri" credit. `AGM_MAX_SEG` drops any
+  diagram segment longer than ~half the pitch (defends against glitched source coords).
+- **`build_match_details.py` per-match exports**: `shots[]` (`cross/key/through/prog`
+  flags, `body`), `passes[]`, `dribbles[]`, **`saves[]`** (keeper saves → rebound nodes),
+  `goals[]` (with `own`/`pen`), `lineups`.
+
 ## Gotchas (read before editing)
+- **Own goals**: WhoScored stores an own goal with `isOwnGoal:true`, the **conceding**
+  team's `teamId`, and coords at that player's own-goal end. `build_match_details.py` and
+  `renderer.py` credit it to the **opponent** (timeline `own:true`, shown "(OG)") and keep
+  it **out of `shots[]` / the shot map** — otherwise the wrong team is credited and the
+  shot map / All Goals Map plot a bogus goal at the wrong end (drew a line across the whole
+  pitch). Detect via `isOwnGoal or "OwnGoal" qualifier`. Team `score` totals come from the
+  scraper feed and are already correct.
+- **Concurrent scrapes**: `wc2026/_runlock.py` (`scrape_lock`) serialises scrapers so two
+  Task-Scheduler matches firing together don't collide on the shared undetected-chromedriver
+  (WinError 183 / wedged Chrome). `renderer.render_wc_dashboard` raises a clear error on an
+  empty stub instead of dividing by zero; `tools/catchup.py` `_is_real` treats a crash-stub
+  (has `_sources/_scraped_at` but no events/lineups) as incomplete so the daily sweep retries.
 - **Live PNGs must be in tracked `WorldCup2026/`**, NOT git-ignored `wc2026/output/`, or
   Infographic-PNG links 404. `find_png` prefers WorldCup2026 then falls back to output.
 - **Shot/pass maps**: `match.js` `ty()` flips the across-pitch y (`PH - y` for home) to

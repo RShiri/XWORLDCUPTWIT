@@ -141,6 +141,12 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
         type_name = ev.get("type", {}).get("displayName", "")
         if type_name not in _SHOT_TYPES:
             continue
+        # Own goals belong to the opponent and are not a shot by this team; the raw
+        # event sits at this team's own-goal end, which would plot a bogus "goal" dot
+        # at the wrong end of the shot map. Skip them.
+        _q = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        if ev.get("isOwnGoal") or "OwnGoal" in _q:
+            continue
         x_sb = _ws_to_sb_x(ev.get("x", 0))
         y_sb = 80 - ev.get("y", 0) * SCALE_Y
         body, situation, zone, big_chance, one_on_one, gm_y, gm_z = _extract_qualifiers(ev)
