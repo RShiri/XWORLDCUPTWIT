@@ -38,6 +38,20 @@
       <span><i class="q2"></i> 2nd — advance</span>
       <span>3rd place may advance as one of the best third-placed teams</span>
     </div>
+
+    <div class="section-head" style="margin-top:34px">
+      <h2>Knockout bracket</h2>
+      <p>The road from the Round of 32 to the final. Each tie shows its result once played;
+         until then it shows the slot it will be filled from. Group winners and runners-up are
+         filled in automatically once that group has finished all its matches (shown with their
+         group slot, e.g. <b>1A</b>); third-placed and later-round slots stay as placeholders.</p>
+    </div>
+    <div class="bracket-scroll">
+      <div class="bracket-inner">
+        <div class="bk-head" id="bracketHead"></div>
+        <div id="bracket"></div>
+      </div>
+    </div>
   </section>
 
   <!-- MATCHES (fixtures, results & full stats merged) -->
@@ -158,10 +172,11 @@
     </div>
 
     <div class="card full-card">
-      <h3>Who's good at both ends?</h3>
-      <p class="hint">Every team placed by the quality of chances they <b>create</b> per game (further right = more
-         dangerous attack) and the quality of chances they <b>allow</b> per game (higher up = meaner defence).
-         Top-right = strong both ways; bottom-left = leaky and blunt.</p>
+      <h3>Who's good at both ends? — attack vs. defence quality</h3>
+      <p class="hint">Each team is placed by how dangerous its <b>attack</b> is (further right = more/better chances
+         <b>created</b> per game) and how mean its <b>defence</b> is (higher up = fewer/worse chances <b>allowed</b>
+         per game). The dashed lines are the tournament average, splitting the pitch into four types of team — the
+         colour key below explains each. Top-right = strong both ways; bottom-left = leaky and blunt.</p>
       <div class="scatter-wrap" id="quadrant"></div>
     </div>
 
@@ -206,19 +221,11 @@
       <div class="table-scroll" id="agreement"></div>
     </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3>Unluckiest results (deserved more)</h3>
-        <p class="hint">Games where the side that <b>out-created</b> their opponent by the most xG still failed to win —
-           they made the better chances but didn't get the result. The biggest "should have won this" performances.</p>
-        <div class="table-scroll" id="unlucky"></div>
-      </div>
-      <div class="card">
-        <h3>Luckiest results (got away with it)</h3>
-        <p class="hint">The flip side: games where the side that won or drew was <b>out-chanced</b> by the most xG —
-           the scoreline flattered them.</p>
-        <div class="table-scroll" id="upsets"></div>
-      </div>
+    <div class="card full-card">
+      <h3>Unluckiest results (deserved more)</h3>
+      <p class="hint">Games where the side that <b>out-created</b> their opponent by the most xG still failed to win —
+         they made the better chances but didn't get the result. The biggest "should have won this" performances.</p>
+      <div class="table-scroll" id="unlucky"></div>
     </div>
   </section>
 
