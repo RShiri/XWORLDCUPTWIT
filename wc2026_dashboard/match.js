@@ -778,7 +778,7 @@
       for (var i = 0; i < g.length; i++) if (g[i].min === shot.min && agmNorm(g[i].scorer) === agmNorm(shot.player)) return g[i].assist;
       return null;
     }
-    return (D.shots || []).filter(function (s) { return s.goal; }).map(function (shot) {
+    var seqs = (D.shots || []).filter(function (s) { return s.goal; }).map(function (shot) {
       var T = agmT(shot);
       var chain = ev.filter(function (e) { return e.team === shot.team && e.t <= T && e.t >= T - 35; });
       var seq = [];
@@ -806,6 +806,18 @@
         dribbles: seq.filter(function (s) { return s.k === "dribble"; }).length, xg: shot.xg
       };
     });
+    // Own goals: not shots, but show them as a single "Own goal" node at the beneficiary's
+    // attacking end (coords were mirrored into their frame in build_match_details).
+    (D.goals || []).forEach(function (g) {
+      if (!g.own || g.x == null) return;
+      seqs.push({
+        scorer: "Own goal", ogBy: g.scorer, min: g.min, side: g.team, assist: null, rebound: false, own: true,
+        steps: [{ k: "shot", team: g.team, x: g.x, y: g.y, player: g.scorer, og: true }],
+        players: 1, passes: 0, crosses: 0, dribbles: 0, xg: null
+      });
+    });
+    seqs.sort(function (a, b) { return (a.min || 0) - (b.min || 0); });
+    return seqs;
   }
   function agmLine(x1, y1, x2, y2, cls) {
     var m = cls === "agm-pass" ? "agmAp" : (cls === "agm-shotln" ? "agmAs" : "agmAc");
@@ -841,8 +853,10 @@
                x: tx(sd, st.x), y: ty(sd, st.y), ex: tx(sd, st.ex != null ? st.ex : st.x), ey: ty(sd, st.ey != null ? st.ey : st.y) };
     });
     var teamName = seq.side === "home" ? D.home.name : D.away.name;
+    // Home attacks right (▶); away attacks left (◀) — match the rest of the dashboard.
+    var dirTxt = seq.side === "home" ? (esc(teamName) + " attacking ▶") : ("◀ " + esc(teamName) + " attacking");
     var a = [defs, pitchMarkup(),
-      '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + esc(teamName) + ' attacking ▶</text>'];
+      '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + dirTxt + '</text>'];
     for (var i = 0; i < P.length; i++) {
       var pt = P[i];
       if (pt.k === "pass") a.push(pt.cross ? agmArc(pt.x, pt.y, pt.ex, pt.ey, "agm-cross")   // curved dotted = cross
@@ -864,9 +878,10 @@
     P.forEach(function (pt, i) {
       var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
       var num = numMap[agmNorm(pt.player)];
-      var label = (num != null) ? num : (agmIni(pt.player) || (i + 1));
-      var ttl = (pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
-        (pt.player || ("Touch " + (i + 1))) + (pt.k === "pass" && pt.cross ? " · cross" : "") + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "");
+      var label = pt.og ? "OG" : ((num != null) ? num : (agmIni(pt.player) || (i + 1)));
+      var ttl = pt.og ? ("Own goal — " + (pt.player || "")) :
+        ((pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
+        (pt.player || ("Touch " + (i + 1))) + (pt.k === "pass" && pt.cross ? " · cross" : "") + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : ""));
       a.push(agmNode(pt.x, pt.y, label, ttl, cls));
     });
     var ly = Math.max(3.4, L.y - 2.0);                                              // scorer name + xG ABOVE the finishing node
@@ -968,6 +983,8 @@
     if (!seqs.length) { if (host.parentNode) host.parentNode.style.display = "none"; return; }  // 0–0 etc → render nothing
     var numMap = agmNumMap(D);
     function meta(g) {
+      if (g.own) return '<div class="agm-meta"><span class="agm-pill lead">Own goal</span>' +
+        '<span class="agm-pill">scored by <b>' + esc(g.ogBy || "") + "</b></span></div>";
       var counts = g.players + " player" + (g.players === 1 ? "" : "s") + " · " + g.passes + " pass" + (g.passes === 1 ? "" : "es") +
         " · " + g.dribbles + " dribble" + (g.dribbles === 1 ? "" : "s");
       var assist = g.assist ? '<span class="agm-pill">assist <b>' + esc(g.assist) + "</b></span>" : '<span class="agm-pill">unassisted</span>';
@@ -977,6 +994,7 @@
         (g.xg != null ? g.xg.toFixed(2) : "—") + "</b></span>" + crs + assist + reb + "</div>";
     }
     function roster(g) {
+      if (g.own) return '<div class="agm-roster"><b>Own goal</b> by ' + esc(g.ogBy || "") + "</div>";
       var seen = [], num = {};
       g.steps.forEach(function (st) { if (st.k !== "save" && st.player && seen.indexOf(st.player) < 0) { seen.push(st.player); num[st.player] = numMap[agmNorm(st.player)]; } });
       var sv = null; g.steps.forEach(function (s) { if (s.k === "save") sv = s; });

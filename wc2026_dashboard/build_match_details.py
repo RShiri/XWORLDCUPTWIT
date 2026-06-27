@@ -209,6 +209,10 @@ def extract(match_data):
                     "assist": None,
                     "pen": False,
                     "own": True,
+                    # coords mirrored 180° into the beneficiary's frame so the All Goals
+                    # Map plots the own goal at the end they were attacking (not across it)
+                    "x": round(100 - ev.get("x", 0), 1),
+                    "y": round(100 - ev.get("y", 0), 1),
                 })
                 continue
             xg, meta = shot_xg(ev)

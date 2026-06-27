@@ -69,8 +69,10 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   Opta-style build-up reconstructed from `D.shots`/`D.passes`/`D.dribbles`/`D.saves` —
   numbered shirt-# touch nodes, **dotted** passes, **curved dotted** crosses (`p.cross`),
   **solid** carries/dribbles, orange move-start, red shot (scorer + xG floated above the
-  node), and a grey keeper-save node for rebounds. Reuses `tx()/ty()/pitchMarkup()`; 0–0
-  games render nothing. A per-goal **"Download PNG"** button serialises that goal's
+  node), and a grey keeper-save node for rebounds. Home attacks ▶, away ◀ (dir label
+  matches side). Own goals appear as a single red **"OG"** node labelled "Own goal" at the
+  beneficiary's attacking end (coords mirrored 180° in `build_match_details`, since the raw
+  event sits at the conceding team's end). Reuses `tx()/ty()/pitchMarkup()`; 0–0 render nothing. A per-goal **"Download PNG"** button serialises that goal's
   SVG→canvas (dependency-free) with a metadata header (teams+score · stage · date ·
   scorer+min) and an "All rights reserved to @RShiri" credit. `AGM_MAX_SEG` drops any
   diagram segment longer than ~half the pitch (defends against glitched source coords).
