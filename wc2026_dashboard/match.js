@@ -768,7 +768,7 @@
   function buildGoalSequences(D) {
     var ev = [].concat(
       (D.passes || []).filter(function (p) { return p.ok; })
-        .map(function (p) { return { k: "pass", t: agmT(p), team: p.team, x: p.x, y: p.y, ex: p.ex, ey: p.ey, player: p.player }; }),
+        .map(function (p) { return { k: "pass", t: agmT(p), team: p.team, x: p.x, y: p.y, ex: p.ex, ey: p.ey, player: p.player, cross: !!p.cross }; }),
       (D.dribbles || []).filter(function (d) { return d.ok; })
         .map(function (d) { return { k: "dribble", t: agmT(d), team: d.team, x: d.x, y: d.y, player: d.player }; })
     ).sort(function (a, b) { return a.t - b.t; });
@@ -802,6 +802,7 @@
         scorer: shot.player, min: shot.min, side: shot.team, assist: assistFor(shot), rebound: rebound, steps: seq,
         players: Object.keys(ppl).length,
         passes: seq.filter(function (s) { return s.k === "pass"; }).length,
+        crosses: seq.filter(function (s) { return s.k === "pass" && s.cross; }).length,
         dribbles: seq.filter(function (s) { return s.k === "dribble"; }).length, xg: shot.xg
       };
     });
@@ -810,6 +811,17 @@
     var m = cls === "agm-pass" ? "agmAp" : (cls === "agm-shotln" ? "agmAs" : "agmAc");
     return '<line class="' + cls + '" x1="' + x1.toFixed(2) + '" y1="' + y1.toFixed(2) + '" x2="' + x2.toFixed(2) +
       '" y2="' + y2.toFixed(2) + '" marker-end="url(#' + m + ')"/>';
+  }
+  // A cross renders like a pass (same fine dots) but CURVED — a quadratic arc bowed
+  // perpendicular to the line, so it reads as a cross while staying a pass-type delivery.
+  function agmArc(x1, y1, x2, y2, cls) {
+    var dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+    var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    var off = Math.min(7, len * 0.2);                      // bow height, capped
+    var cx = mx + (-dy / len) * off, cy = my + (dx / len) * off;
+    return '<path class="' + cls + '" d="M' + x1.toFixed(2) + ',' + y1.toFixed(2) +
+      ' Q' + cx.toFixed(2) + ',' + cy.toFixed(2) + ' ' + x2.toFixed(2) + ',' + y2.toFixed(2) +
+      '" marker-end="url(#agmAp)"/>';
   }
   function agmNode(x, y, label, title, cls) {
     var dark = (cls === "start" || cls === "shot" || cls === "save");
@@ -824,7 +836,7 @@
       '<marker id="agmAs" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk-shot"/></marker></defs>';
     var P = seq.steps.map(function (st) {
       var sd = st.team || seq.side;
-      return { k: st.k, player: st.player, xg: st.xg, team: sd,
+      return { k: st.k, player: st.player, xg: st.xg, team: sd, cross: !!st.cross,
                x: tx(sd, st.x), y: ty(sd, st.y), ex: tx(sd, st.ex != null ? st.ex : st.x), ey: ty(sd, st.ey != null ? st.ey : st.y) };
     });
     var teamName = seq.side === "home" ? D.home.name : D.away.name;
@@ -832,7 +844,8 @@
       '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + esc(teamName) + ' attacking ▶</text>'];
     for (var i = 0; i < P.length; i++) {
       var pt = P[i];
-      if (pt.k === "pass") a.push(agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass"));   // dotted
+      if (pt.k === "pass") a.push(pt.cross ? agmArc(pt.x, pt.y, pt.ex, pt.ey, "agm-cross")   // curved dotted = cross
+                                           : agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass")); // straight dotted = pass
       if (i < P.length - 1) {
         var nx = P[i + 1];
         var fx = pt.k === "pass" ? pt.ex : pt.x, fy = pt.k === "pass" ? pt.ey : pt.y;
@@ -847,7 +860,7 @@
       var num = numMap[agmNorm(pt.player)];
       var label = (num != null) ? num : (agmIni(pt.player) || (i + 1));
       var ttl = (pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
-        (pt.player || ("Touch " + (i + 1))) + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "");
+        (pt.player || ("Touch " + (i + 1))) + (pt.k === "pass" && pt.cross ? " · cross" : "") + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "");
       a.push(agmNode(pt.x, pt.y, label, ttl, cls));
     });
     var ly = Math.max(3.4, L.y - 2.0);                                              // scorer name + xG ABOVE the finishing node
@@ -867,8 +880,9 @@
         " · " + g.dribbles + " dribble" + (g.dribbles === 1 ? "" : "s");
       var assist = g.assist ? '<span class="agm-pill">assist <b>' + esc(g.assist) + "</b></span>" : '<span class="agm-pill">unassisted</span>';
       var reb = g.rebound ? '<span class="agm-pill">rebound</span>' : "";
+      var crs = g.crosses ? '<span class="agm-pill">' + g.crosses + " cross" + (g.crosses === 1 ? "" : "es") + "</span>" : "";
       return '<div class="agm-meta"><span class="agm-pill lead">' + counts + '</span><span class="agm-pill">xG <b>' +
-        (g.xg != null ? g.xg.toFixed(2) : "—") + "</b></span>" + assist + reb + "</div>";
+        (g.xg != null ? g.xg.toFixed(2) : "—") + "</b></span>" + crs + assist + reb + "</div>";
     }
     function roster(g) {
       var seen = [], num = {};
@@ -884,6 +898,7 @@
       '<span class="it"><span class="agm-lz save"></span>Keeper save</span>' +
       '<span class="it"><span class="agm-lz shot"></span>Shot (xG)</span>' +
       '<span class="it"><span class="agm-lln"></span>Pass</span>' +
+      '<span class="it"><svg class="agm-crosslg" width="20" height="9" viewBox="0 0 20 9"><path d="M1,7 Q10,0 19,7"/></svg>Cross</span>' +
       '<span class="it"><span class="agm-lln carry"></span>Carry / dribble</span>' +
       '<span class="it"><span class="agm-lln shot"></span>Shot</span></div>';
     var tabs = '<div class="agm-tabs">' + seqs.map(function (g, i) {
