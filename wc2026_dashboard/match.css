@@ -43,6 +43,8 @@
 .pitch-svg { width: 100%; height: auto; display: block; border-radius: 8px; touch-action: manipulation; }
 .pitch-bg { fill: #14361f; }
 .pitch-line { stroke: rgba(255,255,255,0.28); stroke-width: 0.3; fill: none; }
+.pitch-goal { stroke: rgba(255,255,255,0.45); stroke-width: 0.3; fill: rgba(255,255,255,0.06); }
+.pitch-net { stroke: rgba(255,255,255,0.22); stroke-width: 0.2; }
 .dir-label { fill: rgba(255,255,255,0.5); font-size: 2.4px; font-weight: 700; letter-spacing: 0.5px; }
 
 .shot-dot { cursor: pointer; transition: stroke-width 0.1s; }
@@ -52,6 +54,8 @@
 .pass-line.key { stroke-width: 0.6; opacity: 0.95; }
 .pass-line.assist { stroke-width: 0.8; opacity: 1; }
 .pass-dot { opacity: 0.7; }
+.drib-dot { cursor: pointer; }
+.drib-arrow { cursor: pointer; fill: none; }
 
 .controls-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
 .controls-bar .grp { display: inline-flex; align-items: center; gap: 6px; background: var(--card);
