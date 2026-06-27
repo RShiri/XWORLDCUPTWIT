@@ -139,11 +139,17 @@ def _lineup(side, ex):
 
 def find_png(match_id):
     """Relative path (from the dashboard folder) to the rendered infographic, or None.
-    Prefers the published WorldCup2026 collection, falls back to wc2026/output."""
-    for rel in (os.path.join("WorldCup2026", match_id + ".png"),
-                os.path.join("wc2026", "output", match_id + ".png")):
+
+    Always emits the published WorldCup2026 path (where the deploy copies the PNG),
+    even when the file currently only exists in the git-ignored wc2026/output. A
+    fresh auto-deploy regenerates data.js *before* the PNG reaches WorldCup2026,
+    so returning the output/ path here would 404 the Infographic link on the live
+    site. The PNG is checked in both places only to decide whether the match has a
+    render at all."""
+    published = os.path.join("WorldCup2026", match_id + ".png")
+    for rel in (published, os.path.join("wc2026", "output", match_id + ".png")):
         if os.path.exists(os.path.join(ROOT, rel)):
-            return "../" + rel.replace("\\", "/")
+            return "../" + published.replace("\\", "/")
     return None
 
 
@@ -174,7 +180,7 @@ def extract(match_data):
                 receiver[i] = player_full_name(match_data, nxt.get("playerId"))
                 break
 
-    shots, passes, goals, dribbles = [], [], [], []
+    shots, passes, goals, dribbles, saves = [], [], [], [], []
     max_min = 0
     for _i, ev in enumerate(events):
         tid = ev.get("teamId")
@@ -250,6 +256,16 @@ def extract(match_data):
                 "ok": ev.get("outcomeType", {}).get("displayName") == "Successful",
             })
 
+        elif tname == "Save":     # goalkeeper save (point event) — powers the All Goals Map
+            saves.append({        # rebound chain's grey keeper-save node
+                "team": side,
+                "x": round(ev.get("x", 0), 1),
+                "y": round(ev.get("y", 0), 1),
+                "min": minute,
+                "sec": ev.get("second", 0),
+                "player": player_full_name(match_data, ev.get("playerId")),
+            })
+
     meta = match_data.get("wc_metadata", {})
     mid_date = meta.get("date", "")
 
@@ -265,6 +281,7 @@ def extract(match_data):
         "shots": shots,
         "passes": passes,
         "dribbles": dribbles,
+        "saves": saves,
         "goals": sorted(goals, key=lambda g: g["min"]),
         "lineups": {"home": _lineup(home, ex), "away": _lineup(away, ex)},
     }

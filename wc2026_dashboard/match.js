@@ -90,13 +90,16 @@
       return '<section class="mv-block"><h2 class="mv-title">' + title + '</h2><div id="' + id + '"></div></section>';
     }
     var hasDribbles = !!(D.dribbles && D.dribbles.length);
+    var hasGoals = !!(D.goals && D.goals.length);
     root.innerHTML = scoreboard(D) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
       block("Shot map", "mv-shots") +
       block("Pass explorer", "mv-passes") +
       (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
       block("Pass network", "mv-network") +
-      block("Line-ups", "mv-lineups");
+      block("Line-ups", "mv-lineups") +
+      // All Goals Map sits below every stats section (last block on the page).
+      (hasGoals ? block("All goals map", "mv-goals") : "");
 
     if (hasStats) buildMatchStats(rec, D);
     buildShots(D);
@@ -104,6 +107,7 @@
     if (hasDribbles) buildDribbles(D);
     buildNetwork(D);
     buildLineups(D);
+    if (hasGoals) buildAllGoals(D);
   }
 
   function scoreboard(D) {
@@ -742,6 +746,163 @@
         "<span>⚽ goal</span><span><b class='ast'>A</b> assist</span>" +
         '<span><i class="cardm yc"></i> yellow</span><span><i class="cardm rc"></i> red</span>' +
         "<span>rating coloured by value · min = minutes played</span></div>";
+  }
+
+  /* ================= ALL GOALS MAP ================= */
+  // Opta-style per-goal build-up: shirt-number touch nodes, dotted passes, solid
+  // carries/dribbles, red shot, orange move-start, grey keeper-save (from saves[]).
+  // Reconstructed from the same arrays the other maps use; reuses tx()/ty()/pitchMarkup().
+  function agmNorm(s) { return String(s == null ? "" : s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim(); }
+  function agmIni(n) { return n ? n.split(/\s+/).map(function (w) { return w[0]; }).join("").slice(0, 2).toUpperCase() : ""; }
+  function agmT(o) { return (o.min || 0) * 60 + (o.sec || 0); }
+  function agmNumMap(D) {
+    var m = {};
+    ["home", "away"].forEach(function (sd) {
+      var lu = (D.lineups && D.lineups[sd]) || {};
+      [].concat(lu.starters || [], lu.subs || []).forEach(function (p) {
+        if (p && p.name != null && p.num != null) m[agmNorm(p.name)] = p.num;
+      });
+    });
+    return m;
+  }
+  function buildGoalSequences(D) {
+    var ev = [].concat(
+      (D.passes || []).filter(function (p) { return p.ok; })
+        .map(function (p) { return { k: "pass", t: agmT(p), team: p.team, x: p.x, y: p.y, ex: p.ex, ey: p.ey, player: p.player }; }),
+      (D.dribbles || []).filter(function (d) { return d.ok; })
+        .map(function (d) { return { k: "dribble", t: agmT(d), team: d.team, x: d.x, y: d.y, player: d.player }; })
+    ).sort(function (a, b) { return a.t - b.t; });
+    var saves = D.saves || [];
+    function assistFor(shot) {
+      var g = D.goals || [];
+      for (var i = 0; i < g.length; i++) if (g[i].min === shot.min && agmNorm(g[i].scorer) === agmNorm(shot.player)) return g[i].assist;
+      return null;
+    }
+    return (D.shots || []).filter(function (s) { return s.goal; }).map(function (shot) {
+      var T = agmT(shot);
+      var chain = ev.filter(function (e) { return e.team === shot.team && e.t <= T && e.t >= T - 35; });
+      var seq = [];
+      for (var i = chain.length - 1; i >= 0; i--) { if (seq.length && seq[0].t - chain[i].t > 6) break; seq.unshift(chain[i]); }
+      var rebound = false;
+      // Rebound: a same-team shot saved/blocked in the ~4s before the goal → splice in
+      // the original effort + keeper save, in time order, before the goal node. Runs
+      // whether or not passes preceded, so rebounds show even with a build-up chain.
+      var prior = null, best = -1;
+      (D.shots || []).forEach(function (s2) { var tt = agmT(s2); if (s2.team === shot.team && !s2.goal && tt < T && T - tt <= 4 && tt > best) { best = tt; prior = s2; } });
+      if (prior) {
+        rebound = true;
+        seq.push({ k: "shot_eff", team: prior.team, x: prior.x, y: prior.y, player: prior.player, xg: prior.xg });
+        var sv = null, sb = -1;
+        saves.forEach(function (v) { var tt = agmT(v); if (v.team !== shot.team && Math.abs(tt - T) <= 2 && tt > sb) { sb = tt; sv = v; } });
+        if (sv) seq.push({ k: "save", opp: true, team: sv.team, x: sv.x, y: sv.y, player: sv.player });  // graceful: omitted if no saves[]
+      }
+      seq.push({ k: "shot", team: shot.team, x: shot.x, y: shot.y, player: shot.player, xg: shot.xg });
+      var ppl = {}; seq.forEach(function (s) { if (s.k !== "save" && s.player) ppl[agmNorm(s.player)] = 1; });
+      return {
+        scorer: shot.player, min: shot.min, side: shot.team, assist: assistFor(shot), rebound: rebound, steps: seq,
+        players: Object.keys(ppl).length,
+        passes: seq.filter(function (s) { return s.k === "pass"; }).length,
+        dribbles: seq.filter(function (s) { return s.k === "dribble"; }).length, xg: shot.xg
+      };
+    });
+  }
+  function agmLine(x1, y1, x2, y2, cls) {
+    var m = cls === "agm-pass" ? "agmAp" : (cls === "agm-shotln" ? "agmAs" : "agmAc");
+    return '<line class="' + cls + '" x1="' + x1.toFixed(2) + '" y1="' + y1.toFixed(2) + '" x2="' + x2.toFixed(2) +
+      '" y2="' + y2.toFixed(2) + '" marker-end="url(#' + m + ')"/>';
+  }
+  function agmNode(x, y, label, title, cls) {
+    var dark = (cls === "start" || cls === "shot" || cls === "save");
+    return '<g><title>' + esc(title) + '</title><circle class="agm-node' + (cls ? (" " + cls) : "") +
+      '" cx="' + x.toFixed(2) + '" cy="' + y.toFixed(2) + '" r="1.3"/>' +
+      '<text class="agm-nt' + (dark ? " dark" : "") + '" x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '">' + esc(label) + "</text></g>";
+  }
+  function agmSeqSVG(seq, numMap, D) {
+    var defs = '<defs>' +
+      '<marker id="agmAp" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk"/></marker>' +
+      '<marker id="agmAc" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk"/></marker>' +
+      '<marker id="agmAs" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk-shot"/></marker></defs>';
+    var P = seq.steps.map(function (st) {
+      var sd = st.team || seq.side;
+      return { k: st.k, player: st.player, xg: st.xg, team: sd,
+               x: tx(sd, st.x), y: ty(sd, st.y), ex: tx(sd, st.ex != null ? st.ex : st.x), ey: ty(sd, st.ey != null ? st.ey : st.y) };
+    });
+    var teamName = seq.side === "home" ? D.home.name : D.away.name;
+    var a = [defs, pitchMarkup(),
+      '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + esc(teamName) + ' attacking ▶</text>'];
+    for (var i = 0; i < P.length; i++) {
+      var pt = P[i];
+      if (pt.k === "pass") a.push(agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass"));   // dotted
+      if (i < P.length - 1) {
+        var nx = P[i + 1];
+        var fx = pt.k === "pass" ? pt.ex : pt.x, fy = pt.k === "pass" ? pt.ey : pt.y;
+        var cls = (nx.k === "save") ? "agm-shotln" : "agm-carry";                   // saved effort→keeper = red; else solid carry
+        if (Math.hypot(nx.x - fx, nx.y - fy) > 1.0) a.push(agmLine(fx, fy, nx.x, nx.y, cls));
+      }
+    }
+    var L = P[P.length - 1];
+    a.push(agmLine(L.x, L.y, tx(L.team, 99.4), ty(L.team, 50), "agm-shotln"));      // finishing shot → goal
+    P.forEach(function (pt, i) {
+      var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
+      var num = numMap[agmNorm(pt.player)];
+      var label = (num != null) ? num : (agmIni(pt.player) || (i + 1));
+      var ttl = (pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
+        (pt.player || ("Touch " + (i + 1))) + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "");
+      a.push(agmNode(pt.x, pt.y, label, ttl, cls));
+    });
+    var ly = Math.max(3.4, L.y - 2.0);                                              // scorer name + xG ABOVE the finishing node
+    a.push('<text class="agm-scorelab" x="' + L.x.toFixed(2) + '" y="' + (ly - 1.7).toFixed(2) + '">' + esc(seq.scorer) + "</text>");
+    if (L.xg != null) a.push('<text class="agm-xglab" x="' + L.x.toFixed(2) + '" y="' + ly.toFixed(2) + '">xG ' + L.xg.toFixed(2) + "</text>");
+    for (var j = 0; j < P.length; j++) if (P[j].k === "save") { a.push('<text class="agm-savelab" x="' + P[j].x.toFixed(2) + '" y="' + (P[j].y - 2.0).toFixed(2) + '" text-anchor="middle">SAVE</text>'); break; }
+    return '<svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' + a.join("") + "</svg>";
+  }
+  function buildAllGoals(D) {
+    var host = document.getElementById("mv-goals");
+    if (!host) return;
+    var seqs = buildGoalSequences(D);
+    if (!seqs.length) { if (host.parentNode) host.parentNode.style.display = "none"; return; }  // 0–0 etc → render nothing
+    var numMap = agmNumMap(D);
+    function meta(g) {
+      var counts = g.players + " player" + (g.players === 1 ? "" : "s") + " · " + g.passes + " pass" + (g.passes === 1 ? "" : "es") +
+        " · " + g.dribbles + " dribble" + (g.dribbles === 1 ? "" : "s");
+      var assist = g.assist ? '<span class="agm-pill">assist <b>' + esc(g.assist) + "</b></span>" : '<span class="agm-pill">unassisted</span>';
+      var reb = g.rebound ? '<span class="agm-pill">rebound</span>' : "";
+      return '<div class="agm-meta"><span class="agm-pill lead">' + counts + '</span><span class="agm-pill">xG <b>' +
+        (g.xg != null ? g.xg.toFixed(2) : "—") + "</b></span>" + assist + reb + "</div>";
+    }
+    function roster(g) {
+      var seen = [], num = {};
+      g.steps.forEach(function (st) { if (st.k !== "save" && st.player && seen.indexOf(st.player) < 0) { seen.push(st.player); num[st.player] = numMap[agmNorm(st.player)]; } });
+      var sv = null; g.steps.forEach(function (s) { if (s.k === "save") sv = s; });
+      var sx = sv ? " · saved by " + esc(sv.player) : "";
+      return '<div class="agm-roster"><b>Players in move:</b> ' +
+        seen.map(function (n) { return esc(n) + (num[n] != null ? " (#" + num[n] + ")" : ""); }).join(" · ") + sx + "</div>";
+    }
+    var legend = '<div class="agm-legend">' +
+      '<span class="it"><span class="agm-lz">7</span>Touch (shirt #)</span>' +
+      '<span class="it"><span class="agm-lz start"></span>Move start</span>' +
+      '<span class="it"><span class="agm-lz save"></span>Keeper save</span>' +
+      '<span class="it"><span class="agm-lz shot"></span>Shot (xG)</span>' +
+      '<span class="it"><span class="agm-lln"></span>Pass</span>' +
+      '<span class="it"><span class="agm-lln carry"></span>Carry / dribble</span>' +
+      '<span class="it"><span class="agm-lln shot"></span>Shot</span></div>';
+    var tabs = '<div class="agm-tabs">' + seqs.map(function (g, i) {
+      var col = g.side === "home" ? D.home.color : D.away.color;
+      return '<button class="agm-tab" data-i="' + i + '"><span class="sw" style="background:' + col + '"></span><span class="mm">' +
+        g.min + "'</span> " + esc(g.scorer) + "</button>";
+    }).join("") + "</div>";
+    host.innerHTML = tabs + '<div id="agm-feat"></div>';
+    var feat = document.getElementById("agm-feat");
+    function sel(i) {
+      [].forEach.call(host.querySelectorAll(".agm-tab"), function (b, j) { b.classList.toggle("active", j === i); });
+      var g = seqs[i];
+      feat.innerHTML = meta(g) + roster(g) + '<div class="pitch-wrap">' + agmSeqSVG(g, numMap, D) + "</div>" + legend;
+    }
+    host.querySelector(".agm-tabs").addEventListener("click", function (e) {
+      var b = e.target.closest(".agm-tab"); if (!b) return; sel(+b.getAttribute("data-i"));
+    });
+    var def = 0; seqs.forEach(function (g, i) { if (g.players > seqs[def].players) def = i; });  // open on the richest move
+    sel(def);
   }
 
   /* ---- tooltip ---- */
