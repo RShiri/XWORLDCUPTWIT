@@ -1028,6 +1028,96 @@
     }
   }
 
+  /* ================= BEST THIRD-PLACED TEAMS =================
+     Ranks the 12 group third-placed teams (Pts, GD, GF, name); the top 8 advance to the R32.
+     Which qualifier faces which group winner comes from FIFA's Annex C allocation table — for
+     a given set of 8 qualifying groups it maps each relevant group WINNER to the GROUP whose
+     third-placed team it plays. Keyed by the sorted qualifying-group combination. Only the
+     combinations that can actually occur this tournament need to be listed; if the live combo
+     isn't present the bracket simply keeps the "3rd: A/B/.." placeholder. */
+  var FIFA_THIRD_ALLOC = {
+    // qualifying thirds {B,D,E,F,I,J,K,L}  →  winnerGroup : thirdGroup it faces
+    "BDEFIJKL": { A: "E", B: "J", D: "B", E: "D", G: "I", I: "F", K: "L", L: "K" }
+  };
+
+  function computeThirds() {
+    if (!D.standings) return null;
+    var letters = Object.keys(D.standings).sort();
+    var ranking = [];
+    var allComplete = true;
+    letters.forEach(function (g) {
+      var grp = D.standings[g];
+      if (!grp || grp.length < 4 || !grp.every(function (r) { return r.P >= 3; })) { allComplete = false; return; }
+      var r = grp[2];
+      ranking.push({ grp: g, team: r.team, P: r.P, W: r.W, D: r.D, L: r.L, GF: r.GF, GA: r.GA, GD: r.GD, Pts: r.Pts });
+    });
+    ranking.sort(function (a, b) {
+      return b.Pts - a.Pts || b.GD - a.GD || b.GF - a.GF || (a.team < b.team ? -1 : a.team > b.team ? 1 : 0);
+    });
+    ranking.forEach(function (t, i) { t.rank = i + 1; t.qual = i < 8; });
+
+    // Slot assignment only when all 12 groups are done and the combo is in the table.
+    var assignByCode = {}, thirdToWinner = {};
+    if (allComplete && ranking.length === 12) {
+      var combo = ranking.slice(0, 8).map(function (t) { return t.grp; }).sort().join("");
+      var winnerToThird = FIFA_THIRD_ALLOC[combo];
+      if (winnerToThird) {
+        Object.keys(winnerToThird).forEach(function (w) { thirdToWinner[winnerToThird[w]] = w; });
+        // Map each schedule slot code (e.g. "3ABCDF") to its team via the 1X opponent it faces.
+        (D.matches || []).forEach(function (m) {
+          var s = m.id.replace(/^\d{4}_\d{2}_\d{2}_/, "").split("_vs_");
+          s.forEach(function (sideCode, ix) {
+            if (!/^3[A-L]{2,}$/.test(sideCode)) return;
+            var opp = s[1 - ix], wm = opp.match(/^1([A-L])$/);
+            if (!wm) return;
+            var thirdG = winnerToThird[wm[1]];
+            var row = ranking.find(function (t) { return t.grp === thirdG; });
+            if (row) assignByCode[sideCode] = row.team;
+          });
+        });
+      }
+    }
+    return { ranking: ranking, assignByCode: assignByCode, thirdToWinner: thirdToWinner, complete: allComplete };
+  }
+
+  function renderThirdPlace() {
+    var host = document.getElementById("thirdTable");
+    if (!host) return;
+    var info = computeThirds();
+    if (!info || !info.ranking.length) {
+      host.innerHTML = '<p class="hint">The third-placed ranking appears once groups finish their matches.</p>';
+      return;
+    }
+    var winnerTeam = {};
+    Object.keys(D.standings).forEach(function (g) {
+      var grp = D.standings[g];
+      if (grp && grp[0] && grp.every(function (r) { return r.P >= 3; })) winnerTeam[g] = grp[0].team;
+    });
+    var body = info.ranking.map(function (t) {
+      var dest = "";
+      if (t.qual) {
+        var w = info.thirdToWinner[t.grp];
+        dest = w ? ('R32: vs ' + (winnerTeam[w] ? esc(winnerTeam[w]) : "1" + w) + ' <span class="tp-gw">(1' + w + ')</span>')
+                 : '<span class="tp-gw">qualifies</span>';
+      } else {
+        dest = '<span class="tp-out">eliminated</span>';
+      }
+      return '<tr class="' + (t.qual ? "qual" : "out") + '">' +
+        '<td class="rk">' + t.rank + "</td>" +
+        '<td class="grp">' + t.grp + "</td>" +
+        '<td class="team"><div class="team-cell">' + logoImg(t.team) + '<span class="nm">' + esc(t.team) + "</span></div></td>" +
+        "<td>" + t.P + "</td><td>" + t.W + "</td><td>" + t.D + "</td><td>" + t.L + "</td>" +
+        "<td>" + t.GF + "</td><td>" + t.GA + "</td><td>" + (t.GD > 0 ? "+" + t.GD : t.GD) + "</td>" +
+        '<td class="pts">' + t.Pts + "</td>" +
+        '<td class="dest">' + dest + "</td></tr>";
+    }).join("");
+    host.innerHTML =
+      '<div class="third-card"><table class="third-table"><thead><tr>' +
+      "<th>#</th><th>Grp</th><th class='team'>Team</th><th>P</th><th>W</th><th>D</th><th>L</th>" +
+      "<th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th class='dest'>Round of 32</th>" +
+      "</tr></thead><tbody>" + body + "</tbody></table></div>";
+  }
+
   /* ================= KNOCKOUT BRACKET (Tables tab) =================
      The bracket shape is read straight from the schedule's knockout match ids. Those ids
      carry slot/Winner/Loser codes (e.g. "2A_vs_2B", "Winner_EF_1_vs_Winner_EF_2") that
@@ -1103,6 +1193,7 @@
     var tp = rounds.TP[0];
     if (tp) tp._kids = refNums(tp.id, "SF").map(function (n) { return sfByNum[n]; });
 
+    var thirdAssign = (computeThirds() || {}).assignByCode || {};
     function resolveSlot(raw) {
       raw = String(raw);
       var m = raw.match(/^([12])([A-L])$/);
@@ -1114,7 +1205,10 @@
         }
         return { text: code + " · " + (m[1] === "1" ? "group winner" : "runner-up") };
       }
-      if ((m = raw.match(/^3([A-L]{2,})$/))) return { text: "3rd: " + m[1].split("").join("/") };
+      if ((m = raw.match(/^3([A-L]{2,})$/))) {
+        if (thirdAssign[raw]) return { team: thirdAssign[raw], code: "3rd" };
+        return { text: "3rd: " + m[1].split("").join("/") };
+      }
       if (/^Winner /.test(raw)) return { text: raw.replace(/EF (\d)/, "R16 #$1").replace(/QF (\d)/, "QF #$1").replace(/SF (\d)/, "SF #$1") };
       if (/^Loser /.test(raw)) return { text: raw.replace(/SF (\d)/, "SF #$1") };
       return { text: raw };
@@ -1171,6 +1265,7 @@
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
+  renderThirdPlace();
   renderBracket();
   renderMatches();
   renderDbTeamTable();
