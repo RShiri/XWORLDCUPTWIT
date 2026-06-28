@@ -1953,6 +1953,69 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,379205,Sergino Dest,Sub,0,24,0,0,0,0,6.2,0.0,0,0,3,3,1,8,0,1,0,1,0,0,0,0
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,397465,Malik Tillman,Sub,0,14,0,0,0,0,5.8,0.0,0,0,1,1,0,5,0,0,0,0,0,0,1,0
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,440159,Alex Freeman,Sub,0,23,0,0,0,0,6.3,0.0,0,0,7,5,1,17,1,0,0,0,0,4,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,123577,Vozinha,GK,1,95,0,0,0,0,7.1,0.0,0,0,34,27,0,45,0,0,0,0,0,0,0,3
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,492313,Wagner Pina,DR,1,93,0,0,1,0,6.7,0.09,1,0,37,27,2,64,0,1,1,1,1,2,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,235763,Diney Borges,DC,1,95,0,0,0,0,7.2,0.0,0,0,64,56,0,73,2,0,4,0,1,8,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,430933,Pico Lopes,DC,1,95,0,0,0,0,7.3,0.1,1,0,52,47,0,65,3,2,2,0,0,3,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,431439,Joao Paulo,DL,1,95,0,0,0,0,7.6,0.1,2,0,48,42,0,87,2,4,3,1,0,5,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,438902,Kevin Pina,DMC,1,95,0,0,0,0,7.0,0.02,2,0,60,53,0,82,2,1,1,1,2,4,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,74790,Ryan Mendes,MR,1,71,0,0,0,0,6.7,0.12,1,0,34,25,1,59,3,1,1,2,1,2,4,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,296684,Jamiro Monteiro,MC,1,70,0,0,0,0,6.3,0.18,2,1,29,22,1,42,1,0,0,0,2,0,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,328549,Deroy Duarte,MC,1,95,0,0,0,0,7.3,0.02,1,0,40,34,1,59,5,1,2,0,0,5,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,415948,Willy Semedo,ML,1,60,0,0,0,0,6.6,0.07,2,0,15,15,1,45,0,2,0,2,2,0,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,528208,Dailon Livramento,FW,1,60,0,0,0,0,6.0,0.0,0,0,9,7,0,15,0,0,2,0,0,0,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,342550,Nuno da Costa,Sub,0,35,0,0,0,0,6.7,0.09,1,0,6,5,1,14,1,0,2,1,0,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,142431,Garry Rodrigues,Sub,0,24,0,0,0,0,6.2,0.03,1,0,6,5,1,12,1,0,0,0,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,493061,Helio Varela,Sub,0,35,0,0,0,0,6.2,0.0,0,0,8,8,1,13,0,0,0,1,1,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,129648,Steven Moreira,Sub,0,2,0,0,0,0,6.0,0.0,0,0,1,1,0,2,0,0,0,0,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,379742,Laros Duarte,Sub,0,25,0,0,0,0,6.6,0.56,1,1,8,7,3,14,1,1,0,1,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,146400,Mohammed Al Owais,GK,1,95,0,0,0,0,6.8,0.0,0,0,24,19,0,30,0,0,0,0,0,0,0,2
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,457103,Saud Abdulhamid,DR,1,95,0,0,1,0,7.4,0.01,1,0,34,24,1,61,6,1,2,1,2,5,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447660,Abdulelah Al Amri,DC,1,95,0,0,0,0,7.1,0.05,1,0,52,44,1,61,2,1,2,0,0,2,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447676,Hassan Al Tambakti,DC,1,32,0,0,0,0,6.6,0.0,0,0,20,18,0,23,1,1,0,0,0,1,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,458392,Nawaf Bu Washl,DL,1,81,0,0,0,0,6.6,0.0,0,0,36,25,0,57,2,2,0,0,0,6,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,488541,Sultan Mandash,MR,1,65,0,0,0,0,6.9,0.0,0,0,10,8,0,31,10,0,0,0,1,1,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,333478,Abdullah Al Khaibari,MC,1,45,0,0,0,0,6.3,0.0,0,0,18,16,0,22,0,0,0,0,0,1,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447662,Nasser Al Dawsari,MC,1,95,0,0,1,0,6.9,0.01,1,0,57,49,0,75,2,2,0,2,4,2,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,111560,Salem Al Dawsari,ML,1,65,0,0,0,0,6.5,0.06,1,0,18,12,0,36,4,1,0,2,2,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,358782,Mohamed Kanno,FW,1,95,0,0,0,0,7.2,0.35,1,1,46,39,0,71,7,1,4,1,4,1,4,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447657,Feras Al Brikan,FW,1,95,0,0,1,0,6.2,0.0,0,0,15,9,2,22,2,0,1,0,1,1,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447663,Abdullah Al Hamddan,Sub,0,30,0,0,0,0,6.1,0.11,1,1,11,8,0,17,1,0,1,0,2,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447677,Ali Lajami,Sub,0,63,0,0,0,0,7.0,0.0,0,0,38,35,0,53,1,1,1,0,0,5,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,470590,Musab Al Juwayr,Sub,0,50,0,0,0,0,6.3,0.0,0,0,29,24,1,40,1,0,0,0,0,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,470595,Mohammed Abu Al Shamat,Sub,0,30,0,0,0,0,6.3,0.06,1,1,25,19,0,30,0,1,0,0,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,458371,Moteb Al Harbi,Sub,0,14,0,0,0,0,6.0,0.0,0,0,11,10,0,14,0,0,0,0,0,0,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,119120,Dominik Livakovic,GK,1,97,0,0,0,0,6.1,0.0,0,0,21,14,0,30,0,0,0,0,0,2,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,413272,Josip Stanisic,DR,1,97,0,0,0,0,6.0,0.0,0,0,37,33,0,51,2,0,0,0,0,1,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,336048,Marin Pongracic,DC,1,97,0,0,0,0,6.8,0.07,1,0,72,69,0,85,3,0,1,0,2,7,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,402666,Josip Sutalo,DC,1,97,0,0,0,0,6.9,0.0,0,0,87,82,0,98,2,1,1,1,0,6,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,70524,Ivan Perisic,DL,1,97,0,0,1,0,6.8,0.04,1,1,45,43,0,64,3,1,2,0,1,3,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,20874,Luka Modric,DMC,1,97,0,1,0,0,7.7,0.0,0,0,89,82,4,102,4,0,0,1,0,1,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,93894,Mateo Kovacic,DMC,1,77,0,0,0,0,6.3,0.01,1,0,61,58,1,68,1,0,0,0,0,0,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,343975,Nikola Vlasic,AMR,1,87,1,0,0,0,7.6,0.1,2,1,21,20,0,29,2,0,1,0,2,2,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,439534,Petar Sucic,AMC,1,97,1,0,0,0,7.5,0.01,1,1,34,31,1,44,2,0,1,0,0,1,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,407944,Martin Baturina,AML,1,87,0,0,0,0,6.7,0.0,0,0,26,20,2,54,2,0,0,2,1,0,3,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,98126,Ante Budimir,FW,1,65,0,0,0,0,6.1,0.0,0,0,5,4,0,9,0,0,0,0,3,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,129903,Mario Pasalic,Sub,0,20,0,0,0,0,6.3,0.08,2,1,11,11,0,15,0,0,0,0,0,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,402664,Josko Gvardiol,Sub,0,10,0,0,0,0,6.3,0.0,0,0,3,3,0,11,1,2,0,0,0,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,407222,Igor Matanovic,Sub,0,32,0,0,0,0,6.3,0.0,0,0,6,4,0,13,0,0,2,1,0,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,423157,Marco Pasalic,Sub,0,10,0,0,0,0,6.3,0.0,0,0,5,3,0,10,0,0,0,2,0,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,512761,Benjamin Asare,GK,1,97,0,0,0,0,6.1,0.0,0,0,15,13,0,26,0,0,0,0,0,0,0,2
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,404952,Marvin Senaya,DR,1,97,0,0,0,0,7.0,0.03,1,0,36,29,0,65,8,2,3,0,3,4,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,231140,Derrick Luckassen,DC,1,97,1,0,0,0,7.1,0.65,1,1,82,71,1,86,0,0,4,0,0,1,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,561185,Jonas Adjetey,DC,1,45,0,0,0,0,6.0,0.0,0,0,48,44,1,50,0,0,0,0,0,1,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,402749,Gideon Mensah,DL,1,97,0,0,0,0,6.6,0.0,0,0,54,47,1,68,2,4,1,0,0,3,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,238940,Thomas Partey,DMC,1,97,0,0,0,0,5.8,0.0,0,0,75,69,0,84,1,3,0,0,1,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,357073,Antoine Semenyo,MR,1,97,0,0,0,0,5.8,0.05,1,0,18,16,0,30,1,0,1,1,0,0,2,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,345988,Elisha Owusu,MC,1,45,0,0,0,0,6.1,0.0,0,0,15,11,0,20,2,0,0,1,2,0,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,463426,Kwasi Sibo,MC,1,84,0,0,0,0,6.0,0.0,0,0,40,38,0,46,1,0,0,0,3,1,1,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,422135,Kamaldeen Sulemana,ML,1,70,0,0,0,0,6.3,0.03,1,0,19,17,0,37,3,0,0,3,1,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,67491,Jordan Ayew,FW,1,70,0,0,0,0,5.8,0.0,0,0,9,8,0,15,0,0,0,0,1,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,430985,Abdul Fatawu,Sub,0,52,0,0,0,0,6.4,0.07,2,0,4,4,1,19,0,0,0,2,0,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,463147,Ernest Nuamah,Sub,0,27,0,1,0,0,7.1,0.0,0,0,7,5,2,19,2,0,0,1,0,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,561984,Caleb Yirenkyi,Sub,0,13,0,0,0,0,6.1,0.0,0,0,7,7,0,8,0,0,0,0,1,0,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,573388,Kojo Peprah Oppong,Sub,0,52,0,0,1,0,6.0,0.0,0,0,24,21,0,25,0,0,0,0,1,1,0,0
+2026_06_27_Croatia_vs_Ghana,2026-06-27,Ghana,Croatia,331235,Brandon Thomas-Asante,Sub,0,27,0,0,0,0,6.0,0.0,0,0,2,2,0,3,0,0,0,0,0,0,0,0
 2026_06_27_Egypt_vs_Iran,2026-06-27,Egypt,Iran,519797,Mostafa Shobeir,GK,1,98,0,0,0,0,7.8,0.0,0,0,26,20,0,33,0,0,4,0,0,3,0,2
 2026_06_27_Egypt_vs_Iran,2026-06-27,Egypt,Iran,450471,Mohamed Hany,DR,1,98,0,0,0,0,7.8,0.01,1,0,45,42,1,78,6,2,3,0,0,14,1,0
 2026_06_27_Egypt_vs_Iran,2026-06-27,Egypt,Iran,431067,Mohamed Abdelmonem,DC,1,13,0,0,0,0,5.5,0.0,0,0,12,12,0,14,1,0,0,0,1,0,0,0
@@ -2078,3 +2141,130 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,349760,Ferran Torres,Sub,0,21,0,0,0,0,6.4,0.35,1,0,2,2,0,10,0,0,1,1,0,0,1,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,403865,Yeremy Pino,Sub,0,31,0,0,0,0,6.0,0.0,0,0,9,7,0,13,0,0,1,0,0,0,1,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,408449,Nico Williams,Sub,0,21,0,0,0,0,6.1,0.0,0,0,5,2,0,9,0,0,1,0,0,1,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,484707,Oussama Benbot,GK,1,96,0,0,0,0,4.4,0.0,0,0,23,16,0,27,0,0,0,0,0,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,486753,Rafik Belghali,DR,1,70,1,0,0,0,7.4,0.23,2,1,24,23,1,44,1,1,0,1,0,1,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,90115,Aissa Mandi,DC,1,96,0,0,0,0,6.4,0.0,0,0,117,114,1,125,1,0,1,0,0,5,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,288892,Ramy Bensebaini,DC,1,96,0,0,0,0,6.0,0.01,1,0,134,128,0,141,0,0,0,0,0,2,1,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,438657,Jaouen Hadjam,DL,1,70,0,0,0,0,6.3,0.0,0,0,38,31,0,54,1,0,1,2,0,2,1,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,137521,Nabil Bentaleb,DMC,1,96,0,0,0,0,6.6,0.0,0,0,119,113,2,129,5,0,0,0,0,1,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,444725,Fares Chaibi,DMC,1,96,0,0,0,0,7.3,0.07,3,1,81,79,0,94,1,1,0,1,0,3,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,104749,Riyad Mahrez,AMR,1,96,2,0,0,0,8.4,0.94,3,2,51,47,2,71,2,1,1,0,1,2,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,477985,Ibrahim Maza,AMC,1,96,0,0,0,0,7.0,0.77,3,1,27,22,1,44,0,0,0,5,0,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,322096,Houssem Aouar,AML,1,93,0,2,0,0,7.9,0.0,0,0,38,35,3,50,2,0,0,1,1,0,1,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,348654,Amine Gouiri,FW,1,70,0,0,0,0,6.4,0.0,0,0,14,13,0,17,0,0,1,0,0,1,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,355401,Rayan Ait-Nouri,Sub,0,26,0,0,0,0,6.3,0.0,0,0,28,26,0,32,0,0,0,2,1,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,457801,Zineddine Belaid,Sub,0,26,0,0,0,0,6.1,0.0,0,0,37,37,0,38,0,0,0,0,0,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,469827,Fares Ghedjemis,Sub,0,3,0,0,0,0,5.9,0.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,438655,Samir Chergui,Sub,0,26,0,0,0,0,6.0,0.0,0,0,24,22,0,25,0,0,0,0,0,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,130812,Alexander Schlager,GK,1,96,0,0,0,0,5.7,0.0,0,0,25,21,0,27,0,0,0,0,0,0,0,2
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,333741,Stefan Posch,DR,1,96,0,0,0,0,6.4,0.0,0,0,32,23,0,50,4,4,4,0,0,3,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,39722,David Alaba,DC,1,61,0,1,0,0,6.7,0.0,0,0,50,49,1,53,1,0,0,0,0,1,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,298446,Philipp Lienhart,DC,1,96,0,0,0,0,5.9,0.09,1,0,52,48,0,63,1,0,0,0,0,6,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,124021,Phillipp Mwene,DL,1,94,0,0,0,0,6.3,0.07,1,0,31,28,1,54,1,3,0,0,0,4,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,418587,Nicolas Seiwald,DMC,1,96,0,0,0,0,6.3,0.11,2,0,25,21,0,32,3,0,0,0,0,1,1,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,262856,Xaver Schlager,DMC,1,45,0,0,0,0,6.3,0.01,1,0,22,20,0,31,1,1,1,0,1,1,1,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,248010,Konrad Laimer,AMR,1,96,0,1,0,0,6.6,0.0,0,0,21,16,1,31,2,0,0,1,0,0,2,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,383847,Romano Schmid,AMC,1,45,0,0,0,0,6.0,0.01,1,0,19,15,0,29,3,0,0,0,1,0,3,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,92051,Marcel Sabitzer,AML,1,96,1,0,0,0,7.6,0.05,1,1,23,19,1,38,3,2,0,0,1,2,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,34693,Marko Arnautovic,FW,1,45,1,0,1,0,6.8,0.65,1,1,11,8,0,14,0,0,0,0,1,0,1,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,84919,Michael Gregoritsch,Sub,0,51,0,1,0,0,6.8,0.0,0,0,12,11,2,15,1,0,1,0,1,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,291937,Florian Grillitsch,Sub,0,51,0,0,0,0,6.1,0.0,0,0,39,37,0,42,1,0,0,0,2,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,330816,Kevin Danso,Sub,0,35,0,0,0,0,6.2,0.1,1,0,21,20,0,24,0,0,2,0,0,1,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,377271,Sasa Kalajdzic,Sub,0,2,1,0,0,0,6.9,0.35,1,1,1,1,0,2,0,0,0,0,0,0,0,0
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,430703,Paul Wanner,Sub,0,51,0,0,0,0,6.1,0.0,0,0,12,9,0,19,1,0,1,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,53362,Camilo Vargas,GK,1,95,0,0,0,0,6.7,0.0,0,0,38,31,0,42,0,0,0,0,0,1,0,2
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,88112,Santiago Arias,DR,1,86,0,0,0,0,7.3,0.0,0,0,41,34,5,56,5,1,0,0,1,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,322655,Davinson Sanchez,DC,1,95,0,0,0,0,7.3,0.07,1,0,65,55,1,78,1,1,2,0,0,6,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,363653,Jhon Lucumi,DC,1,95,0,0,0,0,6.8,0.0,0,0,27,26,0,33,1,0,2,0,1,4,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,416148,Deiver Machado,DL,1,95,0,0,0,0,6.8,0.0,0,0,25,21,1,35,2,2,0,0,1,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,133464,Jefferson Lerma,MC,1,59,0,0,0,0,6.5,0.03,2,1,42,38,0,49,0,1,0,0,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,424039,Jhon Arias,MC,1,75,0,0,0,0,7.6,0.15,3,2,55,52,4,74,4,0,0,2,3,0,3,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,472904,Gustavo Puerta,MC,1,95,0,0,1,0,6.6,0.11,4,1,75,72,1,87,1,0,0,0,2,2,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,71182,James Rodriguez,FWR,1,75,0,0,0,0,7.2,0.14,3,1,72,65,5,85,3,0,1,2,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,136904,Jhon Cordoba,FW,1,59,0,0,0,0,6.1,0.44,2,1,10,7,0,16,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,377168,Luis Diaz,FWL,1,95,0,0,0,0,6.2,0.25,4,0,42,39,2,51,2,0,0,0,0,0,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,91989,Juan Fernando Quintero,Sub,0,20,0,0,0,0,6.0,0.0,0,0,12,10,0,15,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,400496,Daniel Munoz,Sub,0,9,0,0,0,0,6.3,0.0,0,0,1,0,1,3,2,0,0,0,1,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,402213,Richard Rios,Sub,0,36,0,0,0,0,6.1,0.54,1,0,18,16,0,22,2,0,0,0,3,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,402887,Luis Suarez,Sub,0,36,0,0,0,0,5.9,0.37,4,0,9,6,0,18,0,0,0,0,0,1,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,473940,Kevin Castano,Sub,0,20,0,0,0,0,6.1,0.0,0,0,13,13,0,13,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,373842,Diogo Costa,GK,1,95,0,0,0,0,7.9,0.0,0,0,19,15,0,32,0,0,0,0,0,1,0,6
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,128967,Joao Cancelo,DR,1,45,0,0,0,0,6.6,0.0,0,0,12,12,0,22,0,1,0,0,0,2,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,313171,Ruben Dias,DC,1,95,0,0,0,0,7.4,0.0,0,0,54,50,0,70,0,2,3,1,2,7,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,434077,Renato Veiga,DC,1,95,0,0,0,0,7.6,0.0,0,0,57,54,1,74,1,3,2,0,1,7,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,395221,Nuno Mendes,DL,1,92,0,0,0,0,6.9,0.0,0,0,42,38,3,62,1,0,0,2,0,0,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,238244,Ruben Neves,DMC,1,45,0,0,0,0,6.3,0.03,2,0,17,14,0,21,0,0,0,0,0,2,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,384887,Vitinha,DMC,1,69,0,0,0,0,7.0,0.02,1,0,54,54,1,60,0,1,1,1,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,337916,Pedro Neto,AMR,1,95,0,0,0,0,6.3,0.0,0,0,36,30,1,47,0,0,0,1,2,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,123761,Bruno Fernandes,AMC,1,95,0,0,0,0,6.6,0.57,2,1,44,39,1,56,2,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,362431,Joao Felix,AML,1,69,0,0,0,0,6.2,0.19,3,0,14,12,0,33,4,1,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,5583,Cristiano Ronaldo,FW,1,95,0,0,0,0,6.2,0.17,3,1,27,22,0,35,0,0,0,0,1,0,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,349207,Rafael Leao,Sub,0,26,0,0,0,0,6.7,0.06,1,0,6,6,0,18,0,1,0,3,0,0,2,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,353418,Diogo Dalot,Sub,0,50,0,0,0,0,6.7,0.02,1,0,24,22,1,38,1,0,0,1,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,394933,Matheus Nunes,Sub,0,3,0,0,0,0,6.0,0.0,0,0,1,1,0,1,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,465388,Joao Neves,Sub,0,50,0,0,0,0,6.4,0.0,0,0,26,25,0,32,2,2,1,0,0,0,2,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,391562,Samu Costa,Sub,0,26,0,0,0,0,6.3,0.0,0,0,12,11,0,15,1,0,1,0,0,1,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,461465,Lionel Mpasi,GK,1,98,0,0,0,0,6.2,0.0,0,0,34,25,0,36,0,0,0,0,0,0,0,1
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,331924,Aaron Wan-Bissaka,DR,1,98,0,0,0,0,7.2,0.0,0,0,45,36,3,75,0,2,2,1,0,7,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,104368,Chancel Mbemba,DC,1,98,0,0,0,0,6.8,0.1,1,0,53,45,0,67,3,0,3,0,0,4,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,299271,Axel Tuanzebe,DC,1,98,0,0,0,0,6.8,0.0,0,0,55,50,0,68,1,0,2,0,0,7,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,122980,Arthur Masuaku,DL,1,82,0,0,0,0,6.9,0.0,0,0,69,57,2,91,3,0,2,0,0,2,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,380614,Nathanael Mbuku,MR,1,71,0,0,1,0,6.8,0.01,1,1,21,18,1,45,3,0,0,2,3,1,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,437449,Noah Sadiki,MC,1,98,0,0,1,0,7.2,0.0,0,0,56,53,2,69,5,1,0,1,1,1,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,342571,Samuel Moutoussamy,MC,1,71,0,0,1,0,6.6,0.0,0,0,54,44,2,66,6,0,0,0,1,1,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,541727,Brian Cipenga,ML,1,71,0,0,0,0,7.1,0.05,3,0,26,13,0,59,3,0,0,6,0,0,5,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,296240,Yoane Wissa,FW,1,98,2,0,0,0,7.9,1.42,6,2,19,17,0,40,0,0,0,0,1,1,3,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,86513,Cedric Bakambu,FW,1,50,0,0,0,0,5.7,0.0,0,0,6,2,0,10,1,0,0,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,141392,Joris Kayembe,Sub,0,16,0,0,0,0,6.5,0.0,0,0,4,4,1,9,0,2,0,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,315228,Meschack Elia,Sub,0,27,0,0,0,0,6.9,0.03,1,0,12,12,3,19,1,1,1,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,136392,Theo Bongonda,Sub,0,27,0,0,0,0,6.3,0.08,1,0,6,4,0,19,0,1,0,1,0,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,487782,Fiston Mayele,Sub,0,48,1,0,0,0,7.0,0.84,5,1,11,7,0,24,0,0,2,0,0,0,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,468938,Ngal'ayel Mukau,Sub,0,27,0,0,0,0,6.2,0.01,1,0,16,14,0,19,0,0,0,0,0,1,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,457150,Abduvokhid Nematov,GK,1,98,0,0,0,0,5.5,0.0,0,0,28,15,0,34,0,0,1,0,0,1,0,1
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,280961,Rustam Ashurmatov,DC,1,98,0,0,0,0,7.1,0.0,0,0,34,27,0,55,0,4,7,1,0,9,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,493206,Abdukodir Khusanov,DC,1,98,0,0,1,0,5.9,0.0,0,0,39,32,0,51,3,1,1,0,3,7,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,531734,Jakhongir Urozov,DC,1,81,0,0,0,0,6.4,0.0,0,0,22,16,0,35,1,0,4,0,0,7,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,455410,Khojiakbar Alijonov,DMR,1,98,0,0,0,0,6.9,0.0,0,0,31,19,1,71,9,3,1,3,1,1,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,457149,Sherzod Nasrullaev,DML,1,98,0,0,1,0,6.5,0.0,0,0,27,19,0,52,4,1,4,1,2,4,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,274624,Otabek Shukurov,MC,1,58,0,0,0,0,6.2,0.0,0,0,25,21,0,34,0,0,1,0,1,3,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,455427,Akmal Mozgovoy,MC,1,81,0,1,0,0,6.9,0.0,0,0,30,25,1,38,4,2,0,0,0,1,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,262702,Dostonbek Khamdamov,AMC,1,58,0,0,0,0,6.5,0.0,0,0,20,18,0,35,6,0,1,0,1,1,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,495568,Abbosbek Fayzullaev,AMC,1,72,0,0,0,0,6.5,0.01,1,0,9,6,0,26,4,0,0,0,4,3,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,262707,Eldor Shomurodov,FW,1,98,1,0,0,0,7.4,0.14,2,1,27,19,0,51,4,0,2,1,3,0,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,98309,Igor Sergeev,Sub,0,17,0,0,0,0,5.9,0.0,0,0,1,1,0,1,0,0,0,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,126445,Jamshid Iskanderov,Sub,0,17,0,0,0,0,5.8,0.0,0,0,12,9,0,18,0,0,0,0,0,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,393121,Oston Urunov,Sub,0,26,0,0,0,0,5.8,0.0,0,0,7,6,0,12,0,1,0,0,0,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,458631,Aziz G'aniev,Sub,0,40,0,0,0,0,6.2,0.0,0,0,23,17,0,33,5,0,0,0,1,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,455413,Odiljon Khamrobekov,Sub,0,40,0,0,0,0,5.7,0.0,0,0,20,19,0,25,0,0,0,0,0,1,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,457086,Yazeed Abulaila,GK,1,95,0,0,0,0,5.2,0.0,0,0,14,11,0,18,0,0,0,0,0,0,0,1
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,457088,Yazan Al Arab,DC,1,95,0,0,1,0,6.4,0.0,0,0,39,38,0,53,1,6,0,1,3,2,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,457089,Abdallah Nasib,DC,1,95,0,0,0,0,6.1,0.0,0,0,34,27,0,48,2,2,0,0,0,5,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,561201,Husam Abu Dahab,DC,1,89,0,0,0,0,5.9,0.0,0,0,28,22,0,45,4,0,0,0,1,2,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,202134,Ehsan Haddad,DMR,1,95,0,1,0,0,6.7,0.0,0,0,24,20,1,35,0,2,0,0,1,1,2,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,505337,Mohannad Abu Taha,DML,1,95,0,0,1,0,6.4,0.03,1,0,21,10,0,45,2,5,1,1,1,3,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,457085,Noor Al Rawabdeh,MC,1,95,0,0,0,0,6.4,0.0,0,0,41,29,0,54,5,1,0,2,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,464861,Nizar Al Rashdan,MC,1,75,0,0,0,0,6.0,0.0,0,0,28,21,0,38,1,2,0,1,1,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,562782,Ali Azaizeh,AMC,1,45,0,0,0,0,6.3,0.06,1,0,7,7,0,17,2,0,1,1,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,457091,Ali Olwan,AMC,1,89,0,0,0,0,6.1,0.0,0,0,14,12,2,26,1,0,0,1,1,0,2,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,586822,Odeh Fakhoury,FW,1,45,0,0,0,0,6.0,0.01,1,0,6,6,0,9,1,1,0,0,1,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,295226,Mahmoud Al Mardi,Sub,0,50,0,0,0,0,6.0,0.0,0,0,7,7,0,16,0,0,0,1,2,0,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,383816,Mousa Al Tamari,Sub,0,50,1,0,0,0,7.0,0.7,2,1,14,11,0,18,0,0,0,1,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,561199,Amer Jamous,Sub,0,20,0,0,0,0,5.9,0.0,0,0,4,4,0,4,0,0,0,0,1,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,464865,Saleem Obaid,Sub,0,6,0,0,0,0,6.0,0.0,0,0,2,1,0,2,0,0,0,0,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Jordan,Argentina,457084,Mohammad Abu Zraiq,Sub,0,6,0,0,1,0,5.9,0.0,0,0,2,2,0,3,0,0,0,0,1,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,102248,Emiliano Martinez,GK,1,95,0,0,0,0,6.0,0.0,0,0,15,15,0,19,0,0,0,0,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,299684,Exequiel Palacios,DR,1,95,0,0,0,0,7.3,0.0,0,0,87,83,0,110,4,5,0,0,1,3,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,75691,Nicolas Otamendi,DC,1,95,0,0,0,0,6.7,0.07,1,0,96,92,0,105,1,2,2,0,1,3,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,328330,Marcos Senesi,DC,1,95,0,0,0,0,6.7,0.65,1,0,72,68,0,80,0,2,1,0,0,0,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,83809,Nicolas Tagliafico,DL,1,95,0,0,0,0,6.5,0.0,0,0,54,48,1,66,1,0,0,0,1,1,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,422918,Giuliano Simeone,MR,1,70,0,0,0,0,6.2,0.0,0,0,38,34,0,47,3,0,0,0,1,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,93700,Leandro Paredes,MC,1,95,0,0,0,0,6.2,0.0,0,0,164,153,0,172,2,1,0,0,0,0,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,448659,Nico Paz,MC,1,60,0,0,0,0,6.6,0.05,1,0,53,50,0,65,2,0,0,2,1,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,303908,Giovani Lo Celso,ML,1,59,1,0,0,0,7.5,0.03,1,1,46,43,2,58,2,1,0,0,1,0,2,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,299344,Lautaro Martinez,FW,1,59,1,0,0,0,7.4,1.42,3,1,23,18,1,30,1,0,0,0,1,0,2,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,365409,Julian Alvarez,FW,1,81,0,0,0,0,6.6,0.11,1,1,33,25,0,43,1,0,0,0,0,1,3,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,11119,Lionel Messi,Sub,0,36,1,0,0,0,7.5,0.03,2,1,21,17,2,28,0,0,0,0,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,345319,Alexis Mac Allister,Sub,0,35,0,0,0,0,6.7,0.0,0,0,45,42,0,54,3,1,0,0,0,0,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,361732,Thiago Almada,Sub,0,36,0,0,0,0,6.3,0.02,1,0,34,33,0,40,0,0,0,1,0,0,1,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,408110,Jose Manuel Lopez,Sub,0,14,0,0,0,0,6.1,0.06,1,0,0,0,0,5,2,0,0,0,0,1,0,0
+2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,419341,Valentin Barco,Sub,0,25,0,0,0,0,6.2,0.0,0,0,20,16,0,24,1,0,0,0,0,0,0,0
