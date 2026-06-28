@@ -63,6 +63,10 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 - Builders: `build_data.py`→data.js, `build_match_details.py`→matches_detail/<id>.js
   (shots/passes/dribbles/goals/lineups), `build_players.py`→players.js,
   `build_database.py`→database/.
+- **`xg_model.py`** is the shared, dependency-free shot-extraction + xG model that ALL four
+  builders import (so the website's xG matches the PNG infographics exactly). It is copied
+  **verbatim** from `renderer.py`'s `_estimate_xg`/`_extract_qualifiers` — if you change the
+  model in `renderer.py`, mirror the change here or the site and PNGs will disagree.
 
 ## Match dashboard view (`match.js`)
 - **All Goals Map** (last section on each match page, below all stats): a per-goal,
@@ -109,6 +113,15 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 - **Knockout bracket** (`renderBracket`, main page): Round-of-32 → final, results once
   played else the slot placeholder (`1A`, `WinnerEF1`, …). Laid out **from both sides into
   the centre** (`.bracket-tree.two-sided { justify-content:center }`).
+- **Best third-placed teams** (`renderThirdPlace`/`computeThirds`, `#thirdTable`): ranks the
+  12 group third-placed teams (Pts → GD → GF → name); top 8 advance to the R32. Only renders
+  once every group has played all matches (`r.P >= 3` for all four rows). The bracket's
+  `3ABCDF`-style slot placeholders are **resolved to real teams** via FIFA's Annex C
+  allocation table (`FIFA_THIRD_ALLOC`, keyed by the sorted 8-group qualifying combination →
+  maps each `1X` group WINNER to the GROUP whose third-placed team it faces). Only the combos
+  that can actually occur are listed; if the live combo isn't in the table the bracket keeps
+  the `3rd: A/B/..` placeholder. `resolveSlot` consults `computeThirds().assignByCode` to fill
+  the slots.
 - **Scatter charts** (`teamScatter`, shared): powers the attack-vs-defence quadrant,
   expected-points, and **Quality vs quantity of shots** views. That last one passes
   `centerAvg:true` → axes span `0 .. avg + max-distance-from-avg` per axis so the avg
