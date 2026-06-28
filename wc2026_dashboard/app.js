@@ -1125,9 +1125,13 @@
        R32 → R16 is exact (an R16 side like "2A2B" is the winner of the "2A_vs_2B" tie);
        R16 → QF → SF → Final follow the EF/QF/SF index references in the ids, with R16
        numbered 1..8 in schedule (date) order — the standard FIFA bracket numbering. */
-  function renderBracket() {
-    var host = document.getElementById("bracket");
-    if (!host || !D.matches) return;
+  /* Shared knockout-tree model. Parses the schedule's slot / Winner / Loser match ids into a
+     linked R32 → Final tree (each node carries `_kids` = its two feeder ties) plus the
+     third-place play-off, and a `resolveSlot` that turns a slot code into a team once known.
+     Returns null until the fixtures are loaded. Consumed by both `renderBracket` and the
+     Power-Rank predictions, so the projected and actual brackets always share one shape. */
+  function buildKnockout() {
+    if (!D.matches) return null;
     function strip(id) { return id.replace(/^\d{4}_\d{2}_\d{2}_/, ""); }
     function isSlotExpr(t) { return /^[123][0-9A-L]*$/.test(t); }
     function digits(t) { return (t.match(/[123]/g) || []).length; }
@@ -1149,10 +1153,7 @@
       var r = roundOf(m.id);
       if (r) { m._ix = i; rounds[r].push(m); }
     });
-    if (!rounds.F.length || rounds.R32.length < 2) {
-      host.innerHTML = '<p class="hint">The knockout bracket appears once the fixtures are loaded.</p>';
-      return;
-    }
+    if (!rounds.F.length || rounds.R32.length < 2) return null;
     function byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a._ix - b._ix; }
     ["R32", "R16", "QF", "SF"].forEach(function (k) { rounds[k].sort(byDate); });
 
@@ -1213,6 +1214,16 @@
       if (/^Loser /.test(raw)) return { text: raw.replace(/SF (\d)/, "SF #$1") };
       return { text: raw };
     }
+    return { rounds: rounds, r32by: r32by, efByNum: efByNum, qfByNum: qfByNum,
+             sfByNum: sfByNum, fin: fin, tp: tp, resolveSlot: resolveSlot, strip: strip };
+  }
+
+  function renderBracket() {
+    var host = document.getElementById("bracket");
+    if (!host) return;
+    var K = buildKnockout();
+    if (!K) { host.innerHTML = '<p class="hint">The knockout bracket appears once the fixtures are loaded.</p>'; return; }
+    var fin = K.fin, tp = K.tp, resolveSlot = K.resolveSlot;
     function side(m, which) {
       var nm = which === "h" ? m.home : m.away;
       var sc = which === "h" ? m.hs : m.as, os = which === "h" ? m.as : m.hs;
@@ -1262,6 +1273,228 @@
     }
   }
 
+  /* ================= POWER RANK & KNOCKOUT PREDICTIONS (Power Rank tab) =================
+     A single Power Index per knockout team = pre-tournament FIFA ranking points + a capped
+     group-stage "form" adjustment (points, goal difference and xG difference per game). The
+     ratings then drive a favourite-advances simulation of every knockout tie up to the final. */
+
+  // FIFA/Coca-Cola Men's World Ranking points — 11 June 2026 edition (the last update before
+  // kick-off; Argentina 1st on 1877). Top ~45 are the published values; a few of the lowest
+  // debutants are approximated. This is the "class" half of the Power Index.
+  var FIFA_PTS = {
+    "Argentina": 1877, "Spain": 1867, "France": 1862, "England": 1819, "Portugal": 1779, "Brazil": 1760,
+    "Netherlands": 1751, "Belgium": 1740, "Morocco": 1736, "Germany": 1724, "Croatia": 1709, "Colombia": 1696,
+    "Mexico": 1690, "Senegal": 1684, "Uruguay": 1679, "USA": 1665, "Japan": 1652, "Switzerland": 1648,
+    "Iran": 1637, "Turkiye": 1607, "Ecuador": 1587, "Austria": 1578, "South Korea": 1569, "Australia": 1554,
+    "Egypt": 1543, "Canada": 1536, "Norway": 1530, "Ivory Coast": 1524, "Algeria": 1512, "Sweden": 1490,
+    "Panama": 1475, "Paraguay": 1470, "Scotland": 1466, "Czechia": 1458, "Tunisia": 1452, "DR Congo": 1400,
+    "South Africa": 1395, "Qatar": 1394, "Iraq": 1390, "Uzbekistan": 1387, "Jordan": 1383, "Saudi Arabia": 1380,
+    "Bosnia and Herzegovina": 1360, "Cape Verde": 1340, "Ghana": 1326, "Curacao": 1270, "Haiti": 1255, "New Zealand": 1250
+  };
+  // Display rank among the 48 WC teams (1 = highest FIFA points).
+  var FIFA_RANK = {};
+  Object.keys(FIFA_PTS).sort(function (a, b) { return FIFA_PTS[b] - FIFA_PTS[a]; })
+    .forEach(function (t, i) { FIFA_RANK[t] = i + 1; });
+
+  var AGG_BY = {}; AGG.forEach(function (a) { AGG_BY[a.team] = a; });
+  function standingRow(team) {
+    var st = D.standings || {};
+    for (var g in st) {
+      var grp = st[g] || [];
+      for (var i = 0; i < grp.length; i++) if (grp[i].team === team) return grp[i];
+    }
+    return null;
+  }
+
+  // Power Index = FIFA points + group-stage form adjustment, the adjustment capped at ±100 so
+  // a hot group stage tilts but can't fully override pedigree.
+  function powerRating(team) {
+    var fifa = FIFA_PTS[team] || 1400;
+    var row = standingRow(team), ag = AGG_BY[team];
+    var ppg = 0, gdpg = 0, xgdpg = 0, P = 0;
+    if (row && row.P) { P = row.P; ppg = row.Pts / P; gdpg = row.GD / P; }
+    if (ag && ag.n) { xgdpg = (ag.xgf - ag.xga) / ag.n; }
+    var adj = 40 * (ppg - 1.6) + 28 * xgdpg + 10 * gdpg;
+    adj = Math.max(-100, Math.min(100, adj));
+    return {
+      team: team, fifa: fifa, fifaRank: FIFA_RANK[team] || null, adj: adj, rating: fifa + adj,
+      ppg: ppg, gdpg: gdpg, xgdpg: xgdpg, pts: row ? row.Pts : null, gd: row ? row.GD : null, P: P
+    };
+  }
+  // Elo-style: a 100-pt Power-Index edge ≈ 64%, 200 ≈ 74%. Knockout → this is "A advances".
+  function winProb(ra, rb) { return 1 / (1 + Math.pow(10, (rb - ra) / 400)); }
+
+  // Likely regulation scoreline from the rating gap nudged toward each side's group goals-for
+  // rate; level games go to the higher-rated team "on penalties".
+  function predictScore(fav, dog) {
+    var diff = fav.rating - dog.rating;
+    var gF = (standingRow(fav.team) || {}).GF, gU = (standingRow(dog.team) || {}).GF;
+    var baseF = 1.4 + diff / 300, baseU = 1.3 - diff / 360;
+    if (typeof gF === "number") baseF = (baseF + gF / 3) / 2;
+    if (typeof gU === "number") baseU = (baseU + gU / 3) / 2;
+    var sf = Math.round(Math.max(0.4, baseF)), su = Math.round(Math.max(0.3, baseU));
+    var pens = false;
+    if (sf <= su) { su = sf; pens = true; }   // not a clear win on goals → tight game, penalties
+    return { sf: sf, su: su, pens: pens };
+  }
+  function makePred(m, hName, aName) {
+    var res = { m: m, home: hName, away: aName };
+    if (hName && aName) {
+      var A = powerRating(hName), B = powerRating(aName);
+      var pH = winProb(A.rating, B.rating);
+      var fav = pH >= 0.5 ? A : B, dog = pH >= 0.5 ? B : A;
+      res.A = A; res.B = B; res.pH = pH;
+      res.winner = fav.team; res.loser = dog.team;
+      res.favProb = Math.max(pH, 1 - pH);
+      res.score = predictScore(fav, dog);
+    }
+    return res;
+  }
+
+  // Walk the linked knockout tree, projecting each tie from the predicted winners feeding it.
+  function predictAll() {
+    var K = buildKnockout();
+    if (!K) return null;
+    var preds = {};
+    function resolveTeam(slot) { var r = K.resolveSlot(slot); return r.team || null; }
+    function predictMatch(m) {
+      if (!m) return null;
+      if (preds[m.id]) return preds[m.id];
+      preds[m.id] = { m: m };                         // guard against re-entry
+      var sd = K.strip(m.id).split("_vs_");
+      var hName = m._kids && m._kids[0] ? (predictMatch(m._kids[0]) || {}).winner : resolveTeam(sd[0]);
+      var aName = m._kids && m._kids[1] ? (predictMatch(m._kids[1]) || {}).winner : resolveTeam(sd[1]);
+      return (preds[m.id] = makePred(m, hName || null, aName || null));
+    }
+    predictMatch(K.fin);
+    var out = { R32: [], R16: [], QF: [], SF: [], F: null, TP: null, champion: null, K: K };
+    ["R32", "R16", "QF", "SF"].forEach(function (rd) {
+      K.rounds[rd].forEach(function (m) { out[rd].push(preds[m.id] || predictMatch(m)); });
+    });
+    out.F = preds[K.fin.id];
+    out.champion = out.F ? out.F.winner : null;
+    if (K.tp) {                                       // third place = the two beaten semi-finalists
+      var l1 = (preds[(K.sfByNum[1] || {}).id] || {}).loser;
+      var l2 = (preds[(K.sfByNum[2] || {}).id] || {}).loser;
+      out.TP = makePred(K.tp, l1 || null, l2 || null);
+    }
+    return out;
+  }
+
+  function renderPower() {
+    var host = document.getElementById("powerTable");
+    if (!host) return;
+    var K = buildKnockout();
+    var groupsDone = D.standings && Object.keys(D.standings).length >= 12 &&
+      Object.keys(D.standings).every(function (g) { return (D.standings[g] || []).every(function (r) { return r.P >= 3; }); });
+    if (!K || !groupsDone) {
+      host.innerHTML = '<p class="hint">The Power Rank and predictions appear once all groups have finished and the Round of 32 is set.</p>';
+      var rr = document.getElementById("predRounds"); if (rr) rr.innerHTML = "";
+      var pc = document.getElementById("predChampion"); if (pc) pc.innerHTML = "";
+      return;
+    }
+
+    // The 32 = both resolved sides of every Round-of-32 tie.
+    var teamSet = {};
+    K.rounds.R32.forEach(function (m) {
+      K.strip(m.id).split("_vs_").forEach(function (s) { var r = K.resolveSlot(s); if (r.team) teamSet[r.team] = 1; });
+    });
+    var list = Object.keys(teamSet).map(powerRating).sort(function (a, b) { return b.rating - a.rating; });
+    var maxR = list[0].rating, minR = list[list.length - 1].rating, span = (maxR - minR) || 1;
+
+    var P = predictAll();
+
+    // Biggest riser: the team that gained the most places vs its FIFA seeding among these 32
+    // (group-stage form lifting it above where pedigree alone would rank it).
+    var fifaRank32 = {};
+    list.slice().sort(function (a, b) { return b.fifa - a.fifa; }).forEach(function (p, i) { fifaRank32[p.team] = i + 1; });
+    var riser = list[0], riseBy = -99;
+    list.forEach(function (p, i) { var j = fifaRank32[p.team] - (i + 1); if (j > riseBy) { riseBy = j; riser = p; } });
+
+    // Headline stats
+    var stats = [
+      ["v accent", Math.round(list[0].rating), "Top Power Index — " + list[0].team],
+      ["v blue", P && P.champion ? P.champion : "—", "Predicted champion"],
+      ["v", "▲ " + riseBy, "Biggest riser — " + riser.team],
+      ["v", list.length, "Teams in the Round of 32"]
+    ];
+    document.getElementById("predStats").innerHTML = stats.map(function (it) {
+      return '<div class="stat"><div class="' + it[0] + '" style="font-size:' + (String(it[1]).length > 6 ? 20 : 28) + 'px">' +
+        esc(String(it[1])) + '</div><div class="k">' + esc(it[2]) + "</div></div>";
+    }).join("");
+
+    // Power Index table
+    var body = list.map(function (p, i) {
+      var w = ((p.rating - minR) / span) * 100;
+      var champ = P && P.champion === p.team;
+      return '<tr' + (champ ? ' class="champ-row"' : '') + '>' +
+        '<td class="rk">' + (i + 1) + "</td>" +
+        '<td class="team"><div class="team-cell">' + logoImg(p.team) + '<span class="nm">' + esc(p.team) +
+          (champ ? ' <span class="champ-star">★</span>' : '') + "</span></div></td>" +
+        '<td class="fifa">' + (p.fifaRank ? "#" + p.fifaRank : "–") + ' <span class="sub">' + p.fifa + "</span></td>" +
+        "<td>" + (p.pts != null ? p.pts : "–") + ' <span class="sub">' + (p.gd != null ? (p.gd > 0 ? "+" + p.gd : p.gd) : "") + "</span></td>" +
+        "<td>" + (p.xgdpg >= 0 ? "+" : "") + p.xgdpg.toFixed(2) + "</td>" +
+        '<td><span class="delta ' + (p.adj > 2 ? "pos" : p.adj < -2 ? "neg" : "") + '">' + (p.adj >= 0 ? "+" : "") + Math.round(p.adj) + "</span></td>" +
+        '<td class="pwr"><div class="pwr-bar"><span style="width:' + w.toFixed(1) + '%"></span></div><b>' + Math.round(p.rating) + "</b></td>" +
+        "</tr>";
+    }).join("");
+    host.innerHTML = '<table class="rank power-table"><thead><tr>' +
+      "<th>#</th><th class='team'>Team</th><th>FIFA</th><th>Group</th><th>xGD/g</th><th>Form</th><th class='pwr'>Power Index</th>" +
+      "</tr></thead><tbody>" + body + "</tbody></table>";
+
+    renderPredChampion(P);
+    renderPredRounds(P);
+  }
+
+  function predSide(p, name, isWin) {
+    if (!name) return '<div class="ps tbd"><span class="nm">TBD</span></div>';
+    var rt = powerRating(name);
+    return '<div class="ps ' + (isWin ? "win" : "out") + '">' + logoImg(name, "ps-logo") +
+      '<span class="nm">' + esc(name) + '</span><span class="pidx">' + Math.round(rt.rating) + "</span></div>";
+  }
+  function predCard(p, label) {
+    if (!p) return "";
+    var head = label ? '<div class="pc-tag">' + esc(label) + "</div>" : "";
+    if (!p.winner) {
+      return '<div class="pred-card">' + head + predSide(p, p.home, false) + predSide(p, p.away, false) +
+        '<div class="pc-foot">Awaiting feeders</div></div>';
+    }
+    var hWin = p.winner === p.home;
+    var sc = p.score, scoreTxt = hWin ? (sc.sf + "–" + sc.su) : (sc.su + "–" + sc.sf);
+    var foot = "Predicted: <b>" + esc(p.winner) + "</b> " + Math.round(p.favProb * 100) + "% · " +
+      scoreTxt + (sc.pens ? " (pens)" : "");
+    return '<div class="pred-card">' + head +
+      predSide(p, p.home, hWin) + predSide(p, p.away, !hWin) +
+      '<div class="pc-foot">' + foot + "</div></div>";
+  }
+  function renderPredRounds(P) {
+    var host = document.getElementById("predRounds");
+    if (!host || !P) return;
+    var defs = [["R32", "Round of 32"], ["R16", "Round of 16"], ["QF", "Quarter-finals"], ["SF", "Semi-finals"]];
+    var html = defs.map(function (d) {
+      var cards = (P[d[0]] || []).map(function (p) { return predCard(p); }).join("");
+      return '<div class="pred-round"><h4>' + d[1] + "</h4><div class=\"pred-grid\">" + cards + "</div></div>";
+    }).join("");
+    html += '<div class="pred-round"><h4>Final &amp; third place</h4><div class="pred-grid">' +
+      predCard(P.F, "Final") + (P.TP ? predCard(P.TP, "3rd-place play-off") : "") + "</div></div>";
+    host.innerHTML = html;
+  }
+  function renderPredChampion(P) {
+    var host = document.getElementById("predChampion");
+    if (!host) return;
+    if (!P || !P.champion) { host.innerHTML = '<p class="hint">The predicted champion appears once the bracket is set.</p>'; return; }
+    var f = P.F, runnerUp = f.winner === f.home ? f.away : f.home;
+    var sc = f.score, hWin = f.winner === f.home;
+    var scoreTxt = hWin ? (sc.sf + "–" + sc.su) : (sc.su + "–" + sc.sf);
+    host.innerHTML = '<div class="champ-hero">' +
+      '<div class="champ-badge">' + logoImg(P.champion, "champ-logo") +
+        '<div class="champ-name">' + esc(P.champion) + '</div>' +
+        '<div class="champ-sub">Projected World Cup 2026 winners</div></div>' +
+      '<div class="champ-line">Predicted final: <b>' + esc(P.champion) + "</b> " + scoreTxt + (sc.pens ? " (pens)" : "") +
+        " vs " + esc(runnerUp) + " · " + Math.round(f.favProb * 100) + "% win probability</div>" +
+      "</div>";
+  }
+
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
@@ -1282,6 +1515,7 @@
   renderAgreement();
   renderUnlucky();
   renderData();
+  renderPower();
   document.getElementById("footerNote").textContent =
     "Data generated " + D.generated + " · " + D.counts.played + " matches played · " +
     D.counts.with_xg + " with xG · " + PLAYERS.length + " players · built from the WC2026 pipeline.";

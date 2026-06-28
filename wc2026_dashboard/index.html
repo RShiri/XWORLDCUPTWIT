@@ -20,6 +20,7 @@
       <button data-view="players">Players</button>
       <button data-view="xg">xG Analysis</button>
       <button data-view="data">Data</button>
+      <button data-view="predict">Power Rank</button>
     </nav>
   </div>
 </header>
@@ -257,6 +258,57 @@
       <h3>Raw match files</h3>
       <p class="hint" id="rawNote">The original scraped JSON for every match (FotMob + WhoScored merged), including
          the full event stream, lives in <code>wc2026/matches/</code>.</p>
+    </div>
+  </section>
+
+  <!-- POWER RANK & PREDICTIONS -->
+  <section id="view-predict" class="view">
+    <div class="section-head">
+      <h2>Power Rank &amp; Knockout Predictions</h2>
+      <p>A single <b>Power Index</b> for the 32 teams in the Round of 32, blending each side's
+         <b>pre-tournament FIFA ranking</b> with how they actually played in the group stage
+         (points won, goal difference and expected-goal difference). Those ratings then drive a
+         model that simulates every knockout tie — all the way to a predicted champion.</p>
+    </div>
+
+    <div class="explainer">
+      <h3>How the Power Index &amp; predictions work</h3>
+      <p>Every team starts from its <b>FIFA/Coca-Cola World Ranking</b> points (the 11&nbsp;June&nbsp;2026
+         list, the last update before kick-off). We then add a <b>form adjustment</b> of up to ±100 points
+         from the group stage: points per game, goal difference per game, and <b>xG difference</b> per game
+         (chance quality created minus allowed). The result is the <b>Power Index</b> below.</p>
+      <p>For each knockout tie we turn the two teams' Power Index gap into a win probability with an
+         Elo-style curve (a 100-point edge ≈ 64%, 200 ≈ 74%). The higher-rated side is projected to advance,
+         with a likely scoreline derived from the same gap and each team's scoring form. Because it's a
+         knockout, the model always picks a winner — level games are decided "on penalties" by the higher
+         Power Index. It's a deterministic projection, not a probability over every possible bracket: real
+         tournaments throw up upsets the favourites-advance path can't.</p>
+      <p class="explainer-note">FIFA ranking source: the FIFA/Coca-Cola Men's World Ranking published
+         11&nbsp;June&nbsp;2026 (Argentina 1st on 1877 pts). Points for the lowest-ranked sides are
+         approximate. Form &amp; xG come from this site's own scraped group-stage data.</p>
+    </div>
+
+    <div class="stats-strip" id="predStats"></div>
+
+    <div class="card full-card">
+      <h3>Power Index — Round-of-32 teams</h3>
+      <p class="hint">Ranked by Power Index. <b>FIFA</b> = pre-tournament ranking points; <b>Form</b> = the
+         group-stage adjustment (＋ in-form, − underwhelming); <b>xGD/g</b> = expected goal difference per game.
+         The bar shows the Power Index relative to the field.</p>
+      <div class="table-scroll" id="powerTable"></div>
+    </div>
+
+    <div class="card full-card" id="champCard">
+      <h3>Predicted champion</h3>
+      <div id="predChampion"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Predicted road to the final</h3>
+      <p class="hint">Every tie from the Round of 32 to the final, as projected by the Power Index model.
+         The side tipped to go through is highlighted, with its win probability and the model's likely
+         scoreline. Ties whose participants aren't fixed yet are projected from the predicted winners feeding into them.</p>
+      <div id="predRounds"></div>
     </div>
   </section>
 

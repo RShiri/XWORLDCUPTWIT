@@ -122,6 +122,15 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   that can actually occur are listed; if the live combo isn't in the table the bracket keeps
   the `3rd: A/B/..` placeholder. `resolveSlot` consults `computeThirds().assignByCode` to fill
   the slots.
+- **Power Rank & Predictions** (`renderPower`/`predictAll`, `#view-predict`, the **last tab,
+  after Data**): a Power Index for the 32 Round-of-32 teams = hardcoded `FIFA_PTS` (FIFA/Coca-Cola
+  ranking, 11 Jun 2026 — top ~45 published, lowest few approximated) **+** a ±100-capped
+  group-stage form adjustment (`powerRating`: pts/game, GD/game, xGD/game from `AGG`). `winProb`
+  (Elo-style, 400-pt scale) + `predictScore` drive a favourite-advances simulation of every
+  knockout tie to a predicted champion. `buildKnockout()` (shared with `renderBracket`) provides
+  the linked R32→Final tree + `resolveSlot`; `predictAll` recurses it, projecting each tie from
+  the predicted winners feeding it (third-place = the two beaten semi-finalists). Deterministic
+  projection, not a full bracket-probability sim.
 - **Scatter charts** (`teamScatter`, shared): powers the attack-vs-defence quadrant,
   expected-points, and **Quality vs quantity of shots** views. That last one passes
   `centerAvg:true` → axes span `0 .. avg + max-distance-from-avg` per axis so the avg
