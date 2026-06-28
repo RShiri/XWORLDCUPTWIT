@@ -2015,6 +2015,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,399999,Nicolas Raskin,Sub,0,11,0,1,0,0,7.1,0.0,0,0,5,5,1,8,2,0,1,0,0,1,0,0
 2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,400815,Amadou Onana,Sub,0,24,0,0,0,0,6.0,0.02,2,0,10,9,0,15,1,1,0,0,0,0,0,0
 2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Belgium,New Zealand,475462,Matias Fernandez-Pardo,Sub,0,40,0,0,0,0,6.7,0.54,2,0,10,9,4,18,2,0,0,0,0,0,1,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,448768,Orlando Mosquera,GK,1,95,0,0,0,0,6.7,0.0,0,0,33,18,0,51,0,0,1,0,0,2,0,4
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,280972,Amir Murillo,DR,1,95,0,0,0,0,6.3,0.26,2,0,23,18,2,48,2,0,2,2,0,2,1,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,318565,Fidel Escobar,DC,1,95,0,0,0,0,6.7,0.0,0,0,26,20,1,43,4,1,1,0,1,8,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,397267,Andres Andrade,DC,1,95,0,0,1,0,6.1,0.0,0,0,31,23,0,51,3,2,0,0,1,5,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,458339,Jose Cordoba,DC,1,95,0,0,0,0,6.5,0.0,0,0,39,36,0,54,2,0,1,0,0,9,1,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,455359,Jorge Gutierrez,DL,1,87,0,0,0,0,6.2,0.0,0,0,15,11,1,36,1,1,0,0,1,4,1,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,318250,Cristian Martinez,MR,1,95,0,0,0,0,6.8,0.0,0,0,23,15,3,41,2,1,2,1,1,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,143611,Yoel Barcenas,MC,1,70,0,0,0,0,5.8,0.0,0,0,12,8,0,20,2,1,0,0,1,0,1,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,396239,Carlos Harvey,MC,1,87,0,0,0,0,6.9,0.18,2,0,18,16,1,36,2,0,2,2,2,4,2,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,358868,Jose Luis Rodriguez,ML,1,70,0,0,0,0,6.2,0.07,2,1,11,7,0,26,5,0,1,1,2,1,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,458333,Tomas Rodriguez,FW,1,45,0,0,0,0,6.2,0.02,1,1,9,7,1,12,0,0,0,0,3,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,79700,Alberto Quintero,Sub,0,8,0,0,0,0,6.0,0.0,0,0,3,3,0,4,0,0,0,0,1,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,138484,Eric Davis,Sub,0,8,0,0,0,0,6.1,0.01,1,0,4,3,0,9,0,0,0,0,0,1,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,238549,Ismael Diaz,Sub,0,25,0,0,0,0,6.0,0.28,4,0,7,5,0,16,1,0,0,0,0,0,2,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,455374,Azarias Londono,Sub,0,25,0,0,0,0,6.1,0.01,1,0,8,8,0,10,0,0,1,0,1,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,Panama,England,458334,Jose Fajardo,Sub,0,50,0,0,1,0,5.7,0.0,0,0,5,3,0,10,2,0,0,0,2,0,1,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,110189,Jordan Pickford,GK,1,95,0,0,0,0,7.2,0.0,0,0,30,23,0,37,0,0,0,0,0,4,0,2
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,430019,Jarell Quansah,DR,1,62,0,0,1,0,6.9,0.0,0,0,49,44,0,55,1,0,6,0,0,2,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,301440,Ezri Konsa,DC,1,95,0,0,0,0,7.1,0.0,0,0,71,70,0,84,1,1,3,0,3,4,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,374631,Marc Guehi,DC,1,95,0,0,0,0,7.4,0.0,0,0,79,77,1,91,1,2,2,0,0,3,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,468847,Nico O'Reilly,DL,1,95,0,0,0,0,7.6,0.07,1,0,50,47,2,70,4,0,2,1,2,3,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,402596,Elliot Anderson,DMC,1,83,0,0,0,0,7.7,0.01,1,1,70,63,0,92,5,2,2,2,1,1,2,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,367185,Bukayo Saka,MR,1,62,0,1,0,0,7.2,0.26,3,0,26,19,1,47,2,0,0,1,1,0,2,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,362824,Morgan Rogers,MC,1,95,0,0,0,0,7.0,0.0,0,0,37,30,1,50,2,0,1,1,2,1,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,379868,Jude Bellingham,MC,1,70,1,1,0,0,9.4,0.66,2,1,43,37,4,68,4,0,0,3,0,0,3,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,300299,Marcus Rashford,ML,1,95,0,0,0,0,7.2,0.33,5,1,42,34,1,63,1,0,0,2,1,0,1,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,83532,Harry Kane,FW,1,83,1,0,0,0,7.5,0.75,3,2,19,13,0,25,0,0,1,0,2,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,68659,Jordan Henderson,Sub,0,12,0,0,0,0,6.3,0.0,0,0,13,12,0,18,1,0,0,0,0,1,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,148503,Ollie Watkins,Sub,0,12,0,0,0,0,6.0,0.0,0,0,1,1,0,2,0,0,0,0,0,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,332403,Eberechi Eze,Sub,0,25,0,0,0,0,6.0,0.01,1,0,8,7,0,12,0,0,0,0,0,0,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,362219,Djed Spence,Sub,0,33,0,0,0,0,6.5,0.0,0,0,14,13,0,21,1,0,0,0,1,1,0,0
+2026_06_27_Panama_vs_England,2026-06-27,England,Panama,389935,Noni Madueke,Sub,0,33,0,0,0,0,6.5,0.44,1,1,5,2,2,15,1,0,0,0,0,1,0,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,30966,Fernando Muslera,GK,1,45,0,0,0,0,5.0,0.0,0,0,13,7,0,15,0,0,0,0,0,0,0,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,145385,Guillermo Varela,DR,1,96,0,0,1,0,6.3,0.0,0,0,21,17,0,41,0,2,1,0,0,3,0,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,347178,Mathias Olivera,DC,1,96,0,0,0,0,7.3,0.0,0,0,46,38,0,58,7,1,0,1,2,1,1,0
