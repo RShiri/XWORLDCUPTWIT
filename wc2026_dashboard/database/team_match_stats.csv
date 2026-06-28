@@ -135,6 +135,8 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_27_Panama_vs_England,2026-06-27,England,Panama,away,2,0,,,,,85,,,,,,2.55
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Uruguay,Spain,home,0,1,,,,,73,,,,,,0.29
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,away,1,0,,,,,88,,,,,,0.71
+2026_06_28_Algeria_vs_Austria,2026-06-28,Algeria,Austria,home,3,3,,,,,93,,,,,,2.02
+2026_06_28_Algeria_vs_Austria,2026-06-28,Austria,Algeria,away,3,3,,,,,85,,,,,,1.44
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,home,0,0,,,,,88,,,,,,2.1
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,away,0,0,,,,,89,,,,,,1.07
 2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,home,3,1,,,,,80,,,,,,2.55
