@@ -2109,3 +2109,35 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,349760,Ferran Torres,Sub,0,21,0,0,0,0,6.4,0.35,1,0,2,2,0,10,0,0,1,1,0,0,1,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,403865,Yeremy Pino,Sub,0,31,0,0,0,0,6.0,0.0,0,0,9,7,0,13,0,0,1,0,0,0,1,0
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Spain,Uruguay,408449,Nico Williams,Sub,0,21,0,0,0,0,6.1,0.0,0,0,5,2,0,9,0,0,1,0,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,53362,Camilo Vargas,GK,1,95,0,0,0,0,6.7,0.0,0,0,38,31,0,42,0,0,0,0,0,1,0,2
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,88112,Santiago Arias,DR,1,86,0,0,0,0,7.3,0.0,0,0,41,34,5,56,5,1,0,0,1,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,322655,Davinson Sanchez,DC,1,95,0,0,0,0,7.3,0.07,1,0,65,55,1,78,1,1,2,0,0,6,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,363653,Jhon Lucumi,DC,1,95,0,0,0,0,6.8,0.0,0,0,27,26,0,33,1,0,2,0,1,4,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,416148,Deiver Machado,DL,1,95,0,0,0,0,6.8,0.0,0,0,25,21,1,35,2,2,0,0,1,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,133464,Jefferson Lerma,MC,1,59,0,0,0,0,6.5,0.03,2,1,42,38,0,49,0,1,0,0,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,424039,Jhon Arias,MC,1,75,0,0,0,0,7.6,0.15,3,2,55,52,4,74,4,0,0,2,3,0,3,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,472904,Gustavo Puerta,MC,1,95,0,0,1,0,6.6,0.11,4,1,75,72,1,87,1,0,0,0,2,2,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,71182,James Rodriguez,FWR,1,75,0,0,0,0,7.2,0.14,3,1,72,65,5,85,3,0,1,2,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,136904,Jhon Cordoba,FW,1,59,0,0,0,0,6.1,0.44,2,1,10,7,0,16,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,377168,Luis Diaz,FWL,1,95,0,0,0,0,6.2,0.25,4,0,42,39,2,51,2,0,0,0,0,0,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,91989,Juan Fernando Quintero,Sub,0,20,0,0,0,0,6.0,0.0,0,0,12,10,0,15,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,400496,Daniel Munoz,Sub,0,9,0,0,0,0,6.3,0.0,0,0,1,0,1,3,2,0,0,0,1,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,402213,Richard Rios,Sub,0,36,0,0,0,0,6.1,0.54,1,0,18,16,0,22,2,0,0,0,3,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,402887,Luis Suarez,Sub,0,36,0,0,0,0,5.9,0.37,4,0,9,6,0,18,0,0,0,0,0,1,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Colombia,Portugal,473940,Kevin Castano,Sub,0,20,0,0,0,0,6.1,0.0,0,0,13,13,0,13,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,373842,Diogo Costa,GK,1,95,0,0,0,0,7.9,0.0,0,0,19,15,0,32,0,0,0,0,0,1,0,6
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,128967,Joao Cancelo,DR,1,45,0,0,0,0,6.6,0.0,0,0,12,12,0,22,0,1,0,0,0,2,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,313171,Ruben Dias,DC,1,95,0,0,0,0,7.4,0.0,0,0,54,50,0,70,0,2,3,1,2,7,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,434077,Renato Veiga,DC,1,95,0,0,0,0,7.6,0.0,0,0,57,54,1,74,1,3,2,0,1,7,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,395221,Nuno Mendes,DL,1,92,0,0,0,0,6.9,0.0,0,0,42,38,3,62,1,0,0,2,0,0,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,238244,Ruben Neves,DMC,1,45,0,0,0,0,6.3,0.03,2,0,17,14,0,21,0,0,0,0,0,2,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,384887,Vitinha,DMC,1,69,0,0,0,0,7.0,0.02,1,0,54,54,1,60,0,1,1,1,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,337916,Pedro Neto,AMR,1,95,0,0,0,0,6.3,0.0,0,0,36,30,1,47,0,0,0,1,2,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,123761,Bruno Fernandes,AMC,1,95,0,0,0,0,6.6,0.57,2,1,44,39,1,56,2,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,362431,Joao Felix,AML,1,69,0,0,0,0,6.2,0.19,3,0,14,12,0,33,4,1,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,5583,Cristiano Ronaldo,FW,1,95,0,0,0,0,6.2,0.17,3,1,27,22,0,35,0,0,0,0,1,0,1,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,349207,Rafael Leao,Sub,0,26,0,0,0,0,6.7,0.06,1,0,6,6,0,18,0,1,0,3,0,0,2,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,353418,Diogo Dalot,Sub,0,50,0,0,0,0,6.7,0.02,1,0,24,22,1,38,1,0,0,1,0,1,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,394933,Matheus Nunes,Sub,0,3,0,0,0,0,6.0,0.0,0,0,1,1,0,1,0,0,0,0,0,0,0,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,465388,Joao Neves,Sub,0,50,0,0,0,0,6.4,0.0,0,0,26,25,0,32,2,2,1,0,0,0,2,0
+2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,391562,Samu Costa,Sub,0,26,0,0,0,0,6.3,0.0,0,0,12,11,0,15,1,0,1,0,0,1,0,0
