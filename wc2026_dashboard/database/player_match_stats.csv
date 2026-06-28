@@ -2141,3 +2141,35 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,394933,Matheus Nunes,Sub,0,3,0,0,0,0,6.0,0.0,0,0,1,1,0,1,0,0,0,0,0,0,0,0
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,465388,Joao Neves,Sub,0,50,0,0,0,0,6.4,0.0,0,0,26,25,0,32,2,2,1,0,0,0,2,0
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Portugal,Colombia,391562,Samu Costa,Sub,0,26,0,0,0,0,6.3,0.0,0,0,12,11,0,15,1,0,1,0,0,1,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,461465,Lionel Mpasi,GK,1,98,0,0,0,0,6.2,0.0,0,0,34,25,0,36,0,0,0,0,0,0,0,1
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,331924,Aaron Wan-Bissaka,DR,1,98,0,0,0,0,7.2,0.0,0,0,45,36,3,75,0,2,2,1,0,7,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,104368,Chancel Mbemba,DC,1,98,0,0,0,0,6.8,0.1,1,0,53,45,0,67,3,0,3,0,0,4,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,299271,Axel Tuanzebe,DC,1,98,0,0,0,0,6.8,0.0,0,0,55,50,0,68,1,0,2,0,0,7,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,122980,Arthur Masuaku,DL,1,82,0,0,0,0,6.9,0.0,0,0,69,57,2,91,3,0,2,0,0,2,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,380614,Nathanael Mbuku,MR,1,71,0,0,1,0,6.8,0.01,1,1,21,18,1,45,3,0,0,2,3,1,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,437449,Noah Sadiki,MC,1,98,0,0,1,0,7.2,0.0,0,0,56,53,2,69,5,1,0,1,1,1,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,342571,Samuel Moutoussamy,MC,1,71,0,0,1,0,6.6,0.0,0,0,54,44,2,66,6,0,0,0,1,1,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,541727,Brian Cipenga,ML,1,71,0,0,0,0,7.1,0.05,3,0,26,13,0,59,3,0,0,6,0,0,5,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,296240,Yoane Wissa,FW,1,98,2,0,0,0,7.9,1.42,6,2,19,17,0,40,0,0,0,0,1,1,3,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,86513,Cedric Bakambu,FW,1,50,0,0,0,0,5.7,0.0,0,0,6,2,0,10,1,0,0,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,141392,Joris Kayembe,Sub,0,16,0,0,0,0,6.5,0.0,0,0,4,4,1,9,0,2,0,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,315228,Meschack Elia,Sub,0,27,0,0,0,0,6.9,0.03,1,0,12,12,3,19,1,1,1,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,136392,Theo Bongonda,Sub,0,27,0,0,0,0,6.3,0.08,1,0,6,4,0,19,0,1,0,1,0,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,487782,Fiston Mayele,Sub,0,48,1,0,0,0,7.0,0.84,5,1,11,7,0,24,0,0,2,0,0,0,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,DR Congo,Uzbekistan,468938,Ngal'ayel Mukau,Sub,0,27,0,0,0,0,6.2,0.01,1,0,16,14,0,19,0,0,0,0,0,1,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,457150,Abduvokhid Nematov,GK,1,98,0,0,0,0,5.5,0.0,0,0,28,15,0,34,0,0,1,0,0,1,0,1
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,280961,Rustam Ashurmatov,DC,1,98,0,0,0,0,7.1,0.0,0,0,34,27,0,55,0,4,7,1,0,9,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,493206,Abdukodir Khusanov,DC,1,98,0,0,1,0,5.9,0.0,0,0,39,32,0,51,3,1,1,0,3,7,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,531734,Jakhongir Urozov,DC,1,81,0,0,0,0,6.4,0.0,0,0,22,16,0,35,1,0,4,0,0,7,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,455410,Khojiakbar Alijonov,DMR,1,98,0,0,0,0,6.9,0.0,0,0,31,19,1,71,9,3,1,3,1,1,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,457149,Sherzod Nasrullaev,DML,1,98,0,0,1,0,6.5,0.0,0,0,27,19,0,52,4,1,4,1,2,4,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,274624,Otabek Shukurov,MC,1,58,0,0,0,0,6.2,0.0,0,0,25,21,0,34,0,0,1,0,1,3,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,455427,Akmal Mozgovoy,MC,1,81,0,1,0,0,6.9,0.0,0,0,30,25,1,38,4,2,0,0,0,1,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,262702,Dostonbek Khamdamov,AMC,1,58,0,0,0,0,6.5,0.0,0,0,20,18,0,35,6,0,1,0,1,1,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,495568,Abbosbek Fayzullaev,AMC,1,72,0,0,0,0,6.5,0.01,1,0,9,6,0,26,4,0,0,0,4,3,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,262707,Eldor Shomurodov,FW,1,98,1,0,0,0,7.4,0.14,2,1,27,19,0,51,4,0,2,1,3,0,2,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,98309,Igor Sergeev,Sub,0,17,0,0,0,0,5.9,0.0,0,0,1,1,0,1,0,0,0,0,0,0,0,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,126445,Jamshid Iskanderov,Sub,0,17,0,0,0,0,5.8,0.0,0,0,12,9,0,18,0,0,0,0,0,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,393121,Oston Urunov,Sub,0,26,0,0,0,0,5.8,0.0,0,0,7,6,0,12,0,1,0,0,0,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,458631,Aziz G'aniev,Sub,0,40,0,0,0,0,6.2,0.0,0,0,23,17,0,33,5,0,0,0,1,0,1,0
+2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Uzbekistan,DR Congo,455413,Odiljon Khamrobekov,Sub,0,40,0,0,0,0,5.7,0.0,0,0,20,19,0,25,0,0,0,0,0,1,1,0
