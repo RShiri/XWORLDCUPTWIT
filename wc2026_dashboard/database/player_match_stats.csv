@@ -1953,6 +1953,38 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,379205,Sergino Dest,Sub,0,24,0,0,0,0,6.2,0.0,0,0,3,3,1,8,0,1,0,1,0,0,0,0
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,397465,Malik Tillman,Sub,0,14,0,0,0,0,5.8,0.0,0,0,1,1,0,5,0,0,0,0,0,0,1,0
 2026_06_26_Turkiye_vs_USA,2026-06-26,USA,Turkiye,440159,Alex Freeman,Sub,0,23,0,0,0,0,6.3,0.0,0,0,7,5,1,17,1,0,0,0,0,4,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,123577,Vozinha,GK,1,95,0,0,0,0,7.1,0.0,0,0,34,27,0,45,0,0,0,0,0,0,0,3
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,492313,Wagner Pina,DR,1,93,0,0,1,0,6.7,0.09,1,0,37,27,2,64,0,1,1,1,1,2,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,235763,Diney Borges,DC,1,95,0,0,0,0,7.2,0.0,0,0,64,56,0,73,2,0,4,0,1,8,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,430933,Pico Lopes,DC,1,95,0,0,0,0,7.3,0.1,1,0,52,47,0,65,3,2,2,0,0,3,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,431439,Joao Paulo,DL,1,95,0,0,0,0,7.6,0.1,2,0,48,42,0,87,2,4,3,1,0,5,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,438902,Kevin Pina,DMC,1,95,0,0,0,0,7.0,0.02,2,0,60,53,0,82,2,1,1,1,2,4,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,74790,Ryan Mendes,MR,1,71,0,0,0,0,6.7,0.12,1,0,34,25,1,59,3,1,1,2,1,2,4,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,296684,Jamiro Monteiro,MC,1,70,0,0,0,0,6.3,0.18,2,1,29,22,1,42,1,0,0,0,2,0,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,328549,Deroy Duarte,MC,1,95,0,0,0,0,7.3,0.02,1,0,40,34,1,59,5,1,2,0,0,5,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,415948,Willy Semedo,ML,1,60,0,0,0,0,6.6,0.07,2,0,15,15,1,45,0,2,0,2,2,0,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,528208,Dailon Livramento,FW,1,60,0,0,0,0,6.0,0.0,0,0,9,7,0,15,0,0,2,0,0,0,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,342550,Nuno da Costa,Sub,0,35,0,0,0,0,6.7,0.09,1,0,6,5,1,14,1,0,2,1,0,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,142431,Garry Rodrigues,Sub,0,24,0,0,0,0,6.2,0.03,1,0,6,5,1,12,1,0,0,0,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,493061,Helio Varela,Sub,0,35,0,0,0,0,6.2,0.0,0,0,8,8,1,13,0,0,0,1,1,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,129648,Steven Moreira,Sub,0,2,0,0,0,0,6.0,0.0,0,0,1,1,0,2,0,0,0,0,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Cape Verde,Saudi Arabia,379742,Laros Duarte,Sub,0,25,0,0,0,0,6.6,0.56,1,1,8,7,3,14,1,1,0,1,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,146400,Mohammed Al Owais,GK,1,95,0,0,0,0,6.8,0.0,0,0,24,19,0,30,0,0,0,0,0,0,0,2
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,457103,Saud Abdulhamid,DR,1,95,0,0,1,0,7.4,0.01,1,0,34,24,1,61,6,1,2,1,2,5,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447660,Abdulelah Al Amri,DC,1,95,0,0,0,0,7.1,0.05,1,0,52,44,1,61,2,1,2,0,0,2,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447676,Hassan Al Tambakti,DC,1,32,0,0,0,0,6.6,0.0,0,0,20,18,0,23,1,1,0,0,0,1,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,458392,Nawaf Bu Washl,DL,1,81,0,0,0,0,6.6,0.0,0,0,36,25,0,57,2,2,0,0,0,6,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,488541,Sultan Mandash,MR,1,65,0,0,0,0,6.9,0.0,0,0,10,8,0,31,10,0,0,0,1,1,2,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,333478,Abdullah Al Khaibari,MC,1,45,0,0,0,0,6.3,0.0,0,0,18,16,0,22,0,0,0,0,0,1,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447662,Nasser Al Dawsari,MC,1,95,0,0,1,0,6.9,0.01,1,0,57,49,0,75,2,2,0,2,4,2,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,111560,Salem Al Dawsari,ML,1,65,0,0,0,0,6.5,0.06,1,0,18,12,0,36,4,1,0,2,2,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,358782,Mohamed Kanno,FW,1,95,0,0,0,0,7.2,0.35,1,1,46,39,0,71,7,1,4,1,4,1,4,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447657,Feras Al Brikan,FW,1,95,0,0,1,0,6.2,0.0,0,0,15,9,2,22,2,0,1,0,1,1,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447663,Abdullah Al Hamddan,Sub,0,30,0,0,0,0,6.1,0.11,1,1,11,8,0,17,1,0,1,0,2,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,447677,Ali Lajami,Sub,0,63,0,0,0,0,7.0,0.0,0,0,38,35,0,53,1,1,1,0,0,5,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,470590,Musab Al Juwayr,Sub,0,50,0,0,0,0,6.3,0.0,0,0,29,24,1,40,1,0,0,0,0,0,1,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,470595,Mohammed Abu Al Shamat,Sub,0,30,0,0,0,0,6.3,0.06,1,1,25,19,0,30,0,1,0,0,0,0,0,0
+2026_06_27_Cape_Verde_vs_Saudi_Arabia,2026-06-27,Saudi Arabia,Cape Verde,458371,Moteb Al Harbi,Sub,0,14,0,0,0,0,6.0,0.0,0,0,11,10,0,14,0,0,0,0,0,0,1,0
 2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,119120,Dominik Livakovic,GK,1,97,0,0,0,0,6.1,0.0,0,0,21,14,0,30,0,0,0,0,0,2,0,0
 2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,413272,Josip Stanisic,DR,1,97,0,0,0,0,6.0,0.0,0,0,37,33,0,51,2,0,0,0,0,1,1,0
 2026_06_27_Croatia_vs_Ghana,2026-06-27,Croatia,Ghana,336048,Marin Pongracic,DC,1,97,0,0,0,0,6.8,0.07,1,0,72,69,0,85,3,0,1,0,2,7,0,0
