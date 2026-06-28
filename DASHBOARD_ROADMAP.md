@@ -3,8 +3,8 @@
 Future improvements for the interactive site (`wc2026_dashboard/`, live at
 **https://rshiri.github.io/XWORLDCUPTWIT/**). Each item lists **why**, **where it touches**,
 and a rough **effort** (S ≈ hours, M ≈ half-day, L ≈ multi-session). Ordered into
-**Now / Next / Later** by value-to-effort. Nothing here exists yet — current features are
-in `wc2026_dashboard/README.md`.
+**Now / Next / Later** by value-to-effort. Items marked **✅ SHIPPED** are done; the rest
+aren't built yet — current features are in `wc2026_dashboard/README.md`.
 
 > How to work on these: build/serve locally with `py wc2026_dashboard/build_site.py --serve`
 > (→ `http://localhost:8777/wc2026_dashboard/`). Source files (`app.js`/`match.js`/CSS/HTML)
@@ -38,11 +38,10 @@ in `wc2026_dashboard/README.md`.
 
 ## NEXT — high-value analytics & navigation
 
-4. **Knockout bracket view** — *M, high value.*
-   An interactive R32→Final bracket that fills in as results land (the schedule already has
-   the knockout placeholders). Today only group Tables exist; the bracket is the natural
-   tournament centerpiece.
-   *Touches:* new `app.js` section + `build_data.py` (derive bracket from results/schedule).
+4. **Knockout bracket view** — ✅ **SHIPPED.**
+   Interactive R32→Final bracket that fills in as results land (placeholder slots until then),
+   laid out from both sides into the centre. `renderBracket` in `app.js` + `.bracket-tree`
+   styles; see `wc2026_dashboard/README.md`.
 
 5. **xG flow / momentum timeline (per match)** — *M, high value.*
    Cumulative "xG race" line per team over match minutes, plus a momentum bar — the single

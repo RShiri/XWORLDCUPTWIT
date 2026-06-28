@@ -76,9 +76,44 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   SVG→canvas (dependency-free) with a metadata header (teams+score · stage · date ·
   scorer+min) and an "All rights reserved to @RShiri" credit. `AGM_MAX_SEG` drops any
   diagram segment longer than ~half the pitch (defends against glitched source coords).
+- **Goal replays** (`mv-goals-anim`, the section directly **below** All Goals Map): an
+  animated "movie" of each goal driven by the same `buildGoalSequences()` data. `▶ Play`
+  walks a ball along the build-up (`agmBuildAnimSVG`/`agmAnimateMove` via SVG
+  `getPointAtLength`): dotted passes, curved-dotted crosses, **deliberately slower** solid
+  dribbles/carries, then the shot into the net + a "Goal!" flash. The **scorer's node runs
+  onto the ball** through the final carry (`moveScorer`, skipped for own goals). Per-goal
+  tabs, a speed slider, and a **dependency-free WebM export** (`exportGoalVideo` —
+  `MediaRecorder` + `canvas.captureStream`, falls back to PNG) with the same header band +
+  credit as the PNG. Reuses `agmSeqSVG` as the video backdrop; markers suffixed `…2` to
+  avoid `<defs>` id clashes with the static map.
+- **Pitch markings** (`pitchMarkup()`): every pitch (shot/pass/dribble/avg-pos maps) draws
+  full markings incl. **goal posts/net** (`.pitch-goal`/`.pitch-net`) and the **penalty
+  arc** (the "D", `arcR` slice outside the box).
+- **Pass explorer**: filter by team/player/**type** — type includes **Progressive** (uses
+  the `prog` flag already in the data) alongside key/through/cross/incomplete; plus a
+  **Final third** toggle (`paThird` — passes that END in the attacking third, WhoScored
+  x ≥ 66.7). Minute timeline with scrub + ▶.
+- **Dribbles**: each take-on draws a **carry-direction arrow** (`drArrG`/`drArrR` markers,
+  green=success/red=fail) from the take-on dot to the next touch (`ex/ey`); hover tooltip
+  retained. Team/player/outcome filters + minute ▶.
+- **Average position** (`buildAvgPos`, `mv-avgpos`, **under Pass network**): per-minute
+  average-position shape with a **window selector + ▶ play button** (like the pass-explorer
+  timeline). As subs happen the leaving player's node is removed and the incoming player's
+  node appears, so you can watch the shape change across phases of the game.
 - **`build_match_details.py` per-match exports**: `shots[]` (`cross/key/through/prog`
-  flags, `body`), `passes[]`, `dribbles[]`, **`saves[]`** (keeper saves → rebound nodes),
-  `goals[]` (with `own`/`pen`), `lineups`.
+  flags, `body`), `passes[]` (`prog`/`cross`/`key`/`through`/`x,y,ex,ey`), `dribbles[]`
+  (`ex/ey` carry end), **`saves[]`** (keeper saves → rebound nodes), `goals[]` (with
+  `own`/`pen`), `lineups`.
+
+## Main dashboard view (`app.js`)
+- **Knockout bracket** (`renderBracket`, main page): Round-of-32 → final, results once
+  played else the slot placeholder (`1A`, `WinnerEF1`, …). Laid out **from both sides into
+  the centre** (`.bracket-tree.two-sided { justify-content:center }`).
+- **Scatter charts** (`teamScatter`, shared): powers the attack-vs-defence quadrant,
+  expected-points, and **Quality vs quantity of shots** views. That last one passes
+  `centerAvg:true` → axes span `0 .. avg + max-distance-from-avg` per axis so the avg
+  lines sit near centre with no dead space and no clipped outliers (instead of the default
+  `niceMax`-padded fit, which squashed the dots to the bottom).
 
 ## Gotchas (read before editing)
 - **Own goals**: WhoScored stores an own goal with `isOwnGoal:true`, the **conceding**

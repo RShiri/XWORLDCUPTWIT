@@ -7,6 +7,9 @@ A self-contained static website built from the WC2026 scraping pipeline data
 
 - **Tables** — live group standings (A–L), ranked by points → GD → GF, with the
   top two highlighted as qualifiers.
+- **Knockout bracket** — the Round-of-32 → final tree, drawn **from both sides into the
+  centre**; each tie shows its result once played, otherwise the slot it's filled from
+  (e.g. `1A`, `WinnerEF1`).
 - **Matches** — every fixture & result in one place (this merges what used to be
   two near-identical tabs). Grouped by day, searchable, filterable by status / xG.
   - **Click any played game to open its Match Centre** (the whole row is the link;
@@ -35,9 +38,11 @@ A self-contained static website built from the WC2026 scraping pipeline data
   - *Pass explorer* — every pass drawn on the pitch, **colour-coded by outcome**:
     two greens for completed (bright = progressive/key/assist, dim = normal) and two
     reds for incomplete. Minute timeline you can scrub or play back; filter by team,
-    player, and pass type.
+    player, and pass **type** — including **Progressive** (via the `prog` flag) — plus a
+    **Final third** toggle (passes that END in the attacking third, x ≥ 66.7).
   - *Dribbles* — every take-on as a dot where it happened (green = successful, red
-    ring = unsuccessful). Team/player/outcome filters, minute scrubber/▶, and a
+    ring = unsuccessful), with an **arrow to the next touch** showing carry direction
+    (hover kept for details). Team/player/outcome filters, minute scrubber/▶, and a
     success-rate readout. Mirrors the pass explorer for `TakeOn` events.
   - *Pass network* — average-position passing network per team for the **starting XI,
     using passes up to that side's first substitution** (the window all 11 were on
@@ -45,8 +50,18 @@ A self-contained static website built from the WC2026 scraping pipeline data
     Nodes = players at average position (sized by passes involved, labelled with shirt
     number), links = passes between each pair (thickness = volume). Home/away toggle and
     a minimum-combined-passes threshold.
+  - *Average position* — per-team average-position shape for a **user-chosen minute
+    window**, with a ▶ play button (like the pass explorer timeline). As substitutions
+    happen the leaving player's node is removed and the incoming player's appears, so you
+    can watch the shape evolve across phases of the game.
   - *Line-ups* — starting XI + substitutes with each player's **rating**
     (colour-coded), **goals/assists**, **yellow/red cards** and **minutes played**.
+  - *All goals map* — a per-goal Opta-style build-up (numbered touches, dotted passes,
+    curved crosses, solid carries, red shot + xG, keeper-save rebound nodes; own goals as
+    a single "OG" node). Per-goal **Download PNG**.
+  - *Goal replays* — an animated replay of each goal: ▶ walks a ball through the build-up
+    (passes → dribbles → shot → "Goal!"), the scorer runs onto the ball, with a speed
+    slider and a **Download video** (WebM) button.
   - The page loads `data.js` (for Match stats) plus the per-match
     `matches_detail/<id>.js` event file.
 - **xG Analysis** — the efficiency lab:
@@ -55,6 +70,9 @@ A self-contained static website built from the WC2026 scraping pipeline data
   - Scatter plot of xG vs goals with a perfect-finishing (y=x) reference and a
     best-fit regression line.
   - **Attack vs defence quadrant** — each team by xG created vs xG conceded per game.
+  - **Quality vs quantity of shots** — each team by shots/game vs xG-per-shot; the
+    tournament-average lines are **centred** via dynamic `0 → avg + max-distance` axes
+    (no dead space, no clipped outliers).
   - **Does xG predict the table?** — actual points vs *expected points* from a
     Poisson model on each match's xG (spots over- and under-achievers).
   - Finishing bars: total goals minus total xG per team (clinical vs wasteful).
