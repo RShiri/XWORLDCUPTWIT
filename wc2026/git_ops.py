@@ -21,10 +21,52 @@ XWCTWIT_SUBDIR = os.environ.get("XWORLDCUPTWIT_SUBDIR", "WorldCup2026")  # PNG s
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # repo root (holds wc2026_dashboard/, WorldCup2026/, wc2026/)
 
 
-def _authed_url(repo_url: str) -> str:
-    """Inject GIT_TOKEN into the HTTPS remote URL if available."""
+def _token_from_env_file(env_path: Path) -> str:
+    """Read GIT_TOKEN straight from a .env file, WITHOUT needing python-dotenv.
+
+    The normal loader (``load_dotenv`` in run_match.py / scraper.py) is wrapped in
+    ``try/except ImportError`` and ``python-dotenv`` is not a declared dependency, so
+    on a machine where it isn't installed the .env is never parsed and GIT_TOKEN
+    silently stays unset — clone (public read) and the local commit still succeed, only
+    the push fails. Parsing the file here ourselves makes the token in the repo-root
+    .env work regardless of whether python-dotenv is present."""
+    try:
+        for raw in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("export "):
+                line = line[len("export "):].lstrip()
+            key, sep, val = line.partition("=")
+            if sep and key.strip() == "GIT_TOKEN":
+                return val.strip().strip('"').strip("'").strip()
+    except OSError:
+        pass
+    return ""
+
+
+def _git_token() -> str:
+    """Resolve the GitHub PAT: OS env first, else the repo-root .env file.
+
+    Falling back to the .env directly also defeats the ``load_dotenv(..., override=False)``
+    trap, where an *empty* GIT_TOKEN already present in the OS environment shadows the
+    real value in .env (override=False keeps the empty one). We only trust the OS var
+    when it is non-empty, otherwise read .env ourselves."""
     token = os.environ.get("GIT_TOKEN", "").strip()
     if not token:
+        token = _token_from_env_file(PROJECT_ROOT / ".env")
+    return token
+
+
+def _authed_url(repo_url: str) -> str:
+    """Inject GIT_TOKEN into the HTTPS remote URL if available."""
+    token = _git_token()
+    if not token:
+        log.warning(
+            "GIT_TOKEN is missing/empty (checked OS env and %s) — git push will fail "
+            "and the site will NOT update. Put GIT_TOKEN=<PAT> in that .env (no quotes, "
+            "no spaces) or set it in the environment.", PROJECT_ROOT / ".env",
+        )
         return repo_url
     if repo_url.startswith("https://"):
         return repo_url.replace("https://", f"https://x-access-token:{token}@", 1)
