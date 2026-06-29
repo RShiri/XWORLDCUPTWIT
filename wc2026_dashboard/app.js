@@ -207,6 +207,72 @@
     return dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   }
 
+  /* ---- Knockout calendar resolution ----
+     Knockout fixtures arrive in the data with slot codes for teams ("2A", "3ABCDF",
+     "Winner EF 1"). Once the groups (and then earlier ties) are decided we can show the
+     real — or possible — teams instead, and it updates by itself as results land:
+       · R32 (groups done)  → the actual two teams ("South Africa vs Canada")
+       · a side still waiting on one earlier tie → the two candidates ("South Africa / Canada")
+       · a side waiting on a whole sub-bracket (3+ candidates) → the bracket placeholder
+     Played-and-scraped knockout games already carry real names, so they pass straight through. */
+  var STAGE_LABEL = { R32: "Round of 32", R16: "Round of 16", QF: "Quarter-final", SF: "Semi-final", F: "Final", TP: "Third place" };
+  var _koInfo = null;
+  function koInfo() {
+    if (_koInfo) return _koInfo;
+    var K = buildKnockout();
+    _koInfo = { K: K, round: {} };
+    if (K) ["R32", "R16", "QF", "SF", "F", "TP"].forEach(function (rd) {
+      (K.rounds[rd] || []).forEach(function (m) { _koInfo.round[m.id] = rd; });
+    });
+    return _koInfo;
+  }
+  function koUniq(arr) { var s = {}, o = []; arr.forEach(function (t) { if (t && !s[t]) { s[t] = 1; o.push(t); } }); return o; }
+  // Teams that can still emerge as the WINNER of match m.
+  function koCands(K, m) {
+    if (!m) return [];
+    if (m.played && m.hs != null && m.as != null) return [m.hs > m.as ? m.home : m.away];
+    if (m._kids && m._kids.length === 2) return koUniq(koCands(K, m._kids[0]).concat(koCands(K, m._kids[1])));
+    return koUniq(koSideCands(K, m, 0).concat(koSideCands(K, m, 1)));   // R32 leaf
+  }
+  function koSideCands(K, m, idx) {
+    if (m.played && m.hs != null) return [idx === 0 ? m.home : m.away];
+    if (m._kids && m._kids[idx]) return koCands(K, m._kids[idx]);
+    var code = K.strip(m.id).split("_vs_")[idx], r = K.resolveSlot(code);
+    if (r.team) return [r.team];
+    var g2 = code.match(/^([12])([A-L])$/);
+    if (g2) { var grp = D.standings && D.standings[g2[2]]; return grp ? grp.map(function (x) { return x.team; }) : []; }
+    var g3 = code.match(/^3([A-L]{2,})$/);
+    if (g3) return g3[1].split("").map(function (g) { var gr = D.standings && D.standings[g]; return gr && gr[2] ? gr[2].team : ("3" + g); });
+    return [];
+  }
+  // {team, label} for one side of a knockout fixture (team = null when not narrowed to one).
+  function koSide(K, m, idx) {
+    if (m.played && m.hs != null) { var t = idx === 0 ? m.home : m.away; return { team: t, label: t, possible: [t] }; }
+    var poss;
+    if (m._kids && m._kids[idx]) poss = koCands(K, m._kids[idx]);
+    else {
+      var code = K.strip(m.id).split("_vs_")[idx], r = K.resolveSlot(code);
+      if (r.team) return { team: r.team, label: r.team, possible: [r.team] };
+      poss = koSideCands(K, m, idx);
+    }
+    if (poss.length === 1) return { team: poss[0], label: poss[0], possible: poss };
+    if (poss.length === 2) return { team: null, label: poss.join(" / "), possible: poss };
+    var raw = K.strip(m.id).split("_vs_")[idx];
+    var pretty = raw.replace(/^Winner_?/, "Winner ").replace(/EF_?(\d)/, "R16 #$1")
+      .replace(/QF_?(\d)/, "QF #$1").replace(/SF_?(\d)/, "SF #$1").replace(/_/g, " ");
+    return { team: null, label: pretty, possible: poss };
+  }
+  // Display shape for a calendar row: real/possible teams + stage tag + a search haystack.
+  function matchDisplay(m) {
+    var ki = koInfo(), rd = ki.round[m.id];
+    if (!rd || !ki.K || (m.played && m.hs != null))
+      return { home: m.home, away: m.away, hTeam: m.home, aTeam: m.away, stage: rd ? STAGE_LABEL[rd] : "",
+               hay: (m.home + " " + m.away).toLowerCase() };
+    var h = koSide(ki.K, m, 0), a = koSide(ki.K, m, 1);
+    return { home: h.label, away: a.label, hTeam: h.team, aTeam: a.team, stage: STAGE_LABEL[rd] || "",
+             hay: (h.possible.concat(a.possible).join(" ") + " " + h.label + " " + a.label).toLowerCase() };
+  }
+
   function renderMatches() {
     var q = (mSearch.value || "").toLowerCase().trim();
     var mode = mStatus.value;
@@ -217,7 +283,7 @@
       if (mode === "played" && !m.played) return false;
       if (mode === "upcoming" && m.played) return false;
       if (mode === "xg" && m.xg_home == null) return false;
-      if (q && m.home.toLowerCase().indexOf(q) < 0 && m.away.toLowerCase().indexOf(q) < 0) return false;
+      if (q && matchDisplay(m).hay.indexOf(q) < 0) return false;
       return true;
     });
     if (!matches.length) { list.appendChild(el("p", "footer-note", "No matches match your filter.")); return; }
@@ -229,6 +295,7 @@
       var dayWrap = el("div", "match-day");
       dayWrap.appendChild(el("div", "day-label", fmtDate(day) || day));
       byDay[day].forEach(function (m) {
+        var dsp = matchDisplay(m);
         var expandable = m.played && m.has_stats;
         var toCentre = m.has_events;            // has event data → open the full Match Centre on click
         var clickable = toCentre || expandable;
@@ -251,15 +318,17 @@
         row.dataset.id = m.id;
         var headTitle = toCentre ? ' title="Open Match Centre"'
           : m.played ? "" : ' title="Not played yet — no data to show"';
+        var stageChip = dsp.stage ? '<span class="ko-stage">' + esc(dsp.stage) + "</span>" : "";
         row.innerHTML =
           '<div class="db-match-head"' + headTitle + '>' +
-            '<div class="side home"><span class="nm" style="' + (hWin ? "color:var(--good)" : "") + '">' +
-              esc(m.home) + "</span>" + logoImg(m.home) + "</div>" +
+            '<div class="side home"><span class="nm' + (dsp.hTeam ? "" : " slot") + '" style="' + (hWin ? "color:var(--good)" : "") + '">' +
+              esc(dsp.home) + "</span>" + (dsp.hTeam ? logoImg(dsp.hTeam) : "") + "</div>" +
             score +
-            '<div class="side away">' + logoImg(m.away) + '<span class="nm" style="' +
-              (aWin ? "color:var(--good)" : "") + '">' + esc(m.away) + "</span></div>" +
+            '<div class="side away">' + (dsp.aTeam ? logoImg(dsp.aTeam) : "") + '<span class="nm' + (dsp.aTeam ? "" : " slot") + '" style="' +
+              (aWin ? "color:var(--good)" : "") + '">' + esc(dsp.away) + "</span></div>" +
             (toCentre ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev nav">↗</span></div>'
-              : expandable ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev">▾</span></div>' : "") +
+              : expandable ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev">▾</span></div>'
+              : stageChip ? '<div class="db-date">' + stageChip + "</div>" : "") +
             meta +
           "</div>";
         dayWrap.appendChild(row);

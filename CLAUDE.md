@@ -138,6 +138,20 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   `niceMax`-padded fit, which squashed the dots to the bottom).
 
 ## Gotchas (read before editing)
+- **Knockout fixtures = slot-coded stubs**: each KO match ships as a tiny stub JSON named by
+  its slot code (`2026_06_28_2A_vs_2B.json`, `..._Winner_EF_1_vs_Winner_EF_2.json`) so the
+  bracket/calendar have something to link before teams are known. When a KO tie is played,
+  FotMob returns the **real** team names — naming the scraped file after them would leave the
+  stub as a duplicate calendar row **and** give the result an id the bracket can't parse (the
+  bracket keys off the `2A_vs_2B` slot code in the id). So `scraper._output_path` calls
+  `_existing_file_for_id(fotmob_id)` and **overwrites the stub in place** (same slot filename,
+  real content). Don't "fix" the scraper to name KO files by team — it re-introduces both bugs.
+- **Calendar shows possible KO teams** (`matchDisplay`/`koSide` in `app.js` `renderMatches`):
+  unplayed KO fixtures resolve their slot codes via `buildKnockout()` — R32 → the real two
+  teams (groups done), a side waiting on one earlier tie → the two candidates (`A / B`,
+  italic), a side waiting on a whole sub-bracket → the `Winner R16 #n` placeholder. Updates by
+  itself as results land. Played KO games already carry real names (see stub gotcha) and pass
+  straight through. A `ko-stage` chip tags the round.
 - **Own goals**: WhoScored stores an own goal with `isOwnGoal:true`, the **conceding**
   team's `teamId`, and coords at that player's own-goal end. `build_match_details.py` and
   `renderer.py` credit it to the **opponent** (timeline `own:true`, shown "(OG)") and keep

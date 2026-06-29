@@ -850,12 +850,44 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
 # SAVE & TRIGGER
 # ══════════════════════════════════════════════════════════════════════════
 
-def _output_path(match_json: dict) -> Path:
+def _existing_file_for_id(fotmob_id) -> Path | None:
+    """Find an already-saved match file carrying this same FotMob id.
+
+    Knockout fixtures ship as slot-coded stubs (e.g. 2026_06_28_2A_vs_2B.json)
+    so the dashboard bracket has something to link to before the teams are known.
+    Once the tie is played FotMob returns the REAL team names, and naming the
+    scraped file after them ("…_South_Africa_vs_Canada.json") would (a) leave the
+    stub behind as a duplicate calendar row and (b) give the result an id the
+    bracket can't recognise (the bracket keys off the "2A_vs_2B" slot code in the
+    id). So we overwrite the stub in place — same filename, real content."""
+    if not fotmob_id:
+        return None
+    want = str(fotmob_id)
+    for f in sorted(MATCHES_DIR.glob("*.json")):
+        if "_cache" in f.name:
+            continue  # skip scraper WhoScored cache files
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        got = d.get("matchId") or d.get("match_id") or d.get("id")
+        if got is not None and str(got) == want:
+            return f
+    return None
+
+
+def _output_path(match_json: dict, fotmob_id: int | None = None) -> Path:
     meta  = match_json.get("wc_metadata", {})
     date  = meta.get("date", "2026_06_01").replace("-", "_")
     home  = match_json["home"]["name"].replace(" ", "_")
     away  = match_json["away"]["name"].replace(" ", "_")
-    return MATCHES_DIR / f"{date}_{home}_vs_{away}.json"
+    default = MATCHES_DIR / f"{date}_{home}_vs_{away}.json"
+    existing = _existing_file_for_id(fotmob_id)
+    if existing and existing.resolve() != default.resolve():
+        log.info("Reusing existing file for id=%s: %s (real name would be %s)",
+                 fotmob_id, existing.name, default.name)
+        return existing
+    return default
 
 
 def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
@@ -889,7 +921,7 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
             ws_data = whoscored_fetch_match(ws_url)
 
     match_json = build_match_json(fm_data, ws_data, xml_match=xml_match)
-    out_path   = _output_path(match_json)
+    out_path   = _output_path(match_json, fotmob_id)
 
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(match_json, fh, indent=2)

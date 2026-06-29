@@ -613,3 +613,9 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .src-list li a { font-weight: 600; }
 .src-note { color: var(--muted); font-size: 12px; }
 .src-note::before { content: "· "; }
+
+/* knockout fixture chips in the Matches calendar */
+.ko-stage { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--accent-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.db-match .side .nm.slot { color: var(--muted); font-weight: 600; font-style: italic; }
