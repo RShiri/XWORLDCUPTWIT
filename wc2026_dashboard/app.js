@@ -263,14 +263,27 @@
     return { team: null, label: pretty, possible: poss };
   }
   // Display shape for a calendar row: real/possible teams + stage tag + a search haystack.
+  // `koUp` flags an upcoming knockout fixture → the calendar shows team BADGES (one for a
+  // settled side, two for a side still down to two candidates) instead of plain names.
   function matchDisplay(m) {
     var ki = koInfo(), rd = ki.round[m.id];
     if (!rd || !ki.K || (m.played && m.hs != null))
-      return { home: m.home, away: m.away, hTeam: m.home, aTeam: m.away, stage: rd ? STAGE_LABEL[rd] : "",
-               hay: (m.home + " " + m.away).toLowerCase() };
+      return { home: m.home, away: m.away, hTeam: m.home, aTeam: m.away, hPoss: [m.home], aPoss: [m.away],
+               stage: rd ? STAGE_LABEL[rd] : "", koUp: false, hay: (m.home + " " + m.away).toLowerCase() };
     var h = koSide(ki.K, m, 0), a = koSide(ki.K, m, 1);
-    return { home: h.label, away: a.label, hTeam: h.team, aTeam: a.team, stage: STAGE_LABEL[rd] || "",
+    return { home: h.label, away: a.label, hTeam: h.team, aTeam: a.team, hPoss: h.possible, aPoss: a.possible,
+             stage: STAGE_LABEL[rd] || "", koUp: true,
              hay: (h.possible.concat(a.possible).join(" ") + " " + h.label + " " + a.label).toLowerCase() };
+  }
+  function isKnownTeam(t) { return t && D.teamGroup && Object.prototype.hasOwnProperty.call(D.teamGroup, t); }
+  // Badge cluster for one knockout side: 1–2 known teams → badges (with names on hover),
+  // anything still wider (a Winner-of placeholder) → the italic slot label.
+  function koSideBadges(possible, label) {
+    var known = (possible || []).filter(isKnownTeam);
+    if (known.length >= 1 && known.length <= 2)
+      return '<span class="cal-badges" title="' + esc(known.join(" / ")) + '">' +
+        known.map(function (t) { return logoImg(t, "cal-badge"); }).join('<span class="bvs">/</span>') + "</span>";
+    return '<span class="nm slot">' + esc(label) + "</span>";
   }
 
   function renderMatches() {
@@ -319,13 +332,21 @@
         var headTitle = toCentre ? ' title="Open Match Centre"'
           : m.played ? "" : ' title="Not played yet — no data to show"';
         var stageChip = dsp.stage ? '<span class="ko-stage">' + esc(dsp.stage) + "</span>" : "";
+        // Upcoming knockout fixtures show badges (settled or possible teams); everything else
+        // keeps the familiar name + single badge.
+        var homeSide = dsp.koUp
+          ? koSideBadges(dsp.hPoss, dsp.home)
+          : '<span class="nm' + (dsp.hTeam ? "" : " slot") + '" style="' + (hWin ? "color:var(--good)" : "") + '">' +
+              esc(dsp.home) + "</span>" + (dsp.hTeam ? logoImg(dsp.hTeam) : "");
+        var awaySide = dsp.koUp
+          ? koSideBadges(dsp.aPoss, dsp.away)
+          : (dsp.aTeam ? logoImg(dsp.aTeam) : "") + '<span class="nm' + (dsp.aTeam ? "" : " slot") + '" style="' +
+              (aWin ? "color:var(--good)" : "") + '">' + esc(dsp.away) + "</span>";
         row.innerHTML =
           '<div class="db-match-head"' + headTitle + '>' +
-            '<div class="side home"><span class="nm' + (dsp.hTeam ? "" : " slot") + '" style="' + (hWin ? "color:var(--good)" : "") + '">' +
-              esc(dsp.home) + "</span>" + (dsp.hTeam ? logoImg(dsp.hTeam) : "") + "</div>" +
+            '<div class="side home">' + homeSide + "</div>" +
             score +
-            '<div class="side away">' + (dsp.aTeam ? logoImg(dsp.aTeam) : "") + '<span class="nm' + (dsp.aTeam ? "" : " slot") + '" style="' +
-              (aWin ? "color:var(--good)" : "") + '">' + esc(dsp.away) + "</span></div>" +
+            '<div class="side away">' + awaySide + "</div>" +
             (toCentre ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev nav">↗</span></div>'
               : expandable ? '<div class="db-date">' + (fmtDate(m.date) || m.date) + ' <span class="chev">▾</span></div>'
               : stageChip ? '<div class="db-date">' + stageChip + "</div>" : "") +

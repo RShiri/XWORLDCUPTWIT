@@ -619,3 +619,8 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
   text-transform: uppercase; color: var(--accent-2); border: 1px solid var(--line);
   border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
 .db-match .side .nm.slot { color: var(--muted); font-weight: 600; font-style: italic; }
+
+/* knockout badge clusters in the calendar (upcoming KO fixtures show crests, not names) */
+.cal-badges { display: inline-flex; align-items: center; gap: 4px; }
+.cal-badge { width: 30px; height: 22px; object-fit: contain; border-radius: 2px; }
+.cal-badges .bvs { color: var(--muted); font-weight: 700; font-size: 12px; margin: 0 1px; }
