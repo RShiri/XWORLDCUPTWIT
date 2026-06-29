@@ -67,6 +67,7 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 2026_06_27_New_Zealand_vs_Belgium,2026-06-27,Group Stage,,New Zealand,Belgium,1,5,0.38,4.16,1
 2026_06_27_Panama_vs_England,2026-06-27,Group Stage,,Panama,England,0,2,0.82,2.55,1
 2026_06_27_Uruguay_vs_Spain,2026-06-27,Group Stage,,Uruguay,Spain,0,1,0.29,0.71,1
+2026_06_28_2A_vs_2B,2026-06-29,Group Stage,,South Africa,Canada,0,1,0.11,2.43,1
 2026_06_28_Algeria_vs_Austria,2026-06-28,Group Stage,,Algeria,Austria,3,3,2.02,1.44,1
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Group Stage,,Colombia,Portugal,0,0,2.1,1.07,1
 2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Group Stage,,DR Congo,Uzbekistan,3,1,2.55,0.16,1
