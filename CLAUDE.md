@@ -30,6 +30,19 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   editing the schedule (`-Force` overwrites). Inspect with PowerShell `Get-ScheduledTask
   -TaskName "*WC2026*"`.
 
+## Knockout self-heal (so KO ties actually scrape)
+- Knockout fixtures are scheduled with **placeholder FotMob ids** and **slot-code names**
+  (`2A`, `3ABCDF`, `Winner EF 1`) — left as-is the WhoScored search can't find the game and
+  the placeholder id may not exist on FotMob, so the scrape returns nothing. `run_match` step 1
+  calls **`wc2026/knockout_resolve.py`** `resolve_fixture(fotmob_id)`: it finds the slot stub,
+  resolves both sides to the **real** teams now decided (group standings + FIFA best-third
+  allocation + earlier KO results — same logic as the dashboard `buildKnockout`), then
+  `find_fotmob_id_by_teams()` rediscovers the **real** FotMob id by date+teams. The scrape then
+  runs with real names + the right id, and `fetch_and_save(out_path=…)` forces the result back
+  into the original slot-coded stub so the bracket/calendar link it. **No manual id refresh
+  needed.** No-op for group games (`resolve_fixture` returns `None`). Run from repo root:
+  `py -m wc2026.knockout_resolve <placeholder_id>` to preview a fixture's resolved teams.
+
 ## Auto-deploy (how the live site stays current)
 - `run_match` step 4 → `git_ops.push_match_update()`: clones the repo to a temp dir and,
   in ONE commit, pushes the PNG **+** regenerated `wc2026_dashboard/{data.js,players.js,

@@ -891,8 +891,14 @@ def _output_path(match_json: dict, fotmob_id: int | None = None) -> Path:
 
 
 def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
-                   xml_match: dict | None = None) -> Path | None:
-    """Full pipeline for one match: fetch → build JSON → save."""
+                   xml_match: dict | None = None,
+                   out_path: "str | Path | None" = None) -> Path | None:
+    """Full pipeline for one match: fetch → build JSON → save.
+
+    ``out_path`` forces the destination file (used for knockout fixtures so the scraped
+    result overwrites its slot-coded stub even when the real FotMob id differs from the
+    placeholder one in the schedule). When omitted, the path is derived from team names,
+    reusing an existing same-id stub if one exists (see ``_output_path``)."""
     if fotmob_id in _fetched_ids:
         log.info("Match %d already fetched this session, skipping.", fotmob_id)
         return None
@@ -921,7 +927,7 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
             ws_data = whoscored_fetch_match(ws_url)
 
     match_json = build_match_json(fm_data, ws_data, xml_match=xml_match)
-    out_path   = _output_path(match_json, fotmob_id)
+    out_path   = Path(out_path) if out_path else _output_path(match_json, fotmob_id)
 
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(match_json, fh, indent=2)

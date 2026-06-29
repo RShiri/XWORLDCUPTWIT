@@ -48,6 +48,7 @@ from wc2026.scraper     import (fetch_and_save, fotmob_fetch_wc_matches,
 from wc2026.renderer    import render_wc_dashboard, output_filename
 from wc2026.git_ops     import push_png_to_xworldcuptwit, push_match_update
 from wc2026._runlock    import scrape_lock
+from wc2026.knockout_resolve import resolve_fixture, find_fotmob_id_by_teams
 
 log = logging.getLogger("wc2026.run_match")
 logging.basicConfig(
@@ -198,6 +199,33 @@ def run_match(
 
         log.info("Scraping match id=%d …", fotmob_id)
 
+        # ── Knockout self-heal ────────────────────────────────────────────
+        # Knockout fixtures are scheduled with PLACEHOLDER FotMob ids and SLOT-CODE
+        # team names ("2A", "3ABCDF", "Winner EF 1"). Left as-is the WhoScored search
+        # can't find the game and the placeholder id may not exist on FotMob, so the
+        # scrape returns nothing and the tie never publishes. Resolve the slot codes to
+        # the real teams now decided (group standings + best-third allocation + earlier
+        # knockout results), rediscover the REAL FotMob id by date+teams, and force the
+        # result back into the original slot-coded stub so the bracket links it. This is
+        # what makes a failed knockout scrape recover by itself — no manual id refresh.
+        # No-op for group games (resolve_fixture returns None there).
+        original_id = fotmob_id
+        ko_out_path = None
+        try:
+            ko_home, ko_away, ko_stub = resolve_fixture(original_id)
+            if ko_home and ko_away:
+                _, _, sched_date = schedule_team_names(original_id)
+                log.info("Knockout fixture %s resolved → %s vs %s", original_id, ko_home, ko_away)
+                home_name, away_name = ko_home, ko_away
+                ko_out_path = ko_stub
+                real_id = find_fotmob_id_by_teams(ko_home, ko_away, sched_date or None)
+                if real_id and str(real_id) != str(original_id):
+                    log.info("Knockout: using real FotMob id %s (schedule placeholder was %s)",
+                             real_id, original_id)
+                    fotmob_id = real_id
+        except Exception as exc:
+            log.warning("Knockout self-heal skipped for id=%s: %s", original_id, exc)
+
         # Step 1: try FotMob XML for team names + date
         xml_stub = None
         try:
@@ -236,7 +264,8 @@ def run_match(
             for attempt in range(1, SCRAPE_ATTEMPTS + 1):
                 try:
                     json_path = fetch_and_save(
-                        fotmob_id, fotmob_only=fotmob_only, xml_match=xml_stub
+                        fotmob_id, fotmob_only=fotmob_only, xml_match=xml_stub,
+                        out_path=ko_out_path,
                     )
                     if json_path:
                         break
