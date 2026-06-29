@@ -211,45 +211,56 @@ def run_match(
         # No-op for group games (resolve_fixture returns None there).
         original_id = fotmob_id
         ko_out_path = None
+        ko_home = ko_away = None
+        ko_date = ""
         try:
             ko_home, ko_away, ko_stub = resolve_fixture(original_id)
             if ko_home and ko_away:
-                _, _, sched_date = schedule_team_names(original_id)
+                _, _, ko_date = schedule_team_names(original_id)
                 log.info("Knockout fixture %s resolved → %s vs %s", original_id, ko_home, ko_away)
                 home_name, away_name = ko_home, ko_away
                 ko_out_path = ko_stub
-                real_id = find_fotmob_id_by_teams(ko_home, ko_away, sched_date or None)
+                real_id = find_fotmob_id_by_teams(ko_home, ko_away, ko_date or None)
                 if real_id and str(real_id) != str(original_id):
                     log.info("Knockout: using real FotMob id %s (schedule placeholder was %s)",
                              real_id, original_id)
                     fotmob_id = real_id
         except Exception as exc:
+            ko_home = ko_away = None
             log.warning("Knockout self-heal skipped for id=%s: %s", original_id, exc)
 
-        # Step 1: try FotMob XML for team names + date
+        # Step 1: resolve team names + date.
         xml_stub = None
-        try:
-            xml_stub = next(
-                (m for m in fotmob_fetch_wc_matches() if m.get("id") == fotmob_id),
-                None,
-            )
-            if xml_stub:
-                log.info("FotMob XML: resolved %s vs %s",
-                         xml_stub["home"]["name"], xml_stub["away"]["name"])
-        except Exception as exc:
-            log.warning("FotMob XML unavailable: %s", exc)
+        if ko_home and ko_away:
+            # Knockout: FotMob lists the tie with PLACEHOLDER slot names ("2A"/"2B"), so we must
+            # NOT take names from its XML — build the stub from the real teams we just resolved.
+            # Otherwise the WhoScored search (and the saved file) would still say "2A vs 2B".
+            xml_stub = _build_xml_stub(fotmob_id, ko_home, ko_away, ko_date or date_str)
+            log.info("Knockout: scraping as %s vs %s (id=%s)", ko_home, ko_away, fotmob_id)
+        else:
+            # Group game: try FotMob XML for team names + date …
+            try:
+                xml_stub = next(
+                    (m for m in fotmob_fetch_wc_matches() if m.get("id") == fotmob_id),
+                    None,
+                )
+                if xml_stub:
+                    log.info("FotMob XML: resolved %s vs %s",
+                             xml_stub["home"]["name"], xml_stub["away"]["name"])
+            except Exception as exc:
+                log.warning("FotMob XML unavailable: %s", exc)
 
-        # Step 2: fall back to REMAINING_SCHEDULE.json
-        if xml_stub is None:
-            sched_home, sched_away, sched_date = schedule_team_names(fotmob_id)
-            h = home_name or sched_home
-            a = away_name or sched_away
-            d = date_str or sched_date
-            if h and a:
-                log.info("Schedule fallback: %s vs %s", h, a)
-                xml_stub = _build_xml_stub(fotmob_id, h, a, d)
-            else:
-                log.warning("No team names found — WhoScored search may fail.")
+            # … else fall back to REMAINING_SCHEDULE.json.
+            if xml_stub is None:
+                sched_home, sched_away, sched_date = schedule_team_names(fotmob_id)
+                h = home_name or sched_home
+                a = away_name or sched_away
+                d = date_str or sched_date
+                if h and a:
+                    log.info("Schedule fallback: %s vs %s", h, a)
+                    xml_stub = _build_xml_stub(fotmob_id, h, a, d)
+                else:
+                    log.warning("No team names found — WhoScored search may fail.")
 
         json_path = None
         last_exc: Exception | None = None
