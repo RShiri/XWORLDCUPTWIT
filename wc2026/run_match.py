@@ -311,9 +311,15 @@ def run_match(
     away_score = match_data.get("away", {}).get("score", 0)
 
     # ── 3. Render dashboard PNG ───────────────────────────────────────────
+    # Name the PNG (and the match-centre detail + the pushed raw JSON) after the SOURCE
+    # json file. For a knockout game that's the slot-coded id (e.g. 2026_06_28_2A_vs_2B)
+    # the dashboard bracket/calendar key on — naming by the real teams instead would make
+    # find_png() 404 and leave the raw JSON unpushed. Group games are unaffected (their
+    # filename already IS the real-team name).
+    match_id = Path(json_path).stem
     try:
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        png_path = output_filename(match_data, str(OUTPUT_DIR))
+        png_path = os.path.join(str(OUTPUT_DIR), match_id + ".png")
         render_wc_dashboard(match_data, png_path)
         log.info("PNG rendered → %s", png_path)
     except Exception as exc:
@@ -328,6 +334,7 @@ def run_match(
         try:
             raw_url = push_match_update(
                 png_path,
+                match_id=match_id,
                 commit_message=f"[WC2026] {home} vs {away} analytics dashboard",
             )
             log.info("Match update pushed (PNG + site) → %s", raw_url)

@@ -1261,8 +1261,11 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
 
     # Keep the web dashboard in sync: every time a finished game is rendered,
     # rebuild the interactive match page for it and regenerate the index data.js.
-    # Never let this break a render.
-    _refresh_web_dashboard_db(match_data)
+    # Never let this break a render. Name the match-centre detail after the OUTPUT
+    # file (the slot-coded id for knockout games) so the PNG, the detail JS and the
+    # dashboard match id all line up.
+    _match_id = os.path.splitext(os.path.basename(output_path))[0]
+    _refresh_web_dashboard_db(match_data, _match_id)
 
     return output_path
 
@@ -1279,13 +1282,16 @@ def _load_dashboard_module(name: str, filename: str):
     return mod
 
 
-def _refresh_web_dashboard_db(match_data: dict | None = None) -> None:
-    """Rebuild the interactive match page + the index data.js (best-effort)."""
+def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | None = None) -> None:
+    """Rebuild the interactive match page + the index data.js (best-effort).
+
+    ``match_id`` forces the detail filename (the slot-coded id for knockout games) so it
+    matches the PNG and the dashboard match id; when omitted it's derived from team names."""
     try:
         if match_data is not None:
             details = _load_dashboard_module("wc_dashboard_details", "build_match_details.py")
             if details is not None:
-                out = details.write_detail(match_data)
+                out = details.write_detail(match_data, match_id)
                 if out:
                     log.info("Match centre page refreshed → %s", os.path.basename(out))
     except Exception as exc:  # pragma: no cover - never block rendering
