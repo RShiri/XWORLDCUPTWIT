@@ -72,3 +72,5 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_est
 2026_06_28_Colombia_vs_Portugal,2026-06-28,Group Stage,,Colombia,Portugal,0,0,2.1,1.07,1
 2026_06_28_DR_Congo_vs_Uzbekistan,2026-06-28,Group Stage,,DR Congo,Uzbekistan,3,1,2.55,0.16,1
 2026_06_28_Jordan_vs_Argentina,2026-06-28,Group Stage,,Jordan,Argentina,1,3,0.79,2.44,1
+2026_06_29_1C_vs_2F,2026-06-29,Group Stage,,Brazil,Japan,2,1,2.95,0.17,1
+2026_06_29_1E_vs_3ABCDF,2026-06-30,Group Stage,,Germany,Paraguay,0,0,,,0
