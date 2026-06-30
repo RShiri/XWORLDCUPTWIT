@@ -141,21 +141,30 @@ def _fotmob_scraper():
         return s
 
 
-def fotmob_fetch_wc_matches() -> list[dict]:
+def fotmob_fetch_wc_matches(dates: "list[str] | None" = None) -> list[dict]:
     """
-    Return finished WC 2026 matches by scanning today's and yesterday's XML feed.
-    FotMob's JSON leagues endpoint is defunct; the XML matches feed still works at
-    https://api.fotmob.com/matches?date=YYYYMMDD
+    Return WC 2026 matches from FotMob's XML feed (api.fotmob.com/matches?date=YYYYMMDD).
+    FotMob's JSON leagues endpoint is defunct; this XML feed still works.
+
+    ``dates`` (YYYYMMDD strings) overrides the default scan window. When omitted it
+    scans yesterday + today (the live-watch use). Passing explicit dates lets the
+    real-id lookup search the *actual* match date even when the catch-up sweep runs
+    days later — otherwise a match outside the 2-day window is invisible and its id
+    can never be recovered.
     """
     import xml.etree.ElementTree as ET
     from datetime import datetime, timezone, timedelta
 
     scraper = _fotmob_scraper()
     now_utc = datetime.now(timezone.utc)
-    dates_to_check = [
-        (now_utc - timedelta(days=1)).strftime("%Y%m%d"),
-        now_utc.strftime("%Y%m%d"),
-    ]
+    if dates:
+        # de-dup while preserving order
+        dates_to_check = list(dict.fromkeys(dates))
+    else:
+        dates_to_check = [
+            (now_utc - timedelta(days=1)).strftime("%Y%m%d"),
+            now_utc.strftime("%Y%m%d"),
+        ]
 
     matches: list[dict] = []
     seen_ids: set = set()
@@ -217,17 +226,270 @@ def fotmob_fetch_wc_matches() -> list[dict]:
     return matches
 
 
-def fotmob_fetch_match_details(match_id: int) -> dict:
-    """
-    FotMob's JSON matchDetails endpoint is defunct (returns 404).
-    Returns a minimal stub so build_match_json() can still proceed using
-    WhoScored as the primary data source.
-    """
-    log.warning(
-        "FotMob matchDetails JSON API is unavailable (404). "
-        "Match %d will be built from WhoScored data only.", match_id
-    )
+def _fotmob_unavailable_stub() -> dict:
     return {"_fotmob_unavailable": True, "general": {}, "header": {}, "content": {}}
+
+
+def _fotmob_xmas_token(path: str) -> str:
+    """Resolve FotMob's required ``x-mas`` request header, or '' if not configured.
+
+    FotMob gates ``www.fotmob.com/api/*`` behind a signed ``x-mas`` header whose secret
+    they rotate, so it can't be hard-coded reliably. We support, in order:
+      1. FOTMOB_XMAS_TOKEN env — a literal x-mas value (copy it from your browser's
+         DevTools → Network → any matchDetails request → Request Headers).
+      2. FOTMOB_TOKEN_URL env — a helper endpoint that returns the token (raw text or
+         JSON with an ``x-mas``/``token`` field), given the api ``path`` as ?url=.
+    Returns '' when neither is set, in which case we still try the request bare
+    (cloudscraper clears Cloudflare and FotMob's edge sometimes serves it tokenless)."""
+    tok = os.environ.get("FOTMOB_XMAS_TOKEN", "").strip()
+    if tok:
+        return tok
+    token_url = os.environ.get("FOTMOB_TOKEN_URL", "").strip()
+    if token_url:
+        try:
+            import urllib.parse
+            sep = "&" if "?" in token_url else "?"
+            resp = _fotmob_scraper().get(
+                f"{token_url}{sep}url={urllib.parse.quote(path, safe='')}", timeout=15)
+            if resp.ok:
+                body = resp.text.strip()
+                try:
+                    j = resp.json()
+                    return str(j.get("x-mas") or j.get("token") or body)
+                except Exception:
+                    return body
+        except Exception as exc:
+            log.warning("FotMob token helper failed: %s", exc)
+    return ""
+
+
+def fotmob_fetch_match_details(match_id: int) -> dict:
+    """Fetch FotMob's JSON matchDetails for ``match_id``.
+
+    Returns the parsed JSON (keys ``general``/``header``/``content``) on success, or a
+    stub with ``_fotmob_unavailable=True`` on any failure so build_match_json() falls
+    back to WhoScored only — i.e. a FotMob outage degrades, it never aborts the match.
+    """
+    path = f"/api/matchDetails?matchId={match_id}"
+    url  = f"https://www.fotmob.com{path}"
+    scraper = _fotmob_scraper()
+    base_headers = {
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
+        "Accept": "application/json, text/plain, */*",
+        "Referer": f"https://www.fotmob.com/match/{match_id}",
+    }
+    # Try bare first (often enough via cloudscraper); retry with an x-mas token if we
+    # have one and the bare attempt was rejected.
+    attempts = [base_headers]
+    token = _fotmob_xmas_token(path)
+    if token:
+        attempts.append({**base_headers, "x-mas": token})
+
+    last = None
+    for i, headers in enumerate(attempts, 1):
+        tagged = "with x-mas token" if "x-mas" in headers else "bare"
+        try:
+            resp = scraper.get(url, headers=headers, timeout=25)
+            last = resp.status_code
+            if resp.status_code == 200:
+                try:
+                    data = resp.json()
+                except Exception:
+                    data = None
+                if data and (data.get("header") or data.get("content") or data.get("general")):
+                    log.info("FotMob matchDetails: fetched id=%s (%s)", match_id, tagged)
+                    data.setdefault("general", {})
+                    data.setdefault("header", {})
+                    data.setdefault("content", {})
+                    return data
+                log.warning("FotMob matchDetails id=%s (%s): 200 but empty/unexpected body.",
+                            match_id, tagged)
+            else:
+                log.warning("FotMob matchDetails id=%s (%s): HTTP %s.",
+                            match_id, tagged, resp.status_code)
+        except Exception as exc:
+            log.warning("FotMob matchDetails id=%s (%s) failed: %s", match_id, tagged, exc)
+
+    log.warning(
+        "FotMob matchDetails unavailable for id=%s (last HTTP %s). Building from "
+        "WhoScored%s. To enable FotMob, set FOTMOB_XMAS_TOKEN or FOTMOB_TOKEN_URL in .env.",
+        match_id, last, "/SofaScore" if os.environ.get("SOFASCORE_FALLBACK", "1") != "0" else "",
+    )
+    return _fotmob_unavailable_stub()
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# SOFASCORE – no browser, no signed token (fallback stats source)
+# ══════════════════════════════════════════════════════════════════════════
+
+# SofaScore stat name (lowercased) → FotMob match-stats title, so the SofaScore
+# payload can be shaped like FotMob's and reuse _parse_fotmob_stats() verbatim.
+_SS_STAT_TITLES = {
+    "expected goals":   "Expected goals (xG)",
+    "ball possession":  "Ball possession",
+    "total shots":      "Total shots",
+    "shots on target":  "Shots on target",
+    "big chances":      "Big chances",
+    "goalkeeper saves": "Saves",
+    "saves":            "Saves",
+    "fouls":            "Fouls",
+    "passes":           "Passes",
+    "accurate passes":  "Accurate passes",
+}
+# SofaScore single-letter positions → FotMob-ish codes _parse_fotmob_lineup understands.
+_SS_POS = {"G": "GK", "D": "CB", "M": "CM", "F": "ST"}
+
+
+def _ss_num(item, side):
+    """Numeric value of a SofaScore statisticsItem for 'home'/'away'."""
+    v = item.get(side + "Value")
+    if isinstance(v, (int, float)):
+        return v
+    raw = str(item.get(side, "")).strip()
+    m = re.match(r"-?\d+(?:\.\d+)?", raw.replace("%", ""))
+    return float(m.group()) if m else None
+
+
+def sofascore_fetch_match_details(home: str, away: str, around_date: str | None) -> dict:
+    """Best-effort FotMob-shaped matchDetails built from SofaScore's open JSON API.
+
+    SofaScore needs no signed token (just a browser UA), so it's the most reliable
+    second source when FotMob's x-mas gate blocks us. Returns a dict shaped like
+    FotMob's (so _parse_fotmob_stats/_lineup consume it unchanged) tagged
+    ``_source_name='sofascore'``, or the unavailable stub on any failure. Provides
+    stats + lineups + score/venue; shot events stay with WhoScored (whose event
+    stream is richer and whose pitch orientation the renderer already handles)."""
+    from datetime import date, timedelta
+    try:
+        from wc2026.knockout_resolve import _team_key  # alias-aware name compare
+    except Exception:
+        def _team_key(n): return re.sub(r"[^a-z]", "", (n or "").lower())
+
+    scraper = _fotmob_scraper()
+    hdr = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                          "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
+           "Accept": "application/json"}
+
+    def _get(url):
+        r = scraper.get(url, headers=hdr, timeout=20)
+        return r.json() if r.ok else None
+
+    # 1. find the event id by scanning the scheduled-events feed around the date
+    want = {_team_key(home), _team_key(away)}
+    days = []
+    if around_date:
+        try:
+            d0 = date.fromisoformat(around_date[:10])
+            days = [(d0 + timedelta(days=o)).isoformat() for o in (0, -1, 1)]
+        except Exception:
+            days = []
+    if not days:
+        days = [datetime.now(timezone.utc).date().isoformat()]
+
+    event = None
+    try:
+        for day in days:
+            data = _get(f"https://api.sofascore.com/api/v1/sport/football/scheduled-events/{day}")
+            for ev in (data or {}).get("events", []):
+                h = ev.get("homeTeam", {}).get("name", "")
+                a = ev.get("awayTeam", {}).get("name", "")
+                if {_team_key(h), _team_key(a)} == want:
+                    event = ev
+                    break
+            if event:
+                break
+    except Exception as exc:
+        log.warning("SofaScore schedule lookup failed: %s", exc)
+
+    if not event:
+        log.info("SofaScore: no event found for %s vs %s near %s", home, away, around_date)
+        return _fotmob_unavailable_stub()
+
+    eid = event.get("id")
+    swap = _team_key(event.get("homeTeam", {}).get("name", "")) != _team_key(home)  # SS home != our home
+    log.info("SofaScore: matched event id=%s for %s vs %s", eid, home, away)
+
+    # 2. statistics → FotMob-titled stats list
+    stat_items = []
+    try:
+        sdata = _get(f"https://api.sofascore.com/api/v1/event/{eid}/statistics") or {}
+        groups = next((p.get("groups", []) for p in sdata.get("statistics", [])
+                       if p.get("period") == "ALL"), [])
+        for g in groups:
+            for it in g.get("statisticsItems", []):
+                title = _SS_STAT_TITLES.get(str(it.get("name", "")).strip().lower())
+                if not title:
+                    continue
+                hv, av = _ss_num(it, "home"), _ss_num(it, "away")
+                if hv is None or av is None:
+                    continue
+                if swap:
+                    hv, av = av, hv
+                stat_items.append({"title": title, "stats": [hv, av]})
+    except Exception as exc:
+        log.warning("SofaScore statistics parse failed: %s", exc)
+
+    # 3. lineups → FotMob-shaped players
+    def _ss_players(side_obj):
+        out = []
+        for p in (side_obj or {}).get("players", []):
+            pl = p.get("player", {})
+            out.append({
+                "id":          pl.get("id"),
+                "name":        pl.get("name", ""),
+                "shirt":       p.get("jerseyNumber") or pl.get("jerseyNumber") or 0,
+                "position":    _SS_POS.get((p.get("position") or pl.get("position") or "")[:1], "CM"),
+                "positionRow": 99 if p.get("substitute") else 0,
+            })
+        return out
+
+    home_lineup = away_lineup = []
+    try:
+        ld = _get(f"https://api.sofascore.com/api/v1/event/{eid}/lineups") or {}
+        ss_home, ss_away = ld.get("home"), ld.get("away")
+        if swap:
+            ss_home, ss_away = ss_away, ss_home
+        home_lineup, away_lineup = _ss_players(ss_home), _ss_players(ss_away)
+    except Exception as exc:
+        log.warning("SofaScore lineups parse failed: %s", exc)
+
+    # 4. score / teams / venue
+    hs = event.get("homeScore", {}).get("current", 0)
+    as_ = event.get("awayScore", {}).get("current", 0)
+    if swap:
+        hs, as_ = as_, hs
+    ts = event.get("startTimestamp")
+    utc = datetime.fromtimestamp(ts, timezone.utc).isoformat() if ts else ""
+    venue = {}
+    try:
+        det = _get(f"https://api.sofascore.com/api/v1/event/{eid}") or {}
+        ven = det.get("event", {}).get("venue", {}) or {}
+        venue = {"venue": ven.get("stadium", {}).get("name", ""),
+                 "venueCity": ven.get("city", {}).get("name", ""),
+                 "venueCountry": ven.get("country", {}).get("name", "")}
+    except Exception:
+        pass
+
+    stage = (event.get("roundInfo", {}).get("name")
+             or event.get("tournament", {}).get("name", "Group Stage"))
+
+    if not stat_items and not home_lineup and not away_lineup:
+        log.warning("SofaScore: event %s found but no stats/lineups extracted.", eid)
+        return _fotmob_unavailable_stub()
+
+    log.info("SofaScore: built details (%d stats, %d+%d players)",
+             len(stat_items), len(home_lineup), len(away_lineup))
+    return {
+        "_source_name": "sofascore",
+        "general": {"matchId": eid, "parentLeagueName": stage, **venue},
+        "header":  {"teams": [{"name": home, "id": None}, {"name": away, "id": None}],
+                    "status": {"scoreStr": f"{hs} - {as_}", "utcTime": utc, "finished": True}},
+        "content": {"stats":  {"Periods": {"All": {"stats": stat_items}}},
+                    "lineup": {"home": {"players": home_lineup},
+                               "away": {"players": away_lineup}},
+                    "shotmap": {"shots": []}},
+    }
 
 
 def _compute_ws_stats(events: list, home_tid, away_tid) -> dict:
@@ -842,7 +1104,8 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         "match_stats": match_stats,
         "playerIdNameDictionary": pid_name,
         "_scraped_at": datetime.now(timezone.utc).isoformat(),
-        "_sources":    ["fotmob"] + (["whoscored"] if ws_data else []),
+        "_sources":    ([fm_data.get("_source_name", "fotmob")] if not fotmob_unavailable else [])
+                       + (["whoscored"] if ws_data else []),
     }
 
 
@@ -918,6 +1181,17 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
         away_name = teams[1].get("name", "Away") if len(teams) > 1 else "Away"
     home_name = FOTMOB_NAME_OVERRIDES.get(home_name, home_name)
     away_name = FOTMOB_NAME_OVERRIDES.get(away_name, away_name)
+
+    # FotMob down? Fall back to SofaScore (no signed token needed) for a real
+    # stats + lineup source, so the match still has a second source besides
+    # WhoScored. Disable with SOFASCORE_FALLBACK=0.
+    if fm_data.get("_fotmob_unavailable") and os.environ.get("SOFASCORE_FALLBACK", "1") != "0":
+        around = ""
+        if xml_match:
+            around = (xml_match.get("status", {}).get("utcTime", "") or "")[:10]
+        ss_data = sofascore_fetch_match_details(home_name, away_name, around or None)
+        if not ss_data.get("_fotmob_unavailable"):
+            fm_data = ss_data
 
     ws_data = None
     if not fotmob_only:
