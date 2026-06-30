@@ -208,3 +208,7 @@
 .so-row.goal .so-oc { color: #37c978; }
 .so-row.saved .so-oc { color: #ff5b5b; }
 .so-row.missed .so-oc, .so-row.post .so-oc { color: #ffb020; }
+
+/* shot-path legend swatch (Shot map) */
+.legend-row .ln-swatch { width: 14px; height: 0; border-top: 2px solid var(--text);
+  opacity: 0.5; display: inline-block; }

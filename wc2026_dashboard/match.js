@@ -297,6 +297,7 @@
         '<span class="chip-toggle on home" id="shHome">' + esc(D.home.name) + "</span>" +
         '<span class="chip-toggle on away" id="shAway">' + esc(D.away.name) + "</span>" +
         '<span class="chip-toggle" id="shGoals">Goals only</span>' +
+        '<span class="chip-toggle on" id="shLines">Shot paths</span>' +
         '<span class="grp">Min xG <input type="text" id="shMinXg" value="0" size="3" style="width:42px"></span>' +
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
@@ -310,11 +311,12 @@
         '<span><i class="dot" style="background:var(--c-home)"></i>On target</span>' +
         '<span><i class="dot" style="background:transparent;border:1px solid var(--muted)"></i>Off target</span>' +
         '<span><i class="dot" style="background:#7a869f"></i>Blocked</span>' +
+        '<span><i class="ln-swatch"></i>Shot path → goal</span>' +
         '<span>● size = xG</span>' +
       "</div>" +
       '<div class="shot-detail empty" id="shotDetail">Click any shot to see who took it, when, and its xG.</div>';
 
-    var state = { home: true, away: true, goalsOnly: false, minXg: 0, sel: null };
+    var state = { home: true, away: true, goalsOnly: false, lines: true, minXg: 0, sel: null };
     var layer = document.getElementById("shotLayer");
     var detail = document.getElementById("shotDetail");
 
@@ -329,6 +331,20 @@
         var r = 0.55 + Math.sqrt(sh.xg) * 2.0;
         var col = sh.team === "home" ? D.home.color : D.away.color;
         var NS = "http://www.w3.org/2000/svg";
+        // Shot path: a line from the shot spot to where it crossed the goal line
+        // (raw x=100, y=GoalMouthY). Drawn under the dot; off-target lines point wide
+        // of the posts. Only shots with goal-mouth data (gy) get a path.
+        if (state.lines && sh.gy != null) {
+          var lx = tx(sh.team, 100), ly = ty(sh.team, sh.gy);
+          var ln = document.createElementNS(NS, "line");
+          ln.setAttribute("x1", cx.toFixed(2)); ln.setAttribute("y1", cy.toFixed(2));
+          ln.setAttribute("x2", lx.toFixed(2)); ln.setAttribute("y2", ly.toFixed(2));
+          ln.setAttribute("stroke", sh.goal ? "#ffd34e" : col);
+          ln.setAttribute("stroke-width", sh.goal ? "0.4" : "0.28");
+          ln.setAttribute("stroke-opacity", sh.goal ? "0.9" : "0.33");
+          ln.setAttribute("stroke-linecap", "round");
+          layer.appendChild(ln);
+        }
         var fill, stroke = "none", op = 0.85;
         if (sh.goal) { fill = col; op = 1; }                        // goals = team colour
         else if (sh.blocked) { fill = "#7a869f"; op = 0.7; }
@@ -379,6 +395,8 @@
       state.away = !state.away; this.classList.toggle("on"); draw(); });
     document.getElementById("shGoals").addEventListener("click", function () {
       state.goalsOnly = !state.goalsOnly; this.classList.toggle("on"); draw(); });
+    document.getElementById("shLines").addEventListener("click", function () {
+      state.lines = !state.lines; this.classList.toggle("on"); draw(); });
     document.getElementById("shMinXg").addEventListener("input", function () {
       state.minXg = parseFloat(this.value) || 0; draw(); });
     draw();
