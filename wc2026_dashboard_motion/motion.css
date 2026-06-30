@@ -1,0 +1,58 @@
+/* motion.css — styling that supports the motion-enhance.js animation layer.
+   Loaded ONLY by the motion edition (wc2026_dashboard_motion/). The original
+   dashboard is untouched. All animation is driven by the vendored `motion`
+   library (vendor/motion.js); this file only adds the chrome that layer needs
+   plus a hard reduced-motion opt-out. */
+
+/* Scroll progress bar (driven by Motion.scroll in motion-enhance.js). */
+#mo-scrollbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #15c39a, #3aa3ff 60%, #b06bff);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* "Motion edition" badge + classic link injected into the header at runtime. */
+.mo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  color: #06231c;
+  background: linear-gradient(90deg, #2ee6b6, #54b6ff);
+  box-shadow: 0 2px 10px rgba(46, 230, 182, .35);
+  white-space: nowrap;
+}
+.mo-classic-link {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #9fb0c0);
+  text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+  white-space: nowrap;
+}
+.mo-classic-link:hover { color: #fff; }
+
+/* Hint the compositor for elements we animate a lot. */
+nav.tabs button,
+.card, .group-card, .data-card, .third-card, .pred-card, .stat, .stat-panel {
+  will-change: transform;
+}
+
+/* Respect users who ask for less motion: kill every animation/transition and
+   make sure nothing the layer touched can get stuck partly transparent. */
+@media (prefers-reduced-motion: reduce) {
+  #mo-scrollbar { display: none; }
+  .view *, .view { opacity: 1 !important; transform: none !important; }
+}

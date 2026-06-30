@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Match Dashboard — WC2026</title>
+<script>var _v=Date.now();document.write('<link rel="stylesheet" href="../wc2026_dashboard/styles.css?v='+_v+'"><link rel="stylesheet" href="../wc2026_dashboard/match.css?v='+_v+'">');</script>
+<link rel="stylesheet" href="motion.css" />
+<noscript><link rel="stylesheet" href="../wc2026_dashboard/styles.css" /><link rel="stylesheet" href="../wc2026_dashboard/match.css" /></noscript>
+</head>
+<body>
+<header class="site">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="title">FIFA World Cup <span>2026</span> · Match Centre</div>
+      <div class="sub">Interactive shot &amp; pass explorer</div>
+    </div>
+    <nav class="tabs">
+      <a class="back-link" href="index.html">← All matches</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="matchRoot">
+    <p class="footer-note" id="loadingMsg">Loading match…</p>
+  </div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- data.js gives match.js the head-to-head team stats; the match-specific
+     event file is injected by match.js based on ?id= -->
+<script>var _mv=Date.now();
+  document.write('<scr'+'ipt src="../wc2026_dashboard/data.js?v='+_mv+'"></scr'+'ipt>');
+  document.write('<scr'+'ipt src="motion-matchpath.js?v='+_mv+'"></scr'+'ipt>');
+  document.write('<scr'+'ipt src="../wc2026_dashboard/match.js?v='+_mv+'"></scr'+'ipt>');
+  document.write('<scr'+'ipt src="vendor/motion.js?v='+_mv+'"></scr'+'ipt>');
+  document.write('<scr'+'ipt src="motion-enhance.js?v='+_mv+'"></scr'+'ipt>');</script>
+</body>
+</html>
