@@ -1337,33 +1337,22 @@
       return '<div class="bk-match' + (m.played ? " played" : "") + '">' +
         '<div class="bk-dt">' + esc(fmtDate(m.date)) + "</div>" + side(m, "h") + side(m, "a") + "</div>";
     }
-    // Left half: deeper rounds on the left, flowing right toward the centre.
+    // Single left-to-right tree: deepest round (R32) on the left, each round flowing
+    // right into the next, the Final on the right. Feeders link rightward to their tie.
     function node(m) {
       var kids = m && m._kids && m._kids.length === 2
         ? '<div class="bk-kids">' + node(m._kids[0]) + node(m._kids[1]) + "</div><div class=\"bk-edge\"></div>"
         : "";
       return '<div class="bk-node">' + kids + box(m) + "</div>";
     }
-    // Right half: mirrored — the match sits on the left (toward centre), feeders on the right.
-    function nodeR(m) {
-      var kids = m && m._kids && m._kids.length === 2
-        ? "<div class=\"bk-edge\"></div><div class=\"bk-kids\">" + nodeR(m._kids[0]) + nodeR(m._kids[1]) + "</div>"
-        : "";
-      return '<div class="bk-node">' + box(m) + kids + "</div>";
-    }
-    var sf = fin._kids || [];
-    host.innerHTML = '<div class="bracket-tree two-sided">' +
-        '<div class="bk-half left">' + node(sf[0]) + "</div>" +
-        '<div class="bk-center"><div class="bk-edge"></div>' + box(fin) + '<div class="bk-edge"></div></div>' +
-        '<div class="bk-half right">' + nodeR(sf[1]) + "</div>" +
-      "</div>" +
+    host.innerHTML = '<div class="bracket-tree lr">' + node(fin) + "</div>" +
       (tp ? '<div class="bk-third"><div class="bk-third-h">Third-place play-off</div>' + box(tp) + "</div>" : "");
-    // Symmetric header. Cell widths are kept in sync with the layout via the CSS vars.
+    // Header columns aligned to the left-to-right layout (R32 → Final).
     var head = document.getElementById("bracketHead");
     if (head) {
-      var MW = "var(--bk-mw)", MID = "calc(var(--bk-mw) + var(--bk-edge))", FW = "calc(var(--bk-mw) + var(--bk-edge) * 2)";
-      var cells = [["Round of 32", MW], ["Round of 16", MID], ["Quarter-finals", MID], ["Semi-finals", MID],
-        ["Final", FW], ["Semi-finals", MID], ["Quarter-finals", MID], ["Round of 16", MID], ["Round of 32", MW]];
+      var MW = "var(--bk-mw)", MID = "calc(var(--bk-mw) + var(--bk-edge))";
+      var cells = [["Round of 32", MW], ["Round of 16", MID], ["Quarter-finals", MID],
+        ["Semi-finals", MID], ["Final", MID]];
       head.innerHTML = cells.map(function (c) { return '<span class="bk-hcell" style="width:' + c[1] + '">' + c[0] + "</span>"; }).join("");
     }
   }
@@ -1614,4 +1603,60 @@
   document.getElementById("footerNote").textContent =
     "Data generated " + D.generated + " · " + D.counts.played + " matches played · " +
     D.counts.with_xg + " with xG · " + PLAYERS.length + " players · built from the WC2026 pipeline.";
+
+  /* ---------------- live auto-update ----------------
+     The site is a static build; data.js is regenerated and pushed after every match
+     scrape. Poll it so a page left open picks up new results — the knockout bracket,
+     group tables and fixtures — without a manual refresh. We splice the fresh
+     window.WC_DATA into the live D object (closures keep their reference) and re-render
+     the result-driven views. */
+  function parseDataJs(text) {
+    var w = {};
+    (new Function("window", text))(w);   // data.js body is `window.WC_DATA = {...}`
+    return w.WC_DATA;
+  }
+  function showUpdateToast() {
+    var t = document.getElementById("liveToast");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "liveToast"; t.className = "live-toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = "↻ Results updated";
+    t.classList.add("show");
+    clearTimeout(t._h);
+    t._h = setTimeout(function () { t.classList.remove("show"); }, 4000);
+  }
+  function renderResultsViews() {
+    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches].forEach(function (fn) {
+      try { fn(); } catch (e) { /* keep going if one view fails */ }
+    });
+    try {
+      document.getElementById("footerNote").textContent =
+        "Data generated " + D.generated + " · " + D.counts.played + " matches played · " +
+        D.counts.with_xg + " with xG · " + PLAYERS.length + " players · built from the WC2026 pipeline.";
+    } catch (e) {}
+  }
+  var _polling = false;
+  function refreshData() {
+    if (_polling || document.hidden) return;
+    _polling = true;
+    fetch("data.js?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (txt) {
+        if (txt) {
+          var nd = parseDataJs(txt);
+          if (nd && nd.generated && nd.generated !== D.generated) {
+            Object.keys(D).forEach(function (k) { delete D[k]; });
+            Object.assign(D, nd);
+            renderResultsViews();
+            showUpdateToast();
+          }
+        }
+      })
+      .catch(function () { /* offline / file:// — ignore */ })
+      .then(function () { _polling = false; });
+  }
+  setInterval(refreshData, 90000);                 // every 90s while the tab is visible
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshData(); });
 })();

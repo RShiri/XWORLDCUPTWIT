@@ -279,6 +279,19 @@ def extract(match_data):
                 })
                 continue
             xg, meta = shot_xg(ev)
+            # goal-mouth landing spot (where the shot crossed/was aimed at the goal line):
+            # GoalMouthY = across the goal, GoalMouthZ = height. Powers the on-target
+            # "where in the goal" map. Absent on some events → null.
+            gy = gz = None
+            for q in ev.get("qualifiers", []):
+                dn = q.get("type", {}).get("displayName")
+                try:
+                    if dn == "GoalMouthY":
+                        gy = round(float(q.get("value")), 1)
+                    elif dn == "GoalMouthZ":
+                        gz = round(float(q.get("value")), 1)
+                except (TypeError, ValueError):
+                    pass
             shots.append({
                 "team": side,
                 "x": round(ev.get("x", 0), 1),
@@ -294,6 +307,8 @@ def extract(match_data):
                 "body": meta["body"],
                 "sit": meta["situation"],
                 "big": meta["big_chance"],
+                "gy": gy,
+                "gz": gz,
             })
             if tname == "Goal":
                 goals.append({

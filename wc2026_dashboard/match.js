@@ -89,6 +89,34 @@
     return p.join("");
   }
 
+  /* ---- goal-mouth ("behind the net") view, shared by the on-target shot map and
+     the penalty-shootout map. WhoScored GoalMouthY runs across the goal (posts at
+     45.2 / 54.8), GoalMouthZ is height (crossbar ≈ 38). Exposes the frame markup,
+     the coordinate mappers and key frame positions. ---- */
+  var GM = (function () {
+    var GW = 100, GROUND = 50, GY0 = 43, GYR = 14, GZTOP = 48;
+    function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
+    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
+    var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
+    function frame() {
+      var fr = "#f4f6fb", ng = "rgba(255,255,255,0.14)", net = [];
+      net.push('<rect x="-2" y="-2" width="' + (GW + 4) + '" height="' + (GROUND + 6) + '" fill="#0d1420"/>');
+      net.push('<rect x="' + postL.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + (postR - postL).toFixed(1) +
+        '" height="' + (GROUND - barY).toFixed(1) + '" fill="rgba(255,255,255,0.04)"/>');
+      for (var nx = postL; nx <= postR + 0.01; nx += 3.2)
+        net.push('<line x1="' + nx.toFixed(1) + '" y1="' + barY.toFixed(1) + '" x2="' + nx.toFixed(1) + '" y2="' + GROUND + '" stroke="' + ng + '" stroke-width="0.18"/>');
+      for (var ny = barY; ny <= GROUND + 0.01; ny += 3.0)
+        net.push('<line x1="' + postL.toFixed(1) + '" y1="' + ny.toFixed(1) + '" x2="' + postR.toFixed(1) + '" y2="' + ny.toFixed(1) + '" stroke="' + ng + '" stroke-width="0.18"/>');
+      net.push('<line x1="0" y1="' + GROUND + '" x2="' + GW + '" y2="' + GROUND + '" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>');
+      net.push('<line x1="' + postL.toFixed(1) + '" y1="' + GROUND + '" x2="' + postL.toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+      net.push('<line x1="' + postR.toFixed(1) + '" y1="' + GROUND + '" x2="' + postR.toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+      net.push('<line x1="' + (postL - 0.55).toFixed(1) + '" y1="' + barY.toFixed(1) + '" x2="' + (postR + 0.55).toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+      return net.join("");
+    }
+    return { GW: GW, GROUND: GROUND, gxOf: gxOf, gyOf: gyOf, postL: postL, postR: postR,
+             barY: barY, frame: frame, viewBox: "-2 -2 " + (GW + 4) + " " + (GROUND + 8) };
+  })();
+
   /* ================= BOOT ================= */
   function boot(D) {
     document.title = D.home.name + " " + D.home.score + "-" + D.away.score + " " + D.away.name + " · WC2026";
@@ -346,15 +374,21 @@
     draw();
   }
 
-  /* ================= ON-TARGET SHOT MAP ================= */
-  // A focused shot map showing only on-target attempts (goals + saved shots). Team
-  // chooser lets you isolate a single side. Goal dots carry a gold ring; saved-but-
-  // on-target dots are hollow-filled team colour. Dot size = xG (same scale as the
-  // main shot map) so you can read shot quality at a glance.
+  /* ================= ON-TARGET SHOT MAP (goal-mouth view) ================= */
+  // A "behind the goal" view: every on-target attempt (goal + saved) plotted at the
+  // spot in the goal it was aimed at (WhoScored GoalMouthY/Z), coloured green for a
+  // goal and blue for a save. Dot size = xG. Team chooser isolates a side. (Note:
+  // WhoScored often gives saved shots a default height, so saves cluster at one row.)
   function buildOnTargetShots(D) {
     var host = document.getElementById("mv-shots-ot");
     if (!host) return;
-    var onT = D.shots.filter(function (s) { return s.onTarget; });
+    var onT = D.shots.filter(function (s) { return s.onTarget && s.gy != null && s.gz != null; });
+    var noCoord = D.shots.filter(function (s) { return s.onTarget && (s.gy == null || s.gz == null); }).length;
+    if (!onT.length) {
+      host.innerHTML = '<div class="shot-detail empty">No on-target shots with goal-placement data for this match.</div>';
+      return;
+    }
+    var GOAL_COL = "#37c978", SAVE_COL = "#5a9bff";
     host.innerHTML =
       '<div class="controls-bar">' +
         '<span class="chip-toggle on home" id="otHome">' + esc(D.home.name) + "</span>" +
@@ -362,23 +396,28 @@
         '<span class="chip-toggle" id="otGoals">Goals only</span>' +
         '<span class="ot-count" id="otCount"></span>' +
       "</div>" +
-      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
-        pitchMarkup() +
-        '<text class="dir-label" x="3" y="' + (PH + 4) + '">◀ ' + esc(D.away.name) + "</text>" +
-        '<text class="dir-label" x="' + (PW - 3) + '" y="' + (PH + 4) + '" text-anchor="end">' + esc(D.home.name) + " ▶</text>" +
+      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="' + GM.viewBox + '">' +
+        GM.frame() +
+        '<text class="dir-label" x="' + (GM.GW / 2) + '" y="' + (GM.GROUND + 5) +
+          '" text-anchor="middle">Goal-mouth view · where on-target shots were aimed</text>' +
         '<g id="otLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffd34e"></i>Goal (team colour)</span>' +
-        '<span><i class="dot" style="background:var(--c-home)"></i>On target (saved/kept out)</span>' +
+        '<span><i class="dot" style="background:' + GOAL_COL + '"></i>Goal</span>' +
+        '<span><i class="dot" style="background:' + SAVE_COL + '"></i>On target (saved)</span>' +
+        '<span><i class="dot" style="background:#222;border:2px solid var(--c-home)"></i>Team ring</span>' +
         '<span>● size = xG</span>' +
       "</div>" +
-      '<div class="shot-detail empty" id="otDetail">Only shots that were on target (goals + saved). Click a dot for details.</div>';
+      '<div class="shot-detail empty" id="otDetail">' +
+        "Each dot is an on-target shot, placed where it was aimed in the goal. Click one for details." +
+        (noCoord ? " (" + noCoord + " on-target shot" + (noCoord === 1 ? "" : "s") + " had no placement data.)" : "") +
+      "</div>";
 
     var state = { home: true, away: true, goalsOnly: false };
     var layer = document.getElementById("otLayer");
     var detail = document.getElementById("otDetail");
     var countEl = document.getElementById("otCount");
+    var NS = "http://www.w3.org/2000/svg";
 
     function draw() {
       layer.innerHTML = "";
@@ -388,28 +427,20 @@
         if (state.goalsOnly && !sh.goal) return;
         shown++;
         if (sh.team === "home") hg++; else ag++;
-        var cx = tx(sh.team, sh.x), cy = ty(sh.team, sh.y);
-        var r = 0.55 + Math.sqrt(sh.xg) * 2.0;
-        var col = sh.team === "home" ? D.home.color : D.away.color;
-        var NS = "http://www.w3.org/2000/svg";
-        if (sh.goal) {
-          var ring = document.createElementNS(NS, "circle");
-          ring.setAttribute("cx", cx.toFixed(2)); ring.setAttribute("cy", cy.toFixed(2));
-          ring.setAttribute("r", (r + 0.55).toFixed(2));
-          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffd34e");
-          ring.setAttribute("stroke-width", "0.45");
-          layer.appendChild(ring);
-        }
+        var cx = GM.gxOf(sh.gy), cy = GM.gyOf(sh.gz);
+        var r = 1.4 + Math.sqrt(sh.xg) * 2.6;
+        var ring = sh.team === "home" ? D.home.color : D.away.color;
         var c = document.createElementNS(NS, "circle");
-        c.setAttribute("class", "shot-dot");
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
-        c.setAttribute("fill", col); c.setAttribute("fill-opacity", sh.goal ? 1 : 0.55);
-        if (!sh.goal) { c.setAttribute("stroke", col); c.setAttribute("stroke-width", 0.35); }
+        c.setAttribute("fill", sh.goal ? GOAL_COL : SAVE_COL);
+        c.setAttribute("fill-opacity", sh.goal ? 0.95 : 0.8);
+        c.setAttribute("stroke", ring); c.setAttribute("stroke-width", "0.7");
+        c.style.cursor = "pointer";
         c.addEventListener("click", function () { select(sh, c); });
         c.addEventListener("mousemove", function (e) {
           showTip(e, "<b>" + esc(sh.player) + "</b> " + sh.min + "'<br>xG " + sh.xg.toFixed(2) +
-            " · " + (sh.goal ? "GOAL" : "On target"));
+            " · " + (sh.goal ? "GOAL" : "On target (saved)"));
         });
         c.addEventListener("mouseleave", hideTip);
         layer.appendChild(c);
@@ -425,7 +456,7 @@
         '<div class="sd-grid">' +
         "<div><span>Minute</span><br>" + sh.min + "'</div>" +
         "<div><span>xG</span><br>" + sh.xg.toFixed(2) + "</div>" +
-        "<div><span>Outcome</span><br>" + (sh.goal ? "⚽ Goal" : "On target") + "</div>" +
+        "<div><span>Outcome</span><br>" + (sh.goal ? "⚽ Goal" : "On target (saved)") + "</div>" +
         "<div><span>Body</span><br>" + esc(sh.body) + "</div>" +
         "<div><span>Situation</span><br>" + esc(sh.sit) + (sh.big ? " · Big chance" : "") + "</div>" +
         "</div>";
