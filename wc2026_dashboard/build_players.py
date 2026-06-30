@@ -42,7 +42,8 @@ def _sum_stat(stats, key):
 def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
-               rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0)
+               rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
+               progPasses=0, xa=0.0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -65,6 +66,41 @@ def _player_shot_xg(match_data):
     return out
 
 
+def _player_creation(match_data):
+    """playerId -> (progressive-pass count, summed expected assists xA).
+
+    Progressive pass = a SUCCESSFUL pass that advances the ball >=15 WhoScored x-units
+    toward the opponent goal — the same `prog` rule the dashboard pass-explorer uses.
+    xA (expected assists) credits the player whose KEY pass set up each shot with that
+    shot's xG: WhoScored key passes are by definition the pass that leads to a shot, so
+    we credit the next shot by the same team that lands within a few events of the key
+    pass. Own goals and penalty-shootout kicks are excluded."""
+    events = match_data.get("events", [])
+    prog, xa, pending = {}, {}, {}  # pending: teamId -> (passerPid, event_index)
+    for i, ev in enumerate(events):
+        if is_shootout(ev):
+            continue
+        t = ev.get("type", {})
+        tname = t.get("displayName") if isinstance(t, dict) else ""
+        tid = ev.get("teamId")
+        if tname == "Pass":
+            ok = ev.get("outcomeType", {}).get("displayName") == "Successful"
+            pid = ev.get("playerId")
+            if ok and pid is not None and (ev.get("endX", ev.get("x", 0)) - ev.get("x", 0)) >= 15:
+                prog[pid] = prog.get(pid, 0) + 1
+            if ok and pid is not None:
+                quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+                if "KeyPass" in quals or "IntentionalGoalAssist" in quals:
+                    pending[tid] = (pid, i)
+        elif tname in SHOT_TYPES and not ev.get("isOwnGoal"):
+            kp = pending.get(tid)
+            if kp and (i - kp[1]) <= 4 and kp[0] != ev.get("playerId"):
+                xg, _ = shot_xg(ev)
+                xa[kp[0]] = xa.get(kp[0], 0.0) + xg
+            pending.pop(tid, None)
+    return prog, xa
+
+
 def _iter_played():
     for f in sorted(glob.glob(os.path.join(MATCH_DIR, "*.json"))):
         if not is_match_file(f):
@@ -83,6 +119,7 @@ def aggregate():
     for mid, d in _iter_played():
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
+        prog_map, xa_map = _player_creation(d)
         for side in ("home", "away"):
             team = norm(d[side].get("name", ""))
             for p in d[side].get("players", []):
@@ -107,6 +144,8 @@ def aggregate():
                 rec["yc"] += ex["yellow"].get(pid, 0)
                 rec["rc"] += ex["red"].get(pid, 0)
                 rec["xg"] += shot_xg_map.get(pid, 0.0)
+                rec["progPasses"] += prog_map.get(pid, 0)
+                rec["xa"] += xa_map.get(pid, 0.0)
                 rt = _player_rating(p)
                 if rt is not None:
                     rec["rating_sum"] += rt
@@ -124,7 +163,8 @@ def aggregate():
         r["pass_pct"] = round(100 * r["passAcc"] / r["passes"]) if r["passes"] else None
         r["xg"] = round(r["xg"], 2)
         r["xg_diff"] = round(r["g"] - r["xg"], 2)
-        for v in list(SUM_STATS.values()) + ["mins"]:
+        r["xa"] = round(r["xa"], 2)
+        for v in list(SUM_STATS.values()) + ["mins", "progPasses"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)
         r.pop("rating_n", None)

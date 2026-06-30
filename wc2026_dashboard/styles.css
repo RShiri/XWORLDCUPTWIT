@@ -682,3 +682,10 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .so-bar-val { font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; font-weight: 700; }
 .so-bar-val .so-z { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 3px; }
 @media (max-width: 620px) { .so-bar-row { grid-template-columns: 140px 1fr 78px; } }
+.so-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.so-preset {
+  font-size: 13px; color: var(--text); background: var(--bg-2); cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; transition: all .12s;
+}
+.so-preset:hover { border-color: var(--accent-2); color: #fff; }
+.so-preset.active { background: rgba(78,161,255,0.16); border-color: var(--accent-2); color: #fff; }

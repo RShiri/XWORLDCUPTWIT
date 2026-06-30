@@ -304,6 +304,40 @@
          The longer the bar, the more they break from the pack.</p>
       <div id="soStandouts"></div>
     </div>
+
+    <div class="card full-card">
+      <h3>Two-stat scatter — find the complete players</h3>
+      <p class="hint">Plot every player on <b>two stats at once</b> and let the <b>dot size</b> carry a third.
+         Top-right = strong in both; a dot that's big <i>and</i> top-right is a genuinely complete player. The
+         dashed lines are the averages. <span style="color:#ff3d8b;font-weight:700">Pink</span> = above average
+         in both; the player you spotlight above shows here in <span
+         style="color:#ffd24d;font-weight:700">gold</span> too. Start from a preset:</p>
+      <div class="so-presets" id="soPresets"></div>
+      <div class="so-controls">
+        <label>X axis<select id="soScX"></select></label>
+        <label>Y axis<select id="soScY"></select></label>
+        <label>Dot size<select id="soScSize"></select></label>
+        <label>Position
+          <select id="soScPos">
+            <option value="all">All outfield + GK</option>
+            <option value="FWD">Attackers</option>
+            <option value="MID">Midfielders</option>
+            <option value="DEF">Defenders</option>
+            <option value="GK">Goalkeepers</option>
+          </select>
+        </label>
+        <label>Minimum minutes
+          <select id="soScMins">
+            <option value="0">Any</option>
+            <option value="90">90+</option>
+            <option value="180" selected>180+</option>
+            <option value="270">270+</option>
+          </select>
+        </label>
+      </div>
+      <div class="so-chart-wrap" id="soScatter"></div>
+      <div class="insight" id="soScInsight"></div>
+    </div>
   </section>
 
   <!-- DATA -->

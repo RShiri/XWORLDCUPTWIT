@@ -1625,9 +1625,11 @@
      and reports their percentile. All client-side from window.WC_PLAYERS. */
   var SO_STATS = [
     ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0],
-    ["xg", "Expected goals (xG)", 2], ["shots", "Shots", 0], ["sot", "Shots on target", 0],
-    ["keyPasses", "Key passes", 0], ["dribbles", "Dribbles completed", 0],
-    ["passes", "Passes", 0], ["tackles", "Tackles", 0], ["interceptions", "Interceptions", 0],
+    ["xg", "Expected goals (xG)", 2], ["xa", "Expected assists (xA)", 2],
+    ["xg_diff", "Finishing (goals − xG)", 2], ["shots", "Shots", 0], ["sot", "Shots on target", 0],
+    ["keyPasses", "Key passes", 0], ["progPasses", "Progressive passes", 0],
+    ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["tackles", "Tackles", 0],
+    ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
     ["touches", "Touches", 0], ["rating", "Average match rating", 2]
   ];
   var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
@@ -1821,6 +1823,130 @@
     }).join("") + "</div>");
   }
 
+  /* ---- Two-stat scatter (find the complete players) ---- */
+  var soSc = { x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 };
+  var SO_PRESETS = [
+    { label: "⚔ Complete defenders", x: "tackles", y: "xg_diff", size: "interceptions", pos: "DEF", mins: 180 },
+    { label: "🎨 Creators", x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 },
+    { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 180 },
+    { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 90 },
+    { label: "⚡ Dribble & create", x: "dribbles", y: "keyPasses", size: "xa", pos: "all", mins: 180 }
+  ];
+  function soStatLabel(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[1] : k; }
+  function soStatDp(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[2] : 0; }
+  function soNiceStep(raw) {
+    raw = raw || 1; var pow = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / pow;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+  }
+  function soLTicks(lo, hi) {
+    var step = soNiceStep((hi - lo) / 5), start = Math.ceil(lo / step - 1e-9) * step, out = [];
+    for (var v = start; v <= hi + 1e-9; v += step) out.push(+v.toFixed(4));
+    return out;
+  }
+  function soQualifyFor(pos, mins) {
+    return PLAYERS.filter(function (p) {
+      if ((p.mins || 0) < mins) return false;
+      if (pos !== "all" && soPosGroup(p.pos) !== pos) return false;
+      return true;
+    });
+  }
+
+  function soScatterSVG(rows, xKey, yKey, sizeKey, spotPid) {
+    var W = 880, H = 480, padL = 56, padR = 22, padT = 22, padB = 54;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var xs = rows.map(function (p) { return +p[xKey] || 0; });
+    var ys = rows.map(function (p) { return +p[yKey] || 0; });
+    var mean = function (a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; };
+    var stdev = function (a, m) { return Math.sqrt(a.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / a.length); };
+    var mx = mean(xs), my = mean(ys), sdx = stdev(xs, mx) || 1, sdy = stdev(ys, my) || 1;
+    function dom(vals) {
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      lo = Math.min(lo, 0); var pad = (hi - lo) * 0.08 || 1;
+      return [lo - (lo < 0 ? pad * 0.4 : 0), hi + pad];
+    }
+    var dx = dom(xs), dy = dom(ys);
+    function sx(v) { return padL + plotW * (v - dx[0]) / (dx[1] - dx[0]); }
+    function sy(v) { return padT + plotH * (1 - (v - dy[0]) / (dy[1] - dy[0])); }
+    var sizeMax = sizeKey ? Math.max.apply(null, rows.map(function (p) { return +p[sizeKey] || 0; }).concat([0.0001])) : 1;
+    function radius(p) { if (!sizeKey) return 4.2; return 3 + 9 * Math.sqrt(Math.max(0, +p[sizeKey] || 0) / sizeMax); }
+    var dpx = soStatDp(xKey), dpy = soStatDp(yKey), dps = soStatDp(sizeKey);
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // gridlines + ticks
+    soLTicks(dx[0], dx[1]).forEach(function (t) {
+      var x = sx(t);
+      svg.push('<line x1="' + x.toFixed(1) + '" y1="' + padT + '" x2="' + x.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<text x="' + x.toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + soFmt(t, dpx) + "</text>");
+    });
+    soLTicks(dy[0], dy[1]).forEach(function (t) {
+      var y = sy(t);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 7) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + soFmt(t, dpy) + "</text>");
+    });
+    // average lines
+    svg.push('<line x1="' + sx(mx).toFixed(1) + '" y1="' + padT + '" x2="' + sx(mx).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
+    svg.push('<line x1="' + padL + '" y1="' + sy(my).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + sy(my).toFixed(1) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
+    // axis titles
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle">' + esc(soStatLabel(xKey)) + " →</text>");
+    svg.push('<text x="16" y="' + (padT + plotH / 2).toFixed(1) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle" transform="rotate(-90 16 ' + (padT + plotH / 2).toFixed(1) + ')">' + esc(soStatLabel(yKey)) + " →</text>");
+    // dots
+    var pts = [];
+    rows.forEach(function (p) {
+      var vx = +p[xKey] || 0, vy = +p[yKey] || 0;
+      var cx = sx(vx), cy = sy(vy), r = radius(p);
+      var elite = vx > mx && vy > my;
+      var isSpot = spotPid && p.pid === spotPid;
+      var fill = isSpot ? "#ffd24d" : elite ? "#ff3d8b" : "#4ea1ff";
+      var op = isSpot ? 1 : elite ? 0.85 : 0.5;
+      var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
+      var tip = esc(p.name) + " · " + esc(p.team) + " — " + esc(soStatLabel(xKey)) + " " + soFmt(vx, dpx) +
+        ", " + esc(soStatLabel(yKey)) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + esc(soStatLabel(sizeKey)) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
+      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + tip + "</title></circle>");
+      var zx = (vx - mx) / sdx, zy = (vy - my) / sdy;
+      pts.push({ p: p, cx: cx, cy: cy, score: zx + zy, team: p.name, spot: isSpot });
+    });
+    // label top performers (by combined z) + the spotlight player
+    var labelSet = pts.slice().sort(function (a, b) { return b.score - a.score; }).filter(function (q) { return q.score > 1.4; }).slice(0, 9);
+    pts.forEach(function (q) { if (q.spot && labelSet.indexOf(q) < 0) labelSet.push(q); });
+    declutter(labelSet, 8.7);
+    labelSet.forEach(function (q) {
+      if (q.led) svg.push('<line x1="' + q.cx.toFixed(1) + '" y1="' + q.cy.toFixed(1) + '" x2="' + (q.lx - 1).toFixed(1) + '" y2="' + (q.ly - 3).toFixed(1) + '" stroke="#46527a" stroke-width="0.6"/>');
+      svg.push('<text x="' + q.lx.toFixed(1) + '" y="' + q.ly.toFixed(1) + '" fill="' + (q.spot ? "#ffe08a" : "#c2cce0") + '" font-size="8.9">' + esc(q.team) + "</text>");
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderScatter2() {
+    var host = document.getElementById("soScatter");
+    if (!host) return;
+    var rows = soQualifyFor(soSc.pos, soSc.mins);
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    if (rows.length < 3) {
+      host.innerHTML = '<p class="hint">Not enough players match these filters.</p>';
+      setHTML("soScInsight", "");
+      return;
+    }
+    var spot = null;
+    if (soState.player) {
+      var q = soState.player.toLowerCase();
+      spot = rows.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+        rows.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0] || null;
+    }
+    host.innerHTML = soScatterSVG(rows, soSc.x, soSc.y, soSc.size, spot ? spot.pid : null);
+    // top-right complete players (above average in BOTH)
+    var xs = rows.map(function (p) { return +p[soSc.x] || 0; }), ys = rows.map(function (p) { return +p[soSc.y] || 0; });
+    var mx = xs.reduce(function (s, v) { return s + v; }, 0) / xs.length;
+    var my = ys.reduce(function (s, v) { return s + v; }, 0) / ys.length;
+    var elite = rows.filter(function (p) { return (+p[soSc.x] || 0) > mx && (+p[soSc.y] || 0) > my; });
+    var best = elite.slice().sort(function (a, b) {
+      return ((+b[soSc.x] || 0) / (mx || 1) + (+b[soSc.y] || 0) / (my || 1)) - ((+a[soSc.x] || 0) / (mx || 1) + (+a[soSc.y] || 0) / (my || 1));
+    }).slice(0, 5).map(function (p) { return esc(p.name); });
+    setHTML("soScInsight", "<b>" + elite.length + "</b> player" + (elite.length === 1 ? "" : "s") +
+      " are above average in <b>both</b> " + esc(soStatLabel(soSc.x).toLowerCase()) + " and " + esc(soStatLabel(soSc.y).toLowerCase()) +
+      " (top-right quadrant)" + (best.length ? " — led by " + best.join(", ") : "") + "." +
+      (soSc.size ? ' Dot size = ' + esc(soStatLabel(soSc.size).toLowerCase()) + "." : ""));
+  }
+
   function initStandouts() {
     var statSel = document.getElementById("soStat");
     if (!statSel) return;
@@ -1840,9 +1966,41 @@
     var pin = document.getElementById("soPlayer"), deb;
     pin.addEventListener("input", function () {
       clearTimeout(deb);
-      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); }, 200);
+      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); renderScatter2(); }, 200);
     });
     renderStandouts();
+
+    // --- two-stat scatter controls ---
+    var axisOpts = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    var xSel = document.getElementById("soScX"), ySel = document.getElementById("soScY"), sizeSel = document.getElementById("soScSize");
+    if (xSel) {
+      xSel.innerHTML = axisOpts; ySel.innerHTML = axisOpts;
+      sizeSel.innerHTML = '<option value="">— none —</option>' + axisOpts;
+      function syncScatterControls() {
+        xSel.value = soSc.x; ySel.value = soSc.y; sizeSel.value = soSc.size;
+        document.getElementById("soScPos").value = soSc.pos;
+        document.getElementById("soScMins").value = String(soSc.mins);
+      }
+      syncScatterControls();
+      xSel.addEventListener("change", function () { soSc.x = xSel.value; renderScatter2(); });
+      ySel.addEventListener("change", function () { soSc.y = ySel.value; renderScatter2(); });
+      sizeSel.addEventListener("change", function () { soSc.size = sizeSel.value; renderScatter2(); });
+      document.getElementById("soScPos").addEventListener("change", function (e) { soSc.pos = e.target.value; renderScatter2(); });
+      document.getElementById("soScMins").addEventListener("change", function (e) { soSc.mins = +e.target.value; renderScatter2(); });
+      var pHost = document.getElementById("soPresets");
+      pHost.innerHTML = SO_PRESETS.map(function (pr, i) { return '<button class="so-preset" data-i="' + i + '">' + esc(pr.label) + "</button>"; }).join("");
+      pHost.querySelectorAll(".so-preset").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var pr = SO_PRESETS[+btn.dataset.i];
+          soSc.x = pr.x; soSc.y = pr.y; soSc.size = pr.size; soSc.pos = pr.pos; soSc.mins = pr.mins;
+          pHost.querySelectorAll(".so-preset").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          syncScatterControls();
+          renderScatter2();
+        });
+      });
+      renderScatter2();
+    }
   }
 
   /* ---------------- init ---------------- */
