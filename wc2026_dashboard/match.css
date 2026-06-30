@@ -212,3 +212,10 @@
 /* shot-path legend swatch (Shot map) */
 .legend-row .ln-swatch { width: 14px; height: 0; border-top: 2px solid var(--text);
   opacity: 0.5; display: inline-block; }
+
+/* xG momentum chart */
+.mv-mom-wrap { width: 100%; overflow: visible; }
+.mv-mom-chart { width: 100%; height: auto; display: block; }
+.mv-mom-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.mv-mom-legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; margin-right: 7px; vertical-align: middle; }
+.mv-mom-legend b { color: var(--text); }

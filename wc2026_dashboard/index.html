@@ -22,6 +22,7 @@
       <button data-view="data">Data</button>
       <button data-view="predict">Power Rank</button>
       <button data-view="standouts">Standouts</button>
+      <button data-view="teamlab">Team Lab</button>
     </nav>
   </div>
 </header>
@@ -438,6 +439,62 @@
     </div>
   </section>
 
+  <!-- TEAM LAB (shot map + style fingerprint) -->
+  <section id="view-teamlab" class="view">
+    <div class="section-head">
+      <h2>Team Lab — Shot Maps &amp; Style</h2>
+      <p>Where every chance comes from, and how each team likes to play. Pick a team to see <b>its shot map</b>
+         and a <b>style fingerprint</b> against the rest of the tournament — or leave it on <i>All teams</i> for the
+         whole-tournament picture of where goals are made.</p>
+    </div>
+
+    <div class="so-controls">
+      <label>Team
+        <select id="tlTeam"></select>
+      </label>
+      <label>Shots
+        <select id="tlFilter">
+          <option value="all">All shots</option>
+          <option value="ot">On target</option>
+          <option value="goal">Goals only</option>
+        </select>
+      </label>
+      <label>Situation
+        <select id="tlSit">
+          <option value="all">All situations</option>
+          <option value="open">Open play</option>
+          <option value="set">Set pieces</option>
+          <option value="pen">Penalties</option>
+        </select>
+      </label>
+      <label>View
+        <select id="tlMode">
+          <option value="dots">Shot dots</option>
+          <option value="heat">xG heatmap</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="stats-strip" id="tlStats"></div>
+
+    <div class="card full-card">
+      <h3 id="tlMapTitle">Shot map</h3>
+      <p class="hint">Attacking <b>↑</b> (toward the top goal). In <b>Shot dots</b> mode each dot is a shot,
+         sized by xG: <span style="color:#ff3d8b;font-weight:700">goals pink</span>,
+         <span style="color:#4ea1ff;font-weight:700">on-target blue</span>, off-target grey. Switch to
+         <b>xG heatmap</b> to shade the pitch by where chance-quality is concentrated.</p>
+      <div class="tl-pitch-wrap" id="tlMap"></div>
+    </div>
+
+    <div class="card full-card" id="tlStyleCard">
+      <h3 id="tlStyleTitle">Style fingerprint</h3>
+      <p class="hint">Each spoke is a <b>percentile</b> versus all other teams (further out = more of that trait).
+         A team's shape tells you how they win: possession sides bulge top-left, direct/clinical sides bulge
+         toward shot quality and set-piece threat, stingy sides toward defensive solidity.</p>
+      <div class="so-radar-wrap" id="tlRadar"></div>
+    </div>
+  </section>
+
   <div class="footer-note" id="footerNote"></div>
 </main>
 
@@ -450,6 +507,7 @@
     var v = Date.now();
     document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="shots.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="database/manifest.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
   })();

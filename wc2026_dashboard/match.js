@@ -136,6 +136,7 @@
     var hasShootout = !!(D.shootout && D.shootout.length);
     root.innerHTML = scoreboard(D) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
+      block("xG momentum", "mv-momentum") +
       block("Shot map", "mv-shots") +
       // On-target shot map sits directly under the xG shot map.
       block("On-target shots", "mv-shots-ot") +
@@ -152,6 +153,7 @@
       (hasShootout ? block("Penalty shootout", "mv-shootout") : "");
 
     if (hasStats) buildMatchStats(rec, D);
+    buildMomentum(D);
     buildShots(D);
     buildOnTargetShots(D);
     buildPasses(D);
@@ -162,6 +164,84 @@
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
     if (hasShootout) buildShootout(D);
+  }
+
+  /* xG momentum — cumulative xG "race" over the 90 minutes, with goal markers.
+     Each shot steps that side's line up by its xG; the steeper/higher line shows who
+     built the better chances and when. Own goals carry no xG (no step) but are marked. */
+  function buildMomentum(D) {
+    var host = document.getElementById("mv-momentum");
+    if (!host) return;
+    var shots = (D.shots || []).filter(function (s) { return s.min != null; });
+    if (!shots.length) { host.innerHTML = '<p class="hint">No shot data for the xG timeline.</p>'; return; }
+    function tm(s) { return (s.min || 0) + (s.sec || 0) / 60; }
+    shots = shots.slice().sort(function (a, b) { return tm(a) - tm(b); });
+    var lastMin = Math.max.apply(null, shots.map(function (s) { return s.min || 0; }));
+    (D.goals || []).forEach(function (g) { if (g.min > lastMin) lastMin = g.min; });
+    var maxMin = Math.max(90, Math.ceil(lastMin / 5) * 5);
+    function series(side) {
+      var pts = [[0, 0]], c = 0;
+      shots.forEach(function (s) { if (s.team === side) { c += s.xg; pts.push([tm(s), c]); } });
+      pts.push([maxMin, c]);
+      return pts;
+    }
+    var SH = series("home"), SA = series("away");
+    var finH = SH[SH.length - 1][1], finA = SA[SA.length - 1][1];
+    var maxY = Math.max(0.5, finH, finA) * 1.08;
+    var colH = D.home.color || "#4ea1ff", colA = D.away.color || "#ff6a3d";
+    // if the two team colours are too close (e.g. both green), the lines blur together —
+    // fall back to a clearly distinct blue/orange pair.
+    function hex(c) { var m = /^#?([0-9a-f]{6})$/i.exec(c || ""); if (!m) return null; var n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+    var ch = hex(colH), ca = hex(colA);
+    if (ch && ca && Math.sqrt(Math.pow(ch[0] - ca[0], 2) + Math.pow(ch[1] - ca[1], 2) + Math.pow(ch[2] - ca[2], 2)) < 90) {
+      colH = "#4ea1ff"; colA = "#ff6a3d";
+    }
+    var W = 820, HT = 360, padL = 46, padR = 16, padT = 18, padB = 42;
+    var plotW = W - padL - padR, plotH = HT - padT - padB;
+    function sx(m) { return padL + plotW * m / maxMin; }
+    function sy(v) { return padT + plotH * (1 - v / maxY); }
+    function stepPath(pts) {
+      var d = "";
+      pts.forEach(function (p, i) {
+        if (i === 0) { d = "M " + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1); }
+        else { var pr = pts[i - 1]; d += " L " + sx(p[0]).toFixed(1) + " " + sy(pr[1]).toFixed(1) + " L " + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1); }
+      });
+      return d;
+    }
+    function cumAt(pts, minute) { var v = 0; for (var i = 0; i < pts.length; i++) { if (pts[i][0] <= minute + 1e-9) v = pts[i][1]; else break; } return v; }
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // y gridlines
+    var yStep = maxY <= 1 ? 0.25 : maxY <= 2 ? 0.5 : 1;
+    for (var yv = 0; yv <= maxY + 1e-9; yv += yStep) {
+      var y = sy(yv);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + yv.toFixed(yStep < 1 ? 1 : 0) + "</text>");
+    }
+    // x ticks every 15', plus HT line at 45
+    for (var xm = 0; xm <= maxMin; xm += 15) {
+      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
+    }
+    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#2c3656" stroke-width="1" stroke-dasharray="3 3"/>');
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Minute</text>');
+    // step lines
+    svg.push('<path d="' + stepPath(SA) + '" fill="none" stroke="' + colA + '" stroke-width="2.4"/>');
+    svg.push('<path d="' + stepPath(SH) + '" fill="none" stroke="' + colH + '" stroke-width="2.4"/>');
+    // goal markers
+    (D.goals || []).forEach(function (g) {
+      var col = g.team === "home" ? colH : colA;
+      var pts = g.team === "home" ? SH : SA;
+      var gx = sx(g.min), gy = sy(cumAt(pts, g.min + 1e-6));
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2"><title>' + g.min + "' " + esc(g.scorer) + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + "</title></circle>");
+      svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" fill="' + col + '" font-size="11" text-anchor="middle">⚽</text>');
+    });
+    svg.push("</svg>");
+    var legend = '<div class="mv-mom-legend">' +
+      '<span><i style="background:' + colH + '"></i>' + esc(D.home.name) + " — <b>" + finH.toFixed(2) + "</b> xG (" + (D.home.score == null ? "-" : D.home.score) + " goals)</span>" +
+      '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + finA.toFixed(2) + "</b> xG (" + (D.away.score == null ? "-" : D.away.score) + " goals)</span>" +
+      "</div>";
+    host.innerHTML = '<p class="hint">Cumulative <b>expected goals</b> over the match — each step is a shot, sized by its xG. ' +
+      'The higher line built the better chances; ⚽ marks goals.</p>' +
+      '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend;
   }
 
   function scoreboard(D) {
