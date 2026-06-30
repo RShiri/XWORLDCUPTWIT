@@ -101,6 +101,7 @@ def main() -> None:
 
     from wc2026.run_match import run_match  # retry-enabled scrape + full-site push
     from wc2026.scraper import FOTMOB_NAME_OVERRIDES  # play-off slot -> real team
+    from wc2026.knockout_resolve import resolve_fixture  # KO slot code -> real team
 
     schedule  = json.loads(_SCHEDULE.read_text(encoding="utf-8"))
     now       = datetime.now()
@@ -118,6 +119,22 @@ def main() -> None:
             continue  # not due yet
 
         home, away = m["home"], m["away"]
+        # Knockout fixtures sit in the schedule under SLOT-CODE names ("1C"/"2F",
+        # "3ABCDF") that never match the REAL team names a scraped file holds
+        # ("Brazil"/"Japan"). Comparing the slot codes against the published set
+        # therefore always misses, so every already-played KO tie looked "pending"
+        # and got needlessly re-scraped + re-pushed each sweep (e.g. "South Africa
+        # vs Canada" published 3x), churning orphan artifacts — while real misses
+        # (Brazil vs Japan) hid in the same noise. Resolve the slot codes to the
+        # teams now decided first, so a finished tie is recognised as published and
+        # only genuinely-missed ties stay pending. No-op for group games and for KO
+        # ties whose teams aren't decided yet (resolve_fixture returns None there).
+        try:
+            ko_home, ko_away, _ = resolve_fixture(m["fotmob_id"])
+            if ko_home and ko_away:
+                home, away = ko_home, ko_away
+        except Exception as exc:
+            log.warning("KO resolve failed for id=%s: %s", m.get("fotmob_id"), exc)
         # A match is "done" if a real file matches its raw names OR its play-off
         # resolved names (e.g. "European Play-Off D" vs Mexico -> Czechia vs Mexico).
         raw      = frozenset((_norm(home), _norm(away)))

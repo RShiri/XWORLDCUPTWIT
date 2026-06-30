@@ -281,38 +281,94 @@ def resolve_fixture(fotmob_id) -> tuple:
     return home, away, stub_path
 
 
+# FotMob/WhoScored/our-schedule spell some nations differently. Collapse the known
+# variants to one canonical key so a fixture matches regardless of which feed named it.
+_TEAM_ALIASES = {
+    "turkiye":        "turkey",
+    "southkorea":     "korearepublic",
+    "korea":          "korearepublic",
+    "republicofkorea":"korearepublic",
+    "unitedstates":   "usa",
+    "unitedstatesofamerica": "usa",
+    "iriran":         "iran",
+    "cotedivoire":    "ivorycoast",
+    "congodr":        "drcongo",
+    "democraticrepublicofcongo": "drcongo",
+    "czechrepublic":  "czechia",
+    "bosniaandherzegovina": "bosnia",
+    "caboverde":      "capeverde",
+}
+
+
+def _team_key(name: str) -> str:
+    """Alias-aware, punctuation/accent-insensitive comparison key for a team name.
+
+    Accents are folded (Türkiye→turkiye, Côte d'Ivoire→cotedivoire) before the alias
+    table collapses spelling variants, so the same nation keys identically across the
+    FotMob feed, our schedule, and the resolver."""
+    import unicodedata
+    s = unicodedata.normalize("NFKD", _norm(name or ""))
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    k = re.sub(r"[^a-z]", "", s.lower())
+    return _TEAM_ALIASES.get(k, k)
+
+
+def _fotmob_search_dates(around_date: str | None) -> list:
+    """YYYYMMDD strings to scan: the match date ±1 day (so catch-up days later still
+    sees it), else fall back to FotMob's default yesterday/today window (dates=None)."""
+    if not around_date:
+        return None
+    from datetime import date, timedelta
+    try:
+        d = date.fromisoformat(around_date[:10])
+    except Exception:
+        return None
+    return [(d + timedelta(days=off)).strftime("%Y%m%d") for off in (-1, 0, 1)]
+
+
 def find_fotmob_id_by_teams(home: str, away: str, around_date: str | None = None):
     """Best-effort: find the real FotMob match id for ``home`` vs ``away`` near a date.
 
-    Reuses the scraper's FotMob fixture fetch. Returns an int id or None. Imported lazily so
-    this module stays selenium-free for the resolver/tests."""
+    Reuses the scraper's FotMob fixture fetch. Returns an int id or None. Matching is
+    alias-aware (so FotMob's spelling variants still match) and date-windowed around the
+    fixture date; when several fixtures match the teams, the one closest to ``around_date``
+    wins. Imported lazily so this module stays selenium-free for the resolver/tests."""
     try:
         from wc2026.scraper import fotmob_fetch_wc_matches
     except Exception as exc:  # pragma: no cover - import guard
         log.warning("FotMob lookup unavailable: %s", exc)
         return None
 
-    def key(n: str) -> str:
-        return re.sub(r"[^a-z]", "", _norm(n or "").lower())
-
-    want = {key(home), key(away)}
+    want = {_team_key(home), _team_key(away)}
     try:
-        fixtures = fotmob_fetch_wc_matches() or []
+        fixtures = fotmob_fetch_wc_matches(dates=_fotmob_search_dates(around_date)) or []
     except Exception as exc:
         log.warning("FotMob fixture fetch failed: %s", exc)
         return None
-    best = None
+
+    candidates = []  # (date_distance, id)
     for fx in fixtures:
         h = fx.get("home", {}).get("name", "")
         a = fx.get("away", {}).get("name", "")
-        if {key(h), key(a)} != want:
+        if {_team_key(h), _team_key(a)} != want:
             continue
         mid = fx.get("id")
+        if mid is None:
+            continue
         utc = fx.get("status", {}).get("utcTime", "") or ""
-        if around_date and utc[:10] and abs_days(utc[:10], around_date) > 2:
-            continue  # same teams, far-off date → ignore (shouldn't normally happen)
-        return mid
-    return best
+        dist = abs_days(utc[:10], around_date) if (around_date and utc[:10]) else 0
+        if around_date and utc[:10] and dist > 2:
+            continue  # same teams, far-off date → almost certainly a different fixture
+        candidates.append((dist, int(mid)))
+
+    if not candidates:
+        log.info("FotMob real-id lookup: no fixture matched %s vs %s near %s",
+                 home, away, around_date)
+        return None
+    candidates.sort(key=lambda c: c[0])  # closest date first
+    best_id = candidates[0][1]
+    log.info("FotMob real-id lookup: %s vs %s → id=%s", home, away, best_id)
+    return best_id
 
 
 def abs_days(d1: str, d2: str) -> int:
