@@ -1629,7 +1629,9 @@
     ["xg_diff", "Finishing (goals − xG)", 2], ["shots", "Shots", 0], ["sot", "Shots on target", 0],
     ["keyPasses", "Key passes", 0], ["progPasses", "Progressive passes", 0],
     ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["tackles", "Tackles", 0],
-    ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
+    ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0], ["saves", "Saves", 0],
+    ["xga", "xG faced (on pitch)", 2], ["xga90", "xG faced per 90", 2],
+    ["gPrev", "Goals prevented (on pitch)", 2],
     ["touches", "Touches", 0], ["rating", "Average match rating", 2]
   ];
   var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
@@ -1824,9 +1826,10 @@
   }
 
   /* ---- Two-stat scatter (find the complete players) ---- */
-  var soSc = { x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 };
+  var soSc = { x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 };
   var SO_PRESETS = [
-    { label: "⚔ Complete defenders", x: "tackles", y: "xg_diff", size: "interceptions", pos: "DEF", mins: 180 },
+    { label: "🧱 Solid defenders", x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 },
+    { label: "🧤 Shot-stoppers", x: "xga", y: "gPrev", size: "saves", pos: "GK", mins: 180 },
     { label: "🎨 Creators", x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 },
     { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 180 },
     { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 90 },
@@ -1988,7 +1991,10 @@
       document.getElementById("soScPos").addEventListener("change", function (e) { soSc.pos = e.target.value; renderScatter2(); });
       document.getElementById("soScMins").addEventListener("change", function (e) { soSc.mins = +e.target.value; renderScatter2(); });
       var pHost = document.getElementById("soPresets");
-      pHost.innerHTML = SO_PRESETS.map(function (pr, i) { return '<button class="so-preset" data-i="' + i + '">' + esc(pr.label) + "</button>"; }).join("");
+      pHost.innerHTML = SO_PRESETS.map(function (pr, i) {
+        var on = pr.x === soSc.x && pr.y === soSc.y && pr.pos === soSc.pos;
+        return '<button class="so-preset' + (on ? " active" : "") + '" data-i="' + i + '">' + esc(pr.label) + "</button>";
+      }).join("");
       pHost.querySelectorAll(".so-preset").forEach(function (btn) {
         btn.addEventListener("click", function () {
           var pr = SO_PRESETS[+btn.dataset.i];

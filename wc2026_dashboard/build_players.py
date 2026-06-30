@@ -43,7 +43,7 @@ def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
-               progPasses=0, xa=0.0)
+               progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -101,6 +101,25 @@ def _player_creation(match_data):
     return prog, xa
 
 
+def _defense_shotlist(match_data):
+    """[(teamId, minute, xg, is_goal, is_own)] for every shot (shootout excluded).
+
+    Used to attribute on-pitch defensive context: for a player on team T, the xG his
+    side FACED is the summed xg of the OPPONENT's shots while he was on the pitch, and
+    goals conceded are the opponent's goals (plus own goals by T) in that window. Own
+    goals carry the conceding team's id and aren't chances, so xg=0 for them."""
+    out = []
+    for ev in match_data.get("events", []):
+        t = ev.get("type", {})
+        tn = t.get("displayName") if isinstance(t, dict) else ""
+        if tn not in SHOT_TYPES or is_shootout(ev):
+            continue
+        is_own = bool(ev.get("isOwnGoal"))
+        xg = 0.0 if is_own else shot_xg(ev)[0]
+        out.append((ev.get("teamId"), ev.get("minute", 0), xg, tn == "Goal", is_own))
+    return out
+
+
 def _iter_played():
     for f in sorted(glob.glob(os.path.join(MATCH_DIR, "*.json"))):
         if not is_match_file(f):
@@ -120,8 +139,12 @@ def aggregate():
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
         prog_map, xa_map = _player_creation(d)
+        shotlist = _defense_shotlist(d)
+        team_ids = {s: d[s].get("teamId") for s in ("home", "away")}
         for side in ("home", "away"):
             team = norm(d[side].get("name", ""))
+            our_id = team_ids[side]
+            opp_id = team_ids["away" if side == "home" else "home"]
             for p in d[side].get("players", []):
                 pid = p.get("playerId")
                 stats = p.get("stats") or {}
@@ -133,12 +156,24 @@ def aggregate():
                 rec = players.get(pid)
                 if rec is None:
                     rec = players[pid] = _new_player(pid, ascii_name(p.get("name", "")), team, p.get("position", ""))
+                # on-pitch window: [start, end] in minutes
+                start = 0 if started else on_m
+                end = ex["off_min"].get(pid) if ex["off_min"].get(pid) is not None else ex["end_min"]
                 rec["mp"] += 1
                 if started:
                     rec["starts"] += 1
-                    rec["mins"] += (ex["off_min"].get(pid) if ex["off_min"].get(pid) is not None else ex["end_min"])
-                else:
-                    rec["mins"] += max(0, ex["end_min"] - on_m)
+                rec["mins"] += max(0, end - start)
+                # defensive context: opponent xG faced + goals conceded while on the pitch
+                for (tid, mn, xg, is_goal, is_own) in shotlist:
+                    if mn < start or mn > end:
+                        continue
+                    if is_own:
+                        if tid == our_id:
+                            rec["gConcOn"] += 1     # our own goal = conceded
+                    elif tid == opp_id:
+                        rec["xgaOn"] += xg
+                        if is_goal:
+                            rec["gConcOn"] += 1
                 rec["g"] += ex["goals"].get(pid, 0)
                 rec["a"] += ex["assists"].get(pid, 0)
                 rec["yc"] += ex["yellow"].get(pid, 0)
@@ -164,10 +199,15 @@ def aggregate():
         r["xg"] = round(r["xg"], 2)
         r["xg_diff"] = round(r["g"] - r["xg"], 2)
         r["xa"] = round(r["xa"], 2)
-        for v in list(SUM_STATS.values()) + ["mins", "progPasses"]:
+        # on-pitch defence: xG faced, per-90, and goals prevented (faced − conceded)
+        r["xga"] = round(r["xgaOn"], 2)
+        r["xga90"] = round(r["xgaOn"] / r["mins"] * 90, 2) if r["mins"] else None
+        r["gPrev"] = round(r["xgaOn"] - r["gConcOn"], 2)
+        for v in list(SUM_STATS.values()) + ["mins", "progPasses", "gConcOn"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)
         r.pop("rating_n", None)
+        r.pop("xgaOn", None)
         out.append(r)
     out.sort(key=lambda r: (-r["ga"], -r["g"], -(r["rating"] or 0)))
     return out
