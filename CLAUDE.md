@@ -21,7 +21,14 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   Flags: `--no-push` (skip git), `--no-post` (skip WhatsApp). Scrapes FotMob + WhoScored
   → renders PNG → refreshes local dashboard data → **auto-deploys** to the live site.
 - Data sources merge per match JSON in `wc2026/matches/<id>.json`: FotMob = match
-  stats/xG/venue; WhoScored = event stream (shots/passes/dribbles) + player ratings.
+  stats/xG/venue; WhoScored = event stream (shots/passes/dribbles) + player ratings;
+  SofaScore = stats/xG/lineups (no token).
+- **⚠️ OWNER REQUIREMENT — multi-source averaging (see [`DATA_SOURCES.md`](DATA_SOURCES.md)):**
+  every match must be scraped from **all three** (FotMob + WhoScored + SofaScore) and the
+  **overlapping numeric stats averaged** into the canonical "ultimate" value shown on the
+  PNGs and the dashboard. Stats are currently first-available (FotMob-or-SofaScore), not
+  yet averaged — moving to the average is the target; don't regress it. Score/goals/maps
+  stay single-source (WhoScored). Read `DATA_SOURCES.md` before touching the scrape/merge.
 - **Fully automated** via Windows Task Scheduler: `wc2026/register_tasks.ps1` arms one
   task per match (from `REMAINING_SCHEDULE.json`) that runs `py -m wc2026.run_match
   --fotmob-id <id>` at **kickoff+3h**. Tasks have `StartWhenAvailable=True`, so a run
