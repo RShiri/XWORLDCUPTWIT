@@ -384,6 +384,7 @@
       <h3 id="soChartTitle">Distribution</h3>
       <p class="hint" id="soChartHint">Every qualifying player placed by their value for the chosen stat.</p>
       <div class="so-chart-wrap" id="soChart"></div>
+      <div class="chart-tip" id="soChartTip">Tap any dot to see the player.</div>
       <div class="insight" id="soSpotlight"></div>
     </div>
 
@@ -427,6 +428,7 @@
         </label>
       </div>
       <div class="so-chart-wrap" id="soScatter"></div>
+      <div class="chart-tip" id="soScatterTip">Tap any dot to see the player.</div>
       <div class="insight" id="soScInsight"></div>
     </div>
 
@@ -451,6 +453,12 @@
     <div class="so-controls">
       <label>Team
         <select id="tlTeam"></select>
+      </label>
+      <label>Compare
+        <select id="tlTeamB"></select>
+      </label>
+      <label>Compare
+        <select id="tlTeamC"></select>
       </label>
       <label>Shots
         <select id="tlFilter">
@@ -482,16 +490,20 @@
       <p class="hint">Attacking <b>↑</b> (toward the top goal). In <b>Shot dots</b> mode each dot is a shot,
          sized by xG: <span style="color:#ff3d8b;font-weight:700">goals pink</span>,
          <span style="color:#4ea1ff;font-weight:700">on-target blue</span>, off-target grey. Switch to
-         <b>xG heatmap</b> to shade the pitch by where chance-quality is concentrated.</p>
-      <div class="tl-pitch-wrap" id="tlMap"></div>
+         <b>xG heatmap</b> to shade the pitch by where chance-quality is concentrated. Pick a
+         <b>Compare</b> team (or two) to line up shot maps side by side.</p>
+      <div class="tl-maps" id="tlMaps"></div>
+      <div class="chart-tip" id="tlMapTip">Tap any shot to see its details.</div>
     </div>
 
     <div class="card full-card" id="tlStyleCard">
       <h3 id="tlStyleTitle">Style fingerprint</h3>
       <p class="hint">Each spoke is a <b>percentile</b> versus all other teams (further out = more of that trait).
          A team's shape tells you how they win: possession sides bulge top-left, direct/clinical sides bulge
-         toward shot quality and set-piece threat, stingy sides toward defensive solidity.</p>
+         toward shot quality and set-piece threat, stingy sides toward defensive solidity. Comparing teams
+         overlays them in different colours.</p>
       <div class="so-radar-wrap" id="tlRadar"></div>
+      <div class="tl-legend" id="tlLegend"></div>
     </div>
   </section>
 
