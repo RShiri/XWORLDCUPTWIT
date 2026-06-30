@@ -1629,7 +1629,8 @@
     ["xg_diff", "Finishing (goals − xG)", 2], ["shots", "Shots", 0], ["sot", "Shots on target", 0],
     ["keyPasses", "Key passes", 0], ["progPasses", "Progressive passes", 0],
     ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["tackles", "Tackles", 0],
-    ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0], ["saves", "Saves", 0],
+    ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
+    ["blocks", "Shots blocked", 0], ["clrBox", "Clearances in own box", 0], ["saves", "Saves", 0],
     ["xga", "xG faced (on pitch)", 2], ["xga90", "xG faced per 90", 2],
     ["gPrev", "Goals prevented (on pitch)", 2],
     ["touches", "Touches", 0], ["rating", "Average match rating", 2]
@@ -1829,6 +1830,7 @@
   var soSc = { x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 };
   var SO_PRESETS = [
     { label: "🧱 Solid defenders", x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 },
+    { label: "🚧 Shot blockers", x: "blocks", y: "clrBox", size: "interceptions", pos: "DEF", mins: 90 },
     { label: "🧤 Shot-stoppers", x: "xga", y: "gPrev", size: "saves", pos: "GK", mins: 180 },
     { label: "🎨 Creators", x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 },
     { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 180 },
@@ -1950,6 +1952,67 @@
       (soSc.size ? ' Dot size = ' + esc(soStatLabel(soSc.size).toLowerCase()) + "." : ""));
   }
 
+  /* ---- Player percentile radar (uses the shared spotlight player) ---- */
+  var RADAR_OUT = [["g", "Goals"], ["a", "Assists"], ["xa", "xA"], ["keyPasses", "Key passes"],
+    ["progPasses", "Prog passes"], ["dribbles", "Dribbles"], ["tackles", "Tackles"], ["interceptions", "Intercept"]];
+  var RADAR_GK = [["saves", "Saves"], ["gPrev", "Goals prevented"], ["xga", "xG faced"],
+    ["passes", "Passes"], ["pass_pct", "Pass %"], ["clrBox", "Box clears"]];
+
+  function radarSVG(player) {
+    var grp = soPosGroup(player.pos);
+    var axes = grp === "GK" ? RADAR_GK : RADAR_OUT;
+    function inPool(p) {
+      if ((p.mins || 0) < 90) return false;
+      var g = soPosGroup(p.pos);
+      if (grp === "GK") return g === "GK";
+      if (grp === "OTH") return g !== "GK";
+      return g === grp;
+    }
+    var pool = PLAYERS.filter(inPool);
+    if (pool.indexOf(player) < 0) pool.push(player);
+    var N = axes.length, W = 580, H = 470, cx = W / 2, cy = H / 2 + 4, R = 148;
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-radar" preserveAspectRatio="xMidYMid meet" role="img">'];
+    [0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var pts = [];
+      for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
+    });
+    var poly = [];
+    axes.forEach(function (ax, i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / N;
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      var pv = +player[ax[0]] || 0;
+      var below = pool.filter(function (p) { return (+p[ax[0]] || 0) < pv; }).length;
+      var pct = pool.length ? below / pool.length : 0;
+      poly.push((cx + R * pct * Math.cos(a)).toFixed(1) + "," + (cy + R * pct * Math.sin(a)).toFixed(1));
+      var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
+      var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 2).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + soFmt(pv, soStatDp(ax[0])) + " (" + Math.round(pct * 100) + "%)</text>");
+    });
+    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#ffd24d" stroke-width="2"/>');
+    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#ffd24d"/>'); });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderRadar() {
+    var host = document.getElementById("soRadar");
+    if (!host) return;
+    if (!soState.player) {
+      host.innerHTML = '<p class="hint">Pick a <b>spotlight player</b> at the top of this page to see their percentile radar.</p>';
+      return;
+    }
+    var q = soState.player.toLowerCase();
+    var pl = PLAYERS.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+      PLAYERS.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0];
+    if (!pl) { host.innerHTML = '<p class="hint">No player matches "' + esc(soState.player) + '".</p>'; return; }
+    var grp = soPosGroup(pl.pos);
+    var grpLabel = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers", OTH: "outfield players" }[grp] || "peers";
+    host.innerHTML = '<div class="so-radar-head"><b>' + esc(pl.name) + "</b> · " + esc(pl.team) +
+      (pl.pos ? " · " + esc(pl.pos) : "") + " — percentiles vs other " + grpLabel + " (90+ min)</div>" + radarSVG(pl);
+  }
+
   function initStandouts() {
     var statSel = document.getElementById("soStat");
     if (!statSel) return;
@@ -1969,9 +2032,10 @@
     var pin = document.getElementById("soPlayer"), deb;
     pin.addEventListener("input", function () {
       clearTimeout(deb);
-      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); renderScatter2(); }, 200);
+      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); renderScatter2(); renderRadar(); }, 200);
     });
     renderStandouts();
+    renderRadar();
 
     // --- two-stat scatter controls ---
     var axisOpts = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");

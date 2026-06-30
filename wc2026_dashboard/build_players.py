@@ -43,7 +43,7 @@ def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
-               progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0)
+               progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0, blocks=0, clrBox=0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -101,6 +101,35 @@ def _player_creation(match_data):
     return prog, xa
 
 
+def _in_own_box(x, y):
+    """True if a WhoScored coord is inside the player's OWN penalty area (defending
+    goal at x=0): x within the 18-yard box (~17% of pitch length) and the box width."""
+    return x is not None and y is not None and x <= 17.0 and 21.1 <= y <= 78.9
+
+
+def _player_blocks_clears(match_data):
+    """playerId -> (shots blocked, clearances inside own box).
+
+    Individual shot-denial: WhoScored logs an outfielder blocking a shot as a `Save`
+    event carrying an `OutfielderBlock` qualifier (credited to the blocker, not the
+    keeper); box clearances are `Clearance` events located in the player's own area."""
+    blocks, clr = {}, {}
+    for ev in match_data.get("events", []):
+        if is_shootout(ev):
+            continue
+        pid = ev.get("playerId")
+        if pid is None:
+            continue
+        t = ev.get("type", {})
+        tn = t.get("displayName") if isinstance(t, dict) else ""
+        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        if tn == "Save" and "OutfielderBlock" in quals:
+            blocks[pid] = blocks.get(pid, 0) + 1
+        elif tn == "Clearance" and _in_own_box(ev.get("x"), ev.get("y")):
+            clr[pid] = clr.get(pid, 0) + 1
+    return blocks, clr
+
+
 def _defense_shotlist(match_data):
     """[(teamId, minute, xg, is_goal, is_own)] for every shot (shootout excluded).
 
@@ -139,6 +168,7 @@ def aggregate():
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
         prog_map, xa_map = _player_creation(d)
+        blk_map, clrbox_map = _player_blocks_clears(d)
         shotlist = _defense_shotlist(d)
         team_ids = {s: d[s].get("teamId") for s in ("home", "away")}
         for side in ("home", "away"):
@@ -181,6 +211,8 @@ def aggregate():
                 rec["xg"] += shot_xg_map.get(pid, 0.0)
                 rec["progPasses"] += prog_map.get(pid, 0)
                 rec["xa"] += xa_map.get(pid, 0.0)
+                rec["blocks"] += blk_map.get(pid, 0)
+                rec["clrBox"] += clrbox_map.get(pid, 0)
                 rt = _player_rating(p)
                 if rt is not None:
                     rec["rating_sum"] += rt
@@ -203,7 +235,7 @@ def aggregate():
         r["xga"] = round(r["xgaOn"], 2)
         r["xga90"] = round(r["xgaOn"] / r["mins"] * 90, 2) if r["mins"] else None
         r["gPrev"] = round(r["xgaOn"] - r["gConcOn"], 2)
-        for v in list(SUM_STATS.values()) + ["mins", "progPasses", "gConcOn"]:
+        for v in list(SUM_STATS.values()) + ["mins", "progPasses", "gConcOn", "blocks", "clrBox"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)
         r.pop("rating_n", None)
