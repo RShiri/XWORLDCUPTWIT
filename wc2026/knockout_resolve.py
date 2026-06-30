@@ -88,6 +88,8 @@ def _load_matches() -> list:
             "home": _norm(d.get("home", {}).get("name", "")),
             "away": _norm(d.get("away", {}).get("name", "")),
             "hs": hs, "as": as_,
+            "hpen": d.get("home", {}).get("penalty_score"),
+            "apen": d.get("away", {}).get("penalty_score"),
             "played": hs is not None and as_ is not None,
             "match_id": d.get("matchId") or d.get("match_id") or d.get("id"),
         })
@@ -225,8 +227,20 @@ class _Tree:
 
 
 def _winner_of(m: dict):
-    if m and m["played"]:
-        return m["home"] if m["hs"] > m["as"] else m["away"]
+    """Winner of a played knockout tie, penalty-shootout aware.
+
+    A level score means the tie was decided on penalties, so the away team must NOT be
+    assumed the winner -- consult penalty_score. Returns None for a level tie with no
+    penalty result yet (don't guess the wrong team into the next round)."""
+    if not (m and m["played"]):
+        return None
+    if m["hs"] > m["as"]:
+        return m["home"]
+    if m["as"] > m["hs"]:
+        return m["away"]
+    hp, ap = m.get("hpen"), m.get("apen")
+    if hp is not None and ap is not None and hp != ap:
+        return m["home"] if hp > ap else m["away"]
     return None
 
 

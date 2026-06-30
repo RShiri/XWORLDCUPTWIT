@@ -230,7 +230,12 @@
   // Teams that can still emerge as the WINNER of match m.
   function koCands(K, m) {
     if (!m) return [];
-    if (m.played && m.hs != null && m.as != null) return [m.hs > m.as ? m.home : m.away];
+    if (m.played && m.hs != null && m.as != null) {
+      if (m.hs !== m.as) return [m.hs > m.as ? m.home : m.away];
+      // level on goals -> decided on penalties; never assume the away team won
+      if (m.hpen != null && m.apen != null && m.hpen !== m.apen) return [m.hpen > m.apen ? m.home : m.away];
+      return [];
+    }
     if (m._kids && m._kids.length === 2) return koUniq(koCands(K, m._kids[0]).concat(koCands(K, m._kids[1])));
     return koUniq(koSideCands(K, m, 0).concat(koSideCands(K, m, 1)));   // R32 leaf
   }

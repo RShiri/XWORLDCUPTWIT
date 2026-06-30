@@ -88,6 +88,8 @@ def load_matches():
         away = norm(d["away"]["name"])
         hs = d["home"].get("score")
         as_ = d["away"].get("score")
+        hpen = d["home"].get("penalty_score")
+        apen = d["away"].get("penalty_score")
         mid = os.path.basename(f)[:-5]
         # Several files have an empty metadata date; the filename always starts
         # with YYYY_MM_DD, so fall back to that.
@@ -120,6 +122,8 @@ def load_matches():
             "away": away,
             "hs": hs,
             "as": as_,
+            "hpen": hpen,
+            "apen": apen,
             "played": hs is not None and as_ is not None,
             "has_stats": bool(has_stats),
             "has_events": bool(d.get("events")),
