@@ -647,19 +647,38 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
   border: 1px solid var(--accent-2); border-radius: 4px; padding: 0 3px; margin-left: 2px; opacity: 0.85;
 }
 
-/* ---------------- Goal Timing view ---------------- */
-.gt-controls { margin: 6px 0 16px; }
-.gt-toggle {
-  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-  font-size: 14px; color: var(--text); background: var(--bg-2);
-  border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px;
+/* ---------------- Standouts view (player distributions) ---------------- */
+.so-controls {
+  display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: flex-end;
+  margin: 6px 0 18px;
 }
-.gt-toggle input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
-.gt-toggle .hint { display: inline; margin: 0; }
-.gt-chart-wrap { width: 100%; overflow: visible; margin-top: 4px; }
-.gt-chart { width: 100%; height: auto; display: block; }
-.gt-halfbars { margin-top: 6px; }
-.gt-halfbars .ha-row { grid-template-columns: 64px 1fr 92px; }
-.gt-halfbars .ha-row b { text-align: right; }
-.gt-halfbars .ha-row .ha-track { height: 18px; }
-table.rank tr.gt-total td { border-top: 2px solid var(--line); font-weight: 800; color: var(--text); }
+.so-controls label {
+  display: flex; flex-direction: column; gap: 5px;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);
+}
+.so-controls select, .so-controls input {
+  font-size: 14px; color: var(--text); background: var(--bg-2);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-width: 180px;
+}
+.so-controls select:focus, .so-controls input:focus { outline: none; border-color: var(--accent-2); }
+.so-chart-wrap { width: 100%; overflow: visible; margin-top: 4px; }
+.so-chart { width: 100%; height: auto; display: block; }
+.so-spot {
+  background: rgba(255,210,77,0.08); border: 1px solid rgba(255,210,77,0.35);
+  border-radius: 10px; padding: 12px 14px; font-size: 14px; line-height: 1.5;
+}
+.so-spot-tag {
+  display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px;
+  color: #ffd24d; border: 1px solid rgba(255,210,77,0.5); border-radius: 5px;
+  padding: 1px 6px; margin-right: 6px; vertical-align: middle;
+}
+.so-bars { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+.so-bar-row { display: grid; grid-template-columns: 220px 1fr 96px; align-items: center; gap: 12px; }
+.so-bar-row .nm { display: flex; align-items: center; gap: 8px; font-size: 13px; overflow: hidden; }
+.so-bar-row .nm img { width: 20px; height: 14px; object-fit: contain; flex: none; }
+.so-bar-row .nm span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so-bar-track { height: 16px; background: var(--bg-2); border-radius: 5px; overflow: hidden; }
+.so-bar-fill { height: 100%; border-radius: 5px; }
+.so-bar-val { font-variant-numeric: tabular-nums; font-size: 13px; text-align: right; font-weight: 700; }
+.so-bar-val .so-z { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 3px; }
+@media (max-width: 620px) { .so-bar-row { grid-template-columns: 140px 1fr 78px; } }

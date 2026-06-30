@@ -1617,193 +1617,232 @@
       "</div>";
   }
 
-  /* ---------------- Goal Timing ----------------
-     When are goals scored? Aggregates the per-match goal minutes baked into data.js
-     (build_data.extract_goals) into 15-minute windows + 5-minute bins, a first/second
-     half split and a cooling-break read. `half` disambiguates first-half stoppage
-     (min 47, half 1 → "45+") from the early second half (min 47, half 2 → "46-60"). */
-  var GT_WINDOWS = ["1-15", "16-30", "31-45", "45+", "46-60", "61-75", "76-90", "90+"];
+  /* ---------------- Standouts (player distributions) ----------------
+     A density (KDE) plot of every qualifying player for a chosen stat: the curve
+     shows how the field spreads, each dot is a player placed at their value (jittered
+     under the curve), the dashed line is the mean, and players >= 2σ above the mean
+     are flagged as anomalies (pink). A spotlight picker highlights one player (gold)
+     and reports their percentile. All client-side from window.WC_PLAYERS. */
+  var SO_STATS = [
+    ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0],
+    ["xg", "Expected goals (xG)", 2], ["shots", "Shots", 0], ["sot", "Shots on target", 0],
+    ["keyPasses", "Key passes", 0], ["dribbles", "Dribbles completed", 0],
+    ["passes", "Passes", 0], ["tackles", "Tackles", 0], ["interceptions", "Interceptions", 0],
+    ["touches", "Touches", 0], ["rating", "Average match rating", 2]
+  ];
+  var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
+  var soState = { stat: "ga", pos: "all", mins: 90, player: "" };
 
-  function gtWindowIdx(g) {
-    if (g.min > 90) return 7;                       // 90+ (2nd-half stoppage / extra time)
-    if (g.half === 1 && g.min > 45) return 3;       // 45+ (1st-half stoppage)
-    if (g.min <= 15) return 0;
-    if (g.min <= 30) return 1;
-    if (g.min <= 45) return 2;
-    if (g.min <= 60) return 4;
-    if (g.min <= 75) return 5;
-    return 6;                                        // 76-90
+  function soPosGroup(pos) {
+    var s = (pos || "").toUpperCase();
+    if (s === "GK") return "GK";
+    if (s[0] === "F" || s === "ST" || s === "CF" || s[0] === "A") return "FWD";
+    if (s[0] === "M" || s.indexOf("DM") === 0) return "MID";
+    if (s[0] === "D" || s[0] === "W" || s === "B") return "DEF";
+    return "OTH";
   }
-  // 20 fine bins: 0-8 = 1st-half 5s (1-5..41-45), 9 = 45+, 10-18 = 2nd-half 5s (46-50..86-90), 19 = 90+
-  var GT_FINE_LABELS = ["1-5", "6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45",
-    "45+", "46-50", "51-55", "56-60", "61-65", "66-70", "71-75", "76-80", "81-85", "86-90", "90+"];
-  function gtFineIdx(g) {
-    if (g.half === 1 && g.min > 45) return 9;
-    if (g.min > 90) return 19;
-    var b = Math.floor((g.min - 1) / 5);            // 0..17 for min 1..90
-    if (b < 0) b = 0;
-    return b <= 8 ? b : b + 1;                       // shift 2nd-half bins past the 45+ slot
+  function soFmt(v, dp) { return dp ? (+v).toFixed(dp) : Math.round(v); }
+  function normPdf(z) { return Math.exp(-0.5 * z * z) / 2.5066282746310002; }
+  function soStatMeta() {
+    for (var i = 0; i < SO_STATS.length; i++) if (SO_STATS[i][0] === soState.stat) return SO_STATS[i];
+    return SO_STATS[0];
+  }
+  function soQualify() {
+    return PLAYERS.filter(function (p) {
+      if ((p.mins || 0) < soState.mins) return false;
+      if (soState.pos !== "all" && soPosGroup(p.pos) !== soState.pos) return false;
+      if (soState.stat === "rating" && !(p.rating > 0)) return false;  // unrated → not a data point
+      return true;
+    });
   }
 
-  // Dependency-free vertical SVG bar chart (shares niceTicks/fmtTick with the scatter lab).
-  function gtBarChart(bins, opts) {
-    opts = opts || {};
-    var W = opts.w || 820, H = opts.h || 300, padL = 36, padR = 12, padT = 16, padB = opts.rot ? 58 : 42;
+  // Gaussian-kernel density chart with a jittered strip of player dots.
+  function soDistChart(rows, statKey, dp, spotPid, mean, sd) {
+    var W = 880, H = 380, padL = 22, padR = 22, padT = 20, padB = 50;
     var plotW = W - padL - padR, plotH = H - padT - padB;
-    var max = Math.max.apply(null, bins.map(function (b) { return b.value; }).concat([1]));
-    // niceTicks caps the top tick at <= max, which would clip the tallest bar's value
-    // label; round the axis ceiling UP to a whole step so every bar has headroom.
-    var ticks = niceTicks(max, 5);
-    var step = ticks.length > 1 ? ticks[1] - ticks[0] : (max || 1);
-    var tmax = Math.max(ticks[ticks.length - 1] || 0, Math.ceil(max / step) * step);
-    ticks = [];
-    for (var tv = 0; tv <= tmax + 1e-9; tv += step) ticks.push(+tv.toFixed(4));
-    function sy(v) { return padT + plotH * (1 - v / tmax); }
-    var n = bins.length, slot = plotW / n, gap = opts.gap != null ? opts.gap : 0.24, bw = slot * (1 - gap);
-    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="gt-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
-    ticks.forEach(function (t) {
-      var y = sy(t);
-      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
-      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.6).toFixed(1) + '" fill="#7c89a8" font-size="11" text-anchor="end">' + fmtTick(t) + "</text>");
+    var vals = rows.map(function (p) { return +p[statKey] || 0; });
+    var n = vals.length;
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    var span = (hi - lo) || 1;
+    var xMin = statKey === "rating" ? lo - span * 0.06 : Math.min(lo, 0) - span * 0.03;
+    var xMax = hi + span * 0.10;
+    function sx(v) { return padL + plotW * (v - xMin) / (xMax - xMin); }
+    var baseY = padT + plotH;
+    var h = 1.06 * (sd || span * 0.1) * Math.pow(n, -0.2);
+    if (!(h > 0)) h = span * 0.08;
+    // KDE grid
+    var GRID = 140, dens = [], maxD = 0;
+    for (var i = 0; i <= GRID; i++) {
+      var x = xMin + (xMax - xMin) * i / GRID, d = 0;
+      for (var j = 0; j < n; j++) d += normPdf((x - vals[j]) / h);
+      d /= (n * h);
+      dens.push(d);
+      if (d > maxD) maxD = d;
+    }
+    function densInterp(v) {
+      var t = (v - xMin) / (xMax - xMin) * GRID;
+      var i = Math.max(0, Math.min(GRID - 1, Math.floor(t))), frac = t - i;
+      return dens[i] * (1 - frac) + dens[i + 1] * frac;
+    }
+    function sy(d) { return baseY - (maxD ? d / maxD : 0) * plotH; }
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // filled density area
+    var area = "M " + sx(xMin).toFixed(1) + " " + baseY.toFixed(1);
+    for (var k = 0; k <= GRID; k++) area += " L " + sx(xMin + (xMax - xMin) * k / GRID).toFixed(1) + " " + sy(dens[k]).toFixed(1);
+    area += " L " + sx(xMax).toFixed(1) + " " + baseY.toFixed(1) + " Z";
+    svg.push('<path d="' + area + '" fill="rgba(78,161,255,0.10)" stroke="none"/>');
+    // curve line
+    var line = "";
+    for (var k2 = 0; k2 <= GRID; k2++) line += (k2 ? " L " : "M ") + sx(xMin + (xMax - xMin) * k2 / GRID).toFixed(1) + " " + sy(dens[k2]).toFixed(1);
+    svg.push('<path d="' + line + '" fill="none" stroke="#8aa0d8" stroke-width="1.4" stroke-opacity="0.85"/>');
+    // baseline
+    svg.push('<line x1="' + padL + '" y1="' + baseY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + baseY.toFixed(1) + '" stroke="#26304d" stroke-width="1"/>');
+    // x-axis ticks
+    niceTicks(xMax, 6).forEach(function (t) {
+      if (t < xMin - 1e-9 || t > xMax + 1e-9) return;
+      svg.push('<line x1="' + sx(t).toFixed(1) + '" y1="' + baseY.toFixed(1) + '" x2="' + sx(t).toFixed(1) + '" y2="' + (baseY + 4).toFixed(1) + '" stroke="#46527a" stroke-width="1"/>');
+      svg.push('<text x="' + sx(t).toFixed(1) + '" y="' + (baseY + 17) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + fmtTick(t) + "</text>");
     });
-    bins.forEach(function (b, i) {
-      var x = padL + slot * i + slot * gap / 2, cx = x + bw / 2;
-      var y = sy(b.value), h = padT + plotH - y;
-      var col = b.hi ? "#ffb24d" : (opts.color || "#4ea1ff");
-      svg.push('<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0, h).toFixed(1) + '" rx="3" fill="' + col + '" fill-opacity="0.92"><title>' + esc(b.label) + ": " + b.value + " goal" + (b.value === 1 ? "" : "s") + "</title></rect>");
-      if (b.value) svg.push('<text x="' + cx.toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" fill="#e8edf7" font-size="' + (opts.valFont || 11) + '" text-anchor="middle">' + b.value + "</text>");
-      if (opts.rot) svg.push('<text x="' + cx.toFixed(1) + '" y="' + (H - padB + 12).toFixed(1) + '" fill="#aab4cc" font-size="9.5" text-anchor="end" transform="rotate(-45 ' + cx.toFixed(1) + " " + (H - padB + 12).toFixed(1) + ')">' + esc(b.label) + "</text>");
-      else svg.push('<text x="' + cx.toFixed(1) + '" y="' + (H - padB + 16).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="middle">' + esc(b.label) + "</text>");
+    // average line
+    var ax = sx(mean);
+    svg.push('<line x1="' + ax.toFixed(1) + '" y1="' + padT + '" x2="' + ax.toFixed(1) + '" y2="' + baseY.toFixed(1) + '" stroke="#cfd8ee" stroke-width="1.2" stroke-dasharray="5 4" stroke-opacity="0.7"/>');
+    svg.push('<text x="' + ax.toFixed(1) + '" y="' + (padT - 6) + '" fill="#cfd8ee" font-size="11" text-anchor="middle">average ' + soFmt(mean, dp || 1) + "</text>");
+    // dots — deterministic jitter from pid so re-renders are stable
+    function jit(pid) { var s = Math.sin((pid + 1) * 12.9898) * 43758.5453; return s - Math.floor(s); }
+    rows.forEach(function (p) {
+      var v = +p[statKey] || 0, z = sd ? (v - mean) / sd : 0;
+      var dx = sx(v), band = (maxD ? densInterp(v) / maxD : 0) * plotH;
+      var dy = baseY - 4 - jit(p.pid) * Math.max(6, band - 6);
+      var isSpot = spotPid && p.pid === spotPid, anom = z >= 2;
+      var r = isSpot ? 5.5 : anom ? 3.4 : 2.3;
+      var fill = isSpot ? "#ffd24d" : anom ? "#ff3d8b" : "#4ea1ff";
+      var op = isSpot ? 1 : anom ? 0.92 : 0.5;
+      var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
+      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + esc(p.name) + " · " + esc(p.team) + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)</title></circle>");
     });
-    if (!opts.rot) svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">' + esc(opts.xLabel || "Match minute") + "</text>");
+    // labels: top anomalies by value, plus the spotlight player
+    var labels = [];
+    rows.slice().sort(function (a, b) { return (+b[statKey] || 0) - (+a[statKey] || 0); })
+      .slice(0, 5).forEach(function (p) {
+        var v = +p[statKey] || 0, z = sd ? (v - mean) / sd : 0;
+        if (z < 1.2) return;
+        labels.push({ x: sx(v), y: baseY - 6 - (maxD ? densInterp(v) / maxD : 0) * plotH, txt: p.name, gold: false });
+      });
+    if (spotPid) {
+      var sp = rows.filter(function (p) { return p.pid === spotPid; })[0];
+      if (sp) {
+        var v = +sp[statKey] || 0;
+        labels.push({ x: sx(v), y: baseY - 6 - (maxD ? densInterp(v) / maxD : 0) * plotH, txt: sp.name, gold: true });
+      }
+    }
+    labels.sort(function (a, b) { return a.x - b.x; });
+    var lastX = -999, tier = 0;
+    labels.forEach(function (L) {
+      tier = (L.x - lastX < 86) ? tier + 1 : 0; lastX = L.x;
+      var ly = Math.max(padT + 6, L.y - 8 - tier * 13);
+      var lx = Math.max(padL + 18, Math.min(W - padR - 18, L.x));
+      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#ffd24d" : "#ff3d8b") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '" fill="' + (L.gold ? "#ffe08a" : "#ffaecb") + '" font-size="10.5" text-anchor="middle">' + esc(L.txt) + "</text>");
+    });
     svg.push("</svg>");
     return svg.join("");
   }
 
-  function renderGoals() {
-    if (!document.getElementById("view-goals")) return;
-    var openOnlyEl = document.getElementById("gtOpenOnly");
-    var openOnly = !!(openOnlyEl && openOnlyEl.checked);
-    var nMatches = D.matches.filter(function (m) { return m.played && m.has_events; }).length;
-    var goals = [];
-    D.matches.forEach(function (m) {
-      if (!m.played || !m.goals) return;
-      m.goals.forEach(function (g) {
-        if (openOnly && (g.own || g.pen)) return;
-        goals.push(g);
-      });
-    });
-    var total = goals.length;
-    var setHTML = function (id, html) { var e = document.getElementById(id); if (e) e.innerHTML = html; };
-    if (!total) {
-      ["gtStats", "gtWindows", "gtWindowInsight", "gtHalves", "gtHalfInsight", "gtHeatInsight", "gtFine", "gtTable"]
-        .forEach(function (id) { setHTML(id, ""); });
-      setHTML("gtWindows", '<p class="hint">No goal-timing data yet — needs matches with an event stream.</p>');
+  function renderStandouts() {
+    if (!document.getElementById("view-standouts")) return;
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    var meta = soStatMeta(), statKey = meta[0], label = meta[1], dp = meta[2];
+    var rows = soQualify();
+    setHTML("soChartTitle", label + " — distribution across " + rows.length + " players");
+    setHTML("soChartHint", "Each dot is one player with " + (soState.mins ? soState.mins + "+ minutes" : "any minutes") +
+      (soState.pos === "all" ? "" : " · " + SO_POS_LABEL[soState.pos]) + ". Pink = 2σ or more above average.");
+    if (!rows.length) {
+      setHTML("soChart", '<p class="hint">No players match these filters — try lowering the minimum minutes.</p>');
+      ["soStats", "soStandouts", "soSpotlight"].forEach(function (id) { setHTML(id, ""); });
       return;
     }
+    var vals = rows.map(function (p) { return +p[statKey] || 0; }), n = vals.length;
+    var mean = vals.reduce(function (s, v) { return s + v; }, 0) / n;
+    var sd = Math.sqrt(vals.reduce(function (s, v) { return s + (v - mean) * (v - mean); }, 0) / n);
+    var sorted = rows.slice().sort(function (a, b) { return (+b[statKey] || 0) - (+a[statKey] || 0); });
+    var leader = sorted[0], leadZ = sd ? ((+leader[statKey] || 0) - mean) / sd : 0;
 
-    var win = GT_WINDOWS.map(function () { return 0; });
-    var fine = GT_FINE_LABELS.map(function () { return 0; });
-    var firstHalf = 0, secondHalf = 0, pens = 0, owns = 0;
-    goals.forEach(function (g) {
-      win[gtWindowIdx(g)]++;
-      fine[gtFineIdx(g)]++;
-      if (g.min > 45 || g.half === 2) secondHalf++; else firstHalf++;
-      if (g.pen) pens++;
-      if (g.own) owns++;
-    });
-    var maxWin = Math.max.apply(null, win);
-    var busiest = GT_WINDOWS[win.indexOf(maxWin)];
-    var pct = function (n) { return total ? Math.round(100 * n / total) : 0; };
-    var per = function (n) { return nMatches ? (n / nMatches).toFixed(2) : "0"; };
+    // spotlight resolution (exact name first, then substring)
+    var spot = null;
+    if (soState.player) {
+      var q = soState.player.toLowerCase();
+      spot = rows.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+        rows.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0] || null;
+    }
+    var spotPid = spot ? spot.pid : null;
 
-    /* ---- stats strip ---- */
-    var late = win[6] + win[7];                       // 76-90 plus 90+
-    var statItems = [
-      ["v accent", total, "Goals analysed"],
-      ["v", nMatches, "Matches (with events)"],
-      ["v blue", per(total), "Goals per match"],
-      ["v", pct(secondHalf) + "%", "Scored in 2nd half"],
-      ["v", busiest, "Busiest 15-min window"],
-      ["v", pct(late) + "%", "Scored in the last 15+"],
+    // stats strip
+    var anomCount = rows.filter(function (p) { return sd && ((+p[statKey] || 0) - mean) / sd >= 2; }).length;
+    var items = [
+      ["v accent", soFmt(mean, dp || 1), "Average"],
+      ["v blue", soFmt(sd, dp || 1), "Std dev (σ)"],
+      ["v", n, "Players"],
+      ["v", anomCount, "Anomalies (2σ+)"],
+      ["v accent", soFmt(+leader[statKey] || 0, dp) + " <span style='font-size:13px;color:var(--muted)'>" + esc(leader.name) + "</span>", "Highest value"],
+      ["v", "+" + leadZ.toFixed(1) + "σ", "Leader vs average"],
     ];
-    setHTML("gtStats", statItems.map(function (it) {
+    setHTML("soStats", items.map(function (it) {
       return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>";
     }).join(""));
 
-    /* ---- 15-minute window chart ---- */
-    var winBins = GT_WINDOWS.map(function (lab, i) { return { label: lab, value: win[i], hi: win[i] === maxWin }; });
-    setHTML("gtWindows", gtBarChart(winBins, { rot: false }));
-    var opening = win[0], closing = win[6] + win[7];
-    var endVsStart = closing - opening;
-    setHTML("gtWindowInsight",
-      "The busiest spell is <b>" + busiest + "</b> (" + maxWin + " goals). " +
-      (endVsStart > 0
-        ? "Goals lean <b>late</b>: " + closing + " came in the final 15 minutes and stoppage time, against " + opening + " in the opening 15."
-        : endVsStart < 0
-          ? "Goals lean <b>early</b>: " + opening + " in the opening 15 minutes versus " + closing + " in the closing 15+."
-          : "The opening and closing phases are dead level (" + opening + " each).") +
-      " Stoppage time alone (45+ and 90+) has produced <b>" + (win[3] + win[7]) + "</b> goal" + ((win[3] + win[7]) === 1 ? "" : "s") +
-      ", " + pct(win[3] + win[7]) + "% of the total — the drama really does come at the death.");
+    setHTML("soChart", soDistChart(rows, statKey, dp, spotPid, mean, sd));
 
-    /* ---- first vs second half ---- */
-    var mxHalf = Math.max(firstHalf, secondHalf, 1);
-    function halfBar(label, v, col) {
-      return '<div class="ha-row"><span class="ha-lab">' + label + '</span><div class="ha-track">' +
-        '<div class="ha-fill" style="width:' + (100 * v / mxHalf).toFixed(1) + "%;background:" + col + '"></div></div><b>' + v + " (" + pct(v) + "%)</b></div>";
+    // spotlight callout
+    if (spot) {
+      var sv = +spot[statKey] || 0, sz = sd ? (sv - mean) / sd : 0;
+      var better = Math.min(99, Math.round(100 * rows.filter(function (p) { return (+p[statKey] || 0) < sv; }).length / n));
+      setHTML("soSpotlight",
+        '<div class="so-spot"><span class="so-spot-tag">spotlight</span> <b>' + esc(spot.name) + "</b> (" + esc(spot.team) +
+        (spot.pos ? ", " + esc(spot.pos) : "") + ") — <b>" + soFmt(sv, dp) + "</b> " + esc(label.toLowerCase()) +
+        ', <b style="color:' + (sz >= 0 ? "var(--good)" : "var(--bad)") + '">' + (sz >= 0 ? "+" : "") + sz.toFixed(1) +
+        "σ</b> " + (sz >= 0 ? "over" : "below") + " average — better than <b>" + better + "%</b> of " +
+        (soState.pos === "all" ? "players" : "players in this position") + ".</div>");
+    } else if (soState.player) {
+      setHTML("soSpotlight", '<span class="hint">No qualifying player matches "' + esc(soState.player) + '". Check the spelling or relax the filters.</span>');
+    } else {
+      setHTML("soSpotlight", '<span class="hint">Tip: type a name in <b>Spotlight player</b> to highlight one player (gold) and see their percentile.</span>');
     }
-    setHTML("gtHalves",
-      '<div class="gt-halfbars">' +
-      halfBar("1st half", firstHalf, "var(--accent-2)") +
-      halfBar("2nd half", secondHalf, "var(--accent)") + "</div>");
-    var diff = secondHalf - firstHalf;
-    setHTML("gtHalfInsight",
-      diff > 0
-        ? "The second half is the business end: <b>" + diff + " more goal" + (diff === 1 ? "" : "s") + "</b> than the first (" +
-          per(secondHalf) + " vs " + per(firstHalf) + " per match) — fatigue, substitutions and stretched games taking their toll."
-        : diff < 0
-          ? "Unusually, the <b>first half</b> has been more productive by " + (-diff) + " goal" + (-diff === 1 ? "" : "s") + "."
-          : "Both halves have produced exactly <b>" + firstHalf + "</b> goals.");
 
-    /* ---- cooling-break / heat read ----
-       Breaks fall ~30' and ~75'. Compare the 15-min window just AFTER each break with the
-       one BEFORE it: 31-45 vs 16-30 (post-30' break) and 76-90 vs 61-75 (post-75' break). */
-    var pre1 = win[1], post1 = win[2], pre2 = win[5], post2 = win[6];
-    function arrow(post, pre) {
-      var d = post - pre;
-      return d > 0 ? '<b style="color:var(--good)">+' + d + " ↑</b>" : d < 0 ? '<b style="color:var(--bad)">' + d + " ↓</b>" : "<b>level</b>";
+    // standouts bars — top by σ over average
+    var top = sorted.slice(0, 12).map(function (p) {
+      var v = +p[statKey] || 0; return { p: p, v: v, z: sd ? (v - mean) / sd : 0 };
+    });
+    var maxZ = Math.max.apply(null, top.map(function (t) { return t.z; }).concat([0.001]));
+    setHTML("soStandouts", '<div class="so-bars">' + top.map(function (t) {
+      var pct = Math.max(2, 100 * t.z / maxZ), hot = t.z >= 2;
+      return '<div class="so-bar-row"><div class="nm">' + logoImg(t.p.team) + "<span>" + esc(t.p.name) + "</span></div>" +
+        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff3d8b" : "var(--accent-2)") + '"></div></div>' +
+        '<div class="so-bar-val">' + soFmt(t.v, dp) + ' <span class="so-z">' + (t.z >= 0 ? "+" : "") + t.z.toFixed(1) + "σ</span></div></div>";
+    }).join("") + "</div>");
+  }
+
+  function initStandouts() {
+    var statSel = document.getElementById("soStat");
+    if (!statSel) return;
+    if (!PLAYERS.length) {
+      var c = document.getElementById("soChart");
+      if (c) c.innerHTML = '<p class="hint">No player data available yet.</p>';
+      return;
     }
-    var lift = (post1 - pre1) + (post2 - pre2);
-    setHTML("gtHeatInsight",
-      "<div>After the ~30' break: <b>31-45</b> produced " + post1 + " vs " + pre1 + " in 16-30 (" + arrow(post1, pre1) + ").</div>" +
-      "<div style=\"margin-top:6px\">After the ~75' break: <b>76-90</b> produced " + post2 + " vs " + pre2 + " in 61-75 (" + arrow(post2, pre2) + ").</div>" +
-      '<div style="margin-top:10px">' +
-      (lift > 0
-        ? "Across both breaks the post-pause windows hold <b>" + lift + " more goal" + (lift === 1 ? "" : "s") + "</b> — consistent with sides coming back sharper (or more stretched) after a drink."
-        : lift < 0
-          ? "The post-pause windows are actually <b>" + (-lift) + " goal" + (-lift === 1 ? "" : "s") + " quieter</b> — little sign here that the breaks open the game up."
-          : "The breaks leave the goal rate unchanged.") +
-      ' <span class="hint">Exploratory: exact break timing isn\'t in the feed, so these use the typical 30\'/75\' marks.</span></div>');
-
-    /* ---- 5-minute fine chart ---- */
-    var fineMax = Math.max.apply(null, fine);
-    var fineBins = GT_FINE_LABELS.map(function (lab, i) { return { label: lab, value: fine[i], hi: fine[i] === fineMax && fineMax > 0 }; });
-    setHTML("gtFine", gtBarChart(fineBins, { rot: true, h: 320, color: "#6ad29a" }));
-
-    /* ---- table ---- */
-    var run = 0;
-    var body = GT_WINDOWS.map(function (lab, i) {
-      run += win[i];
-      return "<tr><td class='team'>" + lab + "</td><td>" + win[i] + "</td><td>" + pct(win[i]) + "%</td>" +
-        "<td>" + per(win[i]) + "</td><td>" + pct(run) + "%</td></tr>";
-    }).join("");
-    var foot = "<tr class='gt-total'><td class='team'>Total</td><td>" + total + "</td><td>100%</td><td>" + per(total) + "</td><td>—</td></tr>";
-    var breakdown = openOnly ? ""
-      : "<p class='hint' style='margin-top:10px'>Of those " + total + " goals, <b>" + (total - pens - owns) +
-        "</b> came from open play, <b>" + pens + "</b> from penalties and <b>" + owns + "</b> were own goals.</p>";
-    setHTML("gtTable",
-      "<table class='rank'><thead><tr><th class='team'>Window</th><th>Goals</th><th>Share</th><th>Per match</th><th>Running</th></tr></thead><tbody>" +
-      body + foot + "</tbody></table>" + breakdown);
+    statSel.innerHTML = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    statSel.value = soState.stat;
+    var dl = document.getElementById("soPlayerList");
+    if (dl) dl.innerHTML = PLAYERS.map(function (p) { return p.name; }).sort()
+      .map(function (nm) { return '<option value="' + esc(nm) + '">'; }).join("");
+    statSel.addEventListener("change", function () { soState.stat = statSel.value; renderStandouts(); });
+    document.getElementById("soPos").addEventListener("change", function (e) { soState.pos = e.target.value; renderStandouts(); });
+    document.getElementById("soMins").addEventListener("change", function (e) { soState.mins = +e.target.value; renderStandouts(); });
+    var pin = document.getElementById("soPlayer"), deb;
+    pin.addEventListener("input", function () {
+      clearTimeout(deb);
+      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); }, 200);
+    });
+    renderStandouts();
   }
 
   /* ---------------- init ---------------- */
@@ -1825,11 +1864,7 @@
   renderLedger();
   renderAgreement();
   renderUnlucky();
-  renderGoals();
-  (function () {
-    var t = document.getElementById("gtOpenOnly");
-    if (t) t.addEventListener("change", renderGoals);
-  })();
+  initStandouts();
   renderData();
   renderPower();
   document.getElementById("footerNote").textContent =
@@ -1860,7 +1895,7 @@
     t._h = setTimeout(function () { t.classList.remove("show"); }, 4000);
   }
   function renderResultsViews() {
-    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches, renderGoals].forEach(function (fn) {
+    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches].forEach(function (fn) {
       try { fn(); } catch (e) { /* keep going if one view fails */ }
     });
     try {

@@ -19,7 +19,7 @@
       <button data-view="matches">Matches</button>
       <button data-view="players">Players</button>
       <button data-view="xg">xG Analysis</button>
-      <button data-view="goals">Goal Timing</button>
+      <button data-view="standouts">Standouts</button>
       <button data-view="data">Data</button>
       <button data-view="predict">Power Rank</button>
     </nav>
@@ -242,68 +242,67 @@
     </div>
   </section>
 
-  <!-- GOAL TIMING -->
-  <section id="view-goals" class="view">
+  <!-- STANDOUTS (player distributions) -->
+  <section id="view-standouts" class="view">
     <div class="section-head">
-      <h2>When Are Goals Scored?</h2>
-      <p>Every goal in the tournament, placed on the clock. Do games burst into life early, or is it the
-         closing stages — and the long stoppage-time periods — that decide them? With WC2026 played across a
-         North-American summer, we also look at what happens around the <b>cooling breaks</b>.</p>
+      <h2>Standouts — Every Dot Is a Player</h2>
+      <p>Pick a stat and see the <b>whole tournament's distribution</b> at once. The curve is how all players
+         spread out, the dashed line is the <b>average</b>, and each dot is one player. The names way out on the
+         right are the <b>anomalies</b> — the ones breaking from the pack.</p>
     </div>
 
     <div class="explainer">
       <h3>How to read this</h3>
-      <p>Goals are bucketed by the minute they were scored, using the match event streams. <b>45+</b> is
-         first-half stoppage time and <b>90+</b> is second-half stoppage time (added time and any extra time
-         fold into 90+). Penalty <i>shootouts</i> are never counted — they aren't open-play goals.</p>
-      <p class="explainer-note">Based on the matches with a full event stream. Use the toggle to strip out
-         penalties and own goals and see the rhythm of <b>open play</b> alone.</p>
+      <p>This is a <b>density plot</b>: where the curve is tall, lots of players sit on that value; where it's
+         flat, hardly anyone does. Most players cluster near the average, so the curve peaks there and tails off.
+         A player <b>far to the right</b> of the crowd is doing something rare — we measure exactly how rare in
+         <b>σ (sigma) over average</b>: +1σ beats ~84% of players, +2σ beats ~98%, +3σ is a genuine outlier.</p>
+      <p class="explainer-note">Dots are coloured <span style="color:#ff3d8b;font-weight:700">pink</span> once a
+         player is 2σ or more above average. Pick a player to spotlight them in <span
+         style="color:#ffd24d;font-weight:700">gold</span> and see their percentile.</p>
     </div>
 
-    <div class="gt-controls">
-      <label class="gt-toggle"><input type="checkbox" id="gtOpenOnly"> Open play only
-        <span class="hint">(exclude penalties &amp; own goals)</span></label>
+    <div class="so-controls">
+      <label>Stat
+        <select id="soStat"></select>
+      </label>
+      <label>Position
+        <select id="soPos">
+          <option value="all">All outfield + GK</option>
+          <option value="FWD">Attackers</option>
+          <option value="MID">Midfielders</option>
+          <option value="DEF">Defenders</option>
+          <option value="GK">Goalkeepers</option>
+        </select>
+      </label>
+      <label>Minimum minutes
+        <select id="soMins">
+          <option value="0">Any</option>
+          <option value="90" selected>90+</option>
+          <option value="180">180+</option>
+          <option value="270">270+</option>
+        </select>
+      </label>
+      <label>Spotlight player
+        <input id="soPlayer" list="soPlayerList" placeholder="Type a name…" autocomplete="off">
+        <datalist id="soPlayerList"></datalist>
+      </label>
     </div>
 
-    <div class="stats-strip" id="gtStats"></div>
+    <div class="stats-strip" id="soStats"></div>
 
     <div class="card full-card">
-      <h3>Goals by 15-minute window</h3>
-      <p class="hint">The classic view: how the goals split across the six 15-minute thirds of each half, plus
-         the two stoppage-time periods. The <b style="color:#ffb24d">highlighted</b> bar is the busiest window.</p>
-      <div class="gt-chart-wrap" id="gtWindows"></div>
-      <div class="insight" id="gtWindowInsight"></div>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <h3>First half vs second half</h3>
-        <p class="hint">Does the game open up after the break? Tired legs, bigger gaps, chasing the
-           game — the second half is usually where it happens.</p>
-        <div id="gtHalves"></div>
-        <div class="insight" id="gtHalfInsight"></div>
-      </div>
-      <div class="card">
-        <h3>Cooling-break &amp; heat read</h3>
-        <p class="hint">In hot conditions referees call ~3-minute drinks breaks around the <b>30'</b> and
-           <b>75'</b> marks. If the pauses re-energise tiring sides, the windows just after them should be the
-           liveliest. Here's what the data says.</p>
-        <div class="insight" id="gtHeatInsight"></div>
-      </div>
+      <h3 id="soChartTitle">Distribution</h3>
+      <p class="hint" id="soChartHint">Every qualifying player placed by their value for the chosen stat.</p>
+      <div class="so-chart-wrap" id="soChart"></div>
+      <div class="insight" id="soSpotlight"></div>
     </div>
 
     <div class="card full-card">
-      <h3>Goals minute-by-minute (5-minute bins)</h3>
-      <p class="hint">A finer look at the same goals — useful for spotting the post-kickoff, just-before-halftime
-         and late-game surges that the broad windows smooth over.</p>
-      <div class="gt-chart-wrap" id="gtFine"></div>
-    </div>
-
-    <div class="card full-card">
-      <h3>The full breakdown</h3>
-      <p class="hint"><b>Goals</b> in each window, the <b>share</b> of all goals, goals <b>per match</b>, and the
-         <b>running total</b> as the game goes on.</p>
-      <div class="table-scroll" id="gtTable"></div>
+      <h3>The unique ones — biggest anomalies</h3>
+      <p class="hint">The players furthest above the field for the chosen stat, ranked by <b>σ over average</b>.
+         The longer the bar, the more they break from the pack.</p>
+      <div id="soStandouts"></div>
     </div>
   </section>
 

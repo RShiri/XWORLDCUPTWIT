@@ -12,7 +12,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from xg_model import team_xg_from_events, is_shootout
+from xg_model import team_xg_from_events
 from build_match_details import find_png, is_match_file
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -61,41 +61,6 @@ def _stat_line(ms):
     if line["pass_acc"] == [None, None]:
         line["pass_acc"] = _pair(ms, "pass_accuracy")
     return line
-
-
-def extract_goals(d):
-    """Goal-timeline rows for the dashboard's goal-timing analysis.
-
-    One entry per goal (open play + own goals; penalty-shootout kicks excluded),
-    mirroring build_match_details: own goals are credited to the OPPONENT. We keep
-    `half` (1/2) alongside the raw `min` so the front-end can separate first-half
-    stoppage time (e.g. min 47, half 1) from the early second half (min 47, half 2)
-    — WhoScored's running `minute` alone can't tell them apart. Compact keys keep
-    data.js small (there are only a couple hundred goals across the tournament)."""
-    home, away = d.get("home", {}), d.get("away", {})
-    side_of = {home.get("teamId"): "home", away.get("teamId"): "away"}
-    out = []
-    for ev in d.get("events", []):
-        if is_shootout(ev):
-            continue
-        t = ev.get("type", {})
-        if (t.get("displayName") if isinstance(t, dict) else "") != "Goal":
-            continue
-        side = side_of.get(ev.get("teamId"))
-        if side is None:
-            continue
-        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
-        own = bool(ev.get("isOwnGoal")) or ("OwnGoal" in quals)
-        per = ev.get("period", {})
-        per = per.get("displayName") if isinstance(per, dict) else per
-        out.append({
-            "min": ev.get("minute", 0),
-            "half": 1 if (per and "First" in per) else 2,
-            "team": ("away" if side == "home" else "home") if own else side,
-            "own": own,
-            "pen": "Penalty" in quals,
-        })
-    return sorted(out, key=lambda g: g["min"])
 
 
 def build_groups():
@@ -187,8 +152,6 @@ def load_matches():
             "stats": stats,
             "statsBySource": stats_by_source,
             "sources": d.get("_sources", []),
-            # goal minutes (compact) for the Goal Timing view; [] when no event stream
-            "goals": extract_goals(d) if d.get("events") else [],
         })
     return _dedupe(matches)
 
