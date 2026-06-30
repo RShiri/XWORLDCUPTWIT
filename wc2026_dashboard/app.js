@@ -2103,7 +2103,8 @@
      the data.js team stats plus the shot dataset. WhoScored coords attack toward
      x=100; the pitch is drawn goal-at-top (attacking ↑). */
   var SHOTS = (window.WC_SHOTS || []);
-  var tlState = { team: "all", filter: "all", sit: "all", mode: "dots" };
+  var tlState = { team: "all", teamB: "none", teamC: "none", filter: "all", sit: "all", mode: "dots" };
+  var TL_COLORS = ["#4ea1ff", "#ff3d8b", "#ffd24d"];  // up to 3 compared teams
 
   function tlMatchSit(s, sit) {
     if (sit === "all") return true;
@@ -2112,9 +2113,9 @@
     if (sit === "pen") return s.s === "Penalty";
     return true;
   }
-  function tlFilterShots() {
+  function tlShotsFor(team) {
     return SHOTS.filter(function (s) {
-      if (tlState.team !== "all" && s.t !== tlState.team) return false;
+      if (team !== "all" && s.t !== team) return false;
       if (tlState.filter === "ot" && !s.ot) return false;
       if (tlState.filter === "goal" && !s.g) return false;
       return tlMatchSit(s, tlState.sit);
@@ -2229,83 +2230,130 @@
     return out;
   }
 
-  function tlRadar(team, styleMap) {
-    var axes = [["poss", "Possession", 0], ["shotsPG", "Shots /game", 1], ["xgPG", "xG /game", 2],
-      ["xgPerShot", "xG /shot", 2], ["spShare", "Set-piece xG %", 0], ["passAcc", "Pass accuracy", 0], ["DEF", "Defensive", 2]];
+  var TL_AXES = [["poss", "Possession", 0], ["shotsPG", "Shots /game", 1], ["xgPG", "xG /game", 2],
+    ["xgPerShot", "xG /shot", 2], ["spShare", "Set-piece xG %", 0], ["passAcc", "Pass accuracy", 0], ["DEF", "Defensive", 2]];
+
+  // Percentile radar; `teams` is an array (1–3). One polygon per team, coloured by index.
+  // A single team also gets value+percentile labels; multiple teams get trait labels + a legend.
+  function tlRadar(teams, styleMap) {
     var pool = Object.keys(styleMap).map(function (k) { return styleMap[k]; });
-    var me = styleMap[team];
-    if (!me) return '<p class="hint">No style data for this team yet.</p>';
-    var N = axes.length, W = 580, H = 470, cx = W / 2, cy = H / 2 + 4, R = 146;
+    var present = teams.filter(function (t) { return styleMap[t]; });
+    if (!present.length) return '<p class="hint">No style data for these teams yet.</p>';
+    var single = present.length === 1;
+    var N = TL_AXES.length, W = 580, H = 470, cx = W / 2, cy = H / 2 + 4, R = 146;
+    function axVal(me, ax) { return ax[0] === "DEF" ? -me.xgaPG : me[ax[0]]; }
+    function axGet(ax) { return ax[0] === "DEF" ? function (s) { return -s.xgaPG; } : function (s) { return s[ax[0]]; }; }
+    function pctOf(me, ax) {
+      var v = axVal(me, ax), get = axGet(ax);
+      var below = pool.filter(function (s) { return get(s) < v; }).length;
+      return pool.length ? below / pool.length : 0;
+    }
     var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-radar" preserveAspectRatio="xMidYMid meet" role="img">'];
     [0.25, 0.5, 0.75, 1].forEach(function (f) {
       var pts = [];
       for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
       svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
     });
-    var poly = [];
-    axes.forEach(function (ax, i) {
+    // spokes + axis labels
+    TL_AXES.forEach(function (ax, i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / N;
       svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
-      var myVal, pctVal, dispVal, dp = ax[2];
-      if (ax[0] === "DEF") { myVal = -me.xgaPG; pctVal = function (s) { return -s.xgaPG; }; dispVal = me.xgaPG.toFixed(2) + " xGA"; }
-      else { myVal = me[ax[0]]; pctVal = function (s) { return s[ax[0]]; }; dispVal = soFmt(me[ax[0]], dp) + (ax[1].indexOf("%") >= 0 || ax[0] === "poss" || ax[0] === "passAcc" ? "%" : ""); }
-      var below = pool.filter(function (s) { return pctVal(s) < myVal; }).length;
-      var pct = pool.length ? below / pool.length : 0;
-      poly.push((cx + R * pct * Math.cos(a)).toFixed(1) + "," + (cy + R * pct * Math.sin(a)).toFixed(1));
       var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
       var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
-      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 2).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
-      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + dispVal + " (" + Math.round(pct * 100) + "%)</text>");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + ((single ? ly - 2 : ly + 3.5)).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
+      if (single) {
+        var me = styleMap[present[0]], dp = ax[2];
+        var disp = ax[0] === "DEF" ? me.xgaPG.toFixed(2) + " xGA" : soFmt(me[ax[0]], dp) + (ax[0] === "poss" || ax[0] === "passAcc" || ax[1].indexOf("%") >= 0 ? "%" : "");
+        svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + disp + " (" + Math.round(pctOf(me, ax) * 100) + "%)</text>");
+      }
     });
-    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(78,161,255,0.18)" stroke="#4ea1ff" stroke-width="2"/>');
-    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#4ea1ff"/>'); });
+    // one polygon per team
+    present.forEach(function (t, ti) {
+      var me = styleMap[t], col = TL_COLORS[ti % TL_COLORS.length], poly = [];
+      TL_AXES.forEach(function (ax, i) {
+        var a = -Math.PI / 2 + i * 2 * Math.PI / N, pct = pctOf(me, ax);
+        poly.push((cx + R * pct * Math.cos(a)).toFixed(1) + "," + (cy + R * pct * Math.sin(a)).toFixed(1));
+      });
+      svg.push('<polygon points="' + poly.join(" ") + '" fill="' + col + '" fill-opacity="' + (single ? 0.18 : 0.12) + '" stroke="' + col + '" stroke-width="2"/>');
+      poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="' + col + '"/>'); });
+    });
     svg.push("</svg>");
     return svg.join("");
+  }
+
+  function tlMapCard(label, shots) {
+    var goals = shots.filter(function (s) { return s.g; }).length;
+    var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
+    var head = '<div class="tl-map-head"><b>' + esc(label) + "</b> · " + shots.length + " shots · " +
+      goals + " goals · " + xg.toFixed(1) + " xG</div>";
+    var body = shots.length ? tlShotMap(shots) : '<p class="hint">No shots match these filters.</p>';
+    return '<div class="tl-map-card">' + head + '<div class="tl-pitch-wrap">' + body + "</div></div>";
   }
 
   function renderTeamLab() {
     if (!document.getElementById("view-teamlab")) return;
     var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
-    var shots = tlFilterShots();
-    var who = tlState.team === "all" ? "All teams" : tlState.team;
-    setHTML("tlMapTitle", who + " — shot map (" + shots.length + " shot" + (shots.length === 1 ? "" : "s") + ")");
-    var goals = shots.filter(function (s) { return s.g; }).length;
-    var ot = shots.filter(function (s) { return s.ot; }).length;
-    var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
-    var avgDist = shots.length ? shots.reduce(function (a, s) { return a + Math.sqrt((100 - s.x) * (100 - s.x) + (50 - s.y) * (50 - s.y)); }, 0) / shots.length : 0;
-    var items = [
-      ["v accent", shots.length, "Shots"],
-      ["v", goals, "Goals"],
-      ["v blue", xg.toFixed(1), "Total xG"],
-      ["v", shots.length ? (xg / shots.length).toFixed(2) : "0", "xG per shot"],
-      ["v", shots.length ? Math.round(100 * ot / shots.length) + "%" : "0%", "On target"],
-      ["v", goals && xg ? (goals / xg).toFixed(2) : "—", "Goals / xG"],
-    ];
-    setHTML("tlStats", items.map(function (it) { return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>"; }).join(""));
-    setHTML("tlMap", shots.length ? tlShotMap(shots) : '<p class="hint">No shots match these filters.</p>');
+    var allMode = tlState.team === "all";
+    // selected specific teams, de-duplicated, in A/B/C order
+    var teams = allMode ? [] : [tlState.team, tlState.teamB, tlState.teamC].filter(function (t, i, arr) {
+      return t && t !== "none" && t !== "all" && arr.indexOf(t) === i;
+    });
+    var mapList = allMode ? [["All teams", "all"]] : teams.map(function (t) { return [t, t]; });
+    if (!mapList.length) mapList = [["All teams", "all"]];
 
+    setHTML("tlMapTitle", allMode ? "All teams — shot map"
+      : (teams.length > 1 ? "Shot maps — " + teams.join(" vs ") : teams[0] + " — shot map"));
+    setHTML("tlMaps", mapList.map(function (m) { return tlMapCard(m[0], tlShotsFor(m[1])); }).join(""));
+    document.getElementById("tlMaps").classList.toggle("compare", mapList.length > 1);
+
+    // big stats strip only when a single map is shown
+    var statsEl = document.getElementById("tlStats");
+    if (mapList.length === 1) {
+      var shots = tlShotsFor(mapList[0][1]);
+      var goals = shots.filter(function (s) { return s.g; }).length;
+      var ot = shots.filter(function (s) { return s.ot; }).length;
+      var xg = shots.reduce(function (a, s) { return a + s.xg; }, 0);
+      var items = [
+        ["v accent", shots.length, "Shots"], ["v", goals, "Goals"], ["v blue", xg.toFixed(1), "Total xG"],
+        ["v", shots.length ? (xg / shots.length).toFixed(2) : "0", "xG per shot"],
+        ["v", shots.length ? Math.round(100 * ot / shots.length) + "%" : "0%", "On target"],
+        ["v", goals && xg ? (goals / xg).toFixed(2) : "—", "Goals / xG"],
+      ];
+      statsEl.innerHTML = items.map(function (it) { return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>"; }).join("");
+      statsEl.style.display = "";
+    } else { statsEl.innerHTML = ""; statsEl.style.display = "none"; }
+
+    // style fingerprint (hidden for all-teams)
     var styleCard = document.getElementById("tlStyleCard");
-    if (tlState.team === "all") {
-      if (styleCard) styleCard.style.display = "none";
-    } else {
-      if (styleCard) styleCard.style.display = "";
-      setHTML("tlStyleTitle", who + " — style fingerprint");
-      setHTML("tlRadar", tlRadar(tlState.team, tlTeamStyle()));
-    }
+    if (allMode || !teams.length) { if (styleCard) styleCard.style.display = "none"; return; }
+    styleCard.style.display = "";
+    setHTML("tlStyleTitle", teams.length > 1 ? "Style fingerprints — " + teams.join(" vs ") : teams[0] + " — style fingerprint");
+    var sm = tlTeamStyle();
+    setHTML("tlRadar", tlRadar(teams, sm));
+    setHTML("tlLegend", teams.length > 1 ? teams.map(function (t, i) {
+      return '<span class="tl-leg"><i style="background:' + TL_COLORS[i % TL_COLORS.length] + '"></i>' + esc(t) + "</span>";
+    }).join("") : "");
   }
 
   function initTeamLab() {
     var sel = document.getElementById("tlTeam");
     if (!sel) return;
-    if (!SHOTS.length) { var m = document.getElementById("tlMap"); if (m) m.innerHTML = '<p class="hint">No shot data available yet.</p>'; return; }
+    if (!SHOTS.length) { var m = document.getElementById("tlMaps"); if (m) m.innerHTML = '<p class="hint">No shot data available yet.</p>'; return; }
     var teams = {}; SHOTS.forEach(function (s) { teams[s.t] = 1; });
-    sel.innerHTML = '<option value="all">All teams</option>' + Object.keys(teams).sort().map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + "</option>"; }).join("");
+    var sorted = Object.keys(teams).sort();
+    var teamOpts = sorted.map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + "</option>"; }).join("");
+    sel.innerHTML = '<option value="all">All teams</option>' + teamOpts;
+    var selB = document.getElementById("tlTeamB"), selC = document.getElementById("tlTeamC");
+    selB.innerHTML = '<option value="none">— none —</option>' + teamOpts;
+    selC.innerHTML = '<option value="none">— none —</option>' + teamOpts;
     sel.addEventListener("change", function () { tlState.team = sel.value; renderTeamLab(); });
+    selB.addEventListener("change", function () { tlState.teamB = selB.value; renderTeamLab(); });
+    selC.addEventListener("change", function () { tlState.teamC = selC.value; renderTeamLab(); });
     document.getElementById("tlFilter").addEventListener("change", function (e) { tlState.filter = e.target.value; renderTeamLab(); });
     document.getElementById("tlSit").addEventListener("change", function (e) { tlState.sit = e.target.value; renderTeamLab(); });
     document.getElementById("tlMode").addEventListener("change", function (e) { tlState.mode = e.target.value; renderTeamLab(); });
     renderTeamLab();
-    wireChartTaps("tlMap", "tlMapTip");
+    wireChartTaps("tlMaps", "tlMapTip");
   }
 
   /* ---------------- init ---------------- */
