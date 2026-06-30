@@ -19,6 +19,7 @@
       <button data-view="matches">Matches</button>
       <button data-view="players">Players</button>
       <button data-view="xg">xG Analysis</button>
+      <button data-view="goals">Goal Timing</button>
       <button data-view="data">Data</button>
       <button data-view="predict">Power Rank</button>
     </nav>
@@ -238,6 +239,71 @@
       <p class="hint">Games where the side that <b>out-created</b> their opponent by the most xG still failed to win —
          they made the better chances but didn't get the result. The biggest "should have won this" performances.</p>
       <div class="table-scroll" id="unlucky"></div>
+    </div>
+  </section>
+
+  <!-- GOAL TIMING -->
+  <section id="view-goals" class="view">
+    <div class="section-head">
+      <h2>When Are Goals Scored?</h2>
+      <p>Every goal in the tournament, placed on the clock. Do games burst into life early, or is it the
+         closing stages — and the long stoppage-time periods — that decide them? With WC2026 played across a
+         North-American summer, we also look at what happens around the <b>cooling breaks</b>.</p>
+    </div>
+
+    <div class="explainer">
+      <h3>How to read this</h3>
+      <p>Goals are bucketed by the minute they were scored, using the match event streams. <b>45+</b> is
+         first-half stoppage time and <b>90+</b> is second-half stoppage time (added time and any extra time
+         fold into 90+). Penalty <i>shootouts</i> are never counted — they aren't open-play goals.</p>
+      <p class="explainer-note">Based on the matches with a full event stream. Use the toggle to strip out
+         penalties and own goals and see the rhythm of <b>open play</b> alone.</p>
+    </div>
+
+    <div class="gt-controls">
+      <label class="gt-toggle"><input type="checkbox" id="gtOpenOnly"> Open play only
+        <span class="hint">(exclude penalties &amp; own goals)</span></label>
+    </div>
+
+    <div class="stats-strip" id="gtStats"></div>
+
+    <div class="card full-card">
+      <h3>Goals by 15-minute window</h3>
+      <p class="hint">The classic view: how the goals split across the six 15-minute thirds of each half, plus
+         the two stoppage-time periods. The <b style="color:#ffb24d">highlighted</b> bar is the busiest window.</p>
+      <div class="gt-chart-wrap" id="gtWindows"></div>
+      <div class="insight" id="gtWindowInsight"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>First half vs second half</h3>
+        <p class="hint">Does the game open up after the break? Tired legs, bigger gaps, chasing the
+           game — the second half is usually where it happens.</p>
+        <div id="gtHalves"></div>
+        <div class="insight" id="gtHalfInsight"></div>
+      </div>
+      <div class="card">
+        <h3>Cooling-break &amp; heat read</h3>
+        <p class="hint">In hot conditions referees call ~3-minute drinks breaks around the <b>30'</b> and
+           <b>75'</b> marks. If the pauses re-energise tiring sides, the windows just after them should be the
+           liveliest. Here's what the data says.</p>
+        <div class="insight" id="gtHeatInsight"></div>
+      </div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Goals minute-by-minute (5-minute bins)</h3>
+      <p class="hint">A finer look at the same goals — useful for spotting the post-kickoff, just-before-halftime
+         and late-game surges that the broad windows smooth over.</p>
+      <div class="gt-chart-wrap" id="gtFine"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>The full breakdown</h3>
+      <p class="hint"><b>Goals</b> in each window, the <b>share</b> of all goals, goals <b>per match</b>, and the
+         <b>running total</b> as the game goes on.</p>
+      <div class="table-scroll" id="gtTable"></div>
     </div>
   </section>
 

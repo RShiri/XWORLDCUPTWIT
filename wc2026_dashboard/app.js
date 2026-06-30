@@ -1617,6 +1617,195 @@
       "</div>";
   }
 
+  /* ---------------- Goal Timing ----------------
+     When are goals scored? Aggregates the per-match goal minutes baked into data.js
+     (build_data.extract_goals) into 15-minute windows + 5-minute bins, a first/second
+     half split and a cooling-break read. `half` disambiguates first-half stoppage
+     (min 47, half 1 → "45+") from the early second half (min 47, half 2 → "46-60"). */
+  var GT_WINDOWS = ["1-15", "16-30", "31-45", "45+", "46-60", "61-75", "76-90", "90+"];
+
+  function gtWindowIdx(g) {
+    if (g.min > 90) return 7;                       // 90+ (2nd-half stoppage / extra time)
+    if (g.half === 1 && g.min > 45) return 3;       // 45+ (1st-half stoppage)
+    if (g.min <= 15) return 0;
+    if (g.min <= 30) return 1;
+    if (g.min <= 45) return 2;
+    if (g.min <= 60) return 4;
+    if (g.min <= 75) return 5;
+    return 6;                                        // 76-90
+  }
+  // 20 fine bins: 0-8 = 1st-half 5s (1-5..41-45), 9 = 45+, 10-18 = 2nd-half 5s (46-50..86-90), 19 = 90+
+  var GT_FINE_LABELS = ["1-5", "6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45",
+    "45+", "46-50", "51-55", "56-60", "61-65", "66-70", "71-75", "76-80", "81-85", "86-90", "90+"];
+  function gtFineIdx(g) {
+    if (g.half === 1 && g.min > 45) return 9;
+    if (g.min > 90) return 19;
+    var b = Math.floor((g.min - 1) / 5);            // 0..17 for min 1..90
+    if (b < 0) b = 0;
+    return b <= 8 ? b : b + 1;                       // shift 2nd-half bins past the 45+ slot
+  }
+
+  // Dependency-free vertical SVG bar chart (shares niceTicks/fmtTick with the scatter lab).
+  function gtBarChart(bins, opts) {
+    opts = opts || {};
+    var W = opts.w || 820, H = opts.h || 300, padL = 36, padR = 12, padT = 16, padB = opts.rot ? 58 : 42;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var max = Math.max.apply(null, bins.map(function (b) { return b.value; }).concat([1]));
+    // niceTicks caps the top tick at <= max, which would clip the tallest bar's value
+    // label; round the axis ceiling UP to a whole step so every bar has headroom.
+    var ticks = niceTicks(max, 5);
+    var step = ticks.length > 1 ? ticks[1] - ticks[0] : (max || 1);
+    var tmax = Math.max(ticks[ticks.length - 1] || 0, Math.ceil(max / step) * step);
+    ticks = [];
+    for (var tv = 0; tv <= tmax + 1e-9; tv += step) ticks.push(+tv.toFixed(4));
+    function sy(v) { return padT + plotH * (1 - v / tmax); }
+    var n = bins.length, slot = plotW / n, gap = opts.gap != null ? opts.gap : 0.24, bw = slot * (1 - gap);
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="gt-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    ticks.forEach(function (t) {
+      var y = sy(t);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.6).toFixed(1) + '" fill="#7c89a8" font-size="11" text-anchor="end">' + fmtTick(t) + "</text>");
+    });
+    bins.forEach(function (b, i) {
+      var x = padL + slot * i + slot * gap / 2, cx = x + bw / 2;
+      var y = sy(b.value), h = padT + plotH - y;
+      var col = b.hi ? "#ffb24d" : (opts.color || "#4ea1ff");
+      svg.push('<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0, h).toFixed(1) + '" rx="3" fill="' + col + '" fill-opacity="0.92"><title>' + esc(b.label) + ": " + b.value + " goal" + (b.value === 1 ? "" : "s") + "</title></rect>");
+      if (b.value) svg.push('<text x="' + cx.toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" fill="#e8edf7" font-size="' + (opts.valFont || 11) + '" text-anchor="middle">' + b.value + "</text>");
+      if (opts.rot) svg.push('<text x="' + cx.toFixed(1) + '" y="' + (H - padB + 12).toFixed(1) + '" fill="#aab4cc" font-size="9.5" text-anchor="end" transform="rotate(-45 ' + cx.toFixed(1) + " " + (H - padB + 12).toFixed(1) + ')">' + esc(b.label) + "</text>");
+      else svg.push('<text x="' + cx.toFixed(1) + '" y="' + (H - padB + 16).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="middle">' + esc(b.label) + "</text>");
+    });
+    if (!opts.rot) svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">' + esc(opts.xLabel || "Match minute") + "</text>");
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderGoals() {
+    if (!document.getElementById("view-goals")) return;
+    var openOnlyEl = document.getElementById("gtOpenOnly");
+    var openOnly = !!(openOnlyEl && openOnlyEl.checked);
+    var nMatches = D.matches.filter(function (m) { return m.played && m.has_events; }).length;
+    var goals = [];
+    D.matches.forEach(function (m) {
+      if (!m.played || !m.goals) return;
+      m.goals.forEach(function (g) {
+        if (openOnly && (g.own || g.pen)) return;
+        goals.push(g);
+      });
+    });
+    var total = goals.length;
+    var setHTML = function (id, html) { var e = document.getElementById(id); if (e) e.innerHTML = html; };
+    if (!total) {
+      ["gtStats", "gtWindows", "gtWindowInsight", "gtHalves", "gtHalfInsight", "gtHeatInsight", "gtFine", "gtTable"]
+        .forEach(function (id) { setHTML(id, ""); });
+      setHTML("gtWindows", '<p class="hint">No goal-timing data yet — needs matches with an event stream.</p>');
+      return;
+    }
+
+    var win = GT_WINDOWS.map(function () { return 0; });
+    var fine = GT_FINE_LABELS.map(function () { return 0; });
+    var firstHalf = 0, secondHalf = 0, pens = 0, owns = 0;
+    goals.forEach(function (g) {
+      win[gtWindowIdx(g)]++;
+      fine[gtFineIdx(g)]++;
+      if (g.min > 45 || g.half === 2) secondHalf++; else firstHalf++;
+      if (g.pen) pens++;
+      if (g.own) owns++;
+    });
+    var maxWin = Math.max.apply(null, win);
+    var busiest = GT_WINDOWS[win.indexOf(maxWin)];
+    var pct = function (n) { return total ? Math.round(100 * n / total) : 0; };
+    var per = function (n) { return nMatches ? (n / nMatches).toFixed(2) : "0"; };
+
+    /* ---- stats strip ---- */
+    var late = win[6] + win[7];                       // 76-90 plus 90+
+    var statItems = [
+      ["v accent", total, "Goals analysed"],
+      ["v", nMatches, "Matches (with events)"],
+      ["v blue", per(total), "Goals per match"],
+      ["v", pct(secondHalf) + "%", "Scored in 2nd half"],
+      ["v", busiest, "Busiest 15-min window"],
+      ["v", pct(late) + "%", "Scored in the last 15+"],
+    ];
+    setHTML("gtStats", statItems.map(function (it) {
+      return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>";
+    }).join(""));
+
+    /* ---- 15-minute window chart ---- */
+    var winBins = GT_WINDOWS.map(function (lab, i) { return { label: lab, value: win[i], hi: win[i] === maxWin }; });
+    setHTML("gtWindows", gtBarChart(winBins, { rot: false }));
+    var opening = win[0], closing = win[6] + win[7];
+    var endVsStart = closing - opening;
+    setHTML("gtWindowInsight",
+      "The busiest spell is <b>" + busiest + "</b> (" + maxWin + " goals). " +
+      (endVsStart > 0
+        ? "Goals lean <b>late</b>: " + closing + " came in the final 15 minutes and stoppage time, against " + opening + " in the opening 15."
+        : endVsStart < 0
+          ? "Goals lean <b>early</b>: " + opening + " in the opening 15 minutes versus " + closing + " in the closing 15+."
+          : "The opening and closing phases are dead level (" + opening + " each).") +
+      " Stoppage time alone (45+ and 90+) has produced <b>" + (win[3] + win[7]) + "</b> goal" + ((win[3] + win[7]) === 1 ? "" : "s") +
+      ", " + pct(win[3] + win[7]) + "% of the total — the drama really does come at the death.");
+
+    /* ---- first vs second half ---- */
+    var mxHalf = Math.max(firstHalf, secondHalf, 1);
+    function halfBar(label, v, col) {
+      return '<div class="ha-row"><span class="ha-lab">' + label + '</span><div class="ha-track">' +
+        '<div class="ha-fill" style="width:' + (100 * v / mxHalf).toFixed(1) + "%;background:" + col + '"></div></div><b>' + v + " (" + pct(v) + "%)</b></div>";
+    }
+    setHTML("gtHalves",
+      '<div class="gt-halfbars">' +
+      halfBar("1st half", firstHalf, "var(--accent-2)") +
+      halfBar("2nd half", secondHalf, "var(--accent)") + "</div>");
+    var diff = secondHalf - firstHalf;
+    setHTML("gtHalfInsight",
+      diff > 0
+        ? "The second half is the business end: <b>" + diff + " more goal" + (diff === 1 ? "" : "s") + "</b> than the first (" +
+          per(secondHalf) + " vs " + per(firstHalf) + " per match) — fatigue, substitutions and stretched games taking their toll."
+        : diff < 0
+          ? "Unusually, the <b>first half</b> has been more productive by " + (-diff) + " goal" + (-diff === 1 ? "" : "s") + "."
+          : "Both halves have produced exactly <b>" + firstHalf + "</b> goals.");
+
+    /* ---- cooling-break / heat read ----
+       Breaks fall ~30' and ~75'. Compare the 15-min window just AFTER each break with the
+       one BEFORE it: 31-45 vs 16-30 (post-30' break) and 76-90 vs 61-75 (post-75' break). */
+    var pre1 = win[1], post1 = win[2], pre2 = win[5], post2 = win[6];
+    function arrow(post, pre) {
+      var d = post - pre;
+      return d > 0 ? '<b style="color:var(--good)">+' + d + " ↑</b>" : d < 0 ? '<b style="color:var(--bad)">' + d + " ↓</b>" : "<b>level</b>";
+    }
+    var lift = (post1 - pre1) + (post2 - pre2);
+    setHTML("gtHeatInsight",
+      "<div>After the ~30' break: <b>31-45</b> produced " + post1 + " vs " + pre1 + " in 16-30 (" + arrow(post1, pre1) + ").</div>" +
+      "<div style=\"margin-top:6px\">After the ~75' break: <b>76-90</b> produced " + post2 + " vs " + pre2 + " in 61-75 (" + arrow(post2, pre2) + ").</div>" +
+      '<div style="margin-top:10px">' +
+      (lift > 0
+        ? "Across both breaks the post-pause windows hold <b>" + lift + " more goal" + (lift === 1 ? "" : "s") + "</b> — consistent with sides coming back sharper (or more stretched) after a drink."
+        : lift < 0
+          ? "The post-pause windows are actually <b>" + (-lift) + " goal" + (-lift === 1 ? "" : "s") + " quieter</b> — little sign here that the breaks open the game up."
+          : "The breaks leave the goal rate unchanged.") +
+      ' <span class="hint">Exploratory: exact break timing isn\'t in the feed, so these use the typical 30\'/75\' marks.</span></div>');
+
+    /* ---- 5-minute fine chart ---- */
+    var fineMax = Math.max.apply(null, fine);
+    var fineBins = GT_FINE_LABELS.map(function (lab, i) { return { label: lab, value: fine[i], hi: fine[i] === fineMax && fineMax > 0 }; });
+    setHTML("gtFine", gtBarChart(fineBins, { rot: true, h: 320, color: "#6ad29a" }));
+
+    /* ---- table ---- */
+    var run = 0;
+    var body = GT_WINDOWS.map(function (lab, i) {
+      run += win[i];
+      return "<tr><td class='team'>" + lab + "</td><td>" + win[i] + "</td><td>" + pct(win[i]) + "%</td>" +
+        "<td>" + per(win[i]) + "</td><td>" + pct(run) + "%</td></tr>";
+    }).join("");
+    var foot = "<tr class='gt-total'><td class='team'>Total</td><td>" + total + "</td><td>100%</td><td>" + per(total) + "</td><td>—</td></tr>";
+    var breakdown = openOnly ? ""
+      : "<p class='hint' style='margin-top:10px'>Of those " + total + " goals, <b>" + (total - pens - owns) +
+        "</b> came from open play, <b>" + pens + "</b> from penalties and <b>" + owns + "</b> were own goals.</p>";
+    setHTML("gtTable",
+      "<table class='rank'><thead><tr><th class='team'>Window</th><th>Goals</th><th>Share</th><th>Per match</th><th>Running</th></tr></thead><tbody>" +
+      body + foot + "</tbody></table>" + breakdown);
+  }
+
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
@@ -1636,6 +1825,11 @@
   renderLedger();
   renderAgreement();
   renderUnlucky();
+  renderGoals();
+  (function () {
+    var t = document.getElementById("gtOpenOnly");
+    if (t) t.addEventListener("change", renderGoals);
+  })();
   renderData();
   renderPower();
   document.getElementById("footerNote").textContent =
@@ -1666,7 +1860,7 @@
     t._h = setTimeout(function () { t.classList.remove("show"); }, 4000);
   }
   function renderResultsViews() {
-    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches].forEach(function (fn) {
+    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches, renderGoals].forEach(function (fn) {
       try { fn(); } catch (e) { /* keep going if one view fails */ }
     });
     try {

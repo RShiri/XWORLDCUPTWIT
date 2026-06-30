@@ -646,3 +646,20 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
   font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--accent-2);
   border: 1px solid var(--accent-2); border-radius: 4px; padding: 0 3px; margin-left: 2px; opacity: 0.85;
 }
+
+/* ---------------- Goal Timing view ---------------- */
+.gt-controls { margin: 6px 0 16px; }
+.gt-toggle {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font-size: 14px; color: var(--text); background: var(--bg-2);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px;
+}
+.gt-toggle input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+.gt-toggle .hint { display: inline; margin: 0; }
+.gt-chart-wrap { width: 100%; overflow: visible; margin-top: 4px; }
+.gt-chart { width: 100%; height: auto; display: block; }
+.gt-halfbars { margin-top: 6px; }
+.gt-halfbars .ha-row { grid-template-columns: 64px 1fr 92px; }
+.gt-halfbars .ha-row b { text-align: right; }
+.gt-halfbars .ha-row .ha-track { height: 18px; }
+table.rank tr.gt-total td { border-top: 2px solid var(--line); font-weight: 800; color: var(--text); }
