@@ -250,12 +250,180 @@
     obs.observe(root, { childList: true });
   }
 
+  /* ================= IN-GRAPH ANIMATION ENGINE =================
+   * Animates the DATA MARKS inside each chart (scatter dots, shot/pass/node
+   * circles, radar areas, heat cells, the xG-momentum lines, match-stat bars)
+   * — never the axes, gridlines or pitch markings, and never breaking the
+   * charts' own <title>/click/mousemove interactivity (we only set inline
+   * style on existing nodes, never replace them, and clear it afterwards).
+   *
+   * Each chart animates ONCE, when it first scrolls into view. We deliberately
+   * do NOT re-animate on the rapid scrubber/filter redraws (shot/pass/dribble/
+   * avg-pos/shootout redraw ~every 180ms while playing) — that would strobe.
+   */
+  var CHART_SEL = "svg.scatter-svg, svg.so-chart, svg.so-radar, svg.tl-pitch, svg.mv-mom-chart, svg.pitch-svg";
+
+  function clearMark(el) {
+    var s = el.style;
+    s.opacity = ""; s.transform = ""; s.transformBox = ""; s.transformOrigin = "";
+    s.strokeDasharray = ""; s.strokeDashoffset = "";
+  }
+
+  // Data circles, excluding axis/pitch decoration. `allowR`: also accept an
+  // unclassed, title-less circle if it's big enough to be a node (match pass
+  // network / avg-position nodes have neither class nor <title>); used only for
+  // match pitch-svg where tiny pitch spots are r<1.5.
+  function dataCircles(svg, allowR) {
+    return Array.prototype.filter.call(svg.querySelectorAll("circle"), function (c) {
+      var cls = c.getAttribute("class") || "";
+      if (/pitch/.test(cls)) return false;            // pitch marking
+      if (c.getElementsByTagName("title").length) return true; // has tooltip → data
+      if (cls) return true;                            // shot-dot / pass-dot / pt / agm-node …
+      return allowR ? (parseFloat(c.getAttribute("r") || "0") >= 1.5) : false;
+    });
+  }
+  function dataLines(svg) {
+    // pitch-svg only: passes / dribbles / network links / shot paths / agm lines.
+    return Array.prototype.filter.call(svg.querySelectorAll("line, path, polyline"), function (el) {
+      var cls = el.getAttribute("class") || "";
+      return !/pitch|dir-label/.test(cls);
+    });
+  }
+
+  function popIn(els, base, step, cap, spring) {
+    if (!els.length) return;
+    var big = els.length > 120; // perf: lighter (no spring) for dense plots
+    els.forEach(function (el) {
+      el.style.opacity = "0";
+      if (!big) { el.style.transformBox = "fill-box"; el.style.transformOrigin = "center"; el.style.transform = "scale(0.35)"; }
+    });
+    els.forEach(function (el, i) {
+      var d = base + Math.min(i * step, cap);
+      try {
+        if (big) animate(el, { opacity: 1 }, { duration: 0.35, delay: d, ease: EASE });
+        else animate(el, { opacity: 1, scale: 1 }, spring || { type: "spring", stiffness: 420, damping: 24, delay: d });
+      } catch (e) {}
+    });
+    setTimeout(function () { els.forEach(clearMark); }, Math.min((base + cap + 0.7) * 1000, 3200));
+  }
+  function fadeIn(els, step, cap, dur) {
+    if (!els.length) return;
+    els.forEach(function (el) { el.style.opacity = "0"; });
+    els.forEach(function (el, i) {
+      try { animate(el, { opacity: 1 }, { duration: dur || 0.4, delay: Math.min(i * step, cap), ease: EASE }); } catch (e) {}
+    });
+    setTimeout(function () { els.forEach(function (el) { el.style.opacity = ""; }); }, Math.min((cap + (dur || 0.4) + 0.5) * 1000, 3200));
+  }
+  function drawPath(path, dur, delay) {
+    var len = 0; try { len = path.getTotalLength(); } catch (e) {}
+    if (!len) { fadeIn([path], 0, 0, 0.4); return; }
+    path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+    try { animate(path, { strokeDashoffset: [len, 0] }, { duration: dur, delay: delay, ease: EASE }); } catch (e) {}
+    setTimeout(function () { path.style.strokeDasharray = ""; path.style.strokeDashoffset = ""; }, ((delay + dur) + 0.6) * 1000);
+  }
+
+  function revealChart(svg) {
+    if (!svg || svg._moChart) return;
+    svg._moChart = true;
+    var cls = svg.getAttribute("class") || "";
+    try {
+      if (/mv-mom-chart/.test(cls)) {
+        // xG momentum: draw the two cumulative lines, then pop the goal markers.
+        var paths = Array.prototype.filter.call(svg.querySelectorAll("path"), function (p) {
+          return (p.getAttribute("fill") || "") === "none" && p.getAttribute("stroke");
+        });
+        paths.forEach(function (p, i) { drawPath(p, 0.9, i * 0.12); });
+        popIn(dataCircles(svg, false), 0.8, 0.05, 0.4);
+        fadeIn(Array.prototype.filter.call(svg.querySelectorAll("text"), function (t) {
+          return (t.textContent || "").indexOf("⚽") >= 0; // ⚽ goal emoji
+        }), 0.05, 0.4, 0.4);
+        return;
+      }
+      if (/so-radar/.test(cls)) {
+        // radar: scale the filled area from its centre, then pop the vertices.
+        var polys = Array.prototype.filter.call(svg.querySelectorAll("polygon"), function (p) {
+          var f = p.getAttribute("fill") || ""; return f && f !== "none";
+        });
+        polys.forEach(function (p) {
+          p.style.opacity = "0"; p.style.transformBox = "fill-box"; p.style.transformOrigin = "center"; p.style.transform = "scale(0.2)";
+          try { animate(p, { opacity: 1, scale: 1 }, { type: "spring", stiffness: 240, damping: 20 }); } catch (e) {}
+        });
+        popIn(dataCircles(svg, false), 0.12, 0.03, 0.3);
+        setTimeout(function () { polys.forEach(clearMark); }, 1500);
+        return;
+      }
+      // generic: scatter-svg / so-chart / tl-pitch / pitch-svg
+      var isPitch = /pitch-svg/.test(cls);
+      var circles = dataCircles(svg, isPitch);
+      var rects = Array.prototype.filter.call(svg.querySelectorAll("rect"), function (r) {
+        return (r.getAttribute("fill") || "").toLowerCase() === "#ff6a3d"; // tl heat cells
+      });
+      var lines = isPitch ? dataLines(svg) : [];
+      if (lines.length) fadeIn(lines, lines.length > 60 ? 0.004 : 0.012, 0.5, 0.4);
+      if (rects.length) fadeIn(rects, 0.01, 0.45, 0.45);
+      if (circles.length) popIn(circles, lines.length ? 0.18 : 0.04, circles.length > 80 ? 0.005 : 0.014, 0.6);
+    } catch (e) { /* a chart animation must never break the page */ }
+  }
+
+  function registerChart(svg) {
+    if (!svg || svg._moChartReg) return;
+    if (svg.closest && svg.closest("#mv-goals-anim")) return; // replay owns its own opacity
+    svg._moChartReg = true;
+    try { inView(svg, function () { revealChart(svg); }, { amount: 0.12 }); }
+    catch (e) { revealChart(svg); }
+  }
+  function scanCharts(root) {
+    if (!root || !root.querySelectorAll) return;
+    if (root.matches && root.matches(CHART_SEL)) registerChart(root);
+    Array.prototype.forEach.call(root.querySelectorAll(CHART_SEL), registerChart);
+  }
+
+  // Match-stats comparison bars are HTML (.sc-fill width:%), not SVG — grow them.
+  function registerBar(f) {
+    if (!f || f._moBar) return;
+    f._moBar = true;
+    var w = f.style.width; if (!w) return;
+    f.style.width = "0%";
+    var grown = false;
+    var grow = function () { if (grown) return; grown = true; f.style.width = w; };
+    try {
+      inView(f, function () { try { animate(f, { width: ["0%", w] }, { duration: 0.7, ease: EASE }); } catch (e) {} setTimeout(grow, 850); }, { amount: 0.4 });
+    } catch (e) { grow(); }
+    setTimeout(grow, 6000); // safety net
+  }
+  function scanBars(root) {
+    if (!root || !root.querySelectorAll) return;
+    Array.prototype.forEach.call(root.querySelectorAll(".sc-fill"), registerBar);
+  }
+
+  function initGraphs() {
+    scanCharts(document);
+    scanBars(document);
+    // Discover charts/bars created later (tab opens, match.js fetch). We only
+    // REGISTER new svgs/bars here; existing ones keep their one-shot guard, so
+    // scrubber/filter redraws (which only swap child marks, not the svg) never
+    // re-trigger an animation.
+    try {
+      var mo = new MutationObserver(function (muts) {
+        muts.forEach(function (mu) {
+          Array.prototype.forEach.call(mu.addedNodes, function (n) {
+            if (n.nodeType !== 1) return;
+            scanCharts(n);
+            scanBars(n);
+          });
+        });
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {}
+  }
+
   /* ---- boot ---- */
   function boot() {
     decorateHeader();
     mountScrollBar();
     if (document.getElementById("matchRoot")) initMatch();
     else initIndex();
+    initGraphs();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
