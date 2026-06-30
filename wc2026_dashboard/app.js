@@ -317,9 +317,14 @@
         var expandable = m.played && m.has_stats;
         var toCentre = m.has_events;            // has event data → open the full Match Centre on click
         var clickable = toCentre || expandable;
-        var hWin = m.played && m.hs > m.as, aWin = m.played && m.as > m.hs;
+        // A drawn knockout tie is decided on penalties: the pen winner is the match
+        // winner (mark their name) and the row shows the shootout score under the result.
+        var pens = m.played && m.hs === m.as && m.hpen != null && m.apen != null;
+        var hWin = m.played && (m.hs > m.as || (pens && m.hpen > m.apen));
+        var aWin = m.played && (m.as > m.hs || (pens && m.apen > m.hpen));
         var score = m.played
-          ? '<div class="score">' + m.hs + " – " + m.as + "</div>"
+          ? '<div class="score">' + m.hs + " – " + m.as +
+              (pens ? '<span class="pens">' + m.hpen + "–" + m.apen + " pens</span>" : "") + "</div>"
           : '<div class="score upcoming">vs</div>';
         var links = [];
         // The whole played-match row opens the Match Centre now, so no separate link.

@@ -633,3 +633,9 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
   border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
   transition: opacity .3s ease, transform .3s ease; z-index: 9999; }
 .live-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* penalty-shootout result on a drawn knockout tie (matches list) */
+.db-match-head .score .pens, .match-row .score .pens {
+  display: block; margin-top: 2px; font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.2px; color: var(--accent); text-transform: uppercase;
+}
