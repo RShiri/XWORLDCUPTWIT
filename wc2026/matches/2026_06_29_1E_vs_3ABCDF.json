@@ -13,7 +13,7 @@
     "teamId": 336,
     "name": "Germany",
     "score": 1,
-    "penalty_score": null,
+    "penalty_score": 3,
     "players": [
       {
         "playerId": 13754,
@@ -4934,7 +4934,7 @@
     "teamId": 417,
     "name": "Paraguay",
     "score": 1,
-    "penalty_score": null,
+    "penalty_score": 4,
     "players": [
       {
         "playerId": 540684,
@@ -140537,8 +140537,8 @@
   ],
   "match_stats": {
     "big_chances_missed": {
-      "home": 5,
-      "away": 4
+      "home": 2,
+      "away": 2
     },
     "passes_total_home": 888,
     "passes_accurate_home": 761,
@@ -140547,24 +140547,24 @@
     "passes_accurate_away": 178,
     "passes_accuracy_away": 60,
     "shots": {
-      "home": 27,
-      "away": 13
+      "home": 21,
+      "away": 7
     },
     "shots_on_target": {
-      "home": 19,
-      "away": 10
+      "home": 14,
+      "away": 5
     },
     "saves": {
-      "home": 6,
-      "away": 17
+      "home": 5,
+      "away": 15
     },
     "fouls": {
       "home": 18,
       "away": 12
     },
     "big_chances_created": {
-      "home": 8,
-      "away": 9
+      "home": 2,
+      "away": 3
     },
     "duels_won": {
       "home": 48,
@@ -140639,7 +140639,7 @@
     "446334": "Gast\u00f3n Olveira",
     "613716": "Alexandro Maidana"
   },
-  "_scraped_at": "2026-06-30T01:10:59.420028+00:00",
+  "_scraped_at": "2026-06-30T01:31:07.922187+00:00",
   "_sources": [
     "whoscored"
   ]
