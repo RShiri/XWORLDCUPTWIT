@@ -169,8 +169,18 @@
     var hs = D.shots.filter(function (s) { return s.team === "home"; });
     var as = D.shots.filter(function (s) { return s.team === "away"; });
     function sum(a) { return a.reduce(function (t, s) { return t + s.xg; }, 0); }
-    xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + sum(hs).toFixed(2) + "</b> — <b>" +
-      sum(as).toFixed(2) + '</b> <span class="est">· model-estimated from ' + D.shots.length + " shots</span></div>";
+    var mH = sum(hs), mA = sum(as);                       // our model (sum of shot dots)
+    var fx = D.fotXg || [];
+    var hasFot = fx[0] != null && fx[1] != null;
+    // Canonical xG = average of our model and FotMob when both exist (matches build_data).
+    var cH = hasFot ? (mH + fx[0]) / 2 : mH;
+    var cA = hasFot ? (mA + fx[1]) / 2 : mA;
+    var detailTxt = hasFot
+      ? '<span class="est">· avg of model ' + mH.toFixed(2) + "–" + mA.toFixed(2) +
+        " &amp; FotMob " + fx[0].toFixed(2) + "–" + fx[1].toFixed(2) + "</span>"
+      : '<span class="est">· model-estimated from ' + D.shots.length + " shots</span>";
+    xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + cH.toFixed(2) + "</b> — <b>" +
+      cA.toFixed(2) + "</b> " + detailTxt + "</div>";
 
     var goals = D.goals.map(function (g) {
       var as = g.assist ? '<span class="as">(' + esc(g.assist) + ")</span>" : "";

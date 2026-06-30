@@ -86,9 +86,9 @@
     </div>
     <div id="mListView">
       <p class="hint" style="margin:0 0 12px">
-        The <span class="est-tag">est</span> tag next to an xG value means it was <b>estimated</b> from each shot's
-        location and type (the same model used for the match infographics), because the official xG wasn't published
-        for that game. Untagged xG comes straight from the data provider.
+        xG comes from our own logistic-regression model (the same one behind the shot maps and infographics). The
+        <span class="xg-cmp">avg</span> tag means it's the <b>average of our model and FotMob's xG</b> for that game;
+        without the tag, FotMob didn't publish xG so the value is our model alone.
       </p>
       <div id="matchList"></div>
     </div>

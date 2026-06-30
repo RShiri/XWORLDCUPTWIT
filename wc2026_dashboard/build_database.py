@@ -46,7 +46,9 @@ def results_rows(data):
                    venue=m.get("venue", ""), home=m["home"], away=m["away"],
                    home_score=m["hs"], away_score=m["as"],
                    home_xg=m["xg_home"], away_xg=m["xg_away"],
-                   xg_estimated=int(bool(m.get("xg_estimated"))))
+                   xg_source=m.get("xg_source"),
+                   home_xg_model=m.get("model_xg_home"), away_xg_model=m.get("model_xg_away"),
+                   home_xg_fotmob=m.get("fot_xg_home"), away_xg_fotmob=m.get("fot_xg_away"))
 
 
 def team_match_stat_rows(data):

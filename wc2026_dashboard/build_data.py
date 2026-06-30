@@ -95,17 +95,31 @@ def load_matches():
         # with YYYY_MM_DD, so fall back to that.
         date = meta.get("date", "") or mid[:10].replace("_", "-")
 
-        # Combined stat line (match_stats keeps the larger value per stat). xG: prefer the
-        # stored/averaged value; otherwise estimate from WhoScored shot events with
-        # the same model the PNG renderer uses.
+        # Combined stat line (match_stats keeps the larger value per stat).
         stats = _stat_line(ms)
-        xg_home, xg_away = stats["xg"][0], stats["xg"][1]
-        xg_estimated = False
-        if (xg_home is None or xg_away is None) and d.get("events"):
+        # xG policy (multi-source average, per DATA_SOURCES.md): the canonical team xG is
+        # the AVERAGE of our logistic model and FotMob's xG when both exist; otherwise
+        # whichever single source we have. Each component is also stored (model_xg_*,
+        # fot_xg_*) so the match page can show the breakdown. `xg_source` records which.
+        fot_xg_home, fot_xg_away = stats["xg"][0], stats["xg"][1]
+        model_xg_home = model_xg_away = None
+        if d.get("events"):
             ch, ca = team_xg_from_events(d)
             if ch is not None:
-                xg_home, xg_away, xg_estimated = ch, ca, True
-                stats["xg"] = [xg_home, xg_away]
+                model_xg_home, model_xg_away = ch, ca
+
+        def _avg_xg(model_v, fot_v):
+            if model_v is not None and fot_v is not None:
+                return round((model_v + fot_v) / 2.0, 2)
+            return model_v if model_v is not None else fot_v
+
+        xg_home = _avg_xg(model_xg_home, fot_xg_home)
+        xg_away = _avg_xg(model_xg_away, fot_xg_away)
+        xg_source = ("avg" if (model_xg_home is not None and fot_xg_home is not None)
+                     else "model" if model_xg_home is not None
+                     else "fotmob" if fot_xg_home is not None else None)
+        if xg_home is not None:
+            stats["xg"] = [xg_home, xg_away]
 
         # Per-source stat lines behind the average, so the site/DB can show or audit
         # each provider's raw numbers ("most should be the same"; xG is FotMob-only).
@@ -129,7 +143,11 @@ def load_matches():
             "has_events": bool(d.get("events")),
             "xg_home": xg_home,
             "xg_away": xg_away,
-            "xg_estimated": xg_estimated,
+            "xg_source": xg_source,
+            "model_xg_home": model_xg_home,
+            "model_xg_away": model_xg_away,
+            "fot_xg_home": fot_xg_home,
+            "fot_xg_away": fot_xg_away,
             "png": find_png(mid),
             "stats": stats,
             "statsBySource": stats_by_source,
