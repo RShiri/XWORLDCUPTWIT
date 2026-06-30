@@ -56,11 +56,24 @@ POLL_INTERVAL = int(os.environ.get("WC2026_SCRAPE_POLL_SECONDS", 300))  # 5 min
 # FotMob World Cup 2026 tournament ID (update if FotMob changes it)
 WC2026_FOTMOB_ID = int(os.environ.get("WC2026_FOTMOB_LEAGUE_ID", 77))
 
-# WhoScored World Cup 2026 fixtures page (season/stage-specific for WC2026)
-WC2026_WS_BASE = os.environ.get(
-    "WC2026_WHOSCORED_URL",
-    "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/10498/Stages/25505/Fixtures/International-FIFA-World-Cup-2026",
+# WhoScored World Cup 2026 fixtures pages. WhoScored splits a tournament into
+# *stages*, each with its own id and its own fixtures list: the GROUP stage
+# (25505) and the KNOCKOUT stage (23752) are separate pages. Searching only the
+# group page meant knockout ties (Brazil vs Japan, etc.) were never found
+# ("match ID not found"). Scan the knockout stage first (that's where the live
+# rounds are), then the group stage. Override/extend with WC2026_WHOSCORED_URLS
+# (pipe-separated); WC2026_WHOSCORED_URL still works for a single page.
+_WS_DEFAULT_URLS = (
+    "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/10498/Stages/23752/Show/International-FIFA-World-Cup-2026"
+    "|https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/10498/Stages/25505/Fixtures/International-FIFA-World-Cup-2026"
 )
+WC2026_WS_BASES = [
+    u.strip() for u in os.environ.get(
+        "WC2026_WHOSCORED_URLS",
+        os.environ.get("WC2026_WHOSCORED_URL", _WS_DEFAULT_URLS),
+    ).split("|") if u.strip()
+]
+WC2026_WS_BASE = WC2026_WS_BASES[0]  # backward-compat alias
 
 _fetched_ids: set[int] = set()  # avoid re-fetching in the same run
 
@@ -885,20 +898,28 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
-        driver.get(WC2026_WS_BASE)
-        time.sleep(14)
         h_key = re.sub(r"[^a-z0-9]", "", home_name.lower())
         a_key = re.sub(r"[^a-z0-9]", "", away_name.lower())
-        for el in driver.find_elements("css selector", "a[href*='/matches/']"):
-            href = el.get_attribute("href") or ""
-            combined = re.sub(r"[^a-z0-9]", "", href.lower())
-            if h_key in combined and a_key in combined:
-                m = re.search(r"/matches/(\d+)/", href)
-                if m:
-                    mid = int(m.group(1))
-                    log.info("WhoScored: found match ID %d", mid)
-                    return mid
-        log.warning("WhoScored: match ID not found for %s vs %s", home_name, away_name)
+        for base in WC2026_WS_BASES:
+            try:
+                driver.get(base)
+            except Exception as exc:
+                log.warning("WhoScored: failed to load %s (%s)", base, exc)
+                continue
+            time.sleep(14)
+            stage = re.search(r"/Stages/(\d+)/", base)
+            log.info("WhoScored: scanning stage %s …", stage.group(1) if stage else base)
+            for el in driver.find_elements("css selector", "a[href*='/matches/']"):
+                href = el.get_attribute("href") or ""
+                combined = re.sub(r"[^a-z0-9]", "", href.lower())
+                if h_key in combined and a_key in combined:
+                    m = re.search(r"/matches/(\d+)/", href)
+                    if m:
+                        mid = int(m.group(1))
+                        log.info("WhoScored: found match ID %d", mid)
+                        return mid
+        log.warning("WhoScored: match ID not found for %s vs %s (scanned %d stage page(s))",
+                    home_name, away_name, len(WC2026_WS_BASES))
         return None
     except Exception as exc:
         log.error("WhoScored search error: %s", exc)
@@ -1202,6 +1223,27 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
 
     match_json = build_match_json(fm_data, ws_data, xml_match=xml_match)
     out_path   = Path(out_path) if out_path else _output_path(match_json, fotmob_id)
+
+    # Never clobber a real saved match with an empty stub. A failed scrape (FotMob
+    # down + WhoScored id not found) builds a stub with no events/lineups; writing
+    # it over good data would destroy a published match AND leave the working tree
+    # dirty so `git pull` aborts. If the new result is empty but the target already
+    # holds a real scrape, keep the existing file and report failure instead.
+    def _has_data(mj: dict) -> bool:
+        return bool(mj.get("events")
+                    or (mj.get("home") or {}).get("players")
+                    or (mj.get("away") or {}).get("players"))
+
+    if not _has_data(match_json) and out_path.exists():
+        try:
+            existing = json.loads(out_path.read_text(encoding="utf-8"))
+        except Exception:
+            existing = {}
+        if _has_data(existing):
+            log.warning("Scrape produced no data for id=%s — keeping existing real file "
+                        "%s (refusing to overwrite it with an empty stub).",
+                        fotmob_id, out_path.name)
+            return None
 
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(match_json, fh, indent=2)
