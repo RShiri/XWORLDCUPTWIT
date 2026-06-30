@@ -152,7 +152,10 @@
       '<div class="scoreboard"><div class="sb-main">' +
         '<div class="sb-team home"><span class="nm">' + esc(D.home.name) + "</span>" + logoImg(D.home.name) + "</div>" +
         '<div class="sb-score">' + (D.home.score == null ? "-" : D.home.score) + " : " +
-          (D.away.score == null ? "-" : D.away.score) + "</div>" +
+          (D.away.score == null ? "-" : D.away.score) +
+          (D.home.pens != null && D.away.pens != null
+            ? '<span class="sb-pens">(' + D.home.pens + "-" + D.away.pens + " pens)</span>" : "") +
+          "</div>" +
         '<div class="sb-team away">' + logoImg(D.away.name) + '<span class="nm">' + esc(D.away.name) + "</span></div>" +
       "</div>" + xgTxt +
       '<div class="sb-meta">' + esc(D.stage || "") + (D.venue ? " · " + esc(D.venue) : "") +
