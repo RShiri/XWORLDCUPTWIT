@@ -3,3 +3,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_06_25_Scotland_vs_Brazil,2026-06-24,Brazil,Scotland,away,fotmob,3,0,54,21,9,605,93,6,3,5,11,63,4.33,6
 2026_06_25_Scotland_vs_Brazil,2026-06-24,Scotland,Brazil,home,whoscored,0,3,46,14,8,546,88,1,1,11,10,33,,
 2026_06_25_Scotland_vs_Brazil,2026-06-24,Brazil,Scotland,away,whoscored,3,0,54,21,14,632,92,6,3,8,11,67,,
+2026_06_30_1F_vs_2C,2026-06-30,Netherlands,Morocco,home,fotmob,1,1,30,6,2,373,79,1,0,5,18,51,0.23,5
+2026_06_30_1F_vs_2C,2026-06-30,Morocco,Netherlands,away,fotmob,1,1,70,11,5,878,91,5,4,1,15,49,1.4,8
+2026_06_30_1F_vs_2C,2026-06-30,Netherlands,Morocco,home,whoscored,1,1,31,6,5,413,77,1,0,7,18,48,,
+2026_06_30_1F_vs_2C,2026-06-30,Morocco,Netherlands,away,whoscored,1,1,69,11,7,916,90,4,3,5,15,52,,
