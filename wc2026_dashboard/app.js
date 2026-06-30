@@ -1319,18 +1319,48 @@
     var K = buildKnockout();
     if (!K) { host.innerHTML = '<p class="hint">The knockout bracket appears once the fixtures are loaded.</p>'; return; }
     var fin = K.fin, tp = K.tp, resolveSlot = K.resolveSlot;
+    // One side of a bracket box. Three cases, in priority order:
+    //   1. tie played            → the team with its goals, plus the shootout score in
+    //                              parens when it finished level and was decided on penalties;
+    //   2. fed by a decided tie  → the team that has ALREADY advanced into this slot. koSide
+    //      (shared with the calendar) walks the `_kids` feeder tree and is penalty-aware, so
+    //      a winner — including a shootout winner — propagates up the bracket automatically;
+    //   3. still undecided       → the projected slot label ("2A", "Winner R16 #1", …).
     function side(m, which) {
-      var nm = which === "h" ? m.home : m.away;
+      var idx = which === "h" ? 0 : 1;
       var sc = which === "h" ? m.hs : m.as, os = which === "h" ? m.as : m.hs;
+      var pen = which === "h" ? m.hpen : m.apen, opp = which === "h" ? m.apen : m.hpen;
       if (m.played && sc != null) {
-        var cls = sc > os ? "win" : sc < os ? "lose" : "draw";
+        var nm = which === "h" ? m.home : m.away;
+        var pens = sc === os && pen != null && opp != null;   // level on goals → shootout decided it
+        var cls = (sc > os || (pens && pen > opp)) ? "win"
+                : (sc < os || (pens && pen < opp)) ? "lose" : "draw";
+        var penTxt = pens ? ' <span class="pen">(' + pen + ")</span>" : "";
         return '<div class="bk-side ' + cls + '">' + logoImg(nm, "bk-logo") +
-          '<span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + "</span></div>";
+          '<span class="nm">' + esc(nm) + '</span><span class="sc">' + sc + penTxt + "</span></div>";
       }
-      var r = resolveSlot(nm);
-      if (r.team) return '<div class="bk-side proj">' + logoImg(r.team, "bk-logo") +
-        '<span class="nm">' + esc(r.team) + '</span><span class="tag">' + esc(r.code) + "</span></div>";
-      return '<div class="bk-side tbd"><span class="nm">' + esc(r.text) + "</span></div>";
+      var rawCode = K.strip(m.id).split("_vs_")[idx];
+      // Third-place play-off: a side references a BEATEN semi-finalist ("Loser_SF_n"), so the
+      // LOSER of that semi advances here — not the winner koSide would return. Resolve it
+      // directly once the semi is played; until then fall through to the "Loser SF #n" label.
+      if (/^Loser_/.test(rawCode)) {
+        var sf = m._kids && m._kids[idx];
+        var w = sf && sf.played ? koCands(K, sf)[0] : null;   // decided winner (goals or pens)
+        if (w) {
+          var loser = w === sf.home ? sf.away : sf.home;
+          return '<div class="bk-side proj">' + logoImg(loser, "bk-logo") +
+            '<span class="nm">' + esc(loser) + "</span></div>";
+        }
+      }
+      var s = koSide(K, m, idx);
+      if (s.team) {
+        // Tag the small group seed it came from (e.g. "2A"/"3rd"); advanced winners get no tag.
+        var code = resolveSlot(rawCode).code || "";
+        return '<div class="bk-side proj">' + logoImg(s.team, "bk-logo") +
+          '<span class="nm">' + esc(s.team) + "</span>" +
+          (code ? '<span class="tag">' + esc(code) + "</span>" : "") + "</div>";
+      }
+      return '<div class="bk-side tbd"><span class="nm">' + esc(s.label) + "</span></div>";
     }
     function box(m) {
       if (!m) return '<div class="bk-match bk-tbd"><div class="bk-side tbd"><span class="nm">TBD</span></div></div>';

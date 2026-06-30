@@ -492,6 +492,7 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .bk-side .bk-logo { width: 18px; height: 13px; object-fit: contain; flex: 0 0 auto; }
 .bk-side .nm { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bk-side .sc { font-weight: 700; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+.bk-side .pen { font-size: 10px; font-weight: 700; opacity: 0.8; }
 .bk-side .tag {
   font-size: 9px; font-weight: 700; color: var(--accent-2); border: 1px solid #2f4366;
   border-radius: 4px; padding: 0 3px; flex: 0 0 auto;
