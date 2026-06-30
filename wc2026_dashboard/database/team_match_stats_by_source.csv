@@ -7,3 +7,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_06_30_1F_vs_2C,2026-06-30,Morocco,Netherlands,away,fotmob,1,1,70,11,5,878,91,5,4,1,15,49,1.4,8
 2026_06_30_1F_vs_2C,2026-06-30,Netherlands,Morocco,home,whoscored,1,1,31,6,5,413,77,1,0,7,18,48,,
 2026_06_30_1F_vs_2C,2026-06-30,Morocco,Netherlands,away,whoscored,1,1,69,11,7,916,90,4,3,5,15,52,,
+2026_06_30_2E_vs_2I,2026-06-30,Ivory Coast,Norway,home,fotmob,1,2,47,14,5,401,85,3,2,1,6,54,1.36,14
+2026_06_30_2E_vs_2I,2026-06-30,Norway,Ivory Coast,away,fotmob,2,1,53,9,4,473,88,4,3,4,7,46,2.02,3
+2026_06_30_2E_vs_2I,2026-06-30,Ivory Coast,Norway,home,whoscored,1,2,47,14,5,450,81,3,2,5,6,55,,
+2026_06_30_2E_vs_2I,2026-06-30,Norway,Ivory Coast,away,whoscored,2,1,53,9,7,511,87,4,3,4,7,45,,
