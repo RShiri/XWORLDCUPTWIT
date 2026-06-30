@@ -53,13 +53,13 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 ## Auto-deploy (how the live site stays current)
 - `run_match` step 4 → `git_ops.push_match_update()`: clones the repo to a temp dir and,
   in ONE commit, pushes the PNG **+** regenerated `wc2026_dashboard/{data.js,players.js,
-  matches_detail/,database/}` **+** the raw match JSON. Needs `GIT_TOKEN` env var.
+  shots.js,matches_detail/,database/}` **+** the raw match JSON. Needs `GIT_TOKEN` env var.
 - It only auto-pushes **generated** files. Edits to dashboard **source**
   (`app.js`, `match.js`, `styles.css`, `match.css`, `*.html`) need a **manual** `git push`.
 - The render hook `_refresh_web_dashboard_db()` (renderer.py, runs on EVERY render)
   regenerates ALL dashboard data LOCALLY: the match-detail JS **and** `build_data.py`,
-  `build_players.py`, `build_database.py` (CSVs + sqlite + manifest). So databases are
-  always fresh after a scrape; the **push is a separate step** that can fail independently.
+  `build_players.py`, `build_shots.py`, `build_database.py` (CSVs + sqlite + manifest). So
+  databases are always fresh after a scrape; the **push is a separate step** that can fail independently.
 
 ### ⚠️ Silent-push-failure (the #1 reason the site goes stale)
 - `git_ops._run()` forces `-c credential.helper=`, so the bot can auth **only** via
@@ -82,6 +82,8 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   (visit `http://localhost:8777/wc2026_dashboard/index.html`; server roots at repo root).
 - Builders: `build_data.py`→data.js, `build_match_details.py`→matches_detail/<id>.js
   (shots/passes/dribbles/goals/lineups), `build_players.py`→players.js,
+  `build_shots.py`→shots.js (every shot tournament-wide: `window.WC_SHOTS`
+  `[{t,o,h,x,y,xg,g,ot,s,m}]`, own goals + shootouts excluded — powers Team Lab),
   `build_database.py`→database/.
 - **`xg_model.py`** is the shared, dependency-free shot-extraction + xG model that ALL four
   builders import (so the website's xG matches the PNG infographics exactly). It is copied
@@ -89,6 +91,12 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   model in `renderer.py`, mirror the change here or the site and PNGs will disagree.
 
 ## Match dashboard view (`match.js`)
+- **xG momentum** (`buildMomentum`, `#mv-momentum`, near the top under Match stats): a cumulative
+  **xG "race"** over the 90 mins — each side's line steps up by every shot's xG (`D.shots`), with
+  ⚽ markers at goal minutes (`D.goals`, incl. pens/OGs — OGs carry no xG so they mark without a
+  step), an HT dashed line, and a legend showing final xG vs actual goals. Uses `D.home.color`/
+  `D.away.color`, but falls back to a distinct blue/orange pair when the two team colours are too
+  close (hex distance < 90) so the lines never blur together.
 - **All Goals Map** (last section on each match page, below all stats): a per-goal,
   Opta-style build-up reconstructed from `D.shots`/`D.passes`/`D.dribbles`/`D.saves` —
   numbered shirt-# touch nodes, **dotted** passes, **curved dotted** crosses (`p.cross`),
@@ -142,8 +150,11 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   that can actually occur are listed; if the live combo isn't in the table the bracket keeps
   the `3rd: A/B/..` placeholder. `resolveSlot` consults `computeThirds().assignByCode` to fill
   the slots.
-- **Power Rank & Predictions** (`renderPower`/`predictAll`, `#view-predict`, the **last tab,
-  after Data**): a Power Index for the 32 Round-of-32 teams = hardcoded `FIFA_PTS` (FIFA/Coca-Cola
+- **Tab order** (`nav.tabs`): Tables · Matches · Players · xG Analysis · Data · Power Rank ·
+  **Standouts** · **Team Lab**. Tab switching is `data-view`-driven (a button's `data-view="x"`
+  toggles `#view-x`), so reordering is pure HTML — see `app.js` ~line 148.
+- **Power Rank & Predictions** (`renderPower`/`predictAll`, `#view-predict`, after Data): a Power
+  Index for the 32 Round-of-32 teams = hardcoded `FIFA_PTS` (FIFA/Coca-Cola
   ranking, 11 Jun 2026 — top ~45 published, lowest few approximated) **+** a ±100-capped
   group-stage form adjustment (`powerRating`: pts/game, GD/game, xGD/game from `AGG`). `winProb`
   (Elo-style, 400-pt scale) + `predictScore` drive a favourite-advances simulation of every
@@ -156,6 +167,29 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   `centerAvg:true` → axes span `0 .. avg + max-distance-from-avg` per axis so the avg
   lines sit near centre with no dead space and no clipped outliers (instead of the default
   `niceMax`-padded fit, which squashed the dots to the bottom).
+- **Standouts** (`#view-standouts`, `renderStandouts`/`renderScatter2`/`renderRadar`, all in
+  `app.js`): a player-analysis tab, all client-side from `window.WC_PLAYERS`, tied together by one
+  **spotlight-player** picker (`soState.player`). Four linked tools: (1) a **distribution / KDE**
+  density plot for any stat — every player a jittered dot, mean line, ≥2σ dots pink, spotlight gold
+  + percentile; (2) **"the unique ones"** σ-ranked anomaly list; (3) a **two-stat scatter**
+  (`soScatterSVG`) with a 3rd stat as dot size, quadrant mean lines, and **preset chips**
+  (`SO_PRESETS`: Solid defenders, Shot blockers, Shot-stoppers, Creators, Ball winners, Finishers,
+  Dribble & create); (4) a **percentile radar** (`radarSVG`) vs same-position peers (90+ min),
+  role-specific axes for outfield vs GK. Stat list = `SO_STATS`.
+- **Player metrics** (`build_players.py`, in `players.js`): besides the basics it now aggregates
+  from the event stream — `progPasses` (successful passes advancing ≥15 x toward goal), `xa`
+  (expected assists: each shot's xG credited to the key passer who set it up), `xga`/`xga90`
+  (opponent xG faced **while on the pitch**), `gPrev` (goals prevented = xG faced − goals conceded
+  on pitch; for keepers = shot-stopping), `blocks` (outfielder shot blocks = `Save`+`OutfielderBlock`
+  qualifier), `clrBox` (clearances inside own penalty area). xG-faced/gPrev is *team-on-pitch*
+  context (teammates sharing minutes share the value); for keepers it's individual.
+- **Team Lab** (`#view-teamlab`, `renderTeamLab`/`tlShotMap`/`tlRadar`/`tlTeamStyle`, `app.js`):
+  team-analysis tab driven by `window.WC_SHOTS` (`shots.js`) + the `data.js` team stats. A
+  **shot map / xG heatmap** on a half-pitch drawn goal-at-top / attacking ↑ (`tlPitch`), per-team
+  or all, filterable by outcome (all/on-target/goals) and situation (open/set/pen), with **Shot
+  dots** (sized by xG) and **xG heatmap** (zone-shaded) modes; plus a per-team **style
+  fingerprint** percentile radar (possession, shots/game, xG/game, xG/shot, set-piece xG share,
+  pass accuracy, defensive solidity = −xGA/game) vs all teams.
 
 ## Gotchas (read before editing)
 - **Knockout fixtures = slot-coded stubs**: each KO match ships as a tiny stub JSON named by
