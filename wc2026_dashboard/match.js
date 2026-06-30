@@ -233,7 +233,7 @@
       var gx = sx(g.min), gy = sy(cumAt(pts, g.min + 1e-6));
       var gName = g.team === "home" ? D.home.name : D.away.name;
       var info = g.min + "' " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + " — " + gName;
-      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"></circle>');
       svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" fill="' + col + '" font-size="11" text-anchor="middle">⚽</text>');
     });
     svg.push("</svg>");
@@ -246,11 +246,20 @@
       '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend +
       '<div class="chart-tip" id="mvMomTip"></div>';
     var tip = document.getElementById("mvMomTip");
+    function isDot(el) { return el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info"); }
+    function momHTML(info) {
+      var i = info.indexOf(" — "), a = i >= 0 ? info.slice(0, i) : info, bb = i >= 0 ? info.slice(i + 3) : "";
+      return '<div class="t-team">' + esc(a) + "</div>" + (bb ? '<div class="t-line">' + esc(bb) + "</div>" : "");
+    }
+    // desktop hover: floating tooltip like every other match-page chart
+    host.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      if (isDot(e.target)) showTip(e, momHTML(e.target.getAttribute("data-info"))); else hideTip();
+    });
+    host.addEventListener("pointerleave", hideTip);
+    // touch tap: caption line under the chart
     host.addEventListener("click", function (e) {
-      var el = e.target;
-      if (el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info")) {
-        tip.textContent = el.getAttribute("data-info"); tip.classList.add("show");
-      }
+      if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); }
     });
   }
 

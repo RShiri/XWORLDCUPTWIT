@@ -1724,7 +1724,7 @@
       var op = isSpot ? 1 : anom ? 0.92 : 0.5;
       var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
       var info = p.name + " · " + p.team + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)";
-      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
+      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
     });
     // labels: top anomalies by value, plus the spotlight player
     var labels = [];
@@ -1911,7 +1911,7 @@
       var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
       var info = p.name + " · " + p.team + " — " + soStatLabel(xKey) + " " + soFmt(vx, dpx) +
         ", " + soStatLabel(yKey) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + soStatLabel(sizeKey) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
-      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
+      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
       var zx = (vx - mx) / sdx, zy = (vy - my) / sdy;
       pts.push({ p: p, cx: cx, cy: cy, score: zx + zy, team: p.name, spot: isSpot });
     });
@@ -2031,26 +2031,39 @@
      below the chart (and highlight the dot). Hover still works via <title> on desktop,
      but tap is the only way on touch devices. Delegated on the persistent container so
      it survives the chart's innerHTML being re-rendered. */
+  // data-info is "Title — detail"; format like the rest of the graphs' tooltip.
+  function tipHTML(info) {
+    var i = info.indexOf(" — ");
+    var a = i >= 0 ? info.slice(0, i) : info, b = i >= 0 ? info.slice(i + 3) : "";
+    return '<div class="t-team">' + esc(a) + "</div>" + (b ? '<div class="t-line">' + esc(b) + "</div>" : "");
+  }
   function wireChartTaps(hostId, tipId) {
     var host = document.getElementById(hostId), tip = document.getElementById(tipId);
-    if (!host || !tip || host._tapWired) return;
+    if (!host || host._tapWired) return;
     host._tapWired = true;
     var last = null;
     function isDot(el) { return el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info"); }
-    function select(el) {
+    // desktop hover: the same floating tooltip the other charts use
+    host.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      if (isDot(e.target)) {
+        tooltip.innerHTML = tipHTML(e.target.getAttribute("data-info"));
+        tooltip.style.opacity = "1";
+        tooltip.style.left = (e.clientX + 14) + "px";
+        tooltip.style.top = (e.clientY + 14) + "px";
+      } else { tooltip.style.opacity = "0"; }
+    });
+    host.addEventListener("pointerleave", function () { tooltip.style.opacity = "0"; });
+    // touch tap: highlight the dot + show its details in the caption line (a tooltip
+    // under the finger would be hidden), plus the floating tooltip at the tap point.
+    host.addEventListener("click", function (e) {
+      if (!isDot(e.target)) return;
+      var el = e.target;
       if (last && last.parentNode) { last.setAttribute("stroke", last._os || "none"); last.setAttribute("stroke-width", last._ow || "0"); }
       el._os = el.getAttribute("stroke") || "none"; el._ow = el.getAttribute("stroke-width") || "0";
       el.setAttribute("stroke", "#fff"); el.setAttribute("stroke-width", "2");
       last = el;
-      tip.textContent = el.getAttribute("data-info");
-      tip.classList.add("show");
-    }
-    // tap (mobile) + click (desktop)
-    host.addEventListener("click", function (e) { if (isDot(e.target)) select(e.target); });
-    // hover (desktop): update the caption without the sticky highlight
-    host.addEventListener("pointermove", function (e) {
-      if (e.pointerType === "touch") return;        // touch already handled by click
-      if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); }
+      if (tip) { tip.textContent = el.getAttribute("data-info"); tip.classList.add("show"); }
     });
   }
 
@@ -2200,7 +2213,7 @@
         var op = s.g ? 0.95 : s.ot ? 0.6 : 0.35;
         var stroke = s.g ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
         var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : s.ot ? " (on target)" : "") + " · " + s.s + " · " + s.m + "'";
-        svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
+        svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
       });
     }
     svg.push("</svg>");
