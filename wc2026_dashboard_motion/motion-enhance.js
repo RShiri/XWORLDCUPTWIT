@@ -115,7 +115,14 @@
   /* ---- spring hover lift (event-delegated → survives app re-renders) ---- */
   var HOVER_SEL = ".card,.group-card,.data-card,.third-card,.pred-card,.stat,.stat-panel";
   function hoverTarget(node) {
-    return node && node.closest ? node.closest(HOVER_SEL) : null;
+    if (!node || !node.closest) return null;
+    var t = node.closest(HOVER_SEL);
+    if (!t) return null;
+    // Never lift/scale a card that holds a graph: a CSS scale blurs the SVG and
+    // the lift fights the chart's own hover tooltips / clickable dots. Leave any
+    // card containing an <svg> or <canvas> perfectly still and interactive.
+    if (t.querySelector("svg, canvas")) return null;
+    return t;
   }
   document.addEventListener("mouseover", function (e) {
     var t = hoverTarget(e.target);

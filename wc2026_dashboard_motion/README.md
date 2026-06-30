@@ -22,6 +22,16 @@ Only these files actually live here:
 | `index.html` / `match.html` | Copies of the originals, re-pointed at `../wc2026_dashboard/` for CSS/JS/data, plus the motion layer. Body markup is identical. |
 | `vendor/motion.js` | The vendored `motion` UMD build (v11.18.2, exposes `window.Motion`). Pulled from the npm registry — **no CDN**, matching the project's offline-capable ethos. |
 | `motion-enhance.js` | The animation layer: header entrance, top scroll-progress bar, staggered card reveals per view + on tab switch, stat number count-ups, spring hover-lift on cards/tabs, and match-page section reveals. Loads *after* `app.js`/`match.js`. |
+
+### Graphs are left alone
+
+The charts/maps (scatter quadrants, shot maps, radars, pitch & momentum
+diagrams) are rendered by the **original, unchanged** code — same SVG, same xG
+model, same data. The animation layer deliberately **excludes any card
+containing an `<svg>`/`<canvas>` from the hover-lift**, so graphs never scale
+(which would blur the SVG) and the lift never fights a chart's own hover
+tooltips or clickable dots. Charts still get the one-time fade-up entrance with
+their view, but stay perfectly still and fully interactive on hover.
 | `motion-matchpath.js` | One surgical shim: rewrites `match.js`'s page-relative `matches_detail/<id>.js` request back to `../wc2026_dashboard/` so the shared per-match event files load (avoids duplicating ~78 files). |
 | `motion.css` | Chrome for the layer (scroll bar, header badge, "Classic" link) + a hard `prefers-reduced-motion` opt-out. |
 
