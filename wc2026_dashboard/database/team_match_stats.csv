@@ -149,3 +149,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_29_1C_vs_2F,2026-06-29,Japan,Brazil,away,1,2,32,5,4,348,82,0,0,11,13,48,0.17
 2026_06_29_1E_vs_3ABCDF,2026-06-30,Germany,Paraguay,home,1,1,75,21,14,888,86,2,2,5,18,48,1.87
 2026_06_29_1E_vs_3ABCDF,2026-06-30,Paraguay,Germany,away,1,1,25,7,5,295,60,3,2,15,12,52,1.54
+2026_06_30_1F_vs_2C,2026-06-30,Netherlands,Morocco,home,1,1,30,6,5,413,79,1,0,7,18,51,0.23
+2026_06_30_1F_vs_2C,2026-06-30,Morocco,Netherlands,away,1,1,70,11,7,916,91,5,4,5,15,49,1.4

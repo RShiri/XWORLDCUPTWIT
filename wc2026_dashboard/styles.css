@@ -458,7 +458,9 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .bk-kids { display: flex; flex-direction: column; justify-content: center; }
 .bk-edge { width: var(--bk-edge); height: 2px; background: var(--line); flex: 0 0 auto; }
 
-/* two-sided layout: left half flows right, right half mirrors, Final in the centre */
+/* left-to-right layout: deepest round (R32) on the left, flowing right to the Final */
+.bracket-tree.lr { justify-content: flex-start; align-items: center; }
+/* two-sided layout (legacy): left half flows right, right half mirrors, Final centre */
 .bracket-tree.two-sided { justify-content: center; }
 .bk-half, .bk-center { display: flex; align-items: center; }
 
@@ -625,3 +627,16 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .cal-badges { display: inline-flex; align-items: center; gap: 4px; }
 .cal-badge { width: 30px; height: 22px; object-fit: contain; border-radius: 2px; }
 .cal-badges .bvs { color: var(--muted); font-weight: 700; font-size: 12px; margin: 0 1px; }
+
+/* ---- live auto-update toast ---- */
+.live-toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--accent); color: #04121f; font-weight: 700; font-size: 13px; padding: 9px 16px;
+  border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+  transition: opacity .3s ease, transform .3s ease; z-index: 9999; }
+.live-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* penalty-shootout result on a drawn knockout tie (matches list) */
+.db-match-head .score .pens, .match-row .score .pens {
+  display: block; margin-top: 2px; font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.2px; color: var(--accent); text-transform: uppercase;
+}
