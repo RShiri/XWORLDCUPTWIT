@@ -35,6 +35,34 @@ def norm(name):
     return NAME_MAP.get(name, name)
 
 
+# data.js stat key -> canonical match_stats key (scraper now stores nested
+# {home,away} under these canonical names; older files used flat `<key>_home`).
+_STAT_KEYS = {
+    "xg": "xg", "shots": "shots", "sot": "shots_on_target",
+    "possession": "possession", "passes": "passes_total",
+    "pass_acc": "passes_accuracy", "big_chances": "big_chances_created",
+    "big_missed": "big_chances_missed", "saves": "saves", "fouls": "fouls",
+    "duels_won": "duels_won", "corners": "corners",
+}
+
+
+def _pair(ms, canonical):
+    """[home, away] for a canonical stat, accepting nested {home,away} or flat key_home."""
+    v = ms.get(canonical)
+    if isinstance(v, dict):
+        return [v.get("home"), v.get("away")]
+    return [ms.get(canonical + "_home"), ms.get(canonical + "_away")]
+
+
+def _stat_line(ms):
+    """Full [home, away] stat line keyed by the data.js stat names."""
+    line = {dst: _pair(ms, canon) for dst, canon in _STAT_KEYS.items()}
+    # legacy alias: some old files only have pass_accuracy spelled differently
+    if line["pass_acc"] == [None, None]:
+        line["pass_acc"] = _pair(ms, "pass_accuracy")
+    return line
+
+
 def build_groups():
     """team -> group letter, from the remaining schedule (covers all 48 teams)."""
     sched = json.load(open(SCHEDULE, encoding="utf-8"))
@@ -65,33 +93,22 @@ def load_matches():
         # with YYYY_MM_DD, so fall back to that.
         date = meta.get("date", "") or mid[:10].replace("_", "-")
 
-        # xG: prefer the FotMob value; otherwise estimate it from the WhoScored
-        # shot events with the same model the PNG renderer uses. This fills the
-        # many played matches that were scraped + rendered but had no FotMob xG.
-        xg_home, xg_away = ms.get("xg_home"), ms.get("xg_away")
+        # Combined stat line (match_stats keeps the larger value per stat). xG: prefer the
+        # stored/averaged value; otherwise estimate from WhoScored shot events with
+        # the same model the PNG renderer uses.
+        stats = _stat_line(ms)
+        xg_home, xg_away = stats["xg"][0], stats["xg"][1]
         xg_estimated = False
         if (xg_home is None or xg_away is None) and d.get("events"):
             ch, ca = team_xg_from_events(d)
             if ch is not None:
                 xg_home, xg_away, xg_estimated = ch, ca, True
+                stats["xg"] = [xg_home, xg_away]
 
-        # Full stat line per game. Each entry is [home, away]; None where absent.
-        def pair(key):
-            return [ms.get(key + "_home"), ms.get(key + "_away")]
-        stats = {
-            "xg": [xg_home, xg_away],
-            "shots": pair("shots"),
-            "sot": [ms.get("shots_on_target_home"), ms.get("shots_on_target_away")],
-            "possession": pair("possession"),
-            "passes": pair("passes"),
-            "pass_acc": [ms.get("pass_accuracy_home") or ms.get("passes_accuracy_home"),
-                         ms.get("pass_accuracy_away") or ms.get("passes_accuracy_away")],
-            "big_chances": [ms.get("big_chances_created_home"), ms.get("big_chances_created_away")],
-            "big_missed": [ms.get("big_chances_missed_home"), ms.get("big_chances_missed_away")],
-            "saves": pair("saves"),
-            "fouls": pair("fouls"),
-            "duels_won": pair("duels_won"),
-        }
+        # Per-source stat lines behind the average, so the site/DB can show or audit
+        # each provider's raw numbers ("most should be the same"; xG is FotMob-only).
+        stats_by_source = {src: _stat_line(sd) for src, sd in (d.get("stats_by_source") or {}).items()}
+
         has_stats = stats["xg"][0] is not None or stats["shots"][0] is not None
 
         matches.append({
@@ -111,6 +128,8 @@ def load_matches():
             "xg_estimated": xg_estimated,
             "png": find_png(mid),
             "stats": stats,
+            "statsBySource": stats_by_source,
+            "sources": d.get("_sources", []),
         })
     return _dedupe(matches)
 

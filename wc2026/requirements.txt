@@ -14,3 +14,4 @@ Pillow>=10.0.0
 fastapi
 uvicorn
 requests>=2.31.0
+curl_cffi>=0.7  # browser-TLS HTTP client: reaches FotMob JSON API (Varnish/JA3 gated)

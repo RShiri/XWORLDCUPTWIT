@@ -1,0 +1,5 @@
+match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,passes,pass_acc,big_chances,big_missed,saves,fouls,duels_won,xg,corners
+2026_06_25_Scotland_vs_Brazil,2026-06-24,Scotland,Brazil,home,fotmob,0,3,46,14,5,500,90,1,1,5,10,37,1.04,7
+2026_06_25_Scotland_vs_Brazil,2026-06-24,Brazil,Scotland,away,fotmob,3,0,54,21,9,605,93,6,3,5,11,63,4.33,6
+2026_06_25_Scotland_vs_Brazil,2026-06-24,Scotland,Brazil,home,whoscored,0,3,46,14,8,546,88,1,1,11,10,33,,
+2026_06_25_Scotland_vs_Brazil,2026-06-24,Brazil,Scotland,away,whoscored,3,0,54,21,14,632,92,6,3,8,11,67,,

@@ -232,9 +232,16 @@
         '<div class="sc-val ' + (aBetter ? "win" : "") + '">' + disp(a) + "</div>" +
         "</div>";
     }).join("");
+    var LABELS = { fotmob: "FotMob", whoscored: "WhoScored", sofascore: "SofaScore" };
+    var srcs = (rec.sources || []).map(function (s) { return LABELS[s] || s; });
+    var cap = srcs.length
+      ? '<div class="stat-src" style="text-align:center;font-size:.78em;opacity:.6;margin-top:8px">' +
+          (srcs.length > 1 ? "Combined from " + srcs.length + " sources: " : "Source: ") +
+          srcs.join(" · ") + "</div>"
+      : "";
     host.innerHTML = '<div class="stat-panel" style="border-top:none">' +
       '<div class="sp-head"><span>' + esc(D.home.name) + "</span><span>" + esc(D.away.name) + "</span></div>" +
-      rows + "</div>";
+      rows + cap + "</div>";
   }
 
   /* ================= SHOT MAP ================= */

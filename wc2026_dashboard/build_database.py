@@ -68,6 +68,28 @@ def team_match_stat_rows(data):
             yield row
 
 
+def team_match_stat_by_source_rows(data):
+    """One row per team per match PER SOURCE — the raw provider numbers behind the
+    averaged team_match_stats (so all scraped data is stored, not just the mean)."""
+    keys = ["possession", "shots", "sot", "passes", "pass_acc", "big_chances",
+            "big_missed", "saves", "fouls", "duels_won", "xg", "corners"]
+    for m in data["matches"]:
+        if not m["played"]:
+            continue
+        for source, line in (m.get("statsBySource") or {}).items():
+            for i, side in enumerate(("home", "away")):
+                team = m["home"] if side == "home" else m["away"]
+                opp = m["away"] if side == "home" else m["home"]
+                row = dict(match_id=m["id"], date=m["date"], team=team, opponent=opp,
+                           side=side, source=source,
+                           goals=(m["hs"] if side == "home" else m["as"]),
+                           conceded=(m["as"] if side == "home" else m["hs"]))
+                for k in keys:
+                    pair = line.get(k) or [None, None]
+                    row[k] = pair[i]
+                yield row
+
+
 def standings_rows(data):
     for letter, rows in data["standings"].items():
         for pos, r in enumerate(rows, 1):
@@ -132,6 +154,7 @@ def main():
 
     results = list(results_rows(data))
     team_stats = list(team_match_stat_rows(data))
+    team_stats_src = list(team_match_stat_by_source_rows(data))
     standings = list(standings_rows(data))
     player_match = list(build_players.per_match_rows())
     players = build_players.aggregate()
@@ -139,6 +162,7 @@ def main():
     counts = {
         "results.csv": _write_csv("results.csv", results),
         "team_match_stats.csv": _write_csv("team_match_stats.csv", team_stats),
+        "team_match_stats_by_source.csv": _write_csv("team_match_stats_by_source.csv", team_stats_src),
         "player_match_stats.csv": _write_csv("player_match_stats.csv", player_match),
         "players.csv": _write_csv("players.csv", players),
         "standings.csv": _write_csv("standings.csv", standings),
@@ -146,6 +170,7 @@ def main():
     _write_sqlite({
         "matches": results,
         "team_match_stats": team_stats,
+        "team_match_stats_by_source": team_stats_src,
         "player_match_stats": player_match,
         "players": players,
         "standings": standings,
@@ -158,7 +183,8 @@ def main():
         "generated": data.get("generated", ""),
         "tables": [
             {"file": "results.csv", "label": "Game results", "rows": counts["results.csv"]},
-            {"file": "team_match_stats.csv", "label": "Team stats per game", "rows": counts["team_match_stats.csv"]},
+            {"file": "team_match_stats.csv", "label": "Team stats per game (averaged)", "rows": counts["team_match_stats.csv"]},
+            {"file": "team_match_stats_by_source.csv", "label": "Team stats per game (per source)", "rows": counts["team_match_stats_by_source.csv"]},
             {"file": "player_match_stats.csv", "label": "Player stats per game", "rows": counts["player_match_stats.csv"]},
             {"file": "players.csv", "label": "Player aggregate totals", "rows": counts["players.csv"]},
             {"file": "standings.csv", "label": "Group standings", "rows": counts["standings.csv"]},

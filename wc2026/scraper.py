@@ -154,6 +154,31 @@ def _fotmob_scraper():
         return s
 
 
+_BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+               "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+
+
+def _http_get(url: str, headers: dict | None = None, timeout: int = 25):
+    """GET a URL with a real-browser TLS fingerprint.
+
+    FotMob (and many football data hosts) sit behind a Varnish/WAF edge that
+    fingerprints the TLS/JA3 handshake and 403/404s the stock ``requests``/
+    ``cloudscraper`` clients. ``curl_cffi`` impersonates Chrome's TLS so the
+    request looks like a genuine browser -- this is what makes the FotMob JSON
+    API reachable without a signed token. If curl_cffi isn't installed we fall
+    back to the cloudscraper session (works once the request URL is correct).
+    Returns a response object exposing ``.status_code``/``.text``/``.json()``.
+    """
+    hdr = {"User-Agent": _BROWSER_UA, "Accept": "application/json, text/plain, */*"}
+    if headers:
+        hdr.update(headers)
+    try:
+        from curl_cffi import requests as _creq
+        return _creq.get(url, headers=hdr, timeout=timeout, impersonate="chrome")
+    except ImportError:
+        return _fotmob_scraper().get(url, headers=hdr, timeout=timeout)
+
+
 def fotmob_fetch_wc_matches(dates: "list[str] | None" = None) -> list[dict]:
     """
     Return WC 2026 matches from FotMob's XML feed (api.fotmob.com/matches?date=YYYYMMDD).
@@ -283,27 +308,25 @@ def fotmob_fetch_match_details(match_id: int) -> dict:
     stub with ``_fotmob_unavailable=True`` on any failure so build_match_json() falls
     back to WhoScored only — i.e. a FotMob outage degrades, it never aborts the match.
     """
-    path = f"/api/matchDetails?matchId={match_id}"
-    url  = f"https://www.fotmob.com{path}"
-    scraper = _fotmob_scraper()
-    base_headers = {
-        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
-        "Accept": "application/json, text/plain, */*",
-        "Referer": f"https://www.fotmob.com/match/{match_id}",
-    }
-    # Try bare first (often enough via cloudscraper); retry with an x-mas token if we
-    # have one and the bare attempt was rejected.
-    attempts = [base_headers]
-    token = _fotmob_xmas_token(path)
-    if token:
-        attempts.append({**base_headers, "x-mas": token})
+    # FotMob moved matchDetails behind /api/data/ -- the old /api/matchDetails path
+    # now 404s for everyone (that silent 404 is why FotMob stats/xG vanished from the
+    # pipeline). Hit the live path first, keep the legacy one as a fallback in case
+    # FotMob flips it back. _http_get uses a browser TLS fingerprint (curl_cffi) so
+    # the Varnish edge serves the JSON without any signed x-mas token.
+    paths = [
+        f"/api/data/matchDetails?matchId={match_id}",
+        f"/api/matchDetails?matchId={match_id}",
+    ]
 
     last = None
-    for i, headers in enumerate(attempts, 1):
-        tagged = "with x-mas token" if "x-mas" in headers else "bare"
+    for path in paths:
+        url = f"https://www.fotmob.com{path}"
+        headers = {"Referer": f"https://www.fotmob.com/match/{match_id}"}
+        token = _fotmob_xmas_token(path)  # only if explicitly configured (no longer required)
+        if token:
+            headers["x-mas"] = token
         try:
-            resp = scraper.get(url, headers=headers, timeout=25)
+            resp = _http_get(url, headers=headers, timeout=25)
             last = resp.status_code
             if resp.status_code == 200:
                 try:
@@ -311,23 +334,23 @@ def fotmob_fetch_match_details(match_id: int) -> dict:
                 except Exception:
                     data = None
                 if data and (data.get("header") or data.get("content") or data.get("general")):
-                    log.info("FotMob matchDetails: fetched id=%s (%s)", match_id, tagged)
+                    log.info("FotMob matchDetails: fetched id=%s (%s)", match_id, path)
                     data.setdefault("general", {})
                     data.setdefault("header", {})
                     data.setdefault("content", {})
                     return data
                 log.warning("FotMob matchDetails id=%s (%s): 200 but empty/unexpected body.",
-                            match_id, tagged)
+                            match_id, path)
             else:
                 log.warning("FotMob matchDetails id=%s (%s): HTTP %s.",
-                            match_id, tagged, resp.status_code)
+                            match_id, path, resp.status_code)
         except Exception as exc:
-            log.warning("FotMob matchDetails id=%s (%s) failed: %s", match_id, tagged, exc)
+            log.warning("FotMob matchDetails id=%s (%s) failed: %s", match_id, path, exc)
 
     log.warning(
         "FotMob matchDetails unavailable for id=%s (last HTTP %s). Building from "
-        "WhoScored%s. To enable FotMob, set FOTMOB_XMAS_TOKEN or FOTMOB_TOKEN_URL in .env.",
-        match_id, last, "/SofaScore" if os.environ.get("SOFASCORE_FALLBACK", "1") != "0" else "",
+        "WhoScored only. (If this persists FotMob may have changed the API path again.)",
+        match_id, last,
     )
     return _fotmob_unavailable_stub()
 
@@ -603,53 +626,129 @@ def _compute_ws_stats(events: list, home_tid, away_tid) -> dict:
     }
 
 
+# FotMob stat row "key" → our canonical stat name. FotMob's "key" is stable across
+# title/locale changes (the old title-based map broke when FotMob restructured stats
+# into groups). Values are normalised to the same units WhoScored produces so the two
+# sources can be averaged (see _compute_ws_stats / _average_sources).
+_FM_STAT_KEYS = {
+    "BallPossesion":           "possession",            # %
+    "expected_goals":          "xg",                    # float
+    "total_shots":             "shots",                 # count
+    "ShotsOnTarget":           "shots_on_target",       # count
+    "big_chance":              "big_chances_created",   # count
+    "big_chance_missed_title": "big_chances_missed",    # count
+    "keeper_saves":            "saves",                 # count
+    "fouls":                   "fouls",                 # count
+    "passes":                  "passes_total",          # count
+    "corners":                 "corners",               # count (extra)
+    "interceptions":           "interceptions",         # count (extra)
+    "shot_blocks":             "blocks",                # count (extra)
+    "clearances":              "clearances",            # count (extra)
+    "Offsides":                "offsides",              # count (extra)
+}
+
+# Fallback map keyed by the human title, for payloads that lack the stable "key"
+# field (FotMob's older flat layout, and the SofaScore-shaped fallback that reuses
+# this parser). Keeps the parser working if FotMob changes its structure again.
+_FM_TITLE_KEYS = {
+    "Expected goals (xG)": "xg",
+    "Ball possession":     "possession",
+    "Total shots":         "shots",
+    "Shots on target":     "shots_on_target",
+    "Big chances":         "big_chances_created",
+    "Big chances missed":  "big_chances_missed",
+    "Saves":               "saves",
+    "Fouls":               "fouls",
+    "Passes":              "passes_total",
+    "Accurate passes":     "passes_accurate",
+    "Corners":             "corners",
+}
+
+
+def _fm_num(v):
+    """Leading number out of a FotMob stat cell ('1.04', 46, '450 (90%)' → 1.04/46/450)."""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return v
+    m = re.match(r"-?\d+(?:\.\d+)?", str(v).strip())
+    if not m:
+        return None
+    x = m.group()
+    return float(x) if "." in x else int(x)
+
+
+def _fm_pct(v):
+    """Percentage inside a FotMob cell like '450 (90%)' → 90."""
+    m = re.search(r"\((\d+(?:\.\d+)?)\s*%\)", str(v))
+    return _fm_num(m.group(1)) if m else None
+
+
 def _parse_fotmob_stats(fm_data: dict) -> dict:
-    """Extract match_stats dict from FotMob matchDetails response."""
-    stats = {}
+    """Extract a canonical {stat: {home, away}} dict from FotMob matchDetails.
+
+    Handles FotMob's current *grouped* layout (Periods.All.stats = list of groups,
+    each with an inner ``stats`` list of rows) and the older flat layout. Returns
+    values in the same units WhoScored uses so the two sources can be averaged.
+    """
+    stats: dict = {}
     try:
-        periods = (
+        all_stats = (
             fm_data.get("content", {})
             .get("stats", {})
             .get("Periods", {})
             .get("All", {})
             .get("stats", [])
         )
-        label_map = {
-            "Expected goals (xG)":  "xg",
-            "Ball possession":      "possession",
-            "Shots on target":      "shots_on_target",
-            "Total shots":          "shots",
-            "Big chances":          "big_chances_created",
-            "Successful dribbles":  "duels_won",
-            "Saves":                "saves",
-            "Fouls":                "fouls",
-            "Passes":               "passes_total",
-            "Accurate passes":      "passes_accurate",
-        }
-        for item in periods:
-            key = label_map.get(item.get("title", ""))
-            if not key:
+        # Flatten: each element is either a group ({title,key,stats:[rows]}) or, in the
+        # legacy layout, a row itself. A group's inner items carry their own "stats".
+        rows = []
+        for el in all_stats:
+            inner = el.get("stats") if isinstance(el, dict) else None
+            if isinstance(inner, list) and inner and isinstance(inner[0], dict) and "stats" in inner[0]:
+                rows.extend(inner)        # grouped layout
+            elif isinstance(el, dict):
+                rows.append(el)           # flat layout
+
+        for row in rows:
+            vals = row.get("stats")
+            if not isinstance(vals, list) or len(vals) < 2:
                 continue
-            vals = item.get("stats", [])
-            if len(vals) < 2:
+            h_raw, a_raw = vals[0], vals[1]
+            if h_raw is None and a_raw is None:
                 continue
-            def _num(v):
-                v = str(v).replace("%", "").strip()
-                try:    return float(v) if "." in v else int(v)
-                except: return None
-            stats[key] = {"home": _num(vals[0]), "away": _num(vals[1])}
+
+            # Accurate passes carry both a count and a % — split into two canonical stats.
+            if row.get("key") == "accurate_passes":
+                stats["passes_accurate"] = {"home": _fm_num(h_raw), "away": _fm_num(a_raw)}
+                hp, ap = _fm_pct(h_raw), _fm_pct(a_raw)
+                if hp is not None or ap is not None:
+                    stats["passes_accuracy"] = {"home": hp, "away": ap}
+                continue
+            # Duels won: FotMob gives a raw COUNT; WhoScored gives a % share. Convert to
+            # a share so the two are averaged on the same scale (and match the site).
+            if row.get("key") == "duel_won":
+                hn, an = _fm_num(h_raw), _fm_num(a_raw)
+                tot = (hn or 0) + (an or 0)
+                if tot:
+                    stats["duels_won"] = {"home": int(round(100 * (hn or 0) / tot)),
+                                          "away": int(round(100 * (an or 0) / tot))}
+                continue
+
+            canon = (_FM_STAT_KEYS.get(row.get("key", ""))
+                     or _FM_TITLE_KEYS.get(row.get("title", "")))
+            if not canon or canon in stats:
+                continue  # first non-empty row for a key wins (groups repeat keys)
+            stats[canon] = {"home": _fm_num(h_raw), "away": _fm_num(a_raw)}
     except Exception as exc:
         log.warning("FotMob stats parse error: %s", exc)
 
-    # Derive passes_accuracy from passes_total + passes_accurate
-    pt = stats.get("passes_total", {})
-    pa = stats.get("passes_accurate", {})
-    if pt and pa:
+    # Derive passes_accuracy from totals if FotMob didn't give the % directly.
+    pt, pa = stats.get("passes_total", {}), stats.get("passes_accurate", {})
+    if pt and pa and "passes_accuracy" not in stats:
         for side in ("home", "away"):
             if pt.get(side) and pa.get(side):
-                stats.setdefault("passes_accuracy", {})[side] = int(
-                    round(pa[side] / pt[side] * 100)
-                )
+                stats.setdefault("passes_accuracy", {})[side] = int(round(pa[side] / pt[side] * 100))
 
     return stats
 
@@ -723,41 +822,58 @@ def _parse_fotmob_shots(fm_data: dict, home_id: int, away_id: int) -> list[dict]
 
 
 def _parse_fotmob_lineup(fm_data: dict, side: str) -> list[dict]:
-    """Extract player list from FotMob lineup (home or away)."""
-    idx = 0 if side == "home" else 1
-    try:
-        lineup = fm_data["content"]["lineup"][side]["players"]
-    except (KeyError, IndexError, TypeError):
+    """Extract player list from FotMob lineup (home or away).
+
+    FotMob's current shape is content.lineup.homeTeam/awayTeam with separate
+    ``starters`` and ``subs`` lists (each player carries ``shirtNumber``). This is a
+    fallback only — WhoScored supplies the rich lineups (positions, ratings), so we
+    just need names/shirts here for FotMob-only matches.
+    """
+    lineup = fm_data.get("content", {}).get("lineup", {})
+    if not isinstance(lineup, dict):
         return []
+    team = lineup.get("homeTeam" if side == "home" else "awayTeam")
+    if not isinstance(team, dict):
+        # legacy shape content.lineup.home.players
+        team = lineup.get(side, {})
+        legacy = team.get("players", []) if isinstance(team, dict) else []
+        starters, subs = legacy, []
+    else:
+        starters = team.get("starters", []) or []
+        subs = team.get("subs", []) or []
 
     players = []
-    pos_map = {
-        "GK": "GK", "CB": "DC", "LB": "DL", "RB": "DR",
-        "CM": "MC", "DM": "DMC", "AM": "AMC", "LW": "ML",
-        "RW": "MR", "ST": "FW", "CF": "FW",
-    }
-    for p in lineup:
-        if not isinstance(p, dict):
-            continue
-        players.append({
-            "playerId":     p.get("id"),
-            "name":         p.get("name", ""),
-            "shirtNo":      p.get("shirt", 0),
-            "position":     pos_map.get(p.get("position", ""), "MC"),
-            "isFirstEleven": p.get("positionRow", 99) < 11,
-            "stats":        {},
-        })
+    for is_starter, group in ((True, starters), (False, subs)):
+        for p in group:
+            if not isinstance(p, dict):
+                continue
+            players.append({
+                "playerId":     p.get("id"),
+                "name":         p.get("name") or p.get("fullName", ""),
+                "shirtNo":      p.get("shirtNumber", p.get("shirt", 0)),
+                "position":     "MC",  # WhoScored overrides; FotMob gives only positionId
+                "isFirstEleven": is_starter,
+                "stats":        {},
+            })
     return players
 
 
 def _parse_fotmob_venue(fm_data: dict) -> dict:
-    """Extract venue/city/stage from FotMob matchDetails."""
+    """Extract venue/city/stage from FotMob matchDetails.
+
+    Venue/attendance now live under content.matchFacts.infoBox.Stadium; the stage
+    name is the parent league / round. All best-effort with graceful fallbacks."""
     general = fm_data.get("general", {})
+    info = (fm_data.get("content", {}).get("matchFacts", {}) or {}).get("infoBox", {}) or {}
+    stadium = info.get("Stadium", {}) if isinstance(info.get("Stadium"), dict) else {}
+    stage = (general.get("parentLeagueName")
+             or general.get("leagueName")
+             or "Group Stage")
     return {
-        "venue":   general.get("venue", ""),
-        "city":    general.get("venueCity", ""),
-        "country": general.get("venueCountry", ""),
-        "stage":   general.get("parentLeagueName", "Group Stage"),
+        "venue":   stadium.get("name") or general.get("venue", ""),
+        "city":    stadium.get("city") or general.get("venueCity", ""),
+        "country": stadium.get("country") or general.get("venueCountry", "United States"),
+        "stage":   stage,
     }
 
 
@@ -961,6 +1077,58 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# MULTI-SOURCE MERGE — average overlapping stats across providers
+# ══════════════════════════════════════════════════════════════════════════
+
+# Stats kept with decimals (xG); everything else is rounded to a whole number.
+_FLOAT_STATS = {"xg"}
+
+# Complementary percentages (home + away ~= 100): NOT event counts, so the "keep the
+# larger" rule must not be applied per side (maxing both sides would push the sum past
+# 100). Keep one source's coherent pair instead -- the one summing closest to 100.
+_PAIR_STATS = {"possession", "duels_won"}
+
+
+def _merge_sources(by_source: "dict[str, dict]") -> dict:
+    """Combine each canonical stat across the sources that provide it by keeping the
+    LARGER value (not the average).
+
+    Rationale: when two providers disagree on a count it's almost always because the
+    lesser one missed an event (a shot/pass/foul it didn't log), so the bigger number
+    is the more complete one. ``by_source`` maps source name -> {stat:{home,away}}
+    (already normalised to the same keys + units). Event-count stats take the per-side
+    maximum; a stat only one source has (xG is FotMob-only, etc.) is used as-is.
+    Complementary percentages (possession, duels) are kept as a coherent single-source
+    pair so they still sum to ~100. The result is the nested {stat:{home,away}}
+    ``match_stats`` the renderer and dashboard read."""
+    keys: set = set()
+    for s in by_source.values():
+        keys.update(s.keys())
+
+    merged: dict = {}
+    for k in sorted(keys):
+        pairs = [d[k] for d in by_source.values() if isinstance(d.get(k), dict)]
+        if not pairs:
+            continue
+        if k in _PAIR_STATS:
+            def _imbalance(p):
+                h, a = p.get("home"), p.get("away")
+                return abs(100 - ((h or 0) + (a or 0))) if h is not None and a is not None else 999
+            best = min(pairs, key=_imbalance)
+            for side in ("home", "away"):
+                if best.get(side) is not None:
+                    merged.setdefault(k, {})[side] = best[side]
+        else:
+            for side in ("home", "away"):
+                vals = [p[side] for p in pairs if p.get(side) is not None]
+                if not vals:
+                    continue
+                v = max(vals)
+                merged.setdefault(k, {})[side] = round(v, 2) if k in _FLOAT_STATS else int(round(v))
+    return merged
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # BUILD WC2026 MATCH JSON
 # ══════════════════════════════════════════════════════════════════════════
 
@@ -1086,9 +1254,11 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
     if pk_home is not None:
         log.info("Penalty shootout: %s %d-%d %s", home_name, pk_home, pk_away, away_name)
 
-    match_stats = _parse_fotmob_stats(fm_data)
-
-    # Big chance missed: shots that were big chances but not goals (shootout excluded)
+    # ── Per-source stats → averaged match_stats ───────────────────────────────
+    # Normalise every provider to the SAME canonical {stat:{home,away}} schema + units,
+    # store each verbatim in stats_by_source (so all raw data is queryable), then average
+    # overlapping stats. _compute_ws_stats already derives possession/passes/duels from
+    # the WhoScored event stream, so no ad-hoc flat-key pass maths is needed any more.
     def _bc_missed(side_id):
         return sum(
             1 for e in events
@@ -1099,28 +1269,22 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             and e.get("type", {}).get("displayName") != "Goal"
         )
 
-    match_stats.setdefault("big_chances_missed", {
-        "home": _bc_missed(home_tid),
-        "away": _bc_missed(away_tid),
-    })
-
-    # Compute pass totals / accurate passes from the event stream (WhoScored data)
-    for _side, _tid in [("home", home_tid), ("away", away_tid)]:
-        _passes  = [e for e in events if e.get("teamId") == _tid
-                    and e.get("type", {}).get("displayName") == "Pass"]
-        _total   = len(_passes)
-        _accurate = sum(1 for e in _passes
-                        if e.get("outcomeType", {}).get("displayName") == "Successful")
-        if _total > 0:
-            match_stats.setdefault(f"passes_total_{_side}", _total)
-            match_stats[f"passes_accurate_{_side}"] = _accurate
-            match_stats.setdefault(f"passes_accuracy_{_side}",
-                                   int(round(100 * _accurate / _total)))
-
-    # Fill remaining stats from WhoScored events when FotMob didn't provide them.
+    stats_by_source: dict = {}
+    fm_stats = _parse_fotmob_stats(fm_data) if not fotmob_unavailable else {}
+    if fm_stats:
+        stats_by_source[fm_data.get("_source_name", "fotmob")] = fm_stats
     if events:
-        for _k, _v in _compute_ws_stats(events, home_tid, away_tid).items():
-            match_stats.setdefault(_k, _v)
+        ws_stats = _compute_ws_stats(events, home_tid, away_tid)
+        ws_stats["big_chances_missed"] = {"home": _bc_missed(home_tid),
+                                          "away": _bc_missed(away_tid)}
+        stats_by_source["whoscored"] = ws_stats
+
+    match_stats = _merge_sources(stats_by_source)
+
+    # Keep big_chances_missed even if FotMob was the only stats source.
+    if "big_chances_missed" not in match_stats and events:
+        match_stats["big_chances_missed"] = {"home": _bc_missed(home_tid),
+                                             "away": _bc_missed(away_tid)}
 
     pid_name = {}
     for p in home_players + away_players:
@@ -1159,6 +1323,9 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         },
         "events":      events,
         "match_stats": match_stats,
+        # Verbatim per-source stat lines (FotMob, WhoScored, …) behind the averaged
+        # match_stats above — so every provider's raw numbers are stored and queryable.
+        "stats_by_source": stats_by_source,
         "playerIdNameDictionary": pid_name,
         "_scraped_at": datetime.now(timezone.utc).isoformat(),
         "_sources":    ([fm_data.get("_source_name", "fotmob")] if not fotmob_unavailable else [])
