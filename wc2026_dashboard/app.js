@@ -331,8 +331,11 @@
         if (m.png) links.push('<a class="open-match png" href="' + esc(m.png) +
           '" target="_blank" rel="noopener">PNG 🖼️</a>');
         var xgline = "";
-        if (m.xg_home != null) xgline = 'xG <b>' + m.xg_home.toFixed(2) + "</b> — <b>" +
-          m.xg_away.toFixed(2) + "</b>" + (m.xg_estimated ? ' <span class="est-tag">est</span>' : "");
+        if (m.xg_home != null) {
+          // Canonical xG = average of our model + FotMob when both exist (see build_data).
+          xgline = 'xG <b>' + m.xg_home.toFixed(2) + "</b> — <b>" + m.xg_away.toFixed(2) + "</b>";
+          if (m.xg_source === "avg") xgline += ' <span class="xg-cmp">avg</span>';
+        }
         var meta = (xgline || links.length)
           ? '<div class="xgline">' + xgline + (xgline && links.length ? " &nbsp;·&nbsp; " : "") + links.join(" ") + "</div>"
           : "";

@@ -383,6 +383,9 @@ def extract(match_data):
 
     meta = match_data.get("wc_metadata", {})
     mid_date = meta.get("date", "")
+    # FotMob's own team xG (if scraped) — shown on the page alongside our model value.
+    ms = match_data.get("match_stats") or {}
+    fot_xg = [ms.get("xg_home"), ms.get("xg_away")]
 
     return {
         "home": {"name": norm(home.get("name", "Home")), "raw": home.get("name", ""),
@@ -394,6 +397,7 @@ def extract(match_data):
         "date": mid_date,
         "venue": meta.get("venue", ""),
         "stage": meta.get("stage", ""),
+        "fotXg": fot_xg,
         "maxMin": max_min,
         "shots": shots,
         "passes": passes,
