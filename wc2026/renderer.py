@@ -46,23 +46,46 @@ def _ws_to_sb_x(ws_x: float) -> float:
     else:            return 108.0 + (ws_x - 89) * (12.0 / 11.0)
 
 
+# --- Logistic-regression xG model (mirror of wc2026_dashboard/xg_model.py) ---
+# Fit on 1,861 non-shootout WC2026 shots vs their actual outcomes (Brier 0.079,
+# calibrated to actual goals). Keep this and xg_model.py byte-for-byte equivalent
+# so the PNG infographics and the website report identical xG.
+_XG_INTERCEPT = -2.9528
+_XG_COEF = {
+    "dist": -0.0179, "ang": 1.4460, "header": -0.5954, "big": 1.7581,
+    "one": 0.1043, "fk": 0.9319, "setp": -0.5847, "fast": 0.8012,
+}
+_PENALTY_XG = 0.76
+
+
+def _goal_geom(x_sb: float, y_sb: float):
+    """Distance to goal centre (120, 40) and angle subtended by the posts (y 36/44)."""
+    dist = max(math.hypot(120.0 - x_sb, 40.0 - y_sb), 0.5)
+    a = math.hypot(120.0 - x_sb, 36.0 - y_sb)
+    b = math.hypot(120.0 - x_sb, 44.0 - y_sb)
+    cos_v = (a * a + b * b - 64.0) / (2.0 * a * b) if a * b else 1.0
+    return dist, math.acos(max(-1.0, min(1.0, cos_v)))
+
+
 def _estimate_xg(x_sb: float, y_sb: float,
-                 is_penalty: bool, is_big_chance: bool, body_part: str) -> float:
+                 is_penalty: bool, is_big_chance: bool, body_part: str,
+                 is_one_on_one: bool = False, is_free_kick: bool = False,
+                 is_set_piece: bool = False, is_fast_break: bool = False) -> float:
     if is_penalty:
-        return 0.76
-    dx = 120.0 - x_sb
-    dy = 40.0 - y_sb
-    distance = max(math.sqrt(dx ** 2 + dy ** 2), 0.5)
-    angle = math.atan2(4.0, distance)
-    xg = (angle / (math.pi / 2)) * (1 / (1 + distance / 30))
-    if body_part == "Header":
-        xg *= 0.4
-    if is_big_chance:
-        xg = max(0.35, xg * 3.5)
-        xg = min(0.65, xg)
-    if distance > 18:
-        xg *= (18 / distance) ** 2
-    return round(min(max(xg, 0.01), 0.95), 3)
+        return _PENALTY_XG
+    dist, ang = _goal_geom(x_sb, y_sb)
+    z = (_XG_INTERCEPT
+         + _XG_COEF["dist"] * dist
+         + _XG_COEF["ang"] * ang
+         + _XG_COEF["header"] * (1.0 if body_part == "Header" else 0.0)
+         + _XG_COEF["big"] * (1.0 if is_big_chance else 0.0)
+         + _XG_COEF["one"] * (1.0 if is_one_on_one else 0.0)
+         + _XG_COEF["fk"] * (1.0 if is_free_kick else 0.0)
+         + _XG_COEF["setp"] * (1.0 if is_set_piece else 0.0)
+         + _XG_COEF["fast"] * (1.0 if is_fast_break else 0.0))
+    z = max(-35.0, min(35.0, z))
+    xg = 1.0 / (1.0 + math.exp(-z))
+    return round(min(max(xg, 0.01), 0.99), 3)
 
 
 def _ascii_name(name: str) -> str:
@@ -172,7 +195,12 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
             "is_goal":      type_name == "Goal",
             "is_on_target": type_name in ("SavedShot", "Goal"),
             "xG":           (xg_stored if xg_stored is not None
-                             else _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body)),
+                             else _estimate_xg(
+                                 x_sb, y_sb, is_penalty, big_chance, body,
+                                 is_one_on_one=one_on_one,
+                                 is_free_kick=(situation == "Free Kick"),
+                                 is_set_piece=(situation in ("Corner", "Set Piece")),
+                                 is_fast_break=(situation == "Fast Break"))),
             "body_part":    body,
             "situation":    situation,
             "zone":         zone,
