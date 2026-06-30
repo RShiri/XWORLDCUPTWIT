@@ -42,7 +42,8 @@ def _sum_stat(stats, key):
 def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos,
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
-               rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0)
+               rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
+               progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0, blocks=0, clrBox=0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -65,6 +66,89 @@ def _player_shot_xg(match_data):
     return out
 
 
+def _player_creation(match_data):
+    """playerId -> (progressive-pass count, summed expected assists xA).
+
+    Progressive pass = a SUCCESSFUL pass that advances the ball >=15 WhoScored x-units
+    toward the opponent goal — the same `prog` rule the dashboard pass-explorer uses.
+    xA (expected assists) credits the player whose KEY pass set up each shot with that
+    shot's xG: WhoScored key passes are by definition the pass that leads to a shot, so
+    we credit the next shot by the same team that lands within a few events of the key
+    pass. Own goals and penalty-shootout kicks are excluded."""
+    events = match_data.get("events", [])
+    prog, xa, pending = {}, {}, {}  # pending: teamId -> (passerPid, event_index)
+    for i, ev in enumerate(events):
+        if is_shootout(ev):
+            continue
+        t = ev.get("type", {})
+        tname = t.get("displayName") if isinstance(t, dict) else ""
+        tid = ev.get("teamId")
+        if tname == "Pass":
+            ok = ev.get("outcomeType", {}).get("displayName") == "Successful"
+            pid = ev.get("playerId")
+            if ok and pid is not None and (ev.get("endX", ev.get("x", 0)) - ev.get("x", 0)) >= 15:
+                prog[pid] = prog.get(pid, 0) + 1
+            if ok and pid is not None:
+                quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+                if "KeyPass" in quals or "IntentionalGoalAssist" in quals:
+                    pending[tid] = (pid, i)
+        elif tname in SHOT_TYPES and not ev.get("isOwnGoal"):
+            kp = pending.get(tid)
+            if kp and (i - kp[1]) <= 4 and kp[0] != ev.get("playerId"):
+                xg, _ = shot_xg(ev)
+                xa[kp[0]] = xa.get(kp[0], 0.0) + xg
+            pending.pop(tid, None)
+    return prog, xa
+
+
+def _in_own_box(x, y):
+    """True if a WhoScored coord is inside the player's OWN penalty area (defending
+    goal at x=0): x within the 18-yard box (~17% of pitch length) and the box width."""
+    return x is not None and y is not None and x <= 17.0 and 21.1 <= y <= 78.9
+
+
+def _player_blocks_clears(match_data):
+    """playerId -> (shots blocked, clearances inside own box).
+
+    Individual shot-denial: WhoScored logs an outfielder blocking a shot as a `Save`
+    event carrying an `OutfielderBlock` qualifier (credited to the blocker, not the
+    keeper); box clearances are `Clearance` events located in the player's own area."""
+    blocks, clr = {}, {}
+    for ev in match_data.get("events", []):
+        if is_shootout(ev):
+            continue
+        pid = ev.get("playerId")
+        if pid is None:
+            continue
+        t = ev.get("type", {})
+        tn = t.get("displayName") if isinstance(t, dict) else ""
+        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        if tn == "Save" and "OutfielderBlock" in quals:
+            blocks[pid] = blocks.get(pid, 0) + 1
+        elif tn == "Clearance" and _in_own_box(ev.get("x"), ev.get("y")):
+            clr[pid] = clr.get(pid, 0) + 1
+    return blocks, clr
+
+
+def _defense_shotlist(match_data):
+    """[(teamId, minute, xg, is_goal, is_own)] for every shot (shootout excluded).
+
+    Used to attribute on-pitch defensive context: for a player on team T, the xG his
+    side FACED is the summed xg of the OPPONENT's shots while he was on the pitch, and
+    goals conceded are the opponent's goals (plus own goals by T) in that window. Own
+    goals carry the conceding team's id and aren't chances, so xg=0 for them."""
+    out = []
+    for ev in match_data.get("events", []):
+        t = ev.get("type", {})
+        tn = t.get("displayName") if isinstance(t, dict) else ""
+        if tn not in SHOT_TYPES or is_shootout(ev):
+            continue
+        is_own = bool(ev.get("isOwnGoal"))
+        xg = 0.0 if is_own else shot_xg(ev)[0]
+        out.append((ev.get("teamId"), ev.get("minute", 0), xg, tn == "Goal", is_own))
+    return out
+
+
 def _iter_played():
     for f in sorted(glob.glob(os.path.join(MATCH_DIR, "*.json"))):
         if not is_match_file(f):
@@ -83,8 +167,14 @@ def aggregate():
     for mid, d in _iter_played():
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
+        prog_map, xa_map = _player_creation(d)
+        blk_map, clrbox_map = _player_blocks_clears(d)
+        shotlist = _defense_shotlist(d)
+        team_ids = {s: d[s].get("teamId") for s in ("home", "away")}
         for side in ("home", "away"):
             team = norm(d[side].get("name", ""))
+            our_id = team_ids[side]
+            opp_id = team_ids["away" if side == "home" else "home"]
             for p in d[side].get("players", []):
                 pid = p.get("playerId")
                 stats = p.get("stats") or {}
@@ -96,17 +186,33 @@ def aggregate():
                 rec = players.get(pid)
                 if rec is None:
                     rec = players[pid] = _new_player(pid, ascii_name(p.get("name", "")), team, p.get("position", ""))
+                # on-pitch window: [start, end] in minutes
+                start = 0 if started else on_m
+                end = ex["off_min"].get(pid) if ex["off_min"].get(pid) is not None else ex["end_min"]
                 rec["mp"] += 1
                 if started:
                     rec["starts"] += 1
-                    rec["mins"] += (ex["off_min"].get(pid) if ex["off_min"].get(pid) is not None else ex["end_min"])
-                else:
-                    rec["mins"] += max(0, ex["end_min"] - on_m)
+                rec["mins"] += max(0, end - start)
+                # defensive context: opponent xG faced + goals conceded while on the pitch
+                for (tid, mn, xg, is_goal, is_own) in shotlist:
+                    if mn < start or mn > end:
+                        continue
+                    if is_own:
+                        if tid == our_id:
+                            rec["gConcOn"] += 1     # our own goal = conceded
+                    elif tid == opp_id:
+                        rec["xgaOn"] += xg
+                        if is_goal:
+                            rec["gConcOn"] += 1
                 rec["g"] += ex["goals"].get(pid, 0)
                 rec["a"] += ex["assists"].get(pid, 0)
                 rec["yc"] += ex["yellow"].get(pid, 0)
                 rec["rc"] += ex["red"].get(pid, 0)
                 rec["xg"] += shot_xg_map.get(pid, 0.0)
+                rec["progPasses"] += prog_map.get(pid, 0)
+                rec["xa"] += xa_map.get(pid, 0.0)
+                rec["blocks"] += blk_map.get(pid, 0)
+                rec["clrBox"] += clrbox_map.get(pid, 0)
                 rt = _player_rating(p)
                 if rt is not None:
                     rec["rating_sum"] += rt
@@ -124,10 +230,16 @@ def aggregate():
         r["pass_pct"] = round(100 * r["passAcc"] / r["passes"]) if r["passes"] else None
         r["xg"] = round(r["xg"], 2)
         r["xg_diff"] = round(r["g"] - r["xg"], 2)
-        for v in list(SUM_STATS.values()) + ["mins"]:
+        r["xa"] = round(r["xa"], 2)
+        # on-pitch defence: xG faced, per-90, and goals prevented (faced − conceded)
+        r["xga"] = round(r["xgaOn"], 2)
+        r["xga90"] = round(r["xgaOn"] / r["mins"] * 90, 2) if r["mins"] else None
+        r["gPrev"] = round(r["xgaOn"] - r["gConcOn"], 2)
+        for v in list(SUM_STATS.values()) + ["mins", "progPasses", "gConcOn", "blocks", "clrBox"]:
             r[v] = int(round(r[v]))
         r.pop("rating_sum", None)
         r.pop("rating_n", None)
+        r.pop("xgaOn", None)
         out.append(r)
     out.sort(key=lambda r: (-r["ga"], -r["g"], -(r["rating"] or 0)))
     return out

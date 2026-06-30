@@ -21,6 +21,7 @@
       <button data-view="xg">xG Analysis</button>
       <button data-view="data">Data</button>
       <button data-view="predict">Power Rank</button>
+      <button data-view="standouts">Standouts</button>
     </nav>
   </div>
 </header>
@@ -326,6 +327,114 @@
         <li><a href="https://football-ranking.com/fifa-world-rankings" target="_blank" rel="noopener">FIFA World Rankings (live) — football-ranking.com</a></li>
         <li><b>FotMob</b> &amp; <b>WhoScored</b> — match results, xG and the event stream scraped for this dashboard.</li>
       </ul>
+    </div>
+  </section>
+
+  <!-- STANDOUTS (player distributions) -->
+  <section id="view-standouts" class="view">
+    <div class="section-head">
+      <h2>Standouts — Every Dot Is a Player</h2>
+      <p>Pick a stat and see the <b>whole tournament's distribution</b> at once. The curve is how all players
+         spread out, the dashed line is the <b>average</b>, and each dot is one player. The names way out on the
+         right are the <b>anomalies</b> — the ones breaking from the pack.</p>
+    </div>
+
+    <div class="explainer">
+      <h3>How to read this</h3>
+      <p>This is a <b>density plot</b>: where the curve is tall, lots of players sit on that value; where it's
+         flat, hardly anyone does. Most players cluster near the average, so the curve peaks there and tails off.
+         A player <b>far to the right</b> of the crowd is doing something rare — we measure exactly how rare in
+         <b>σ (sigma) over average</b>: +1σ beats ~84% of players, +2σ beats ~98%, +3σ is a genuine outlier.</p>
+      <p class="explainer-note">Dots are coloured <span style="color:#ff3d8b;font-weight:700">pink</span> once a
+         player is 2σ or more above average. Pick a player to spotlight them in <span
+         style="color:#ffd24d;font-weight:700">gold</span> and see their percentile.</p>
+    </div>
+
+    <div class="so-controls">
+      <label>Stat
+        <select id="soStat"></select>
+      </label>
+      <label>Position
+        <select id="soPos">
+          <option value="all">All outfield + GK</option>
+          <option value="FWD">Attackers</option>
+          <option value="MID">Midfielders</option>
+          <option value="DEF">Defenders</option>
+          <option value="GK">Goalkeepers</option>
+        </select>
+      </label>
+      <label>Minimum minutes
+        <select id="soMins">
+          <option value="0">Any</option>
+          <option value="90" selected>90+</option>
+          <option value="180">180+</option>
+          <option value="270">270+</option>
+        </select>
+      </label>
+      <label>Spotlight player
+        <input id="soPlayer" list="soPlayerList" placeholder="Type a name…" autocomplete="off">
+        <datalist id="soPlayerList"></datalist>
+      </label>
+    </div>
+
+    <div class="stats-strip" id="soStats"></div>
+
+    <div class="card full-card">
+      <h3 id="soChartTitle">Distribution</h3>
+      <p class="hint" id="soChartHint">Every qualifying player placed by their value for the chosen stat.</p>
+      <div class="so-chart-wrap" id="soChart"></div>
+      <div class="insight" id="soSpotlight"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>The unique ones — biggest anomalies</h3>
+      <p class="hint">The players furthest above the field for the chosen stat, ranked by <b>σ over average</b>.
+         The longer the bar, the more they break from the pack.</p>
+      <div id="soStandouts"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Two-stat scatter — find the complete players</h3>
+      <p class="hint">Plot every player on <b>two stats at once</b> and let the <b>dot size</b> carry a third.
+         Top-right = strong in both; a dot that's big <i>and</i> top-right is a genuinely complete player. The
+         dashed lines are the averages. <span style="color:#ff3d8b;font-weight:700">Pink</span> = above average
+         in both; the player you spotlight above shows here in <span
+         style="color:#ffd24d;font-weight:700">gold</span> too. Defensive presets use <b>on-pitch context</b>:
+         <b>xG faced</b> and <b>goals prevented</b> = the xG a player's team faced minus the goals it conceded
+         <i>while they were on the pitch</i> (higher = stingier; for keepers this is their shot-stopping). Start from a preset:</p>
+      <div class="so-presets" id="soPresets"></div>
+      <div class="so-controls">
+        <label>X axis<select id="soScX"></select></label>
+        <label>Y axis<select id="soScY"></select></label>
+        <label>Dot size<select id="soScSize"></select></label>
+        <label>Position
+          <select id="soScPos">
+            <option value="all">All outfield + GK</option>
+            <option value="FWD">Attackers</option>
+            <option value="MID">Midfielders</option>
+            <option value="DEF">Defenders</option>
+            <option value="GK">Goalkeepers</option>
+          </select>
+        </label>
+        <label>Minimum minutes
+          <select id="soScMins">
+            <option value="0">Any</option>
+            <option value="90">90+</option>
+            <option value="180" selected>180+</option>
+            <option value="270">270+</option>
+          </select>
+        </label>
+      </div>
+      <div class="so-chart-wrap" id="soScatter"></div>
+      <div class="insight" id="soScInsight"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Player radar — percentile profile</h3>
+      <p class="hint">How the <b>spotlight player</b> (picked at the top) ranks against peers in the same position
+         (90+ minutes) across every key area. Each spoke is a <b>percentile</b> — further out = better than more
+         of their peers (100% = best in that role). Outfielders and goalkeepers get the profile that fits the job.</p>
+      <div class="so-radar-wrap" id="soRadar"></div>
     </div>
   </section>
 

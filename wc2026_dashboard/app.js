@@ -1617,6 +1617,462 @@
       "</div>";
   }
 
+  /* ---------------- Standouts (player distributions) ----------------
+     A density (KDE) plot of every qualifying player for a chosen stat: the curve
+     shows how the field spreads, each dot is a player placed at their value (jittered
+     under the curve), the dashed line is the mean, and players >= 2σ above the mean
+     are flagged as anomalies (pink). A spotlight picker highlights one player (gold)
+     and reports their percentile. All client-side from window.WC_PLAYERS. */
+  var SO_STATS = [
+    ["ga", "Goals + assists", 0], ["g", "Goals", 0], ["a", "Assists", 0],
+    ["xg", "Expected goals (xG)", 2], ["xa", "Expected assists (xA)", 2],
+    ["xg_diff", "Finishing (goals − xG)", 2], ["shots", "Shots", 0], ["sot", "Shots on target", 0],
+    ["keyPasses", "Key passes", 0], ["progPasses", "Progressive passes", 0],
+    ["dribbles", "Dribbles completed", 0], ["passes", "Passes", 0], ["tackles", "Tackles", 0],
+    ["interceptions", "Interceptions", 0], ["clearances", "Clearances", 0],
+    ["blocks", "Shots blocked", 0], ["clrBox", "Clearances in own box", 0], ["saves", "Saves", 0],
+    ["xga", "xG faced (on pitch)", 2], ["xga90", "xG faced per 90", 2],
+    ["gPrev", "Goals prevented (on pitch)", 2],
+    ["touches", "Touches", 0], ["rating", "Average match rating", 2]
+  ];
+  var SO_POS_LABEL = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers" };
+  var soState = { stat: "ga", pos: "all", mins: 90, player: "" };
+
+  function soPosGroup(pos) {
+    var s = (pos || "").toUpperCase();
+    if (s === "GK") return "GK";
+    if (s[0] === "F" || s === "ST" || s === "CF" || s[0] === "A") return "FWD";
+    if (s[0] === "M" || s.indexOf("DM") === 0) return "MID";
+    if (s[0] === "D" || s[0] === "W" || s === "B") return "DEF";
+    return "OTH";
+  }
+  function soFmt(v, dp) { return dp ? (+v).toFixed(dp) : Math.round(v); }
+  function normPdf(z) { return Math.exp(-0.5 * z * z) / 2.5066282746310002; }
+  function soStatMeta() {
+    for (var i = 0; i < SO_STATS.length; i++) if (SO_STATS[i][0] === soState.stat) return SO_STATS[i];
+    return SO_STATS[0];
+  }
+  function soQualify() {
+    return PLAYERS.filter(function (p) {
+      if ((p.mins || 0) < soState.mins) return false;
+      if (soState.pos !== "all" && soPosGroup(p.pos) !== soState.pos) return false;
+      if (soState.stat === "rating" && !(p.rating > 0)) return false;  // unrated → not a data point
+      return true;
+    });
+  }
+
+  // Gaussian-kernel density chart with a jittered strip of player dots.
+  function soDistChart(rows, statKey, dp, spotPid, mean, sd) {
+    var W = 880, H = 380, padL = 22, padR = 22, padT = 20, padB = 50;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var vals = rows.map(function (p) { return +p[statKey] || 0; });
+    var n = vals.length;
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    var span = (hi - lo) || 1;
+    var xMin = statKey === "rating" ? lo - span * 0.06 : Math.min(lo, 0) - span * 0.03;
+    var xMax = hi + span * 0.10;
+    function sx(v) { return padL + plotW * (v - xMin) / (xMax - xMin); }
+    var baseY = padT + plotH;
+    var h = 1.06 * (sd || span * 0.1) * Math.pow(n, -0.2);
+    if (!(h > 0)) h = span * 0.08;
+    // KDE grid
+    var GRID = 140, dens = [], maxD = 0;
+    for (var i = 0; i <= GRID; i++) {
+      var x = xMin + (xMax - xMin) * i / GRID, d = 0;
+      for (var j = 0; j < n; j++) d += normPdf((x - vals[j]) / h);
+      d /= (n * h);
+      dens.push(d);
+      if (d > maxD) maxD = d;
+    }
+    function densInterp(v) {
+      var t = (v - xMin) / (xMax - xMin) * GRID;
+      var i = Math.max(0, Math.min(GRID - 1, Math.floor(t))), frac = t - i;
+      return dens[i] * (1 - frac) + dens[i + 1] * frac;
+    }
+    function sy(d) { return baseY - (maxD ? d / maxD : 0) * plotH; }
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // filled density area
+    var area = "M " + sx(xMin).toFixed(1) + " " + baseY.toFixed(1);
+    for (var k = 0; k <= GRID; k++) area += " L " + sx(xMin + (xMax - xMin) * k / GRID).toFixed(1) + " " + sy(dens[k]).toFixed(1);
+    area += " L " + sx(xMax).toFixed(1) + " " + baseY.toFixed(1) + " Z";
+    svg.push('<path d="' + area + '" fill="rgba(78,161,255,0.10)" stroke="none"/>');
+    // curve line
+    var line = "";
+    for (var k2 = 0; k2 <= GRID; k2++) line += (k2 ? " L " : "M ") + sx(xMin + (xMax - xMin) * k2 / GRID).toFixed(1) + " " + sy(dens[k2]).toFixed(1);
+    svg.push('<path d="' + line + '" fill="none" stroke="#8aa0d8" stroke-width="1.4" stroke-opacity="0.85"/>');
+    // baseline
+    svg.push('<line x1="' + padL + '" y1="' + baseY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + baseY.toFixed(1) + '" stroke="#26304d" stroke-width="1"/>');
+    // x-axis ticks
+    niceTicks(xMax, 6).forEach(function (t) {
+      if (t < xMin - 1e-9 || t > xMax + 1e-9) return;
+      svg.push('<line x1="' + sx(t).toFixed(1) + '" y1="' + baseY.toFixed(1) + '" x2="' + sx(t).toFixed(1) + '" y2="' + (baseY + 4).toFixed(1) + '" stroke="#46527a" stroke-width="1"/>');
+      svg.push('<text x="' + sx(t).toFixed(1) + '" y="' + (baseY + 17) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + fmtTick(t) + "</text>");
+    });
+    // average line
+    var ax = sx(mean);
+    svg.push('<line x1="' + ax.toFixed(1) + '" y1="' + padT + '" x2="' + ax.toFixed(1) + '" y2="' + baseY.toFixed(1) + '" stroke="#cfd8ee" stroke-width="1.2" stroke-dasharray="5 4" stroke-opacity="0.7"/>');
+    svg.push('<text x="' + ax.toFixed(1) + '" y="' + (padT - 6) + '" fill="#cfd8ee" font-size="11" text-anchor="middle">average ' + soFmt(mean, dp || 1) + "</text>");
+    // dots — deterministic jitter from pid so re-renders are stable
+    function jit(pid) { var s = Math.sin((pid + 1) * 12.9898) * 43758.5453; return s - Math.floor(s); }
+    rows.forEach(function (p) {
+      var v = +p[statKey] || 0, z = sd ? (v - mean) / sd : 0;
+      var dx = sx(v), band = (maxD ? densInterp(v) / maxD : 0) * plotH;
+      var dy = baseY - 4 - jit(p.pid) * Math.max(6, band - 6);
+      var isSpot = spotPid && p.pid === spotPid, anom = z >= 2;
+      var r = isSpot ? 5.5 : anom ? 3.4 : 2.3;
+      var fill = isSpot ? "#ffd24d" : anom ? "#ff3d8b" : "#4ea1ff";
+      var op = isSpot ? 1 : anom ? 0.92 : 0.5;
+      var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
+      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + esc(p.name) + " · " + esc(p.team) + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)</title></circle>");
+    });
+    // labels: top anomalies by value, plus the spotlight player
+    var labels = [];
+    rows.slice().sort(function (a, b) { return (+b[statKey] || 0) - (+a[statKey] || 0); })
+      .slice(0, 5).forEach(function (p) {
+        var v = +p[statKey] || 0, z = sd ? (v - mean) / sd : 0;
+        if (z < 1.2) return;
+        labels.push({ x: sx(v), y: baseY - 6 - (maxD ? densInterp(v) / maxD : 0) * plotH, txt: p.name, gold: false });
+      });
+    if (spotPid) {
+      var sp = rows.filter(function (p) { return p.pid === spotPid; })[0];
+      if (sp) {
+        var v = +sp[statKey] || 0;
+        labels.push({ x: sx(v), y: baseY - 6 - (maxD ? densInterp(v) / maxD : 0) * plotH, txt: sp.name, gold: true });
+      }
+    }
+    labels.sort(function (a, b) { return a.x - b.x; });
+    var lastX = -999, tier = 0;
+    labels.forEach(function (L) {
+      tier = (L.x - lastX < 86) ? tier + 1 : 0; lastX = L.x;
+      var ly = Math.max(padT + 6, L.y - 8 - tier * 13);
+      var lx = Math.max(padL + 18, Math.min(W - padR - 18, L.x));
+      svg.push('<line x1="' + L.x.toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + lx.toFixed(1) + '" y2="' + ly.toFixed(1) + '" stroke="' + (L.gold ? "#ffd24d" : "#ff3d8b") + '" stroke-width="0.7" stroke-opacity="0.6"/>');
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 3).toFixed(1) + '" fill="' + (L.gold ? "#ffe08a" : "#ffaecb") + '" font-size="10.5" text-anchor="middle">' + esc(L.txt) + "</text>");
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderStandouts() {
+    if (!document.getElementById("view-standouts")) return;
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    var meta = soStatMeta(), statKey = meta[0], label = meta[1], dp = meta[2];
+    var rows = soQualify();
+    setHTML("soChartTitle", label + " — distribution across " + rows.length + " players");
+    setHTML("soChartHint", "Each dot is one player with " + (soState.mins ? soState.mins + "+ minutes" : "any minutes") +
+      (soState.pos === "all" ? "" : " · " + SO_POS_LABEL[soState.pos]) + ". Pink = 2σ or more above average.");
+    if (!rows.length) {
+      setHTML("soChart", '<p class="hint">No players match these filters — try lowering the minimum minutes.</p>');
+      ["soStats", "soStandouts", "soSpotlight"].forEach(function (id) { setHTML(id, ""); });
+      return;
+    }
+    var vals = rows.map(function (p) { return +p[statKey] || 0; }), n = vals.length;
+    var mean = vals.reduce(function (s, v) { return s + v; }, 0) / n;
+    var sd = Math.sqrt(vals.reduce(function (s, v) { return s + (v - mean) * (v - mean); }, 0) / n);
+    var sorted = rows.slice().sort(function (a, b) { return (+b[statKey] || 0) - (+a[statKey] || 0); });
+    var leader = sorted[0], leadZ = sd ? ((+leader[statKey] || 0) - mean) / sd : 0;
+
+    // spotlight resolution (exact name first, then substring)
+    var spot = null;
+    if (soState.player) {
+      var q = soState.player.toLowerCase();
+      spot = rows.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+        rows.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0] || null;
+    }
+    var spotPid = spot ? spot.pid : null;
+
+    // stats strip
+    var anomCount = rows.filter(function (p) { return sd && ((+p[statKey] || 0) - mean) / sd >= 2; }).length;
+    var items = [
+      ["v accent", soFmt(mean, dp || 1), "Average"],
+      ["v blue", soFmt(sd, dp || 1), "Std dev (σ)"],
+      ["v", n, "Players"],
+      ["v", anomCount, "Anomalies (2σ+)"],
+      ["v accent", soFmt(+leader[statKey] || 0, dp) + " <span style='font-size:13px;color:var(--muted)'>" + esc(leader.name) + "</span>", "Highest value"],
+      ["v", "+" + leadZ.toFixed(1) + "σ", "Leader vs average"],
+    ];
+    setHTML("soStats", items.map(function (it) {
+      return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>";
+    }).join(""));
+
+    setHTML("soChart", soDistChart(rows, statKey, dp, spotPid, mean, sd));
+
+    // spotlight callout
+    if (spot) {
+      var sv = +spot[statKey] || 0, sz = sd ? (sv - mean) / sd : 0;
+      var better = Math.min(99, Math.round(100 * rows.filter(function (p) { return (+p[statKey] || 0) < sv; }).length / n));
+      setHTML("soSpotlight",
+        '<div class="so-spot"><span class="so-spot-tag">spotlight</span> <b>' + esc(spot.name) + "</b> (" + esc(spot.team) +
+        (spot.pos ? ", " + esc(spot.pos) : "") + ") — <b>" + soFmt(sv, dp) + "</b> " + esc(label.toLowerCase()) +
+        ', <b style="color:' + (sz >= 0 ? "var(--good)" : "var(--bad)") + '">' + (sz >= 0 ? "+" : "") + sz.toFixed(1) +
+        "σ</b> " + (sz >= 0 ? "over" : "below") + " average — better than <b>" + better + "%</b> of " +
+        (soState.pos === "all" ? "players" : "players in this position") + ".</div>");
+    } else if (soState.player) {
+      setHTML("soSpotlight", '<span class="hint">No qualifying player matches "' + esc(soState.player) + '". Check the spelling or relax the filters.</span>');
+    } else {
+      setHTML("soSpotlight", '<span class="hint">Tip: type a name in <b>Spotlight player</b> to highlight one player (gold) and see their percentile.</span>');
+    }
+
+    // standouts bars — top by σ over average
+    var top = sorted.slice(0, 12).map(function (p) {
+      var v = +p[statKey] || 0; return { p: p, v: v, z: sd ? (v - mean) / sd : 0 };
+    });
+    var maxZ = Math.max.apply(null, top.map(function (t) { return t.z; }).concat([0.001]));
+    setHTML("soStandouts", '<div class="so-bars">' + top.map(function (t) {
+      var pct = Math.max(2, 100 * t.z / maxZ), hot = t.z >= 2;
+      return '<div class="so-bar-row"><div class="nm">' + logoImg(t.p.team) + "<span>" + esc(t.p.name) + "</span></div>" +
+        '<div class="so-bar-track"><div class="so-bar-fill" style="width:' + pct.toFixed(1) + "%;background:" + (hot ? "#ff3d8b" : "var(--accent-2)") + '"></div></div>' +
+        '<div class="so-bar-val">' + soFmt(t.v, dp) + ' <span class="so-z">' + (t.z >= 0 ? "+" : "") + t.z.toFixed(1) + "σ</span></div></div>";
+    }).join("") + "</div>");
+  }
+
+  /* ---- Two-stat scatter (find the complete players) ---- */
+  var soSc = { x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 };
+  var SO_PRESETS = [
+    { label: "🧱 Solid defenders", x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 },
+    { label: "🚧 Shot blockers", x: "blocks", y: "clrBox", size: "interceptions", pos: "DEF", mins: 90 },
+    { label: "🧤 Shot-stoppers", x: "xga", y: "gPrev", size: "saves", pos: "GK", mins: 180 },
+    { label: "🎨 Creators", x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 },
+    { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 180 },
+    { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 90 },
+    { label: "⚡ Dribble & create", x: "dribbles", y: "keyPasses", size: "xa", pos: "all", mins: 180 }
+  ];
+  function soStatLabel(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[1] : k; }
+  function soStatDp(k) { var m = SO_STATS.filter(function (s) { return s[0] === k; })[0]; return m ? m[2] : 0; }
+  function soNiceStep(raw) {
+    raw = raw || 1; var pow = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / pow;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+  }
+  function soLTicks(lo, hi) {
+    var step = soNiceStep((hi - lo) / 5), start = Math.ceil(lo / step - 1e-9) * step, out = [];
+    for (var v = start; v <= hi + 1e-9; v += step) out.push(+v.toFixed(4));
+    return out;
+  }
+  function soQualifyFor(pos, mins) {
+    return PLAYERS.filter(function (p) {
+      if ((p.mins || 0) < mins) return false;
+      if (pos !== "all" && soPosGroup(p.pos) !== pos) return false;
+      return true;
+    });
+  }
+
+  function soScatterSVG(rows, xKey, yKey, sizeKey, spotPid) {
+    var W = 880, H = 480, padL = 56, padR = 22, padT = 22, padB = 54;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var xs = rows.map(function (p) { return +p[xKey] || 0; });
+    var ys = rows.map(function (p) { return +p[yKey] || 0; });
+    var mean = function (a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; };
+    var stdev = function (a, m) { return Math.sqrt(a.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / a.length); };
+    var mx = mean(xs), my = mean(ys), sdx = stdev(xs, mx) || 1, sdy = stdev(ys, my) || 1;
+    function dom(vals) {
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      lo = Math.min(lo, 0); var pad = (hi - lo) * 0.08 || 1;
+      return [lo - (lo < 0 ? pad * 0.4 : 0), hi + pad];
+    }
+    var dx = dom(xs), dy = dom(ys);
+    function sx(v) { return padL + plotW * (v - dx[0]) / (dx[1] - dx[0]); }
+    function sy(v) { return padT + plotH * (1 - (v - dy[0]) / (dy[1] - dy[0])); }
+    var sizeMax = sizeKey ? Math.max.apply(null, rows.map(function (p) { return +p[sizeKey] || 0; }).concat([0.0001])) : 1;
+    function radius(p) { if (!sizeKey) return 4.2; return 3 + 9 * Math.sqrt(Math.max(0, +p[sizeKey] || 0) / sizeMax); }
+    var dpx = soStatDp(xKey), dpy = soStatDp(yKey), dps = soStatDp(sizeKey);
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // gridlines + ticks
+    soLTicks(dx[0], dx[1]).forEach(function (t) {
+      var x = sx(t);
+      svg.push('<line x1="' + x.toFixed(1) + '" y1="' + padT + '" x2="' + x.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<text x="' + x.toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + soFmt(t, dpx) + "</text>");
+    });
+    soLTicks(dy[0], dy[1]).forEach(function (t) {
+      var y = sy(t);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#161d31" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 7) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + soFmt(t, dpy) + "</text>");
+    });
+    // average lines
+    svg.push('<line x1="' + sx(mx).toFixed(1) + '" y1="' + padT + '" x2="' + sx(mx).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
+    svg.push('<line x1="' + padL + '" y1="' + sy(my).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + sy(my).toFixed(1) + '" stroke="#cfd8ee" stroke-width="1" stroke-dasharray="5 4" stroke-opacity="0.5"/>');
+    // axis titles
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 6) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle">' + esc(soStatLabel(xKey)) + " →</text>");
+    svg.push('<text x="16" y="' + (padT + plotH / 2).toFixed(1) + '" fill="#e8edf7" font-size="12.5" text-anchor="middle" transform="rotate(-90 16 ' + (padT + plotH / 2).toFixed(1) + ')">' + esc(soStatLabel(yKey)) + " →</text>");
+    // dots
+    var pts = [];
+    rows.forEach(function (p) {
+      var vx = +p[xKey] || 0, vy = +p[yKey] || 0;
+      var cx = sx(vx), cy = sy(vy), r = radius(p);
+      var elite = vx > mx && vy > my;
+      var isSpot = spotPid && p.pid === spotPid;
+      var fill = isSpot ? "#ffd24d" : elite ? "#ff3d8b" : "#4ea1ff";
+      var op = isSpot ? 1 : elite ? 0.85 : 0.5;
+      var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
+      var tip = esc(p.name) + " · " + esc(p.team) + " — " + esc(soStatLabel(xKey)) + " " + soFmt(vx, dpx) +
+        ", " + esc(soStatLabel(yKey)) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + esc(soStatLabel(sizeKey)) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
+      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + tip + "</title></circle>");
+      var zx = (vx - mx) / sdx, zy = (vy - my) / sdy;
+      pts.push({ p: p, cx: cx, cy: cy, score: zx + zy, team: p.name, spot: isSpot });
+    });
+    // label top performers (by combined z) + the spotlight player
+    var labelSet = pts.slice().sort(function (a, b) { return b.score - a.score; }).filter(function (q) { return q.score > 1.4; }).slice(0, 9);
+    pts.forEach(function (q) { if (q.spot && labelSet.indexOf(q) < 0) labelSet.push(q); });
+    declutter(labelSet, 8.7);
+    labelSet.forEach(function (q) {
+      if (q.led) svg.push('<line x1="' + q.cx.toFixed(1) + '" y1="' + q.cy.toFixed(1) + '" x2="' + (q.lx - 1).toFixed(1) + '" y2="' + (q.ly - 3).toFixed(1) + '" stroke="#46527a" stroke-width="0.6"/>');
+      svg.push('<text x="' + q.lx.toFixed(1) + '" y="' + q.ly.toFixed(1) + '" fill="' + (q.spot ? "#ffe08a" : "#c2cce0") + '" font-size="8.9">' + esc(q.team) + "</text>");
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderScatter2() {
+    var host = document.getElementById("soScatter");
+    if (!host) return;
+    var rows = soQualifyFor(soSc.pos, soSc.mins);
+    var setHTML = function (id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; };
+    if (rows.length < 3) {
+      host.innerHTML = '<p class="hint">Not enough players match these filters.</p>';
+      setHTML("soScInsight", "");
+      return;
+    }
+    var spot = null;
+    if (soState.player) {
+      var q = soState.player.toLowerCase();
+      spot = rows.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+        rows.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0] || null;
+    }
+    host.innerHTML = soScatterSVG(rows, soSc.x, soSc.y, soSc.size, spot ? spot.pid : null);
+    // top-right complete players (above average in BOTH)
+    var xs = rows.map(function (p) { return +p[soSc.x] || 0; }), ys = rows.map(function (p) { return +p[soSc.y] || 0; });
+    var mx = xs.reduce(function (s, v) { return s + v; }, 0) / xs.length;
+    var my = ys.reduce(function (s, v) { return s + v; }, 0) / ys.length;
+    var elite = rows.filter(function (p) { return (+p[soSc.x] || 0) > mx && (+p[soSc.y] || 0) > my; });
+    var best = elite.slice().sort(function (a, b) {
+      return ((+b[soSc.x] || 0) / (mx || 1) + (+b[soSc.y] || 0) / (my || 1)) - ((+a[soSc.x] || 0) / (mx || 1) + (+a[soSc.y] || 0) / (my || 1));
+    }).slice(0, 5).map(function (p) { return esc(p.name); });
+    setHTML("soScInsight", "<b>" + elite.length + "</b> player" + (elite.length === 1 ? "" : "s") +
+      " are above average in <b>both</b> " + esc(soStatLabel(soSc.x).toLowerCase()) + " and " + esc(soStatLabel(soSc.y).toLowerCase()) +
+      " (top-right quadrant)" + (best.length ? " — led by " + best.join(", ") : "") + "." +
+      (soSc.size ? ' Dot size = ' + esc(soStatLabel(soSc.size).toLowerCase()) + "." : ""));
+  }
+
+  /* ---- Player percentile radar (uses the shared spotlight player) ---- */
+  var RADAR_OUT = [["g", "Goals"], ["a", "Assists"], ["xa", "xA"], ["keyPasses", "Key passes"],
+    ["progPasses", "Prog passes"], ["dribbles", "Dribbles"], ["tackles", "Tackles"], ["interceptions", "Intercept"]];
+  var RADAR_GK = [["saves", "Saves"], ["gPrev", "Goals prevented"], ["xga", "xG faced"],
+    ["passes", "Passes"], ["pass_pct", "Pass %"], ["clrBox", "Box clears"]];
+
+  function radarSVG(player) {
+    var grp = soPosGroup(player.pos);
+    var axes = grp === "GK" ? RADAR_GK : RADAR_OUT;
+    function inPool(p) {
+      if ((p.mins || 0) < 90) return false;
+      var g = soPosGroup(p.pos);
+      if (grp === "GK") return g === "GK";
+      if (grp === "OTH") return g !== "GK";
+      return g === grp;
+    }
+    var pool = PLAYERS.filter(inPool);
+    if (pool.indexOf(player) < 0) pool.push(player);
+    var N = axes.length, W = 580, H = 470, cx = W / 2, cy = H / 2 + 4, R = 148;
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="so-radar" preserveAspectRatio="xMidYMid meet" role="img">'];
+    [0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var pts = [];
+      for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N; pts.push((cx + R * f * Math.cos(a)).toFixed(1) + "," + (cy + R * f * Math.sin(a)).toFixed(1)); }
+      svg.push('<polygon points="' + pts.join(" ") + '" fill="none" stroke="#1e2740" stroke-width="1"/>');
+    });
+    var poly = [];
+    axes.forEach(function (ax, i) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / N;
+      svg.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + R * Math.cos(a)).toFixed(1) + '" y2="' + (cy + R * Math.sin(a)).toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
+      var pv = +player[ax[0]] || 0;
+      var below = pool.filter(function (p) { return (+p[ax[0]] || 0) < pv; }).length;
+      var pct = pool.length ? below / pool.length : 0;
+      poly.push((cx + R * pct * Math.cos(a)).toFixed(1) + "," + (cy + R * pct * Math.sin(a)).toFixed(1));
+      var lx = cx + (R + 16) * Math.cos(a), ly = cy + (R + 16) * Math.sin(a);
+      var anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly - 2).toFixed(1) + '" fill="#aab4cc" font-size="10.5" text-anchor="' + anchor + '">' + esc(ax[1]) + "</text>");
+      svg.push('<text x="' + lx.toFixed(1) + '" y="' + (ly + 10).toFixed(1) + '" fill="#e8edf7" font-size="11" font-weight="700" text-anchor="' + anchor + '">' + soFmt(pv, soStatDp(ax[0])) + " (" + Math.round(pct * 100) + "%)</text>");
+    });
+    svg.push('<polygon points="' + poly.join(" ") + '" fill="rgba(255,210,77,0.18)" stroke="#ffd24d" stroke-width="2"/>');
+    poly.forEach(function (pt) { var c = pt.split(","); svg.push('<circle cx="' + c[0] + '" cy="' + c[1] + '" r="3" fill="#ffd24d"/>'); });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+
+  function renderRadar() {
+    var host = document.getElementById("soRadar");
+    if (!host) return;
+    if (!soState.player) {
+      host.innerHTML = '<p class="hint">Pick a <b>spotlight player</b> at the top of this page to see their percentile radar.</p>';
+      return;
+    }
+    var q = soState.player.toLowerCase();
+    var pl = PLAYERS.filter(function (p) { return p.name.toLowerCase() === q; })[0] ||
+      PLAYERS.filter(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; })[0];
+    if (!pl) { host.innerHTML = '<p class="hint">No player matches "' + esc(soState.player) + '".</p>'; return; }
+    var grp = soPosGroup(pl.pos);
+    var grpLabel = { FWD: "attackers", MID: "midfielders", DEF: "defenders", GK: "goalkeepers", OTH: "outfield players" }[grp] || "peers";
+    host.innerHTML = '<div class="so-radar-head"><b>' + esc(pl.name) + "</b> · " + esc(pl.team) +
+      (pl.pos ? " · " + esc(pl.pos) : "") + " — percentiles vs other " + grpLabel + " (90+ min)</div>" + radarSVG(pl);
+  }
+
+  function initStandouts() {
+    var statSel = document.getElementById("soStat");
+    if (!statSel) return;
+    if (!PLAYERS.length) {
+      var c = document.getElementById("soChart");
+      if (c) c.innerHTML = '<p class="hint">No player data available yet.</p>';
+      return;
+    }
+    statSel.innerHTML = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    statSel.value = soState.stat;
+    var dl = document.getElementById("soPlayerList");
+    if (dl) dl.innerHTML = PLAYERS.map(function (p) { return p.name; }).sort()
+      .map(function (nm) { return '<option value="' + esc(nm) + '">'; }).join("");
+    statSel.addEventListener("change", function () { soState.stat = statSel.value; renderStandouts(); });
+    document.getElementById("soPos").addEventListener("change", function (e) { soState.pos = e.target.value; renderStandouts(); });
+    document.getElementById("soMins").addEventListener("change", function (e) { soState.mins = +e.target.value; renderStandouts(); });
+    var pin = document.getElementById("soPlayer"), deb;
+    pin.addEventListener("input", function () {
+      clearTimeout(deb);
+      deb = setTimeout(function () { soState.player = pin.value.trim(); renderStandouts(); renderScatter2(); renderRadar(); }, 200);
+    });
+    renderStandouts();
+    renderRadar();
+
+    // --- two-stat scatter controls ---
+    var axisOpts = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    var xSel = document.getElementById("soScX"), ySel = document.getElementById("soScY"), sizeSel = document.getElementById("soScSize");
+    if (xSel) {
+      xSel.innerHTML = axisOpts; ySel.innerHTML = axisOpts;
+      sizeSel.innerHTML = '<option value="">— none —</option>' + axisOpts;
+      function syncScatterControls() {
+        xSel.value = soSc.x; ySel.value = soSc.y; sizeSel.value = soSc.size;
+        document.getElementById("soScPos").value = soSc.pos;
+        document.getElementById("soScMins").value = String(soSc.mins);
+      }
+      syncScatterControls();
+      xSel.addEventListener("change", function () { soSc.x = xSel.value; renderScatter2(); });
+      ySel.addEventListener("change", function () { soSc.y = ySel.value; renderScatter2(); });
+      sizeSel.addEventListener("change", function () { soSc.size = sizeSel.value; renderScatter2(); });
+      document.getElementById("soScPos").addEventListener("change", function (e) { soSc.pos = e.target.value; renderScatter2(); });
+      document.getElementById("soScMins").addEventListener("change", function (e) { soSc.mins = +e.target.value; renderScatter2(); });
+      var pHost = document.getElementById("soPresets");
+      pHost.innerHTML = SO_PRESETS.map(function (pr, i) {
+        var on = pr.x === soSc.x && pr.y === soSc.y && pr.pos === soSc.pos;
+        return '<button class="so-preset' + (on ? " active" : "") + '" data-i="' + i + '">' + esc(pr.label) + "</button>";
+      }).join("");
+      pHost.querySelectorAll(".so-preset").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var pr = SO_PRESETS[+btn.dataset.i];
+          soSc.x = pr.x; soSc.y = pr.y; soSc.size = pr.size; soSc.pos = pr.pos; soSc.mins = pr.mins;
+          pHost.querySelectorAll(".so-preset").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          syncScatterControls();
+          renderScatter2();
+        });
+      });
+      renderScatter2();
+    }
+  }
+
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
@@ -1636,6 +2092,7 @@
   renderLedger();
   renderAgreement();
   renderUnlucky();
+  initStandouts();
   renderData();
   renderPower();
   document.getElementById("footerNote").textContent =
