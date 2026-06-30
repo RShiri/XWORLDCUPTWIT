@@ -147,3 +147,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_28_Jordan_vs_Argentina,2026-06-28,Argentina,Jordan,away,3,1,,,,,92,,,,,,2.44
 2026_06_29_1C_vs_2F,2026-06-29,Brazil,Japan,home,2,1,,,,,88,,,,,,2.95
 2026_06_29_1C_vs_2F,2026-06-29,Japan,Brazil,away,1,2,,,,,82,,,,,,0.17
+2026_06_29_1E_vs_3ABCDF,2026-06-30,Germany,Paraguay,home,1,1,,,,,86,,,,,,6.43
+2026_06_29_1E_vs_3ABCDF,2026-06-30,Paraguay,Germany,away,1,1,,,,,60,,,,,,6.1
