@@ -231,13 +231,38 @@ def _winner_of(m: dict):
 
 
 # ── public API ────────────────────────────────────────────────────────────
-def resolve_fixture(fotmob_id) -> tuple:
+def build_resolution_context() -> dict:
+    """Load + index everything ``resolve_fixture`` needs, ONCE.
+
+    Reading every match file (some are 100k+ lines) and recomputing standings on each
+    ``resolve_fixture`` call is what made the catch-up sweep crawl (one full re-load per
+    schedule row). Build this context once and pass it to ``resolve_fixture(id, ctx=…)``
+    to resolve many fixtures cheaply. Re-build it (don't reuse) after a scrape writes new
+    results, since standings / earlier-KO winners change."""
+    matches = _load_matches()
+    tg = _team_group()
+    standings = _standings(matches, tg)
+    return {
+        "matches":   matches,
+        "by_id":     {str(m.get("match_id")): m for m in matches if m.get("match_id") is not None},
+        "standings": standings,
+        "alloc":     _third_alloc(standings),
+        "tree":      _Tree(matches),
+    }
+
+
+def resolve_fixture(fotmob_id, ctx: dict | None = None) -> tuple:
     """Resolve a knockout fixture (by its placeholder FotMob id) to (home, away, stub_path).
 
     Returns real team names where decidable, else (None) for an unresolved side. ``stub_path``
-    is the slot-coded file the scraped result should be written back to (or None if no stub)."""
-    matches = _load_matches()
-    stub = next((m for m in matches if str(m.get("match_id")) == str(fotmob_id)), None)
+    is the slot-coded file the scraped result should be written back to (or None if no stub).
+    Pass ``ctx`` from ``build_resolution_context()`` to resolve many fixtures without
+    re-loading the match files each time (the default builds a fresh context per call)."""
+    ctx = ctx or build_resolution_context()
+    standings = ctx["standings"]
+    alloc     = ctx["alloc"]
+    tree      = ctx["tree"]
+    stub = ctx["by_id"].get(str(fotmob_id))
     if not stub:
         return None, None, None
     stub_path = str(MATCH_DIR / (stub["slot_id"] + ".json"))
@@ -245,10 +270,6 @@ def resolve_fixture(fotmob_id) -> tuple:
     if _round_of(sid) is None:
         return None, None, stub_path  # not a knockout fixture
 
-    tg = _team_group()
-    standings = _standings(matches, tg)
-    alloc = _third_alloc(standings)
-    tree = _Tree(matches)
     node = tree.by_slot.get(sid)
 
     def resolve_slot(code: str):

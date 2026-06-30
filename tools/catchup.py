@@ -101,7 +101,8 @@ def main() -> None:
 
     from wc2026.run_match import run_match  # retry-enabled scrape + full-site push
     from wc2026.scraper import FOTMOB_NAME_OVERRIDES  # play-off slot -> real team
-    from wc2026.knockout_resolve import resolve_fixture  # KO slot code -> real team
+    from wc2026.knockout_resolve import resolve_fixture, build_resolution_context  # KO slot -> team
+    ko_ctx = build_resolution_context()  # load match data ONCE for the whole scan (fast)
 
     schedule  = json.loads(_SCHEDULE.read_text(encoding="utf-8"))
     now       = datetime.now()
@@ -130,7 +131,7 @@ def main() -> None:
         # only genuinely-missed ties stay pending. No-op for group games and for KO
         # ties whose teams aren't decided yet (resolve_fixture returns None there).
         try:
-            ko_home, ko_away, _ = resolve_fixture(m["fotmob_id"])
+            ko_home, ko_away, _ = resolve_fixture(m["fotmob_id"], ctx=ko_ctx)
             if ko_home and ko_away:
                 home, away = ko_home, ko_away
         except Exception as exc:
