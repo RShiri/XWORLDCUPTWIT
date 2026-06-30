@@ -139,6 +139,65 @@ def _lineup(side, ex):
     return {"starters": starters, "subs": subs}
 
 
+_SHOOTOUT_OUTCOME = {
+    "Goal": "goal",
+    "SavedShot": "saved",
+    "MissedShots": "missed",
+    "ShotOnPost": "post",
+}
+
+
+def _shootout(match_data, side_of):
+    """Per-kick penalty-shootout list (empty for games without a shootout).
+
+    Each kick carries the goal-mouth landing spot (GoalMouthY/Z qualifiers) so the
+    dashboard can plot where every penalty was placed inside the goal frame and which
+    were scored / saved / missed. The opposing keeper is linked to saved kicks via the
+    WhoScored OppositeRelatedEvent qualifier on the Save/PenaltyFaced event."""
+    events = match_data.get("events", [])
+    sh_events = [e for e in events if is_shootout(e)]
+    if not sh_events:
+        return []
+    # eventId of the shooter -> keeper who faced (and saved) it
+    keeper_by_shot = {}
+    for e in sh_events:
+        t = e.get("type", {}).get("displayName", "")
+        if t not in ("Save", "PenaltyFaced") or e.get("playerId") is None:
+            continue
+        for q in e.get("qualifiers", []):
+            if q.get("type", {}).get("displayName") == "OppositeRelatedEvent":
+                keeper_by_shot[str(q.get("value"))] = player_full_name(match_data, e.get("playerId"))
+    pens, order = [], 0
+    for e in sh_events:
+        t = e.get("type", {}).get("displayName", "")
+        if t not in _SHOOTOUT_OUTCOME:
+            continue
+        side = side_of.get(e.get("teamId"))
+        if side is None:
+            continue
+        gy = gz = None
+        for q in e.get("qualifiers", []):
+            dn = q.get("type", {}).get("displayName")
+            try:
+                if dn == "GoalMouthY":
+                    gy = round(float(q.get("value")), 1)
+                elif dn == "GoalMouthZ":
+                    gz = round(float(q.get("value")), 1)
+            except (TypeError, ValueError):
+                pass
+        order += 1
+        pens.append({
+            "team": side,
+            "order": order,
+            "player": player_full_name(match_data, e.get("playerId")),
+            "outcome": _SHOOTOUT_OUTCOME[t],
+            "gy": gy,
+            "gz": gz,
+            "keeper": keeper_by_shot.get(str(e.get("eventId"))),
+        })
+    return pens
+
+
 def find_png(match_id):
     """Relative path (from the dashboard folder) to the rendered infographic, or None.
 
@@ -326,6 +385,7 @@ def extract(match_data):
         "dribbles": dribbles,
         "saves": saves,
         "goals": sorted(goals, key=lambda g: g["min"]),
+        "shootout": _shootout(match_data, side_of),
         "lineups": {"home": _lineup(home, ex), "away": _lineup(away, ex)},
     }
 

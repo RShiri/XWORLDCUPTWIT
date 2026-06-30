@@ -105,21 +105,27 @@
     }
     var hasDribbles = !!(D.dribbles && D.dribbles.length);
     var hasGoals = !!(D.goals && D.goals.length);
+    var hasShootout = !!(D.shootout && D.shootout.length);
     root.innerHTML = scoreboard(D) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
       block("Shot map", "mv-shots") +
+      // On-target shot map sits directly under the xG shot map.
+      block("On-target shots", "mv-shots-ot") +
       block("Pass explorer", "mv-passes") +
       (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
       block("Pass network", "mv-network") +
       block("Average position", "mv-avgpos") +
       block("Line-ups", "mv-lineups") +
-      // All Goals Map sits below every stats section (last block on the page).
+      // All Goals Map sits below every stats section.
       (hasGoals ? block("All goals map", "mv-goals") : "") +
       // Animated "movie" replays of each goal sit directly below the static map.
-      (hasGoals ? block("Goal replays", "mv-goals-anim") : "");
+      (hasGoals ? block("Goal replays", "mv-goals-anim") : "") +
+      // Penalty shootout (goal-mouth placement) is the last block — below all graphs.
+      (hasShootout ? block("Penalty shootout", "mv-shootout") : "");
 
     if (hasStats) buildMatchStats(rec, D);
     buildShots(D);
+    buildOnTargetShots(D);
     buildPasses(D);
     if (hasDribbles) buildDribbles(D);
     buildNetwork(D);
@@ -127,6 +133,7 @@
     buildLineups(D);
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
+    if (hasShootout) buildShootout(D);
   }
 
   function scoreboard(D) {
@@ -336,6 +343,100 @@
       state.goalsOnly = !state.goalsOnly; this.classList.toggle("on"); draw(); });
     document.getElementById("shMinXg").addEventListener("input", function () {
       state.minXg = parseFloat(this.value) || 0; draw(); });
+    draw();
+  }
+
+  /* ================= ON-TARGET SHOT MAP ================= */
+  // A focused shot map showing only on-target attempts (goals + saved shots). Team
+  // chooser lets you isolate a single side. Goal dots carry a gold ring; saved-but-
+  // on-target dots are hollow-filled team colour. Dot size = xG (same scale as the
+  // main shot map) so you can read shot quality at a glance.
+  function buildOnTargetShots(D) {
+    var host = document.getElementById("mv-shots-ot");
+    if (!host) return;
+    var onT = D.shots.filter(function (s) { return s.onTarget; });
+    host.innerHTML =
+      '<div class="controls-bar">' +
+        '<span class="chip-toggle on home" id="otHome">' + esc(D.home.name) + "</span>" +
+        '<span class="chip-toggle on away" id="otAway">' + esc(D.away.name) + "</span>" +
+        '<span class="chip-toggle" id="otGoals">Goals only</span>' +
+        '<span class="ot-count" id="otCount"></span>' +
+      "</div>" +
+      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
+        pitchMarkup() +
+        '<text class="dir-label" x="3" y="' + (PH + 4) + '">◀ ' + esc(D.away.name) + "</text>" +
+        '<text class="dir-label" x="' + (PW - 3) + '" y="' + (PH + 4) + '" text-anchor="end">' + esc(D.home.name) + " ▶</text>" +
+        '<g id="otLayer"></g>' +
+      "</svg></div>" +
+      '<div class="legend-row">' +
+        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffd34e"></i>Goal (team colour)</span>' +
+        '<span><i class="dot" style="background:var(--c-home)"></i>On target (saved/kept out)</span>' +
+        '<span>● size = xG</span>' +
+      "</div>" +
+      '<div class="shot-detail empty" id="otDetail">Only shots that were on target (goals + saved). Click a dot for details.</div>';
+
+    var state = { home: true, away: true, goalsOnly: false };
+    var layer = document.getElementById("otLayer");
+    var detail = document.getElementById("otDetail");
+    var countEl = document.getElementById("otCount");
+
+    function draw() {
+      layer.innerHTML = "";
+      var shown = 0, hg = 0, ag = 0;
+      onT.forEach(function (sh) {
+        if (!state[sh.team]) return;
+        if (state.goalsOnly && !sh.goal) return;
+        shown++;
+        if (sh.team === "home") hg++; else ag++;
+        var cx = tx(sh.team, sh.x), cy = ty(sh.team, sh.y);
+        var r = 0.55 + Math.sqrt(sh.xg) * 2.0;
+        var col = sh.team === "home" ? D.home.color : D.away.color;
+        var NS = "http://www.w3.org/2000/svg";
+        if (sh.goal) {
+          var ring = document.createElementNS(NS, "circle");
+          ring.setAttribute("cx", cx.toFixed(2)); ring.setAttribute("cy", cy.toFixed(2));
+          ring.setAttribute("r", (r + 0.55).toFixed(2));
+          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffd34e");
+          ring.setAttribute("stroke-width", "0.45");
+          layer.appendChild(ring);
+        }
+        var c = document.createElementNS(NS, "circle");
+        c.setAttribute("class", "shot-dot");
+        c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
+        c.setAttribute("r", r.toFixed(2));
+        c.setAttribute("fill", col); c.setAttribute("fill-opacity", sh.goal ? 1 : 0.55);
+        if (!sh.goal) { c.setAttribute("stroke", col); c.setAttribute("stroke-width", 0.35); }
+        c.addEventListener("click", function () { select(sh, c); });
+        c.addEventListener("mousemove", function (e) {
+          showTip(e, "<b>" + esc(sh.player) + "</b> " + sh.min + "'<br>xG " + sh.xg.toFixed(2) +
+            " · " + (sh.goal ? "GOAL" : "On target"));
+        });
+        c.addEventListener("mouseleave", hideTip);
+        layer.appendChild(c);
+      });
+      countEl.textContent = shown + " on target · " + hg + "–" + ag;
+    }
+    function select(sh, node) {
+      layer.querySelectorAll(".sel").forEach(function (n) { n.classList.remove("sel"); });
+      node.classList.add("sel");
+      detail.className = "shot-detail";
+      var teamName = sh.team === "home" ? D.home.name : D.away.name;
+      detail.innerHTML = '<div class="sd-head">' + esc(sh.player) + " · " + esc(teamName) + "</div>" +
+        '<div class="sd-grid">' +
+        "<div><span>Minute</span><br>" + sh.min + "'</div>" +
+        "<div><span>xG</span><br>" + sh.xg.toFixed(2) + "</div>" +
+        "<div><span>Outcome</span><br>" + (sh.goal ? "⚽ Goal" : "On target") + "</div>" +
+        "<div><span>Body</span><br>" + esc(sh.body) + "</div>" +
+        "<div><span>Situation</span><br>" + esc(sh.sit) + (sh.big ? " · Big chance" : "") + "</div>" +
+        "</div>";
+    }
+
+    document.getElementById("otHome").addEventListener("click", function () {
+      state.home = !state.home; this.classList.toggle("on"); draw(); });
+    document.getElementById("otAway").addEventListener("click", function () {
+      state.away = !state.away; this.classList.toggle("on"); draw(); });
+    document.getElementById("otGoals").addEventListener("click", function () {
+      state.goalsOnly = !state.goalsOnly; this.classList.toggle("on"); draw(); });
     draw();
   }
 
@@ -1578,6 +1679,125 @@
     });
     var def = 0; seqs.forEach(function (g, i) { if (g.players > seqs[def].players) def = i; });
     sel(def);
+  }
+
+  /* ================= PENALTY SHOOTOUT ================= */
+  // A goal-mouth "behind the net" view: every shootout kick plotted where it landed
+  // in the goal frame (WhoScored GoalMouthY/Z), coloured by outcome (scored / saved /
+  // missed) with a team-colour ring. Team chooser + a kick-by-kick list with the
+  // running tally sit alongside. This is the last block on the page (below all graphs).
+  function buildShootout(D) {
+    var host = document.getElementById("mv-shootout");
+    if (!host) return;
+    var pens = D.shootout || [];
+    if (!pens.length) { if (host.parentNode) host.parentNode.style.display = "none"; return; }
+
+    // goal-mouth view mapping (WhoScored: GoalMouthY across, GoalMouthZ up).
+    // Posts sit at GoalMouthY 45.2 / 54.8; crossbar at GoalMouthZ ≈ 38.
+    var GW = 100, GROUND = 50, GY0 = 43, GYR = 14, GZTOP = 48;
+    function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
+    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
+    var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
+    var OUT_COL = { goal: "#37c978", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
+    var OUT_LBL = { goal: "Scored", saved: "Saved", missed: "Off target", post: "Hit post" };
+    var OUT_ICON = { goal: "⚽", saved: "🧤", missed: "✗", post: "▮" };
+
+    var fr = "#f4f6fb", ng = "rgba(255,255,255,0.14)";
+    var net = [];
+    net.push('<rect x="-2" y="-2" width="' + (GW + 4) + '" height="' + (GROUND + 6) + '" fill="#0d1420"/>');
+    net.push('<rect x="' + postL.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + (postR - postL).toFixed(1) +
+      '" height="' + (GROUND - barY).toFixed(1) + '" fill="rgba(255,255,255,0.04)"/>');
+    for (var nx = postL; nx <= postR + 0.01; nx += 3.2)
+      net.push('<line x1="' + nx.toFixed(1) + '" y1="' + barY.toFixed(1) + '" x2="' + nx.toFixed(1) + '" y2="' + GROUND + '" stroke="' + ng + '" stroke-width="0.18"/>');
+    for (var nyy = barY; nyy <= GROUND + 0.01; nyy += 3.0)
+      net.push('<line x1="' + postL.toFixed(1) + '" y1="' + nyy.toFixed(1) + '" x2="' + postR.toFixed(1) + '" y2="' + nyy.toFixed(1) + '" stroke="' + ng + '" stroke-width="0.18"/>');
+    net.push('<line x1="0" y1="' + GROUND + '" x2="' + GW + '" y2="' + GROUND + '" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>');
+    net.push('<line x1="' + postL.toFixed(1) + '" y1="' + GROUND + '" x2="' + postL.toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+    net.push('<line x1="' + postR.toFixed(1) + '" y1="' + GROUND + '" x2="' + postR.toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+    net.push('<line x1="' + (postL - 0.55).toFixed(1) + '" y1="' + barY.toFixed(1) + '" x2="' + (postR + 0.55).toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+
+    var hp = D.home.pens, ap = D.away.pens;
+    var summary = "";
+    if (hp != null && ap != null) {
+      var win = hp > ap ? D.home.name : ap > hp ? D.away.name : null;
+      summary = '<div class="so-summary"><b>' + esc(D.home.name) + " " + hp + " – " + ap + " " + esc(D.away.name) + "</b>" +
+        (win ? ' <span class="so-win">' + esc(win) + " win on penalties</span>" : "") + "</div>";
+    }
+
+    host.innerHTML = summary +
+      '<div class="controls-bar">' +
+        '<span class="chip-toggle on home" id="soHome">' + esc(D.home.name) + "</span>" +
+        '<span class="chip-toggle on away" id="soAway">' + esc(D.away.name) + "</span>" +
+      "</div>" +
+      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (GW + 4) + ' ' + (GROUND + 8) + '">' +
+        net.join("") +
+        '<text class="dir-label" x="' + (GW / 2) + '" y="' + (GROUND + 5) + '" text-anchor="middle">Goal-mouth view · placement of each kick</text>' +
+        '<g id="soLayer"></g>' +
+      "</svg></div>" +
+      '<div class="legend-row">' +
+        '<span><i class="dot" style="background:' + OUT_COL.goal + '"></i>Scored</span>' +
+        '<span><i class="dot" style="background:' + OUT_COL.saved + '"></i>Saved</span>' +
+        '<span><i class="dot" style="background:' + OUT_COL.missed + '"></i>Off target / post</span>' +
+        '<span><i class="dot" style="background:#222;border:2px solid var(--c-home)"></i>Team ring</span>' +
+      "</div>" +
+      '<div class="so-list" id="soList"></div>';
+
+    var layer = document.getElementById("soLayer");
+    var state = { home: true, away: true };
+
+    function draw() {
+      layer.innerHTML = "";
+      var NS = "http://www.w3.org/2000/svg";
+      pens.forEach(function (k) {
+        if (!state[k.team]) return;
+        if (k.gy == null || k.gz == null) return;   // no placement coords → list only
+        var cx = gxOf(k.gy), cy = gyOf(k.gz);
+        var ring = k.team === "home" ? D.home.color : D.away.color;
+        var c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
+        c.setAttribute("r", "2.3");
+        c.setAttribute("fill", OUT_COL[k.outcome] || "#ffb020");
+        c.setAttribute("stroke", ring); c.setAttribute("stroke-width", "0.9");
+        c.style.cursor = "pointer";
+        var t = document.createElementNS(NS, "text");
+        t.setAttribute("x", cx.toFixed(2)); t.setAttribute("y", (cy + 0.9).toFixed(2));
+        t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "2.6");
+        t.setAttribute("font-weight", "800"); t.setAttribute("fill", "#0d1420");
+        t.style.pointerEvents = "none";
+        t.textContent = k.order;
+        function tip(e) {
+          showTip(e, "<b>#" + k.order + " " + esc(k.player) + "</b><br>" +
+            esc(k.team === "home" ? D.home.name : D.away.name) + " · " + (OUT_LBL[k.outcome] || k.outcome) +
+            (k.keeper ? "<br>Keeper: " + esc(k.keeper) : ""));
+        }
+        c.addEventListener("mousemove", tip);
+        c.addEventListener("mouseleave", hideTip);
+        layer.appendChild(c);
+        layer.appendChild(t);
+      });
+    }
+
+    // kick-by-kick list with running tally (always shows both teams, in order)
+    var hC = 0, aC = 0;
+    var rows = pens.map(function (k) {
+      if (k.outcome === "goal") { if (k.team === "home") hC++; else aC++; }
+      var col = k.team === "home" ? D.home.color : D.away.color;
+      var name = k.team === "home" ? D.home.name : D.away.name;
+      return '<div class="so-row ' + k.outcome + '">' +
+        '<span class="so-n">' + k.order + "</span>" +
+        '<span class="so-tm" style="background:' + col + '"></span>' +
+        '<span class="so-pl">' + esc(k.player) + ' <span class="so-tn">' + esc(name) + "</span></span>" +
+        '<span class="so-oc">' + (OUT_ICON[k.outcome] || "") + " " + (OUT_LBL[k.outcome] || k.outcome) + "</span>" +
+        '<span class="so-sc">' + hC + "–" + aC + "</span>" +
+        "</div>";
+    }).join("");
+    document.getElementById("soList").innerHTML = rows;
+
+    document.getElementById("soHome").addEventListener("click", function () {
+      state.home = !state.home; this.classList.toggle("on"); draw(); });
+    document.getElementById("soAway").addEventListener("click", function () {
+      state.away = !state.away; this.classList.toggle("on"); draw(); });
+    draw();
   }
 
   /* ---- tooltip ---- */
