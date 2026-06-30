@@ -16,7 +16,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 from build_match_details import norm, _match_extras, _player_rating, is_match_file
-from xg_model import ascii_name, SHOT_TYPES, shot_xg
+from xg_model import ascii_name, SHOT_TYPES, shot_xg, is_shootout
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT = os.path.join(HERE, "players.js")
@@ -55,6 +55,8 @@ def _player_shot_xg(match_data):
         t = ev.get("type", {})
         if not isinstance(t, dict) or t.get("displayName") not in SHOT_TYPES:
             continue
+        if is_shootout(ev):
+            continue  # exclude penalty-shootout kicks from player xG
         pid = ev.get("playerId")
         if pid is None:
             continue

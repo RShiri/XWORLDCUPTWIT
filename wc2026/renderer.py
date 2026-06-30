@@ -147,6 +147,12 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
         _q = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
         if ev.get("isOwnGoal") or "OwnGoal" in _q:
             continue
+        # Penalty-shootout kicks (period 5) decide a drawn knockout tie but are NOT match
+        # shots — excluding them keeps xG/shot map real (a 1-1 that goes to penalties would
+        # otherwise show ~6 xG from a dozen shootout "shots").
+        _p = ev.get("period", {})
+        if isinstance(_p, dict) and (_p.get("value") == 5 or "Shoot" in (_p.get("displayName") or "")):
+            continue
         x_sb = _ws_to_sb_x(ev.get("x", 0))
         y_sb = 80 - ev.get("y", 0) * SCALE_Y
         body, situation, zone, big_chance, one_on_one, gm_y, gm_z = _extract_qualifiers(ev)
@@ -978,6 +984,10 @@ def _lineup_extras(match_data: dict):
     off_min: dict = {}
     end_min = 90
     for e in match_data.get("events", []):
+        # Penalty-shootout kicks aren't goals and must not stretch the timeline to 131'.
+        _p = e.get("period", {})
+        if isinstance(_p, dict) and (_p.get("value") == 5 or "Shoot" in (_p.get("displayName") or "")):
+            continue
         m = e.get("minute") or 0
         if m > end_min:
             end_min = m

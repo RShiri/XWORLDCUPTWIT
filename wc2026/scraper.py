@@ -505,6 +505,31 @@ def sofascore_fetch_match_details(home: str, away: str, around_date: str | None)
     }
 
 
+def _ev_is_shootout(e: dict) -> bool:
+    """True for penalty-shootout events (WhoScored period 5 / "PenaltyShootout").
+
+    Mirrors wc2026_dashboard/xg_model.is_shootout (scraper can't import the dashboard
+    module). Shootout kicks decide a drawn knockout tie but are not match shots/goals —
+    keep them out of stats, xG, shot maps and the goals timeline; report them as a
+    separate penalty score. Extra-time events (periods 3/4) are real and stay."""
+    p = e.get("period", {})
+    if isinstance(p, dict):
+        return p.get("value") == 5 or "Shoot" in (p.get("displayName") or "")
+    return "Shoot" in str(p or "")
+
+
+def _shootout_score(events: list, home_tid, away_tid) -> tuple:
+    """(home_pens, away_pens) scored in the penalty shootout, or (None, None) if none."""
+    pens = [e for e in events if _ev_is_shootout(e)]
+    if not pens:
+        return None, None
+    def scored(tid):
+        return sum(1 for e in pens
+                   if e.get("teamId") == tid
+                   and e.get("type", {}).get("displayName") == "Goal")
+    return scored(home_tid), scored(away_tid)
+
+
 def _compute_ws_stats(events: list, home_tid, away_tid) -> dict:
     """Compute match stats from the WhoScored event stream.
 
@@ -514,6 +539,10 @@ def _compute_ws_stats(events: list, home_tid, away_tid) -> dict:
     SHOT_ALL = {"Goal", "SavedShot", "MissedShots", "ShotOnPost", "BlockedShot"}
     SHOT_ON  = {"Goal", "SavedShot"}
     DUEL     = {"Aerial", "Tackle", "TakeOn"}
+
+    # Drop penalty-shootout kicks (period 5): they decide the tie but are not match
+    # shots — counting them balloons "shots"/"on target"/"big chances" (and xG).
+    events = [e for e in events if not _ev_is_shootout(e)]
 
     def _t(e): return e.get("type", {}).get("displayName", "")
     def _o(e): return e.get("outcomeType", {}).get("displayName", "")
@@ -1051,13 +1080,20 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         home_players = []
         away_players = []
 
+    # Penalty shootout (drawn knockout tie): record the shootout result separately;
+    # it is NOT folded into the match score or any shot stat.
+    pk_home, pk_away = _shootout_score(events, home_tid, away_tid)
+    if pk_home is not None:
+        log.info("Penalty shootout: %s %d-%d %s", home_name, pk_home, pk_away, away_name)
+
     match_stats = _parse_fotmob_stats(fm_data)
 
-    # Big chance missed: shots that were big chances but not goals
+    # Big chance missed: shots that were big chances but not goals (shootout excluded)
     def _bc_missed(side_id):
         return sum(
             1 for e in events
             if e.get("teamId") == side_id
+            and not _ev_is_shootout(e)
             and any(q.get("type", {}).get("displayName") == "BigChance"
                     for q in e.get("qualifiers", []))
             and e.get("type", {}).get("displayName") != "Goal"
@@ -1107,7 +1143,7 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             "teamId":  home_tid,
             "name":    home_name,
             "score":   home_score,
-            "penalty_score": None,
+            "penalty_score": pk_home,
             "players": home_players,
             "stats":   {},
             "field":   "home",
@@ -1116,7 +1152,7 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             "teamId":  away_tid,
             "name":    away_name,
             "score":   away_score,
-            "penalty_score": None,
+            "penalty_score": pk_away,
             "players": away_players,
             "stats":   {},
             "field":   "away",
@@ -1223,6 +1259,18 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
 
     match_json = build_match_json(fm_data, ws_data, xml_match=xml_match)
     out_path   = Path(out_path) if out_path else _output_path(match_json, fotmob_id)
+
+    # Preserve the knockout-round label from the slot stub. build_match_json defaults
+    # the stage to "Group Stage" when FotMob is unavailable (WhoScored carries no stage),
+    # which mislabels every KO tie. The slot stub the result overwrites knows the round.
+    if out_path and Path(out_path).exists():
+        try:
+            _prev = json.loads(Path(out_path).read_text(encoding="utf-8"))
+            _prev_stage = _prev.get("stage") or _prev.get("wc_metadata", {}).get("stage")
+            if _prev_stage and _prev_stage != "Group Stage" and match_json.get("wc_metadata"):
+                match_json["wc_metadata"]["stage"] = _prev_stage
+        except Exception:
+            pass
 
     # Never clobber a real saved match with an empty stub. A failed scrape (FotMob
     # down + WhoScored id not found) builds a stub with no events/lineups; writing

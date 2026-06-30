@@ -13,6 +13,20 @@ SCALE_Y = 0.80
 SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
 
 
+def is_shootout(ev):
+    """True for penalty-SHOOTOUT events (WhoScored period 5 / "PenaltyShootout").
+
+    A shootout decides a drawn knockout tie but its kicks are NOT match shots: they
+    must be excluded from xG, shot counts, shot maps, the goals timeline and player
+    stats, or a 1-1 tie balloons to ~6 xG and ~9 "goals". The match score stays the
+    post-extra-time result; the shootout is reported separately as a penalty score.
+    Extra-time shots (periods 3/4) ARE real and stay in."""
+    p = ev.get("period", {})
+    if isinstance(p, dict):
+        return p.get("value") == 5 or "Shoot" in (p.get("displayName") or "")
+    return "Shoot" in str(p or "")
+
+
 def ws_to_sb_x(ws_x):
     if ws_x <= 50:
         return ws_x * (60.0 / 50.0)
@@ -101,6 +115,8 @@ def team_xg_from_events(match_data):
         tname = ev.get("type", {})
         if not isinstance(tname, dict) or tname.get("displayName") not in SHOT_TYPES:
             continue
+        if is_shootout(ev):
+            continue  # penalty-shootout kicks are not match shots
         tid = ev.get("teamId")
         if tid not in totals:
             continue

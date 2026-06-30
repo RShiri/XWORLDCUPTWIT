@@ -23,7 +23,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 
-from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name)
+from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shootout)
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT_DIR = os.path.join(HERE, "matches_detail")
@@ -65,6 +65,8 @@ def _match_extras(match_data):
     goals, assists, yellow, red, on_min, off_min = {}, {}, {}, {}, {}, {}
     end_min = 90
     for e in match_data.get("events", []):
+        if is_shootout(e):
+            continue  # shootout kicks aren't goals and must not extend the timeline
         m = e.get("minute") or 0
         if m > end_min:
             end_min = m
@@ -187,6 +189,8 @@ def extract(match_data):
         side = side_of.get(tid)
         if side is None:
             continue
+        if is_shootout(ev):
+            continue  # penalty shootout — exclude its kicks from shots/goals/maps/timeline
         tname = ev.get("type", {})
         tname = tname.get("displayName") if isinstance(tname, dict) else ""
         minute = ev.get("minute", 0)
@@ -308,9 +312,11 @@ def extract(match_data):
 
     return {
         "home": {"name": norm(home.get("name", "Home")), "raw": home.get("name", ""),
-                 "score": home.get("score"), "color": _team_color(home.get("name", ""))},
+                 "score": home.get("score"), "pens": home.get("penalty_score"),
+                 "color": _team_color(home.get("name", ""))},
         "away": {"name": norm(away.get("name", "Away")), "raw": away.get("name", ""),
-                 "score": away.get("score"), "color": _team_color(away.get("name", ""))},
+                 "score": away.get("score"), "pens": away.get("penalty_score"),
+                 "color": _team_color(away.get("name", ""))},
         "date": mid_date,
         "venue": meta.get("venue", ""),
         "stage": meta.get("stage", ""),
