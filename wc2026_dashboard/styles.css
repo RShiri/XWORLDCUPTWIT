@@ -695,3 +695,7 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .so-radar-head b { color: var(--text); }
 .tl-pitch-wrap { display: flex; justify-content: center; }
 .tl-pitch { width: 100%; max-width: 640px; height: auto; display: block; border-radius: 10px; }
+
+/* Tap-to-identify caption for SVG charts (mobile has no hover) */
+.chart-tip { margin-top: 10px; min-height: 20px; font-size: 13.5px; color: var(--muted); text-align: center; }
+.chart-tip.show { color: var(--text); font-weight: 600; }

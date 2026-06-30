@@ -1723,7 +1723,8 @@
       var fill = isSpot ? "#ffd24d" : anom ? "#ff3d8b" : "#4ea1ff";
       var op = isSpot ? 1 : anom ? 0.92 : 0.5;
       var stroke = (isSpot || anom) ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
-      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + esc(p.name) + " · " + esc(p.team) + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)</title></circle>");
+      var info = p.name + " · " + p.team + " — " + soFmt(v, dp) + " (" + (z >= 0 ? "+" : "") + z.toFixed(1) + "σ)";
+      svg.push('<circle cx="' + dx.toFixed(1) + '" cy="' + dy.toFixed(1) + '" r="' + r + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
     });
     // labels: top anomalies by value, plus the spotlight player
     var labels = [];
@@ -1903,9 +1904,9 @@
       var fill = isSpot ? "#ffd24d" : elite ? "#ff3d8b" : "#4ea1ff";
       var op = isSpot ? 1 : elite ? 0.85 : 0.5;
       var stroke = (isSpot || elite) ? ' stroke="#0b0f1a" stroke-width="0.9"' : "";
-      var tip = esc(p.name) + " · " + esc(p.team) + " — " + esc(soStatLabel(xKey)) + " " + soFmt(vx, dpx) +
-        ", " + esc(soStatLabel(yKey)) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + esc(soStatLabel(sizeKey)) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
-      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + tip + "</title></circle>");
+      var info = p.name + " · " + p.team + " — " + soStatLabel(xKey) + " " + soFmt(vx, dpx) +
+        ", " + soStatLabel(yKey) + " " + soFmt(vy, dpy) + (sizeKey ? " · " + soStatLabel(sizeKey) + " " + soFmt(+p[sizeKey] || 0, dps) : "");
+      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
       var zx = (vx - mx) / sdx, zy = (vy - my) / sdy;
       pts.push({ p: p, cx: cx, cy: cy, score: zx + zy, team: p.name, spot: isSpot });
     });
@@ -2013,6 +2014,27 @@
       (pl.pos ? " · " + esc(pl.pos) : "") + " — percentiles vs other " + grpLabel + " (90+ min)</div>" + radarSVG(pl);
   }
 
+  /* Tap-to-identify: SVG dots carry data-info; on tap/click show it in a caption line
+     below the chart (and highlight the dot). Hover still works via <title> on desktop,
+     but tap is the only way on touch devices. Delegated on the persistent container so
+     it survives the chart's innerHTML being re-rendered. */
+  function wireChartTaps(hostId, tipId) {
+    var host = document.getElementById(hostId), tip = document.getElementById(tipId);
+    if (!host || !tip || host._tapWired) return;
+    host._tapWired = true;
+    var last = null;
+    host.addEventListener("click", function (e) {
+      var el = e.target;
+      if (!el || (el.tagName || "").toLowerCase() !== "circle" || !el.hasAttribute("data-info")) return;
+      if (last && last.parentNode) { last.setAttribute("stroke", last._os || "none"); last.setAttribute("stroke-width", last._ow || "0"); }
+      el._os = el.getAttribute("stroke") || "none"; el._ow = el.getAttribute("stroke-width") || "0";
+      el.setAttribute("stroke", "#fff"); el.setAttribute("stroke-width", "2");
+      last = el;
+      tip.textContent = el.getAttribute("data-info");
+      tip.classList.add("show");
+    });
+  }
+
   function initStandouts() {
     var statSel = document.getElementById("soStat");
     if (!statSel) return;
@@ -2036,6 +2058,8 @@
     });
     renderStandouts();
     renderRadar();
+    wireChartTaps("soChart", "soChartTip");
+    wireChartTaps("soScatter", "soScatterTip");
 
     // --- two-stat scatter controls ---
     var axisOpts = SO_STATS.map(function (s) { return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
@@ -2155,7 +2179,8 @@
         var fill = s.g ? "#ff3d8b" : s.ot ? "#4ea1ff" : "#7c89a8";
         var op = s.g ? 0.95 : s.ot ? 0.6 : 0.35;
         var stroke = s.g ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
-        svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + '><title>' + esc(s.t) + " vs " + esc(s.o) + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : "") + " · " + esc(s.s) + " · " + s.m + "'</title></circle>");
+        var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : s.ot ? " (on target)" : "") + " · " + s.s + " · " + s.m + "'";
+        svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
       });
     }
     svg.push("</svg>");
@@ -2280,6 +2305,7 @@
     document.getElementById("tlSit").addEventListener("change", function (e) { tlState.sit = e.target.value; renderTeamLab(); });
     document.getElementById("tlMode").addEventListener("change", function (e) { tlState.mode = e.target.value; renderTeamLab(); });
     renderTeamLab();
+    wireChartTaps("tlMap", "tlMapTip");
   }
 
   /* ---------------- init ---------------- */

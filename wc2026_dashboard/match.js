@@ -231,7 +231,9 @@
       var col = g.team === "home" ? colH : colA;
       var pts = g.team === "home" ? SH : SA;
       var gx = sx(g.min), gy = sy(cumAt(pts, g.min + 1e-6));
-      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2"><title>' + g.min + "' " + esc(g.scorer) + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + "</title></circle>");
+      var gName = g.team === "home" ? D.home.name : D.away.name;
+      var info = g.min + "' " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + " — " + gName;
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"><title>' + esc(info) + "</title></circle>");
       svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" fill="' + col + '" font-size="11" text-anchor="middle">⚽</text>');
     });
     svg.push("</svg>");
@@ -240,8 +242,16 @@
       '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + finA.toFixed(2) + "</b> xG (" + (D.away.score == null ? "-" : D.away.score) + " goals)</span>" +
       "</div>";
     host.innerHTML = '<p class="hint">Cumulative <b>expected goals</b> over the match — each step is a shot, sized by its xG. ' +
-      'The higher line built the better chances; ⚽ marks goals.</p>' +
-      '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend;
+      'The higher line built the better chances; ⚽ marks goals (tap one for the scorer).</p>' +
+      '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend +
+      '<div class="chart-tip" id="mvMomTip"></div>';
+    var tip = document.getElementById("mvMomTip");
+    host.addEventListener("click", function (e) {
+      var el = e.target;
+      if (el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info")) {
+        tip.textContent = el.getAttribute("data-info"); tip.classList.add("show");
+      }
+    });
   }
 
   function scoreboard(D) {
