@@ -19,3 +19,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_01_1I_vs_3CDFGH,2026-06-30,Sweden,France,away,fotmob,0,3,39,8,3,351,79,0,0,9,10,47,0.66,1
 2026_07_01_1I_vs_3CDFGH,2026-06-30,France,Sweden,home,whoscored,3,0,60,25,16,584,86,6,4,5,14,58,,
 2026_07_01_1I_vs_3CDFGH,2026-06-30,Sweden,France,away,whoscored,0,3,40,8,4,386,77,0,0,13,10,42,,
+2026_07_01_1L_vs_3EHIJK,2026-07-01,England,DR Congo,home,fotmob,2,1,60,16,7,517,91,7,6,1,10,49,2.04,5
+2026_07_01_1L_vs_3EHIJK,2026-07-01,DR Congo,England,away,fotmob,1,2,40,7,2,365,82,1,1,5,12,51,0.8,3
+2026_07_01_1L_vs_3EHIJK,2026-07-01,England,DR Congo,home,whoscored,2,1,59,16,10,580,86,7,6,3,10,56,,
+2026_07_01_1L_vs_3EHIJK,2026-07-01,DR Congo,England,away,whoscored,1,2,41,7,4,406,80,1,1,9,12,44,,
