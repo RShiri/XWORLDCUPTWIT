@@ -50,7 +50,7 @@ jobs:
           python wc2026_dashboard/build_shots.py
           python wc2026_dashboard/build_database.py
 
-      - name: Commit corrected data (skip if only the build timestamp changed)
+      - name: Commit corrected data (skip pure-timestamp no-ops)
         run: |
           set -euo pipefail
           git add -- \
@@ -60,25 +60,31 @@ jobs:
             wc2026_dashboard/matches_detail \
             wc2026_dashboard/database
 
-          # Real data change in anything other than data.js?
-          meaningful=0
-          if ! git diff --cached --quiet -- \
-                wc2026_dashboard/players.js \
-                wc2026_dashboard/shots.js \
-                wc2026_dashboard/matches_detail \
-                wc2026_dashboard/database; then
-            meaningful=1
-          fi
-          # data.js counts only if something beyond the "generated" timestamp differs.
-          if ! git diff --cached --quiet -- wc2026_dashboard/data.js; then
-            nonts=$(git diff --cached -U0 -- wc2026_dashboard/data.js \
-                    | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' \
-                    | grep -v '"generated"' | grep -c . || true)
-            if [ "${nonts:-0}" -gt 0 ]; then meaningful=1; fi
-          fi
+          # Decide whether regeneration changed anything beyond the wall-clock build
+          # stamp. data.js and database/manifest.js embed a "generated" timestamp that
+          # differs on every run; every other regenerated file is deterministic, so any
+          # diff there is a real data change. For the two stamped files, a diff counts
+          # only when a line NOT containing "generated" changed.
+          real=0
+          for f in $(git diff --cached --name-only); do
+            case "$f" in
+              wc2026_dashboard/data.js|wc2026_dashboard/database/manifest.js)
+                if git diff --cached -U0 -- "$f" \
+                     | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' \
+                     | grep -qv '"generated"'; then
+                  real=1
+                  echo "Real change in $f"
+                fi
+                ;;
+              *)
+                real=1
+                echo "Real change in $f"
+                ;;
+            esac
+          done
 
-          if [ "$meaningful" -eq 0 ]; then
-            echo "Dashboard data already matches the committed builders — nothing to fix."
+          if [ "$real" -eq 0 ]; then
+            echo "No data change beyond the build timestamp — skipping commit."
             git reset -q
             exit 0
           fi
