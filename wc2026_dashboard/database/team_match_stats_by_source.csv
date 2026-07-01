@@ -11,6 +11,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_06_30_2E_vs_2I,2026-06-30,Norway,Ivory Coast,away,fotmob,2,1,53,9,4,473,88,4,3,4,7,46,2.02,3
 2026_06_30_2E_vs_2I,2026-06-30,Ivory Coast,Norway,home,whoscored,1,2,47,14,5,450,81,3,2,5,6,55,,
 2026_06_30_2E_vs_2I,2026-06-30,Norway,Ivory Coast,away,whoscored,2,1,53,9,7,511,87,4,3,4,7,45,,
+2026_07_01_1A_vs_3CEFHI,2026-07-01,Mexico,Ecuador,home,fotmob,2,0,43,15,3,312,79,2,2,1,9,56,1.0,3
+2026_07_01_1A_vs_3CEFHI,2026-07-01,Ecuador,Mexico,away,fotmob,0,2,57,7,1,399,84,1,1,1,12,44,0.73,8
+2026_07_01_1A_vs_3CEFHI,2026-07-01,Mexico,Ecuador,home,whoscored,2,0,43,15,6,338,79,2,2,2,10,54,,
+2026_07_01_1A_vs_3CEFHI,2026-07-01,Ecuador,Mexico,away,whoscored,0,2,57,7,2,446,80,1,1,4,13,46,,
 2026_07_01_1I_vs_3CDFGH,2026-06-30,France,Sweden,home,fotmob,3,0,61,25,12,551,88,6,4,3,14,53,3.17,9
 2026_07_01_1I_vs_3CDFGH,2026-06-30,Sweden,France,away,fotmob,0,3,39,8,3,351,79,0,0,9,10,47,0.66,1
 2026_07_01_1I_vs_3CDFGH,2026-06-30,France,Sweden,home,whoscored,3,0,60,25,16,584,86,6,4,5,14,58,,
