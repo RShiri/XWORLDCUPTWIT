@@ -153,3 +153,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_06_30_1F_vs_2C,2026-06-30,Morocco,Netherlands,away,1,1,70,11,7,916,91,5,4,5,15,49,1.4
 2026_06_30_2E_vs_2I,2026-06-30,Ivory Coast,Norway,home,1,2,47,14,5,450,85,3,2,5,6,54,1.36
 2026_06_30_2E_vs_2I,2026-06-30,Norway,Ivory Coast,away,2,1,53,9,7,511,88,4,3,4,7,46,2.02
+2026_07_01_1I_vs_3CDFGH,2026-06-30,France,Sweden,home,3,0,61,25,16,584,88,6,4,5,14,53,3.17
+2026_07_01_1I_vs_3CDFGH,2026-06-30,Sweden,France,away,0,3,39,8,4,386,79,0,0,13,10,47,0.66
