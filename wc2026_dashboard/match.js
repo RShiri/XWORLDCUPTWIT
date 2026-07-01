@@ -1304,25 +1304,70 @@
     seqs.sort(function (a, b) { return (a.min || 0) - (b.min || 0); });
     return seqs;
   }
-  function agmLine(x1, y1, x2, y2, cls) {
+  /* ---- hover tooltips: turn each map from a "picture" into a graph you can probe ----
+     Every action (touch node, pass, cross, carry, shot) carries a rich HTML detail
+     string, stashed URI-encoded in data-tip and surfaced through the shared floating
+     #tooltip (showTip/hideTip) via one delegated handler per SVG (agmWireTips). */
+  function agmTipAttr(html) { return html ? ' data-tip="' + encodeURIComponent(html) + '"' : ""; }
+  function agmWho(player, numMap, i) {
+    var num = (player && numMap) ? numMap[agmNorm(player)] : null;
+    return (player ? esc(player) : ("Touch " + ((i || 0) + 1))) + (num != null ? " · #" + num : "");
+  }
+  function agmNodeTip(pt, i, seq, numMap) {
+    if (pt.og) return "<b>Own goal</b><br>" + esc(pt.player || "");
+    var who = agmWho(pt.player, numMap, i), mm = (seq && seq.min != null) ? (" · " + seq.min + "'") : "";
+    if (pt.k === "save") return "<b>" + who + "</b><br>Goalkeeper save";
+    if (pt.k === "shot") return "<b>" + who + "</b><br>⚽ Goal" + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "") + mm;
+    if (pt.k === "shot_eff") return "<b>" + who + "</b><br>Shot saved" + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "");
+    if (pt.k === "dribble") return "<b>" + who + "</b><br>Take-on / dribble";
+    if (i === 0) return "<b>" + who + "</b><br>Move start" + mm;
+    return "<b>" + who + "</b><br>On the ball";
+  }
+  function agmSegTip(kind, opt) {
+    opt = opt || {};
+    if (kind === "pass")  return "<b>Pass</b>" + (opt.by ? "<br>from " + esc(opt.by) : "");
+    if (kind === "cross") return "<b>Cross</b>" + (opt.by ? "<br>from " + esc(opt.by) : "");
+    if (kind === "carry") return "<b>Carry / dribble</b>" + (opt.to ? "<br>to " + esc(opt.to) : "");
+    if (kind === "shot")  return "<b>Shot</b>" + (opt.by ? "<br>" + esc(opt.by) : "") + (opt.xg != null ? " · xG " + opt.xg.toFixed(2) : "");
+    return "<b>" + esc(kind) + "</b>";
+  }
+  // One delegated listener per map SVG: reads the nearest data-tip and floats the detail.
+  function agmWireTips(svg) {
+    if (!svg || svg._tipWired) return;
+    svg._tipWired = true;
+    svg.addEventListener("mousemove", function (e) {
+      var t = e.target && e.target.closest ? e.target.closest("[data-tip]") : null;
+      if (t) showTip(e, decodeURIComponent(t.getAttribute("data-tip")));
+      else hideTip();
+    });
+    svg.addEventListener("mouseleave", hideTip);
+  }
+  function agmLine(x1, y1, x2, y2, cls, tip) {
     var m = cls === "agm-pass" ? "agmAp" : (cls === "agm-shotln" ? "agmAs" : "agmAc");
-    return '<line class="' + cls + '" x1="' + x1.toFixed(2) + '" y1="' + y1.toFixed(2) + '" x2="' + x2.toFixed(2) +
+    var vis = '<line class="' + cls + '" x1="' + x1.toFixed(2) + '" y1="' + y1.toFixed(2) + '" x2="' + x2.toFixed(2) +
       '" y2="' + y2.toFixed(2) + '" marker-end="url(#' + m + ')"/>';
+    if (!tip) return vis;
+    // Transparent fat hit-line on top so even dashed passes hover reliably (the gaps
+    // between dots aren't painted, so the visible line alone is hard to catch).
+    var hit = '<line class="agm-hit" x1="' + x1.toFixed(2) + '" y1="' + y1.toFixed(2) + '" x2="' + x2.toFixed(2) + '" y2="' + y2.toFixed(2) + '"/>';
+    return '<g' + agmTipAttr(tip) + '>' + vis + hit + '</g>';
   }
   // A cross renders like a pass (same fine dots) but CURVED — a quadratic arc bowed
   // perpendicular to the line, so it reads as a cross while staying a pass-type delivery.
-  function agmArc(x1, y1, x2, y2, cls) {
+  function agmArc(x1, y1, x2, y2, cls, tip) {
     var dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
     var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
     var off = Math.min(7, len * 0.2);                      // bow height, capped
     var cx = mx + (-dy / len) * off, cy = my + (dx / len) * off;
-    return '<path class="' + cls + '" d="M' + x1.toFixed(2) + ',' + y1.toFixed(2) +
-      ' Q' + cx.toFixed(2) + ',' + cy.toFixed(2) + ' ' + x2.toFixed(2) + ',' + y2.toFixed(2) +
-      '" marker-end="url(#agmAp)"/>';
+    var d = 'M' + x1.toFixed(2) + ',' + y1.toFixed(2) + ' Q' + cx.toFixed(2) + ',' + cy.toFixed(2) + ' ' + x2.toFixed(2) + ',' + y2.toFixed(2);
+    var vis = '<path class="' + cls + '" d="' + d + '" marker-end="url(#agmAp)"/>';
+    if (!tip) return vis;
+    var hit = '<path class="agm-hit" d="' + d + '"/>';
+    return '<g' + agmTipAttr(tip) + '>' + vis + hit + '</g>';
   }
-  function agmNode(x, y, label, title, cls) {
+  function agmNode(x, y, label, tip, cls) {
     var dark = (cls === "start" || cls === "shot" || cls === "save");
-    return '<g><title>' + esc(title) + '</title><circle class="agm-node' + (cls ? (" " + cls) : "") +
+    return '<g' + agmTipAttr(tip) + '><circle class="agm-node' + (cls ? (" " + cls) : "") +
       '" cx="' + x.toFixed(2) + '" cy="' + y.toFixed(2) + '" r="1.3"/>' +
       '<text class="agm-nt' + (dark ? " dark" : "") + '" x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '">' + esc(label) + "</text></g>";
   }
@@ -1344,14 +1389,16 @@
       '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + dirTxt + '</text>'];
     for (var i = 0; i < P.length; i++) {
       var pt = P[i];
-      if (pt.k === "pass") a.push(pt.cross ? agmArc(pt.x, pt.y, pt.ex, pt.ey, "agm-cross")   // curved dotted = cross
-                                           : agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass")); // straight dotted = pass
+      if (pt.k === "pass") a.push(pt.cross ? agmArc(pt.x, pt.y, pt.ex, pt.ey, "agm-cross", agmSegTip("cross", { by: pt.player }))   // curved dotted = cross
+                                           : agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass", agmSegTip("pass", { by: pt.player }))); // straight dotted = pass
       if (i < P.length - 1) {
         var nx = P[i + 1];
         var fx = pt.k === "pass" ? pt.ex : pt.x, fy = pt.k === "pass" ? pt.ey : pt.y;
-        var cls = (nx.k === "save") ? "agm-shotln" : "agm-carry";                   // saved effort→keeper = red; else solid carry
+        var toKeeper = (nx.k === "save");
+        var cls = toKeeper ? "agm-shotln" : "agm-carry";                            // saved effort→keeper = red; else solid carry
+        var segTip = toKeeper ? agmSegTip("shot", { by: pt.player, xg: pt.xg }) : agmSegTip("carry", { to: nx.player });
         var dcon = Math.hypot(nx.x - fx, nx.y - fy);
-        if (dcon > 1.0 && dcon <= AGM_MAX_SEG) a.push(agmLine(fx, fy, nx.x, nx.y, cls)); // skip cross-pitch spans from bad source coords
+        if (dcon > 1.0 && dcon <= AGM_MAX_SEG) a.push(agmLine(fx, fy, nx.x, nx.y, cls, segTip)); // skip cross-pitch spans from bad source coords
       }
     }
     var L = P[P.length - 1];
@@ -1359,15 +1406,12 @@
     // Only draw the shot→goal line when the shot is plausibly in the attacking half.
     // A few feeds carry a glitched goal coordinate (e.g. at the wrong end); without
     // this guard that produced a line straight across the whole pitch.
-    if (Math.hypot(gx - L.x, gy - L.y) <= AGM_MAX_SEG) a.push(agmLine(L.x, L.y, gx, gy, "agm-shotln"));
+    if (Math.hypot(gx - L.x, gy - L.y) <= AGM_MAX_SEG) a.push(agmLine(L.x, L.y, gx, gy, "agm-shotln", agmSegTip("shot", { by: seq.scorer, xg: L.xg })));
     P.forEach(function (pt, i) {
       var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
       var num = numMap[agmNorm(pt.player)];
       var label = pt.og ? "OG" : ((num != null) ? num : (agmIni(pt.player) || (i + 1)));
-      var ttl = pt.og ? ("Own goal — " + (pt.player || "")) :
-        ((pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
-        (pt.player || ("Touch " + (i + 1))) + (pt.k === "pass" && pt.cross ? " · cross" : "") + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : ""));
-      a.push(agmNode(pt.x, pt.y, label, ttl, cls));
+      a.push(agmNode(pt.x, pt.y, label, agmNodeTip(pt, i, seq, numMap), cls));
     });
     var ly = Math.max(3.4, L.y - 2.0);                                              // scorer name + xG ABOVE the finishing node
     a.push('<text class="agm-scorelab" x="' + L.x.toFixed(2) + '" y="' + (ly - 1.7).toFixed(2) + '">' + esc(seq.scorer) + "</text>");
@@ -1510,7 +1554,8 @@
       '<span class="it"><span class="agm-lln"></span>Pass</span>' +
       '<span class="it"><svg class="agm-crosslg" width="20" height="9" viewBox="0 0 20 9"><path d="M1,7 Q10,0 19,7"/></svg>Cross</span>' +
       '<span class="it"><span class="agm-lln carry"></span>Carry / dribble</span>' +
-      '<span class="it"><span class="agm-lln shot"></span>Shot</span></div>';
+      '<span class="it"><span class="agm-lln shot"></span>Shot</span>' +
+      '<span class="it agm-hint">🛈 Hover any action for detail</span></div>';
     var tabs = '<div class="agm-tabs">' + seqs.map(function (g, i) {
       var col = g.side === "home" ? D.home.color : D.away.color;
       return '<button class="agm-tab" data-i="' + i + '"><span class="sw" style="background:' + col + '"></span><span class="mm">' +
@@ -1524,6 +1569,7 @@
       feat.innerHTML = meta(g) +
         '<div class="agm-actions"><button type="button" class="agm-dl">⤓ Download PNG</button></div>' +
         roster(g) + '<div class="pitch-wrap">' + agmSeqSVG(g, numMap, D) + "</div>" + legend;
+      agmWireTips(feat.querySelector("svg.pitch-svg"));
       var btn = feat.querySelector(".agm-dl");
       if (btn) btn.addEventListener("click", function () {
         exportGoalPNG(feat.querySelector("svg.pitch-svg"), g, D, btn);
@@ -1560,18 +1606,22 @@
     for (var i = 0; i < P.length; i++) {
       var pt = P[i];
       if (pt.k === "pass") {
-        mv.push({ type: pt.cross ? "cross" : "pass", x1: pt.x, y1: pt.y, x2: pt.ex, y2: pt.ey, litNode: null });
+        mv.push({ type: pt.cross ? "cross" : "pass", x1: pt.x, y1: pt.y, x2: pt.ex, y2: pt.ey, litNode: null,
+                  tip: agmSegTip(pt.cross ? "cross" : "pass", { by: pt.player }) });
         if (i < P.length - 1) {
           var nx = P[i + 1], L = Math.hypot(nx.x - pt.ex, nx.y - pt.ey);
-          mv.push({ type: nx.k === "save" ? "shotln" : "carry", x1: pt.ex, y1: pt.ey, x2: nx.x, y2: nx.y, litNode: i + 1, hidden: !(L > 1.0 && L <= AGM_MAX_SEG) });
+          mv.push({ type: nx.k === "save" ? "shotln" : "carry", x1: pt.ex, y1: pt.ey, x2: nx.x, y2: nx.y, litNode: i + 1, hidden: !(L > 1.0 && L <= AGM_MAX_SEG),
+                    tip: nx.k === "save" ? agmSegTip("shot", { by: pt.player, xg: pt.xg }) : agmSegTip("carry", { to: nx.player }) });
         }
       } else if (i < P.length - 1) {
         var nx2 = P[i + 1], L2 = Math.hypot(nx2.x - pt.x, nx2.y - pt.y);
-        mv.push({ type: nx2.k === "save" ? "shotln" : "carry", x1: pt.x, y1: pt.y, x2: nx2.x, y2: nx2.y, litNode: i + 1, hidden: !(L2 > 1.0 && L2 <= AGM_MAX_SEG) });
+        mv.push({ type: nx2.k === "save" ? "shotln" : "carry", x1: pt.x, y1: pt.y, x2: nx2.x, y2: nx2.y, litNode: i + 1, hidden: !(L2 > 1.0 && L2 <= AGM_MAX_SEG),
+                  tip: nx2.k === "save" ? agmSegTip("shot", { by: pt.player, xg: pt.xg }) : agmSegTip("carry", { to: nx2.player }) });
       }
     }
     var Lp = P[P.length - 1], gx = tx(Lp.team, 99.4), gy = ty(Lp.team, 50), sl = Math.hypot(gx - Lp.x, gy - Lp.y);
-    mv.push({ type: "shot", x1: Lp.x, y1: Lp.y, x2: gx, y2: gy, litNode: null, hidden: !(sl <= AGM_MAX_SEG) });
+    mv.push({ type: "shot", x1: Lp.x, y1: Lp.y, x2: gx, y2: gy, litNode: null, hidden: !(sl <= AGM_MAX_SEG),
+              tip: agmSegTip("shot", { by: Lp.player, xg: Lp.xg }) });
     mv.forEach(function (m) {
       var len = Math.hypot(m.x2 - m.x1, m.y2 - m.y1);
       if (m.hidden) { m.dur = 160; m.dwell = 0; }
@@ -1627,16 +1677,14 @@
       if (m.hidden) { m.len = Math.hypot(m.x2 - m.x1, m.y2 - m.y1); m.el = null; return; }
       var p = E("path", { class: agmSegClass(m.type), d: agmSegDpath(m), "marker-end": "url(#" + agmSegMarker(m.type) + ")" });
       svg.appendChild(p); m.el = p; m.len = p.getTotalLength();
+      // transparent fat hit-path on top so each action hovers reliably (dashed passes included)
+      if (m.tip) svg.appendChild(E("path", { class: "agm-hit", d: agmSegDpath(m), "data-tip": encodeURIComponent(m.tip) }));
     });
     var nodeEls = P.map(function (pt, i) {
       var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
       var num = numMap[agmNorm(pt.player)], label = pt.og ? "OG" : ((num != null) ? num : (agmIni(pt.player) || (i + 1)));
       var dark = (cls === "start" || cls === "shot" || cls === "save");
-      var ttl = pt.og ? ("Own goal — " + (pt.player || "")) :
-        ((pt.k === "save" ? "Save — " : pt.k === "shot" ? "Goal — " : pt.k === "shot_eff" ? "Shot (saved) — " : "") +
-        (pt.player || ("Touch " + (i + 1))) + (pt.k === "pass" && pt.cross ? " · cross" : "") + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : ""));
-      var g = E("g", {});
-      var t = E("title"); t.textContent = ttl; g.appendChild(t);
+      var g = E("g", { "data-tip": encodeURIComponent(agmNodeTip(pt, i, seq, numMap)) });
       g.appendChild(E("circle", { class: "agm-node" + (cls ? " " + cls : ""), cx: pt.x.toFixed(2), cy: pt.y.toFixed(2), r: 1.3 }));
       var tx2 = E("text", { class: "agm-nt" + (dark ? " dark" : ""), x: pt.x.toFixed(2), y: pt.y.toFixed(2) }); tx2.textContent = label;
       g.appendChild(tx2); svg.appendChild(g); return g;
@@ -1790,7 +1838,8 @@
       '<span class="it"><span class="agm-lln"></span>Pass</span>' +
       '<span class="it"><svg class="agm-crosslg" width="20" height="9" viewBox="0 0 20 9"><path d="M1,7 Q10,0 19,7"/></svg>Cross</span>' +
       '<span class="it"><span class="agm-lln carry"></span>Carry / dribble</span>' +
-      '<span class="it"><span class="agm-lln shot"></span>Shot</span></div>';
+      '<span class="it"><span class="agm-lln shot"></span>Shot</span>' +
+      '<span class="it agm-hint">🛈 Hover any action for detail</span></div>';
     function metaLine(g) {
       var counts = g.players + " player" + (g.players === 1 ? "" : "s") + " · " + g.passes + " pass" + (g.passes === 1 ? "" : "es") +
         " · " + g.dribbles + " dribble" + (g.dribbles === 1 ? "" : "s");
@@ -1824,6 +1873,7 @@
       anim.onAction = function (t) { actionEl.innerHTML = "now: <b>" + (AGM_ANIM_LABEL[t] || t) + "</b>"; };
       anim.onDone = function () { actionEl.innerHTML = "now: <b>Goal!</b>"; };
       feat.querySelector(".pitch-wrap").appendChild(anim.svg);
+      agmWireTips(anim.svg);
       var spd = feat.querySelector(".agm-spd"), spdv = feat.querySelector(".agm-spdv");
       var speed = 1;
       spd.addEventListener("input", function () { speed = parseFloat(spd.value); spdv.textContent = speed + "×"; });
