@@ -1,0 +1,89 @@
+name: Regenerate dashboard data
+
+# Self-healing safeguard for the live dashboard.
+#
+# The scrape/deploy runs on the owner's PC, which regenerates the dashboard data
+# files (data.js / players.js / shots.js / matches_detail/ / database/) with its
+# LOCAL copy of the builder scripts. When that checkout lags the committed source,
+# every auto-deploy silently drops newer fields (progressive passes, xA, on-pitch
+# xG, the multi-source xG averaging, corrected assists, fotXg, ...). This workflow
+# re-runs the builders from the COMMITTED source on every deploy and commits the
+# corrected data back, so a stale scrape machine can no longer regress the site.
+#
+# The builders are pure-stdlib and resolve their paths relative to their own
+# location, so no dependencies or working-directory setup are needed. Pushes made
+# with GITHUB_TOKEN do not trigger new workflow runs, so this cannot loop.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wc2026/matches/**'
+      - 'wc2026_dashboard/build_*.py'
+      - 'wc2026_dashboard/xg_model.py'
+      - '.github/workflows/regen-dashboard-data.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regen-dashboard-data
+  cancel-in-progress: false
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Regenerate dashboard data from committed builders
+        run: |
+          set -euo pipefail
+          python wc2026_dashboard/build_match_details.py
+          python wc2026_dashboard/build_data.py
+          python wc2026_dashboard/build_players.py
+          python wc2026_dashboard/build_shots.py
+          python wc2026_dashboard/build_database.py
+
+      - name: Commit corrected data (skip if only the build timestamp changed)
+        run: |
+          set -euo pipefail
+          git add -- \
+            wc2026_dashboard/data.js \
+            wc2026_dashboard/players.js \
+            wc2026_dashboard/shots.js \
+            wc2026_dashboard/matches_detail \
+            wc2026_dashboard/database
+
+          # Real data change in anything other than data.js?
+          meaningful=0
+          if ! git diff --cached --quiet -- \
+                wc2026_dashboard/players.js \
+                wc2026_dashboard/shots.js \
+                wc2026_dashboard/matches_detail \
+                wc2026_dashboard/database; then
+            meaningful=1
+          fi
+          # data.js counts only if something beyond the "generated" timestamp differs.
+          if ! git diff --cached --quiet -- wc2026_dashboard/data.js; then
+            nonts=$(git diff --cached -U0 -- wc2026_dashboard/data.js \
+                    | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' \
+                    | grep -v '"generated"' | grep -c . || true)
+            if [ "${nonts:-0}" -gt 0 ]; then meaningful=1; fi
+          fi
+
+          if [ "$meaningful" -eq 0 ]; then
+            echo "Dashboard data already matches the committed builders — nothing to fix."
+            git reset -q
+            exit 0
+          fi
+
+          git config user.name "WC2026 Data Bot"
+          git config user.email "wc2026bot@users.noreply.github.com"
+          git commit -m "CI: regenerate dashboard data from committed builders"
+          git push
