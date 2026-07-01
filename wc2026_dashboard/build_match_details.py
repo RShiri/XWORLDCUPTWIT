@@ -60,11 +60,40 @@ def _team_color(name):
         return "#4ea1ff"
 
 
+def _assist_playerid(goal_ev, scorer_pid, by_team_eid):
+    """The playerId credited with the assist for `goal_ev`, or None if unassisted.
+
+    Follows the goal's `RelatedEventId` qualifier to the setup event within the SAME
+    team's eventId space; credits that event's player when it's a teammate other than
+    the scorer (solo goals point back at the scorer's own carry → no assist)."""
+    rel_id = next((q.get("value") for q in goal_ev.get("qualifiers", [])
+                   if q.get("type", {}).get("displayName") == "RelatedEventId"), None)
+    if rel_id is None:
+        return None
+    try:
+        rel = by_team_eid.get(goal_ev.get("teamId"), {}).get(int(rel_id))
+    except (TypeError, ValueError):
+        return None
+    aid = rel.get("playerId") if rel else None
+    return aid if (aid is not None and aid != scorer_pid) else None
+
+
 def _match_extras(match_data):
-    """Per-playerId goals, assists, cards and sub on/off minutes from events."""
+    """Per-playerId goals, assists, cards and sub on/off minutes from events.
+
+    Assists are resolved via each goal's WhoScored `RelatedEventId`, which links the
+    goal to the event that created it (the assisting pass). WhoScored numbers eventIds
+    PER TEAM, not per match, so the lookup is scoped to the scoring team's events —
+    resolving globally collides the home/away id spaces and credits the wrong player.
+    The older `IntentionalGoalAssist` qualifier is only set on some assists, so it
+    under-counts (e.g. it missed both of Mbappe's assists to Dembele vs Norway)."""
+    events = match_data.get("events", [])
+    by_team_eid = {}  # teamId -> {eventId: event}, for RelatedEventId assist resolution
+    for e in events:
+        by_team_eid.setdefault(e.get("teamId"), {})[e.get("eventId")] = e
     goals, assists, yellow, red, on_min, off_min = {}, {}, {}, {}, {}, {}
     end_min = 90
-    for e in match_data.get("events", []):
+    for e in events:
         if is_shootout(e):
             continue  # shootout kicks aren't goals and must not extend the timeline
         m = e.get("minute") or 0
@@ -77,8 +106,9 @@ def _match_extras(match_data):
         quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
         if t == "Goal" and not (e.get("isOwnGoal") or "OwnGoal" in quals):
             goals[pid] = goals.get(pid, 0) + 1
-        if "IntentionalGoalAssist" in quals:
-            assists[pid] = assists.get(pid, 0) + 1
+            aid = _assist_playerid(e, pid, by_team_eid)
+            if aid is not None:
+                assists[aid] = assists.get(aid, 0) + 1
         if t == "Card":
             if "Red" in quals or "SecondYellow" in quals:
                 red[pid] = red.get(pid, 0) + 1

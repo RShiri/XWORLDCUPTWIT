@@ -1005,13 +1005,22 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
 
 def _lineup_extras(match_data: dict):
     """Scan the event stream once for per-playerId goals, assists, and the
-    minute each player was subbed on / off, plus the match's final minute."""
+    minute each player was subbed on / off, plus the match's final minute.
+
+    Assists follow each goal's WhoScored `RelatedEventId` to the setup event. Because
+    WhoScored numbers eventIds PER TEAM, the lookup is scoped to the scoring team's
+    events (a global lookup collides the home/away id spaces). The older
+    `IntentionalGoalAssist` qualifier is set on only some assists, so it under-counts."""
     goals: dict = {}
     assists: dict = {}
     on_min: dict = {}
     off_min: dict = {}
     end_min = 90
-    for e in match_data.get("events", []):
+    events = match_data.get("events", [])
+    by_team_eid: dict = {}  # teamId -> {eventId: event}
+    for e in events:
+        by_team_eid.setdefault(e.get("teamId"), {})[e.get("eventId")] = e
+    for e in events:
         # Penalty-shootout kicks aren't goals and must not stretch the timeline to 131'.
         _p = e.get("period", {})
         if isinstance(_p, dict) and (_p.get("value") == 5 or "Shoot" in (_p.get("displayName") or "")):
@@ -1026,8 +1035,16 @@ def _lineup_extras(match_data: dict):
         quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
         if t == "Goal" and "OwnGoal" not in quals:
             goals[pid] = goals.get(pid, 0) + 1
-        if "IntentionalGoalAssist" in quals:
-            assists[pid] = assists.get(pid, 0) + 1
+            rel_id = next((q.get("value") for q in e.get("qualifiers", [])
+                           if q.get("type", {}).get("displayName") == "RelatedEventId"), None)
+            if rel_id is not None:
+                try:
+                    rel = by_team_eid.get(e.get("teamId"), {}).get(int(rel_id))
+                except (TypeError, ValueError):
+                    rel = None
+                aid = rel.get("playerId") if rel else None
+                if aid is not None and aid != pid:
+                    assists[aid] = assists.get(aid, 0) + 1
         if t == "SubstitutionOn":
             on_min[pid] = m
         elif t == "SubstitutionOff":
