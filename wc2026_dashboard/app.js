@@ -1266,7 +1266,17 @@
       var key = strip(m.id).split("_vs_").slice().sort().join("|");
       r32by[key] = m;
     });
-    // R16 numbered 1..8 (EF) in schedule order; each R16's feeders are its two R32 ties
+    // R16 numbered 1..8 (EF). The QF/SF ids link by EF number, so EF order must follow the
+    // OFFICIAL FIFA bracket (match 89 → 96), NOT kickoff order: three R16 ties share each of the
+    // last two match-days and their same-day order is not the bracket order, which mis-pairs the
+    // quarter-finals (e.g. the 2K2L/1H2J tie belongs to the same QF as 1D3/1G3, though a later
+    // same-day tie sorts between them). Pin the canonical order by each tie's sorted R32-slot
+    // signature; a tie not in the table (a different schedule) falls back to date order.
+    var R16_ORDER = ["1F2C|2A2B", "1E3ABCDF|1I3CDFGH", "1C2F|2E2I", "1A3CEFHI|1L3EHIJK",
+                     "1H2J|2K2L", "1D3BEFIJ|1G3AEHIJ", "1B3EFGIJ|1K3DEIJL", "1J2H|2D2G"];
+    function r16rank(m) { var i = R16_ORDER.indexOf(strip(m.id).split("_vs_").slice().sort().join("|")); return i < 0 ? 99 : i; }
+    rounds.R16.sort(function (a, b) { var ra = r16rank(a), rb = r16rank(b); return ra !== rb ? ra - rb : byDate(a, b); });
+    // each R16's feeders are its two R32 ties
     var efByNum = {};
     rounds.R16.forEach(function (m, i) {
       efByNum[i + 1] = m;
