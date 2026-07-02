@@ -91,10 +91,16 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   `tools/cooling_break_analysis.py::export_breaks` so the tab always agrees with
   `COOLING_BREAK_ANALYSIS.md`; baseline μ/σ + regression control stay **frozen on the
   group stage** on purpose — don't "fix" them to include knockout games).
-- **`xg_model.py`** is the shared, dependency-free shot-extraction + xG model that ALL four
-  builders import (so the website's xG matches the PNG infographics exactly). It is copied
-  **verbatim** from `renderer.py`'s `_estimate_xg`/`_extract_qualifiers` — if you change the
-  model in `renderer.py`, mirror the change here or the site and PNGs will disagree.
+- **`xg_model.py`** is the shared shot-extraction + xG/xA module that ALL builders import.
+  Since 2026-07 it (and `renderer.py`) routes through **`xg_core/`** — a vendored copy of
+  XLALIGA's calibrated models (v2 xG artifact + pass-level xA artifact, scored by
+  `XGScorer`/`XAScorer`; stdlib-only, lightgbm silently upgrades to the full blend). No
+  hard-coded coefficients remain, so site and PNGs agree by construction. **Canonical
+  xg_core lives in `XLALIGA\xg_core`** — retrain there, re-copy the folder here. The
+  `regen-dashboard-data.yml` CI regenerates data on push and must keep its
+  `pip install lightgbm` step, or the site drifts to the LR-only fallback values. For bulk
+  PNG re-renders (`tools/render_all.py`) set `WC_SKIP_WEB_REFRESH=1` and run the builders
+  once afterwards.
 
 ## Match dashboard view (`match.js`)
 - **xG momentum** (`buildMomentum`, `#mv-momentum`, near the top under Match stats): a cumulative
