@@ -53,13 +53,14 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 ## Auto-deploy (how the live site stays current)
 - `run_match` step 4 → `git_ops.push_match_update()`: clones the repo to a temp dir and,
   in ONE commit, pushes the PNG **+** regenerated `wc2026_dashboard/{data.js,players.js,
-  shots.js,matches_detail/,database/}` **+** the raw match JSON. Needs `GIT_TOKEN` env var.
+  shots.js,breaks.js,matches_detail/,database/}` **+** the raw match JSON. Needs `GIT_TOKEN` env var.
 - It only auto-pushes **generated** files. Edits to dashboard **source**
   (`app.js`, `match.js`, `styles.css`, `match.css`, `*.html`) need a **manual** `git push`.
 - The render hook `_refresh_web_dashboard_db()` (renderer.py, runs on EVERY render)
   regenerates ALL dashboard data LOCALLY: the match-detail JS **and** `build_data.py`,
-  `build_players.py`, `build_shots.py`, `build_database.py` (CSVs + sqlite + manifest). So
-  databases are always fresh after a scrape; the **push is a separate step** that can fail independently.
+  `build_players.py`, `build_shots.py`, `build_database.py` (CSVs + sqlite + manifest),
+  `build_player_lab.py`, `build_breaks.py`. So databases are always fresh after a scrape;
+  the **push is a separate step** that can fail independently.
 
 ### ⚠️ Silent-push-failure (the #1 reason the site goes stale)
 - `git_ops._run()` forces `-c credential.helper=`, so the bot can auth **only** via
@@ -74,8 +75,9 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   login, not `Bad credentials` (401 = expired/revoked/typo'd, even if format looks right).
 - **Recover a stuck match manually:** copy `wc2026/output/<id>.png` →
   `WorldCup2026/<id>.png` (tracked, else the Infographic link 404s), then stage that PNG +
-  the modified `wc2026_dashboard/{data.js,players.js,database/*,matches_detail/<id>.js}` +
-  `wc2026/matches/<id>.json`, commit, `git push`. Stage specific paths (no `git add -A`).
+  the modified `wc2026_dashboard/{data.js,players.js,shots.js,breaks.js,database/*,
+  matches_detail/<id>.js}` + `wc2026/matches/<id>.json`, commit, `git push`. Stage
+  specific paths (no `git add -A`).
 
 ## Web dashboard build
 - `py wc2026_dashboard/build_site.py --serve` → build + serve on :8777
@@ -84,7 +86,11 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   (shots/passes/dribbles/goals/lineups), `build_players.py`→players.js,
   `build_shots.py`→shots.js (every shot tournament-wide: `window.WC_SHOTS`
   `[{t,o,h,x,y,xg,g,ot,s,m}]`, own goals + shootouts excluded — powers Team Lab),
-  `build_database.py`→database/.
+  `build_database.py`→database/, `build_breaks.py`→breaks.js (`window.WC_BREAKS`,
+  cooling-break windows — powers the Breaks tab; ALL the math lives in
+  `tools/cooling_break_analysis.py::export_breaks` so the tab always agrees with
+  `COOLING_BREAK_ANALYSIS.md`; baseline μ/σ + regression control stay **frozen on the
+  group stage** on purpose — don't "fix" them to include knockout games).
 - **`xg_model.py`** is the shared, dependency-free shot-extraction + xG model that ALL four
   builders import (so the website's xG matches the PNG infographics exactly). It is copied
   **verbatim** from `renderer.py`'s `_estimate_xg`/`_extract_qualifiers` — if you change the
@@ -150,9 +156,20 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   that can actually occur are listed; if the live combo isn't in the table the bracket keeps
   the `3rd: A/B/..` placeholder. `resolveSlot` consults `computeThirds().assignByCode` to fill
   the slots.
-- **Tab order** (`nav.tabs`): Tables · Matches · Players · xG Analysis · Data · Power Rank ·
-  **Standouts** · **Team Lab**. Tab switching is `data-view`-driven (a button's `data-view="x"`
-  toggles `#view-x`), so reordering is pure HTML — see `app.js` ~line 148.
+- **Tab order** (`nav.tabs`): Tables · Matches · Players · Standouts · Team Lab · Player Lab ·
+  **Breaks** · xG Analysis · Data · Power Rank. Tab switching is `data-view`-driven (a button's
+  `data-view="x"` toggles `#view-x`), so reordering is pure HTML — see `app.js` ~line 148.
+- **Breaks** (`#view-breaks`, `renderBreaks`/`initBreaks`, `app.js`): cooling-break analysis
+  from `window.WC_BREAKS` (breaks.js). KPI stat tiles, a per-match **momentum river** (rolling
+  momentum differential with shaded break bands + HT line + goal markers; team colours with a
+  darkness guard + the blue/orange collision fallback à la `match.js` `buildMomentum`), a
+  clickable per-match diverging **shift strip** vs baseline churn (μ/+1σ guides), pre→post pace
+  **dumbbells** (PPDA on its own scale), and a dominant-vs-chasing **slopegraph** whose grey
+  bands show the regression-to-mean control — keep that honesty device. Filters: break 1/2,
+  5/7/10-min window, Group/All, dominance rule. Detected break minutes are inferred from
+  event-stream dead gaps (see `COOLING_BREAK_ANALYSIS.md`); stage codes come from
+  `_stage_code()` (stage string + slot-coded id — raw `wc_metadata.stage` lies on overwritten
+  KO stubs).
 - **Power Rank & Predictions** (`renderPower`/`predictAll`, `#view-predict`, after Data): a Power
   Index for the 32 Round-of-32 teams = hardcoded `FIFA_PTS` (FIFA/Coca-Cola
   ranking, 11 Jun 2026 — top ~45 published, lowest few approximated) **+** a ±100-capped

@@ -21,6 +21,7 @@
       <button data-view="standouts">Standouts</button>
       <button data-view="teamlab">Team Lab</button>
       <button data-view="playerlab">Player Lab</button>
+      <button data-view="breaks">Breaks</button>
       <button data-view="xg">xG Analysis</button>
       <button data-view="data">Data</button>
       <button data-view="predict">Power Rank</button>
@@ -568,6 +569,70 @@
     </div>
   </section>
 
+  <!-- BREAKS (cooling-break analysis) -->
+  <section id="view-breaks" class="view">
+    <div class="section-head">
+      <h2>Cooling Breaks</h2>
+      <p>What the two cooling breaks (~min 23 and ~min 74) actually do to a game. Break minutes are
+         detected from dead gaps in the event stream; momentum blends window xG, field tilt and
+         possession, measured against the churn of ordinary 7-minute windows. Spoiler: the breaks move
+         games less than the headlines claim — and most of the “leader loses momentum” effect is
+         regression to the mean (the grey control below shows how much).</p>
+    </div>
+    <div class="stats-strip" id="bkStats"></div>
+    <div class="controls">
+      <div class="seg" id="bkBr">
+        <button class="seg-btn active" data-v="1">Break 1</button>
+        <button class="seg-btn" data-v="2">Break 2</button>
+      </div>
+      <div class="seg" id="bkWin">
+        <button class="seg-btn" data-v="300">5 min</button>
+        <button class="seg-btn active" data-v="420">7 min</button>
+        <button class="seg-btn" data-v="600">10 min</button>
+      </div>
+      <div class="seg" id="bkStage">
+        <button class="seg-btn active" data-v="G">Group stage</button>
+        <button class="seg-btn" data-v="all">All matches</button>
+      </div>
+    </div>
+    <div class="card full-card">
+      <h3 id="bkRiverTitle">Momentum river</h3>
+      <p class="hint">The rolling momentum balance (above 0 = home on top). Shaded bands are the
+         cooling breaks, the dashed line is half-time, ⚽ marks goals. Pick a match — or click a bar
+         in the strip below.</p>
+      <div class="controls"><select id="bkMatch"></select></div>
+      <div id="bkRiver"></div>
+      <div class="chart-tip" id="bkRiverTip"></div>
+    </div>
+    <div class="card full-card">
+      <h3 id="bkStripTitle">Who got shaken — every match</h3>
+      <p class="hint">One bar per match: how far the momentum shift across this break sits above (or
+         below) the tournament’s ordinary window-to-window churn (μ). Bars past the dashed +1σ line are
+         the “higher-than-average” games. Click a bar to load the match above.</p>
+      <div id="bkStrip"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Pace before → after</h3>
+        <p class="hint">Per in-play minute, both teams pooled, across all matches with this break.</p>
+        <div id="bkPace"></div>
+      </div>
+      <div class="card">
+        <h3>Dominant vs chasing side</h3>
+        <p class="hint">Mean momentum index before → after the break. The grey band is the
+           regression-to-mean control: what the same sides do across a random boundary with no break.</p>
+        <div class="controls">
+          <div class="seg" id="bkDom">
+            <button class="seg-btn active" data-v="auto">Score, else momentum</button>
+            <button class="seg-btn" data-v="score">Scoreline only</button>
+            <button class="seg-btn" data-v="mom">Momentum only</button>
+          </div>
+        </div>
+        <div id="bkDominance"></div>
+      </div>
+    </div>
+  </section>
+
   <div class="footer-note" id="footerNote"></div>
 </main>
 
@@ -581,6 +646,7 @@
     document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="shots.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="breaks.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="database/manifest.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
   })();
