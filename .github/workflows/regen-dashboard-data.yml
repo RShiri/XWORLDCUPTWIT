@@ -10,9 +10,12 @@ name: Regenerate dashboard data
 # re-runs the builders from the COMMITTED source on every deploy and commits the
 # corrected data back, so a stale scrape machine can no longer regress the site.
 #
-# The builders are pure-stdlib and resolve their paths relative to their own
-# location, so no dependencies or working-directory setup are needed. Pushes made
-# with GITHUB_TOKEN do not trigger new workflow runs, so this cannot loop.
+# The builders resolve their paths relative to their own location, so no
+# working-directory setup is needed. lightgbm is installed so the xg_core
+# scorers run the SAME full LR+GBM blend as the owner's PC — without it they
+# silently fall back to the calibrated LR-only path and the site's xG/xA
+# drifts a few hundredths from the PNGs. Pushes made with GITHUB_TOKEN do not
+# trigger new workflow runs, so this cannot loop.
 
 on:
   push:
@@ -21,6 +24,7 @@ on:
       - 'wc2026/matches/**'
       - 'wc2026_dashboard/build_*.py'
       - 'wc2026_dashboard/xg_model.py'
+      - 'xg_core/**'
       - '.github/workflows/regen-dashboard-data.yml'
   workflow_dispatch: {}
 
@@ -40,6 +44,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Install scorer dependencies (full LR+GBM blend, not the LR fallback)
+        run: pip install --quiet lightgbm numpy
 
       - name: Regenerate dashboard data from committed builders
         run: |
