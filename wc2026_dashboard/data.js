@@ -11332,6 +11332,26 @@ window.WC_DATA = {
    "xga": 2.83,
    "home": false,
    "date": "2026-07-02"
+  },
+  {
+   "team": "Spain",
+   "opp": "Austria",
+   "gf": 3,
+   "ga": 0,
+   "xgf": 2.73,
+   "xga": 0.44,
+   "home": true,
+   "date": "2026-07-02"
+  },
+  {
+   "team": "Austria",
+   "opp": "Spain",
+   "gf": 0,
+   "ga": 3,
+   "xgf": 0.44,
+   "xga": 2.73,
+   "home": false,
+   "date": "2026-07-02"
   }
  ]
 };
