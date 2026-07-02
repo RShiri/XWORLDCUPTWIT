@@ -2448,6 +2448,364 @@
     wireChartTaps("tlMaps", "tlMapTip");
   }
 
+  /* ---------------- Breaks (cooling-break analysis) ----------------
+     Powered by window.WC_BREAKS (breaks.js, built by build_breaks.py; the math is
+     tools/cooling_break_analysis.py::export_breaks). meta.base holds the GROUP-STAGE
+     baseline churn (mu/sd) and the regression-to-mean control per window length, so
+     every panel can say how much of an effect is just "hot spells end anyway". */
+  var BREAKS = window.WC_BREAKS || { meta: null, matches: [] };
+  var bkState = { br: 1, win: "420", dom: "auto", stage: "G", match: null };
+
+  function bkAvg(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : 0; }
+  function bkMatches() {
+    return BREAKS.matches.filter(function (m) { return bkState.stage === "all" || m.st === bkState.stage; });
+  }
+  // {m, b, w} rows for the current break number + window length (null windows =
+  // clipped by a half boundary — skipped so rates stay honest)
+  function bkRows() {
+    var rows = [];
+    bkMatches().forEach(function (m) {
+      m.breaks.forEach(function (b) {
+        if (b.n === bkState.br && b.w[bkState.win]) rows.push({ m: m, b: b, w: b.w[bkState.win] });
+      });
+    });
+    return rows;
+  }
+  // Same collision fallback as match.js buildMomentum (two similar team colours
+  // become the distinct blue/orange pair), plus a darkness guard: a near-black
+  // kit colour (Germany) is unreadable on the dark chart surface, so it falls
+  // back too.
+  function bkColors(m) {
+    function hx(c) {
+      var r = /^#?([0-9a-f]{6})$/i.exec(c || "");
+      if (!r) return null;
+      var n = parseInt(r[1], 16);
+      return [n >> 16 & 255, n >> 8 & 255, n & 255];
+    }
+    var ch = m.hc || "#4ea1ff", ca = m.ac || "#ff6a3d", A = hx(ch), B = hx(ca);
+    if (A && (0.299 * A[0] + 0.587 * A[1] + 0.114 * A[2]) < 60) { ch = "#4ea1ff"; A = hx(ch); }
+    if (B && (0.299 * B[0] + 0.587 * B[1] + 0.114 * B[2]) < 60) { ca = "#ff6a3d"; B = hx(ca); }
+    if (A && B && Math.sqrt(Math.pow(A[0] - B[0], 2) + Math.pow(A[1] - B[1], 2) + Math.pow(A[2] - B[2], 2)) < 90) {
+      ch = "#4ea1ff"; ca = "#ff6a3d";
+    }
+    return [ch, ca];
+  }
+  // Dominant side of a break row: leader on goals at the break, else (or in
+  // "mom" mode) the side with the higher pre-window momentum index. "score"
+  // mode returns null for level games (row is skipped).
+  function bkDomSide(r, mode) {
+    if (mode !== "mom" && r.b.gh !== r.b.ga) return r.b.gh > r.b.ga ? "h" : "a";
+    if (mode === "score") return null;
+    return r.w.m[0] >= r.w.m[1] ? "h" : "a";
+  }
+  function bkDate(d) {
+    if (!d) return "";
+    var p = d.split("-");
+    return (+p[2]) + " " + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+p[1] - 1];
+  }
+  function bkLabel(m) {
+    return bkDate(m.d) + " — " + m.h + " " + m.hs + "–" + m.as + " " + m.a + (m.st === "G" ? "" : " · " + m.st);
+  }
+
+  function renderBkStats() {
+    var host = document.getElementById("bkStats");
+    if (!host) return;
+    var base = BREAKS.meta && BREAKS.meta.base[bkState.win];
+    var rows = bkRows();
+    if (!base || !rows.length) { host.innerHTML = ""; return; }
+    var det = 0, conf = 0, dead = 0;
+    bkMatches().forEach(function (m) {
+      m.breaks.forEach(function (b) { det++; conf += b.conf; dead += b.dur; });
+    });
+    var avgDead = Math.floor(dead / det / 60) + ":" + ("0" + Math.round((dead / det) % 60)).slice(-2);
+    var above = rows.filter(function (r) { return r.w.sh > base.mu + base.sd; }).length;
+    var domRows = rows.filter(function (r) { return bkDomSide(r, bkState.dom); });
+    var chase = bkAvg(domRows.map(function (r) {
+      return bkDomSide(r, bkState.dom) === "h" ? r.w.m[3] - r.w.m[1] : r.w.m[2] - r.w.m[0];
+    }));
+    var pasPre = bkAvg(rows.map(function (r) { return r.w.pace.pas[0]; }));
+    var pasPost = bkAvg(rows.map(function (r) { return r.w.pace.pas[1]; }));
+    var pasPct = pasPre ? Math.round(100 * (pasPost - pasPre) / pasPre) : 0;
+    var items = [
+      ["v accent", conf + "/" + det, "cooling breaks ≥150 s / detected · avg dead time " + avgDead],
+      ["v", Math.round(100 * above / rows.length) + "%", "of matches shifted > μ+1σ after break " + bkState.br + " (μ " + base.mu.toFixed(2) + " · σ " + base.sd.toFixed(2) + ")"],
+      ["v blue", (chase >= 0 ? "+" : "") + chase.toFixed(2), "chasing side's avg momentum gain · control +" + base.ctrl.sub.toFixed(2) + " (regression to the mean)"],
+      ["v", (pasPct >= 0 ? "+" : "") + pasPct + "%", "passes/min after the restart — games do not slow down"],
+    ];
+    host.innerHTML = items.map(function (it) {
+      return '<div class="stat"><div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div></div>";
+    }).join("");
+  }
+
+  function renderBkRiver() {
+    var host = document.getElementById("bkRiver");
+    if (!host) return;
+    var ms = bkMatches(), m = null;
+    ms.forEach(function (x) { if (x.id === bkState.match) m = x; });
+    if (!m) {
+      m = ms[0];
+      bkState.match = m ? m.id : null;
+      var sel0 = document.getElementById("bkMatch");
+      if (sel0 && m) sel0.value = m.id;
+    }
+    if (!m) { host.innerHTML = '<p class="hint">No matches for this filter.</p>'; return; }
+    var title = document.getElementById("bkRiverTitle");
+    if (title) title.textContent = m.h + " " + m.hs + "–" + m.as + " " + m.a + " — momentum river";
+    var pts = m.series[bkState.win] || [];
+    if (!pts.length) { host.innerHTML = '<p class="hint">No series for this match.</p>'; return; }
+    var cols = bkColors(m);
+    var W = 860, H = 330, padL = 46, padR = 14, padT = 16, padB = 26;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var xmax = Math.max(90, m.end);
+    var ymax = niceMax(Math.max.apply(null, pts.map(function (p) { return Math.abs(p[1]); }).concat([0.5])) * 1.05);
+    function sx(min) { return padL + plotW * (min / xmax); }
+    function sy(v) { return padT + plotH * (1 - (v + ymax) / (2 * ymax)); }
+    var s = ['<svg viewBox="0 0 ' + W + " " + H + '" class="bk-svg">'];
+    // cooling-break bands (behind everything); dashed outline = low-confidence gap
+    m.breaks.forEach(function (b) {
+      s.push('<rect class="bk-band' + (b.conf ? "" : " soft") + '" x="' + sx(b.s).toFixed(1) + '" y="' + padT +
+        '" width="' + Math.max(2, sx(b.e) - sx(b.s)).toFixed(1) + '" height="' + plotH + '"/>');
+      s.push('<text x="' + sx((b.s + b.e) / 2).toFixed(1) + '" y="' + (padT + 11) +
+        '" fill="#7e8bb0" font-size="9.5" text-anchor="middle">break ' + b.n + (b.conf ? "" : " ?") + "</text>");
+    });
+    // y grid at fractions of ymax, x ticks every 15'
+    [-1, -0.5, 0, 0.5, 1].forEach(function (f) {
+      var Y = sy(f * ymax);
+      s.push('<line x1="' + padL + '" y1="' + Y.toFixed(1) + '" x2="' + (padL + plotW) + '" y2="' + Y.toFixed(1) +
+        '" stroke="' + (f === 0 ? "#46527a" : "#222b44") + '" stroke-width="' + (f === 0 ? 1 : 0.6) + '"/>');
+      s.push('<text x="' + (padL - 8) + '" y="' + (Y + 3).toFixed(1) + '" fill="#93a0bd" font-size="10" text-anchor="end">' +
+        (f > 0 ? "+" : "") + (f * ymax).toFixed(1) + "</text>");
+    });
+    for (var t = 0; t <= xmax; t += 15) {
+      s.push('<text x="' + sx(t).toFixed(1) + '" y="' + (padT + plotH + 16) + '" fill="#93a0bd" font-size="10" text-anchor="middle">' + t + "′</text>");
+    }
+    // half-time
+    s.push('<line x1="' + sx(m.ht).toFixed(1) + '" y1="' + padT + '" x2="' + sx(m.ht).toFixed(1) + '" y2="' + (padT + plotH) +
+      '" stroke="#5d6a90" stroke-width="1" stroke-dasharray="4 4"/>');
+    s.push('<text x="' + (sx(m.ht) + 3).toFixed(1) + '" y="' + (padT + plotH - 5) + '" fill="#7e8bb0" font-size="9.5">HT</text>');
+    // the river itself: split at HT, then into sign runs so each side's colour
+    // strokes "their" spells; faint area fill down to the zero line.
+    [pts.filter(function (p) { return p[0] <= m.ht; }), pts.filter(function (p) { return p[0] > m.ht; })].forEach(function (run) {
+      if (run.length < 2) return;
+      var segs = [], cur = [run[0]];
+      for (var i = 1; i < run.length; i++) {
+        var a = run[i - 1], b = run[i];
+        if ((a[1] >= 0) !== (b[1] >= 0)) {
+          var f = Math.abs(a[1]) / (Math.abs(a[1]) + Math.abs(b[1]) || 1);
+          var xz = a[0] + (b[0] - a[0]) * f;
+          cur.push([xz, 0]); segs.push(cur); cur = [[xz, 0]];
+        }
+        cur.push(b);
+      }
+      segs.push(cur);
+      segs.forEach(function (seg) {
+        var col = (Math.max.apply(null, seg.map(function (p) { return p[1]; })) > 0 ||
+                   seg.every(function (p) { return p[1] === 0; })) ? cols[0] : cols[1];
+        var line = seg.map(function (p, i2) { return (i2 ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1); }).join("");
+        s.push('<path d="' + line + " L" + sx(seg[seg.length - 1][0]).toFixed(1) + " " + sy(0).toFixed(1) +
+          " L" + sx(seg[0][0]).toFixed(1) + " " + sy(0).toFixed(1) + 'Z" fill="' + col + '" fill-opacity="0.16"/>');
+        s.push('<path d="' + line + '" fill="none" stroke="' + col + '" stroke-width="2.2" stroke-linejoin="round"/>');
+      });
+    });
+    // goal markers on the line (data-info feeds the shared tap/hover tooltip)
+    m.goals.forEach(function (g) {
+      var yv = 0;
+      for (var i = 0; i < pts.length; i++) if (pts[i][0] <= g.m) yv = pts[i][1];
+      var col = g.s === "h" ? cols[0] : cols[1];
+      var team = g.s === "h" ? m.h : m.a;
+      var info = Math.round(g.m) + "′ Goal — " + team + (g.og ? " (OG)" : "") + (g.pen ? " (pen)" : "");
+      s.push('<circle cx="' + sx(g.m).toFixed(1) + '" cy="' + sy(yv).toFixed(1) + '" r="5.5" fill="' + col +
+        '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"/>');
+      s.push('<text x="' + sx(g.m).toFixed(1) + '" y="' + (sy(yv) - 9).toFixed(1) + '" font-size="9" text-anchor="middle">⚽</text>');
+    });
+    s.push("</svg>");
+    host.innerHTML = s.join("") +
+      chartLegend([[cols[0], m.h], [cols[1], m.a]], "shaded band = cooling break · dashed = HT · above 0 = " + m.h + " on top");
+  }
+
+  function renderBkStrip() {
+    var host = document.getElementById("bkStrip");
+    if (!host) return;
+    var base = BREAKS.meta && BREAKS.meta.base[bkState.win];
+    var rows = bkRows();
+    var title = document.getElementById("bkStripTitle");
+    if (title) title.textContent = "Who got shaken by break " + bkState.br + " — every match";
+    if (!base || !rows.length) { host.innerHTML = '<p class="hint">No data for this filter.</p>'; return; }
+    rows.sort(function (a, b) { return b.w.sh - a.w.sh; });
+    var W = 860, rowH = 9, padT = 18, padB = 6, padSide = 8;
+    var H = padT + rows.length * rowH + padB;
+    var vmax = niceMax(Math.max.apply(null, rows.map(function (r) { return Math.abs(r.w.sh - base.mu); })) * 1.05);
+    var xC = W / 2;
+    function xv(v) { return xC + (v / vmax) * (W / 2 - padSide - 60); }
+    var s = ['<svg viewBox="0 0 ' + W + " " + H + '" class="bk-svg">'];
+    s.push('<line x1="' + xC + '" y1="' + padT + '" x2="' + xC + '" y2="' + (H - padB) + '" stroke="#46527a" stroke-width="1"/>');
+    s.push('<text x="' + xC + '" y="11" fill="#93a0bd" font-size="10" text-anchor="middle">μ (normal churn)</text>');
+    s.push('<line x1="' + xv(base.sd).toFixed(1) + '" y1="' + padT + '" x2="' + xv(base.sd).toFixed(1) + '" y2="' + (H - padB) +
+      '" stroke="#5d6a90" stroke-width="1" stroke-dasharray="4 4"/>');
+    s.push('<text x="' + xv(base.sd).toFixed(1) + '" y="11" fill="#7e8bb0" font-size="10" text-anchor="middle">+1σ</text>');
+    rows.forEach(function (r, i) {
+      var v = r.w.sh - base.mu, y = padT + i * rowH;
+      var x0 = Math.min(xC, xv(v)), bw = Math.max(1.5, Math.abs(xv(v) - xC));
+      var big = r.w.sh > base.mu + base.sd;
+      var tip = r.m.h + " " + r.m.hs + "–" + r.m.as + " " + r.m.a + " — shift " + r.w.sh.toFixed(2) +
+        " (μ " + base.mu.toFixed(2) + ")" + (r.b.conf ? "" : " · low-confidence break");
+      s.push('<rect class="bk-bar" data-id="' + esc(r.m.id) + '" x="' + x0.toFixed(1) + '" y="' + y + '" width="' + bw.toFixed(1) +
+        '" height="' + (rowH - 2) + '" rx="2" fill="' + (v >= 0 ? "#4ea1ff" : "#55617a") + '" fill-opacity="' + (big ? "0.95" : "0.55") +
+        '"><title>' + esc(tip) + "</title></rect>");
+      if (big) {
+        s.push('<text x="' + (xv(v) + 5).toFixed(1) + '" y="' + (y + rowH - 3) + '" fill="#c2cce0" font-size="8.7">' +
+          esc(r.m.h + " – " + r.m.a) + "</text>");
+      }
+    });
+    s.push("</svg>");
+    host.innerHTML = s.join("") +
+      chartLegend([["#4ea1ff", "shift above normal churn"], ["#55617a", "below"]],
+        Math.round(100 * rows.filter(function (r) { return r.w.sh > base.mu + base.sd; }).length / rows.length) +
+        "% past +1σ · click a bar to load the match");
+  }
+
+  function renderBkPace() {
+    var host = document.getElementById("bkPace");
+    if (!host) return;
+    var rows = bkRows();
+    if (!rows.length) { host.innerHTML = '<p class="hint">No data for this filter.</p>'; return; }
+    var mets = [["pas", "Passes / min"], ["tou", "Touches / min"], ["fte", "Final-3rd entries / min"]];
+    var agg = mets.map(function (mt) {
+      return { label: mt[1],
+        pre: bkAvg(rows.map(function (r) { return r.w.pace[mt[0]][0]; })),
+        post: bkAvg(rows.map(function (r) { return r.w.pace[mt[0]][1]; })) };
+    });
+    var bp = [0, 0], da = [0, 0];
+    rows.forEach(function (r) {
+      r.w.pace.ppda.forEach(function (p, i) { bp[i] += p[0]; da[i] += p[1]; });
+    });
+    agg.push({ label: "PPDA (higher = less pressing)", own: true,
+      pre: da[0] ? bp[0] / da[0] : null, post: da[1] ? bp[1] / da[1] : null });
+    var W = 460, rowH = 52, padT = 8, padL = 12, padR = 118;
+    var H = padT + agg.length * rowH + 4;
+    var s = ['<svg viewBox="0 0 ' + W + " " + H + '" class="bk-svg">'];
+    var shared = niceMax(Math.max.apply(null, agg.filter(function (a) { return !a.own; })
+      .map(function (a) { return Math.max(a.pre, a.post); })) * 1.15);
+    agg.forEach(function (a, i) {
+      var y = padT + i * rowH + 30;
+      if (a.pre == null || a.post == null) {
+        s.push('<text x="' + padL + '" y="' + (y - 16) + '" fill="#93a0bd" font-size="11">' + a.label + " —</text>");
+        return;
+      }
+      var max = a.own ? niceMax(Math.max(a.pre, a.post) * 1.3) : shared;
+      function px(v) { return padL + (W - padL - padR) * (v / max); }
+      var pct = Math.round(100 * (a.post - a.pre) / a.pre);
+      s.push('<text x="' + padL + '" y="' + (y - 16) + '" fill="#c2cce0" font-size="11">' + a.label + "</text>");
+      s.push('<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="#222b44" stroke-width="0.8"/>');
+      s.push('<line x1="' + px(a.pre).toFixed(1) + '" y1="' + y + '" x2="' + px(a.post).toFixed(1) + '" y2="' + y + '" stroke="#7c89a8" stroke-width="2"/>');
+      s.push('<circle cx="' + px(a.pre).toFixed(1) + '" cy="' + y + '" r="5" fill="#7c89a8"><title>before: ' + a.pre.toFixed(2) + "</title></circle>");
+      s.push('<circle cx="' + px(a.post).toFixed(1) + '" cy="' + y + '" r="5.5" fill="#4ea1ff" stroke="#0b0f1a" stroke-width="0.8"><title>after: ' + a.post.toFixed(2) + "</title></circle>");
+      s.push('<text x="' + (W - padR + 8) + '" y="' + (y + 4) + '" fill="#c2cce0" font-size="10.5" font-weight="700">' +
+        a.pre.toFixed(1) + "→" + a.post.toFixed(1) + " (" + (pct >= 0 ? "+" : "") + pct + "%)</text>");
+    });
+    s.push("</svg>");
+    host.innerHTML = s.join("") + chartLegend([["#7c89a8", "before the break"], ["#4ea1ff", "after the restart"]],
+      "n = " + rows.length + " matches");
+  }
+
+  function renderBkDominance() {
+    var host = document.getElementById("bkDominance");
+    if (!host) return;
+    var base = BREAKS.meta && BREAKS.meta.base[bkState.win];
+    var rows = bkRows().filter(function (r) { return bkDomSide(r, bkState.dom); });
+    if (!base || !rows.length) { host.innerHTML = '<p class="hint">No data for this filter.</p>'; return; }
+    function sideVals(which) {
+      return rows.map(function (r) {
+        var dom = bkDomSide(r, bkState.dom) === "h";
+        var home = which === "dom" ? dom : !dom;
+        return home ? [r.w.m[0], r.w.m[2]] : [r.w.m[1], r.w.m[3]];
+      });
+    }
+    var domV = sideVals("dom"), subV = sideVals("sub");
+    var d0 = bkAvg(domV.map(function (v) { return v[0]; })), d1 = bkAvg(domV.map(function (v) { return v[1]; }));
+    var s0 = bkAvg(subV.map(function (v) { return v[0]; })), s1 = bkAvg(subV.map(function (v) { return v[1]; }));
+    var ctlD = d0 + base.ctrl.dom, ctlS = s0 + base.ctrl.sub;   // expected post with NO break
+    var lo = Math.min(d0, d1, s0, s1, ctlD, ctlS), hi = Math.max(d0, d1, s0, s1, ctlD, ctlS);
+    var span = (hi - lo) || 1; lo -= span * 0.25; hi += span * 0.25;
+    var W = 430, H = 240, padL = 60, padR = 96, padT = 18, padB = 30;
+    var x0 = padL + 30, x1 = W - padR - 30;
+    function yv(v) { return padT + (H - padT - padB) * (1 - (v - lo) / (hi - lo)); }
+    var s = ['<svg viewBox="0 0 ' + W + " " + H + '" class="bk-svg">'];
+    [["before", x0], ["after", x1]].forEach(function (c) {
+      s.push('<line x1="' + c[1] + '" y1="' + padT + '" x2="' + c[1] + '" y2="' + (H - padB) + '" stroke="#222b44" stroke-width="0.8"/>');
+      s.push('<text x="' + c[1] + '" y="' + (H - 10) + '" fill="#93a0bd" font-size="10.5" text-anchor="middle">' + c[0] + "</text>");
+    });
+    // grey control band: where each side would land from regression alone
+    [[ctlD, "#7c89a8"], [ctlS, "#7c89a8"]].forEach(function (c) {
+      s.push('<rect x="' + (x1 - 14) + '" y="' + (yv(c[0]) - 5).toFixed(1) + '" width="28" height="10" rx="3" fill="' + c[1] + '" fill-opacity="0.35"/>');
+    });
+    s.push('<text x="' + (x1 + 20) + '" y="' + (yv(ctlD) + 3).toFixed(1) + '" fill="#7e8bb0" font-size="9">control</text>');
+    s.push('<text x="' + (x1 + 20) + '" y="' + (yv(ctlS) + 3).toFixed(1) + '" fill="#7e8bb0" font-size="9">control</text>');
+    [[d0, d1, "#ff6a3d", "dominant"], [s0, s1, "#4ea1ff", "chasing"]].forEach(function (L) {
+      s.push('<line x1="' + x0 + '" y1="' + yv(L[0]).toFixed(1) + '" x2="' + x1 + '" y2="' + yv(L[1]).toFixed(1) +
+        '" stroke="' + L[2] + '" stroke-width="2.4"/>');
+      s.push('<circle cx="' + x0 + '" cy="' + yv(L[0]).toFixed(1) + '" r="5" fill="' + L[2] + '"><title>' + L[3] + " before: " + L[0].toFixed(2) + "</title></circle>");
+      s.push('<circle cx="' + x1 + '" cy="' + yv(L[1]).toFixed(1) + '" r="5" fill="' + L[2] + '"><title>' + L[3] + " after: " + L[1].toFixed(2) + "</title></circle>");
+      s.push('<text x="' + (x0 - 8) + '" y="' + (yv(L[0]) + 3.5).toFixed(1) + '" fill="' + L[2] + '" font-size="10.5" text-anchor="end">' + L[3] + "</text>");
+    });
+    s.push("</svg>");
+    var exD = (d1 - d0) - base.ctrl.dom, exS = (s1 - s0) - base.ctrl.sub;
+    host.innerHTML = s.join("") +
+      '<p class="hint" style="margin-top:6px">n = ' + rows.length + " · beyond regression to the mean the break itself costs the dominant side " +
+      (exD >= 0 ? "+" : "") + exD.toFixed(2) + " and hands the chasing side " + (exS >= 0 ? "+" : "") + exS.toFixed(2) + ".</p>";
+  }
+
+  function renderBreaks() {
+    renderBkStats();
+    renderBkRiver();
+    renderBkStrip();
+    renderBkPace();
+    renderBkDominance();
+  }
+
+  function initBreaks() {
+    if (!document.getElementById("view-breaks")) return;
+    if (!BREAKS.matches.length) {
+      var r0 = document.getElementById("bkRiver");
+      if (r0) r0.innerHTML = '<p class="hint">No break data yet — rebuild breaks.js (build_breaks.py).</p>';
+      return;
+    }
+    function fillSelect() {
+      var sel = document.getElementById("bkMatch");
+      var ms = bkMatches().slice().sort(function (a, b) { return (a.d || "") < (b.d || "") ? -1 : 1; });
+      sel.innerHTML = ms.map(function (m) { return '<option value="' + esc(m.id) + '">' + esc(bkLabel(m)) + "</option>"; }).join("");
+      if (!ms.some(function (m) { return m.id === bkState.match; })) {
+        var rows = bkRows().sort(function (a, b) { return b.w.sh - a.w.sh; });
+        bkState.match = rows.length ? rows[0].m.id : (ms[0] && ms[0].id);
+      }
+      if (bkState.match) sel.value = bkState.match;
+    }
+    [["bkBr", "br", true], ["bkWin", "win", false], ["bkStage", "stage", false], ["bkDom", "dom", false]].forEach(function (g) {
+      document.querySelectorAll("#" + g[0] + " .seg-btn").forEach(function (b) {
+        b.addEventListener("click", function () {
+          document.querySelectorAll("#" + g[0] + " .seg-btn").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          bkState[g[1]] = g[2] ? +b.getAttribute("data-v") : b.getAttribute("data-v");
+          if (g[0] === "bkStage") fillSelect();
+          renderBreaks();
+        });
+      });
+    });
+    var sel = document.getElementById("bkMatch");
+    sel.addEventListener("change", function () { bkState.match = sel.value; renderBkRiver(); });
+    document.getElementById("bkStrip").addEventListener("click", function (e) {
+      var id = e.target && e.target.getAttribute && e.target.getAttribute("data-id");
+      if (!id) return;
+      bkState.match = id;
+      sel.value = id;
+      renderBkRiver();
+      document.getElementById("bkRiverTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    fillSelect();
+    renderBreaks();
+    wireChartTaps("bkRiver", "bkRiverTip");
+  }
+
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
@@ -2470,6 +2828,7 @@
   renderUnlucky();
   initStandouts();
   initTeamLab();
+  initBreaks();
   renderData();
   renderPower();
   document.getElementById("footerNote").textContent =

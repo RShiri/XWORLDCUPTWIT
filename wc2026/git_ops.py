@@ -185,6 +185,7 @@ def push_match_update(png_path: str, match_id: str | None = None,
         _copy_file_into(tmpdir, "wc2026_dashboard/data.js")
         _copy_file_into(tmpdir, "wc2026_dashboard/players.js")
         _copy_file_into(tmpdir, "wc2026_dashboard/shots.js")
+        _copy_file_into(tmpdir, "wc2026_dashboard/breaks.js")
         _copy_tree_into(tmpdir, "wc2026_dashboard/matches_detail")
         _copy_tree_into(tmpdir, "wc2026_dashboard/database")
 

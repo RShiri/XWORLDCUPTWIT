@@ -31,9 +31,11 @@ Method
 Run from repo root:  py tools/cooling_break_analysis.py  [--window 420] [--json out.json]
 """
 import argparse
+import bisect
 import glob
 import json
 import os
+import re
 import statistics
 import sys
 
@@ -62,20 +64,58 @@ def is_own_goal(ev):
                for q in ev.get("qualifiers") or [])
 
 
+# Stage metadata can't be trusted alone: knockout slot-stubs overwritten in
+# place keep the stub's "Group Stage" string, while some real group games say
+# "World Cup Grp. C" / "Group I" / None. So classify by the stage string AND
+# the slot-coded file id (the bracket's `2A_vs_2B` convention marks knockouts).
+_SLOT_SIDE_RE = re.compile(r"^(?:[123][A-L]{1,6}|Winner[_ ].*)$", re.I)
+
+
+def _slot_stage(mid):
+    """Knockout round inferred from a slot-coded file id, or None."""
+    m = re.match(r"^\d{4}_\d{2}_\d{2}_(.+)_vs_(.+)$", mid or "")
+    if not m:
+        return None
+    a, b = (s.replace("_", " ").strip() for s in m.groups())
+    if not (_SLOT_SIDE_RE.match(a) or _SLOT_SIDE_RE.match(b)):
+        return None
+    if not a.lower().startswith("winner") and not b.lower().startswith("winner"):
+        return "R32"  # both sides group-position codes (1A / 2B / 3ABCDF)
+    return "KO"
+
+
+def _stage_code(stage, mid=""):
+    s = (stage or "").lower()
+    for token, code in (("32", "R32"), ("16", "R16"), ("quarter", "QF"),
+                        ("semi", "SF"), ("third place", "3P"), ("final", "F")):
+        if token in s:
+            return code
+    slot = _slot_stage(mid)
+    if slot:
+        return slot
+    if not s or "group" in s or "grp" in s:
+        return "G"
+    return stage[:12]
+
+
 def load_group_matches(root):
+    from build_match_details import is_match_file  # via the sys.path insert above
     out = []
     for p in sorted(glob.glob(os.path.join(root, "wc2026", "matches", "*.json"))):
+        if not is_match_file(p):
+            continue
         try:
             d = json.load(open(p, encoding="utf-8"))
         except Exception:
             continue
         if not isinstance(d, dict):
             continue
-        if (d.get("wc_metadata") or {}).get("stage") != "Group Stage":
+        mid = os.path.basename(p)[:-5]
+        if _stage_code((d.get("wc_metadata") or {}).get("stage"), mid) != "G":
             continue
         if not d.get("events"):
             continue
-        out.append((os.path.basename(p)[:-5], d))
+        out.append((mid, d))
     return out
 
 
@@ -347,13 +387,242 @@ def json_goals_before(rec, half, t_cut):
     return gh, ga
 
 
+# ---------------------------------------------------------------------------
+# Dashboard export — everything below feeds wc2026_dashboard/build_breaks.py
+# (breaks.js / window.WC_BREAKS). Same math as analyse() above, but per-window
+# (5/7/10 min), for ALL played matches, plus the per-match momentum series and
+# the regression-to-mean control. The baseline/Zscorer stay fitted on the
+# GROUP STAGE only so the dashboard numbers keep matching this CLI and
+# COOLING_BREAK_ANALYSIS.md as knockout games land.
+
+EXPORT_WINDOWS = (300, 420, 600)
+MIN_CLAMPED = 180        # a clamped pre/post window shorter than this is dropped
+_HALF_KEYS = ((1, "FirstHalf", H1_WIN), (2, "SecondHalf", H2_WIN))
+
+
+def load_played_matches(root):
+    """Every finished match with events, any stage -> [(id, data, stage_code)].
+    Unlike load_group_matches this keeps knockout games; stage codes come from
+    _stage_code (stage string + slot-coded id, see above)."""
+    from build_match_details import is_match_file  # via the sys.path insert above
+    out = []
+    for p in sorted(glob.glob(os.path.join(root, "wc2026", "matches", "*.json"))):
+        if not is_match_file(p):
+            continue
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(d, dict) or not d.get("events"):
+            continue
+        if (d.get("home") or {}).get("score") is None or (d.get("away") or {}).get("score") is None:
+            continue
+        mid = os.path.basename(p)[:-5]
+        out.append((mid, d, _stage_code((d.get("wc_metadata") or {}).get("stage"), mid)))
+    return out
+
+
+def _rec_for_export(mid, d, st):
+    from build_match_details import norm
+    hid, aid = d["home"]["teamId"], d["away"]["teamId"]
+    rec = dict(id=mid, st=st, date=(d.get("wc_metadata") or {}).get("date"),
+               h=norm(d["home"]["name"]), a=norm(d["away"]["name"]),
+               hs=d["home"]["score"], as_=d["away"]["score"],
+               home_id=hid, away_id=aid, halves={}, times={}, breaks={})
+    for key, half, win in _HALF_KEYS:
+        ev = half_events(d, half)
+        rec["halves"][half] = ev
+        rec["times"][half] = [ev_time(e) for e in ev]
+        br = find_break(ev, *win)
+        if br:
+            rec["breaks"][key] = dict(start=br[0], end=br[1], dur=br[2],
+                                      conf=1 if br[2] >= MIN_BREAK_GAP else 0)
+    return rec
+
+
+def _win_slice(rec, half, t0, t1):
+    """Events of `half` with t0 <= time < t1 (bisect on the precomputed times,
+    so the rolling passes don't rescan the whole half per window)."""
+    times = rec["times"][half]
+    return rec["halves"][half][bisect.bisect_left(times, t0):bisect.bisect_left(times, t1)]
+
+
+def _pair_index(zs, rec, half, t0, t1):
+    """(home_index, away_index, raw window stats) for one window."""
+    win = window_stats(_win_slice(rec, half, t0, t1), t0, t1,
+                       rec["home_id"], rec["away_id"])
+    minutes = (t1 - t0) / 60.0
+    mh = zs.index(*momentum_components(win, rec["home_id"], rec["away_id"], minutes))
+    ma = zs.index(*momentum_components(win, rec["away_id"], rec["home_id"], minutes))
+    return mh, ma, win
+
+
+def _fit_group(group, w):
+    """Zscorer over every rolling window of the group-stage matches (same
+    sampling as analyse() pass 1: home-perspective components, break excluded)."""
+    zs = Zscorer()
+    for rec in group:
+        for key, half, _win in _HALF_KEYS:
+            ev = rec["halves"][half]
+            br = rec["breaks"].get(key)
+            for t0, tm, t1 in rolling_windows(ev, w):
+                if br and not (t1 <= br["start"] or t0 >= br["end"]):
+                    continue
+                for a, b in ((t0, tm), (tm, t1)):
+                    win = window_stats(_win_slice(rec, half, a, b), a, b,
+                                       rec["home_id"], rec["away_id"])
+                    zs.add(*momentum_components(win, rec["home_id"], rec["away_id"], w / 60))
+    zs.fit()
+    return zs
+
+
+def _rolling_pairs(rec, half, w):
+    """Adjacent rolling window pairs of `half` that don't overlap a break."""
+    brs = list(rec["breaks"].values())
+    for t0, tm, t1 in rolling_windows(rec["halves"][half], w):
+        if any(not (t1 <= b["start"] or t0 >= b["end"]) for b in brs):
+            continue
+        yield t0, tm, t1
+
+
+def _baseline(group, zs, w):
+    """|D(t+w) - D(t)| churn distribution away from the breaks."""
+    vals = []
+    for rec in group:
+        for _key, half, _win in _HALF_KEYS:
+            for t0, tm, t1 in _rolling_pairs(rec, half, w):
+                mh0, ma0, _ = _pair_index(zs, rec, half, t0, tm)
+                mh1, ma1, _ = _pair_index(zs, rec, half, tm, t1)
+                vals.append(abs((mh1 - ma1) - (mh0 - ma0)))
+    return vals
+
+
+def _control_dom_sub(group, zs, w):
+    """Regression-to-mean control: the dominant side's mean index change across
+    random (non-break) adjacent window pairs, same scoreline-first rule as the
+    break analysis. This is what the break effect must beat to be causal."""
+    dom, sub = [], []
+    for rec in group:
+        for _key, half, _win in _HALF_KEYS:
+            for t0, tm, t1 in _rolling_pairs(rec, half, w):
+                mh0, ma0, _ = _pair_index(zs, rec, half, t0, tm)
+                mh1, ma1, _ = _pair_index(zs, rec, half, tm, t1)
+                gh, ga = json_goals_before(rec, half, tm)
+                dom_home = (gh > ga) if gh != ga else (mh0 >= ma0)
+                dom.append((mh1 - mh0) if dom_home else (ma1 - ma0))
+                sub.append((ma1 - ma0) if dom_home else (mh1 - mh0))
+    return dict(dom=round(statistics.mean(dom), 3),
+                sub=round(statistics.mean(sub), 3), n=len(dom))
+
+
+def _series_points(rec, zs, w):
+    """Trailing-window momentum differential (home - away) at 1-min steps."""
+    pts = []
+    for _key, half, _win in _HALF_KEYS:
+        ev = rec["halves"][half]
+        if not ev:
+            continue
+        lo, hi = ev_time(ev[0]), ev_time(ev[-1])
+        t = lo + w
+        while t <= hi:
+            mh, ma, _ = _pair_index(zs, rec, half, t - w, t)
+            pts.append([round(t / 60, 1), round(mh - ma, 2)])
+            t += 60
+    return pts
+
+
+def _goal_rows(rec):
+    rows = []
+    for _key, half, _win in _HALF_KEYS:
+        for e in rec["halves"][half]:
+            if (e.get("type") or {}).get("displayName") != "Goal":
+                continue
+            side = "h" if e.get("teamId") == rec["home_id"] else "a"
+            og = 1 if is_own_goal(e) else 0
+            if og:
+                side = "a" if side == "h" else "h"
+            pen = 1 if any((q.get("type") or {}).get("displayName") == "Penalty"
+                           for q in e.get("qualifiers") or []) else 0
+            rows.append(dict(m=round(ev_time(e) / 60, 1), s=side, og=og, pen=pen))
+    return rows
+
+
+def _break_block(rec, half, br, zs, w):
+    """Pre/post stats for one break at one window length, or None when a half
+    boundary leaves less than MIN_CLAMPED seconds of play on either side."""
+    ev = rec["halves"][half]
+    if not ev:
+        return None
+    lo, hi = ev_time(ev[0]), ev_time(ev[-1])
+    pre0, pre1 = max(lo, br["start"] - w), br["start"]
+    post0, post1 = br["end"], min(hi, br["end"] + w)
+    if pre1 - pre0 < MIN_CLAMPED or post1 - post0 < MIN_CLAMPED:
+        return None
+    mh0, ma0, wpre = _pair_index(zs, rec, half, pre0, pre1)
+    mh1, ma1, wpost = _pair_index(zs, rec, half, post0, post1)
+    hid, aid = rec["home_id"], rec["away_id"]
+    mins = ((pre1 - pre0) / 60.0, (post1 - post0) / 60.0)
+
+    def rate(name):
+        return [round((w_[hid][name] + w_[aid][name]) / m_, 2)
+                for w_, m_ in zip((wpre, wpost), mins)]
+
+    return dict(
+        sh=round(abs((mh1 - ma1) - (mh0 - ma0)), 2),
+        m=[round(v, 2) for v in (mh0, ma0, mh1, ma1)],
+        pace=dict(pas=rate("passes"), tou=rate("touches"), fte=rate("ft_entries"),
+                  ppda=[[w_[hid]["buildup_passes"] + w_[aid]["buildup_passes"],
+                         w_[hid]["def_actions"] + w_[aid]["def_actions"]]
+                        for w_ in (wpre, wpost)]))
+
+
+def export_breaks(root, windows=EXPORT_WINDOWS):
+    """The window.WC_BREAKS payload (minus team colors, which are a dashboard
+    concern added by build_breaks.py). See build_breaks.py for the schema."""
+    recs = [_rec_for_export(mid, d, st) for mid, d, st in load_played_matches(root)]
+    group = [r for r in recs if r["st"] == "G"]
+    base, zss = {}, {}
+    for w in windows:
+        zs = _fit_group(group, w)
+        zss[w] = zs
+        vals = _baseline(group, zs, w)
+        base[str(w)] = dict(mu=round(statistics.mean(vals), 3),
+                            sd=round(statistics.pstdev(vals), 3), n=len(vals),
+                            ctrl=_control_dom_sub(group, zs, w))
+    matches = []
+    for rec in recs:
+        h1, h2 = rec["halves"]["FirstHalf"], rec["halves"]["SecondHalf"]
+        m = {"id": rec["id"], "d": rec["date"], "st": rec["st"],
+             "h": rec["h"], "a": rec["a"], "hs": rec["hs"], "as": rec["as_"],
+             "ht": round(ev_time(h1[-1]) / 60, 1) if h1 else 45,
+             "end": round(ev_time(h2[-1]) / 60, 1) if h2 else 90,
+             "goals": _goal_rows(rec),
+             "series": {str(w): _series_points(rec, zss[w], w) for w in windows},
+             "breaks": []}
+        for key, half, _win in _HALF_KEYS:
+            br = rec["breaks"].get(key)
+            if not br:
+                continue
+            gh, ga = json_goals_before(rec, half, br["start"])
+            m["breaks"].append(dict(
+                n=key, s=round(br["start"] / 60, 1), e=round(br["end"] / 60, 1),
+                dur=br["dur"], conf=br["conf"], gh=gh, ga=ga,
+                w={str(w): _break_block(rec, half, br, zss[w], w) for w in windows}))
+        matches.append(m)
+    return dict(meta=dict(windows=list(windows), base=base), matches=matches)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--window", type=int, default=WINDOW)
     ap.add_argument("--json", help="write full summary JSON here")
+    ap.add_argument("--export", help="write the breaks.js payload (export_breaks) JSON here")
     args = ap.parse_args()
     root = os.path.join(os.path.dirname(__file__), "..")
-    summary, results, pace, dominance = analyse(root, args.window)
-    if args.json:
-        json.dump(dict(summary=summary, breaks=results, dominance=dominance),
-                  open(args.json, "w"), indent=2, default=float)
+    if args.export:
+        json.dump(export_breaks(root), open(args.export, "w"), indent=1, default=float)
+    else:
+        summary, results, pace, dominance = analyse(root, args.window)
+        if args.json:
+            json.dump(dict(summary=summary, breaks=results, dominance=dominance),
+                      open(args.json, "w"), indent=2, default=float)

@@ -24,6 +24,7 @@ import build_match_details
 import build_data
 import build_players
 import build_database
+import build_breaks
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 
@@ -34,6 +35,7 @@ def build_once():
     build_data.main()
     build_players.main()
     build_database.main()
+    build_breaks.main()
     print(f"Site rebuilt in {time.time() - t0:.1f}s")
 
 

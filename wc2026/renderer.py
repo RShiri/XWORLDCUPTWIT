@@ -1350,6 +1350,7 @@ def _refresh_web_dashboard_db(match_data: dict | None = None, match_id: str | No
         ("wc_dashboard_shots", "build_shots.py", "shots.js"),
         ("wc_dashboard_database", "build_database.py", "database export"),
         ("wc_dashboard_player_lab", "build_player_lab.py", "player_lab per-team events"),
+        ("wc_dashboard_breaks", "build_breaks.py", "breaks.js"),
     ):
         try:
             mod = _load_dashboard_module(modname, filename)
