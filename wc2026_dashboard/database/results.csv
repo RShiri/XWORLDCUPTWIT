@@ -80,3 +80,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_sou
 2026_07_01_1G_vs_3AEHIJ,2026-07-01,Round of 32,Seattle Stadium,Belgium,Senegal,3,2,2.04,3.57,avg,2.33,3.56,1.74,3.58
 2026_07_01_1I_vs_3CDFGH,2026-06-30,Round of 32,New York New Jersey Stadium,France,Sweden,3,0,3.21,0.55,avg,3.26,0.43,3.17,0.66
 2026_07_01_1L_vs_3EHIJK,2026-07-01,Round of 32,Atlanta Stadium,England,DR Congo,2,1,2.49,0.84,avg,2.94,0.88,2.04,0.8
+2026_07_02_1D_vs_3BEFIJ,2026-07-02,Round of 32,San Francisco Bay Area Stadium,USA,Bosnia and Herzegovina,2,0,0.88,0.38,avg,0.83,0.5,0.92,0.25

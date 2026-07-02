@@ -161,3 +161,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_01_1I_vs_3CDFGH,2026-06-30,Sweden,France,away,0,3,39,8,4,386,79,0,0,13,10,47,0.55
 2026_07_01_1L_vs_3EHIJK,2026-07-01,England,DR Congo,home,2,1,60,16,10,580,91,7,6,3,10,49,2.49
 2026_07_01_1L_vs_3EHIJK,2026-07-01,DR Congo,England,away,1,2,40,7,4,406,82,1,1,9,12,51,0.84
+2026_07_02_1D_vs_3BEFIJ,2026-07-02,USA,Bosnia and Herzegovina,home,2,0,48,8,4,454,84,1,0,6,7,58,0.88
+2026_07_02_1D_vs_3BEFIJ,2026-07-02,Bosnia and Herzegovina,USA,away,0,2,52,10,6,482,82,0,0,2,13,42,0.38
