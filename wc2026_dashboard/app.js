@@ -1898,7 +1898,7 @@
     { label: "🧱 Solid defenders", x: "tackles", y: "gPrev", size: "xga", pos: "DEF", mins: 180 },
     { label: "🚧 Shot blockers", x: "blocks", y: "clrBox", size: "interceptions", pos: "DEF", mins: 90 },
     { label: "🧤 Shot-stoppers", x: "xga", y: "gPrev", size: "saves", pos: "GK", mins: 180 },
-    { label: "🎨 Creators", x: "progPasses", y: "keyPasses", size: "xa", pos: "all", mins: 180 },
+    { label: "🎨 Creators", x: "xa", y: "a", size: "keyPasses", pos: "all", mins: 180 },
     { label: "🛡 Ball winners", x: "tackles", y: "interceptions", size: "clearances", pos: "DEF", mins: 180 },
     { label: "🎯 Finishers", x: "xg", y: "g", size: "shots", pos: "all", mins: 90 },
     { label: "⚡ Dribble & create", x: "dribbles", y: "keyPasses", size: "xa", pos: "all", mins: 180 }
