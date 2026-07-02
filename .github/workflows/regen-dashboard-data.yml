@@ -49,6 +49,7 @@ jobs:
           python wc2026_dashboard/build_players.py
           python wc2026_dashboard/build_shots.py
           python wc2026_dashboard/build_database.py
+          python wc2026_dashboard/build_player_lab.py
 
       - name: Commit corrected data (skip pure-timestamp no-ops)
         run: |
@@ -58,7 +59,8 @@ jobs:
             wc2026_dashboard/players.js \
             wc2026_dashboard/shots.js \
             wc2026_dashboard/matches_detail \
-            wc2026_dashboard/database
+            wc2026_dashboard/database \
+            wc2026_dashboard/player_lab
 
           # Decide whether regeneration changed anything beyond the wall-clock build
           # stamp. data.js and database/manifest.js embed a "generated" timestamp that

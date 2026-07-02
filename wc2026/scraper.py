@@ -1192,38 +1192,45 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         away_tid     = ws_away.get("teamId", away_id)
         home_players = ws_home.get("players", [])
         away_players = ws_away.get("players", [])
-        # WhoScored has the real fulltime scores — use them
+        # WhoScored's scores.fulltime is the NINETY-MINUTE score. For a knockout tie
+        # decided in extra time the real final differs (e.g. Belgium 3-2 Senegal aet
+        # showed 2-2), so always count goals in the event stream too — shootout kicks
+        # excluded, own goals credited to the opponent — and prefer that count when
+        # extra time was played (periods 3/4). fulltime stays authoritative for
+        # 90-minute matches (guards against rare event-stream gaps); the event count
+        # is also the fallback when a freshly-finished match has no fulltime yet.
         ws_home_score = ws_home.get("scores", {}).get("fulltime")
         ws_away_score = ws_away.get("scores", {}).get("fulltime")
-        if ws_home_score is not None:
+        _gh = _ga = 0
+        _et_played = False
+        for _e in events:
+            _p = _e.get("period", {})
+            if isinstance(_p, dict) and _p.get("value") in (3, 4):
+                _et_played = True
+            if _e.get("type", {}).get("displayName") != "Goal":
+                continue
+            if "Shoot" in (_p.get("displayName", "") if isinstance(_p, dict) else str(_p or "")):
+                continue
+            _quals = {q.get("type", {}).get("displayName", "")
+                      for q in _e.get("qualifiers", [])}
+            _tid = _e.get("teamId")
+            if "OwnGoal" in _quals:
+                _tid = away_tid if _tid == home_tid else home_tid
+            if _tid == home_tid:
+                _gh += 1
+            elif _tid == away_tid:
+                _ga += 1
+        if _et_played:
+            if (ws_home_score, ws_away_score) != (_gh, _ga):
+                log.info("Extra time played — using event-derived score %d-%d "
+                         "(WhoScored fulltime %s-%s is the 90' score)",
+                         _gh, _ga, ws_home_score, ws_away_score)
+            home_score, away_score = _gh, _ga
+        elif ws_home_score is not None and ws_away_score is not None:
             home_score = int(ws_home_score)
-        if ws_away_score is not None:
             away_score = int(ws_away_score)
-        # On a freshly-finished match WhoScored sometimes returns no fulltime
-        # score, which would leave the FotMob stub's 0-0 in the header even
-        # though the goals are in the event stream. Derive the score from the
-        # goals instead — own goals are tagged with the scoring player's team,
-        # so credit them to the opponent (matches the true result).
-        if ws_home_score is None or ws_away_score is None:
-            _gh = _ga = 0
-            for _e in events:
-                if _e.get("type", {}).get("displayName") != "Goal":
-                    continue
-                if "Shoot" in _e.get("period", {}).get("displayName", ""):
-                    continue
-                _quals = {q.get("type", {}).get("displayName", "")
-                          for q in _e.get("qualifiers", [])}
-                _tid = _e.get("teamId")
-                if "OwnGoal" in _quals:
-                    _tid = away_tid if _tid == home_tid else home_tid
-                if _tid == home_tid:
-                    _gh += 1
-                elif _tid == away_tid:
-                    _ga += 1
-            if ws_home_score is None:
-                home_score = _gh
-            if ws_away_score is None:
-                away_score = _ga
+        else:
+            home_score, away_score = _gh, _ga
             log.info("WhoScored fulltime missing — derived score %d-%d from goal events",
                      home_score, away_score)
         # Patch names into WhoScored data if FotMob was unavailable

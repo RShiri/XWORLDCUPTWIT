@@ -1,10 +1,10 @@
 {
-  "matchId": 4667819,
+  "matchId": "4667819",
   "wc_metadata": {
-    "stage": "Group Stage",
+    "stage": "World Cup Grp. K",
     "group": null,
-    "venue": "",
-    "city": "",
+    "venue": "Houston Stadium",
+    "city": "Houston, Texas",
     "country": "United States",
     "date": "2026-06-17",
     "attendance": null
@@ -12,7 +12,7 @@
   "home": {
     "teamId": 340,
     "name": "Portugal",
-    "score": 0,
+    "score": 1,
     "penalty_score": null,
     "players": [
       {
@@ -220,7 +220,7 @@
       {
         "playerId": 128967,
         "shirtNo": 20,
-        "name": "João Cancelo",
+        "name": "Jo\u00e3o Cancelo",
         "position": "DR",
         "height": 182,
         "weight": 74,
@@ -1035,7 +1035,7 @@
       {
         "playerId": 426502,
         "shirtNo": 4,
-        "name": "Tomás Araújo",
+        "name": "Tom\u00e1s Ara\u00fajo",
         "position": "DC",
         "height": 187,
         "weight": 85,
@@ -1410,7 +1410,7 @@
         "position": "DL",
         "height": 180,
         "weight": 70,
-        "age": 23,
+        "age": 24,
         "isFirstEleven": true,
         "subbedInPlayerId": 296363,
         "subbedOutPeriod": {
@@ -1784,7 +1784,7 @@
       {
         "playerId": 465388,
         "shirtNo": 15,
-        "name": "João Neves",
+        "name": "Jo\u00e3o Neves",
         "position": "DMC",
         "height": 174,
         "weight": 66,
@@ -3446,11 +3446,11 @@
       {
         "playerId": 395802,
         "shirtNo": 9,
-        "name": "Gonçalo Ramos",
+        "name": "Gon\u00e7alo Ramos",
         "position": "Sub",
         "height": 185,
         "weight": 84,
-        "age": 24,
+        "age": 25,
         "subbedInPeriod": {
           "value": 2,
           "displayName": "SecondHalf"
@@ -3485,7 +3485,7 @@
       {
         "playerId": 296363,
         "shirtNo": 2,
-        "name": "Nélson Semedo",
+        "name": "N\u00e9lson Semedo",
         "position": "Sub",
         "height": 179,
         "weight": 66,
@@ -3611,7 +3611,7 @@
       {
         "playerId": 349207,
         "shirtNo": 17,
-        "name": "Rafael Leão",
+        "name": "Rafael Le\u00e3o",
         "position": "Sub",
         "height": 188,
         "weight": 80,
@@ -3701,7 +3701,7 @@
       {
         "playerId": 409221,
         "shirtNo": 26,
-        "name": "Francisco Conceição",
+        "name": "Francisco Concei\u00e7\u00e3o",
         "position": "Sub",
         "height": 166,
         "weight": 67,
@@ -3921,7 +3921,7 @@
       {
         "playerId": 395992,
         "shirtNo": 14,
-        "name": "Gonçalo Inácio",
+        "name": "Gon\u00e7alo In\u00e1cio",
         "position": "Sub",
         "height": 186,
         "weight": 78,
@@ -3933,7 +3933,7 @@
       {
         "playerId": 122714,
         "shirtNo": 12,
-        "name": "José Sá",
+        "name": "Jos\u00e9 S\u00e1",
         "position": "Sub",
         "height": 192,
         "weight": 80,
@@ -3957,7 +3957,7 @@
       {
         "playerId": 238244,
         "shirtNo": 21,
-        "name": "Rúben Neves",
+        "name": "R\u00faben Neves",
         "position": "Sub",
         "height": 183,
         "weight": 83,
@@ -3969,7 +3969,7 @@
       {
         "playerId": 247995,
         "shirtNo": 19,
-        "name": "Gonçalo Guedes",
+        "name": "Gon\u00e7alo Guedes",
         "position": "Sub",
         "height": 179,
         "weight": 72,
@@ -3981,7 +3981,7 @@
       {
         "playerId": 313171,
         "shirtNo": 3,
-        "name": "Rúben Dias",
+        "name": "R\u00faben Dias",
         "position": "Sub",
         "height": 187,
         "weight": 86,
@@ -4005,7 +4005,7 @@
       {
         "playerId": 362431,
         "shirtNo": 11,
-        "name": "João Félix",
+        "name": "Jo\u00e3o F\u00e9lix",
         "position": "Sub",
         "height": 181,
         "weight": 70,
@@ -4017,7 +4017,7 @@
       {
         "playerId": 368409,
         "shirtNo": 16,
-        "name": "Trincão",
+        "name": "Trinc\u00e3o",
         "position": "Sub",
         "height": 184,
         "weight": 76,
@@ -4029,7 +4029,7 @@
       {
         "playerId": 391562,
         "shirtNo": 24,
-        "name": "Samú Costa",
+        "name": "Sam\u00fa Costa",
         "position": "Sub",
         "height": 185,
         "weight": 78,
@@ -4040,15 +4040,12 @@
       }
     ],
     "stats": {},
-    "field": "home",
-    "scores": {
-      "fulltime": 1
-    }
+    "field": "home"
   },
   "away": {
     "teamId": 960,
     "name": "DR Congo",
-    "score": 0,
+    "score": 1,
     "penalty_score": null,
     "players": [
       {
@@ -5956,7 +5953,7 @@
       {
         "playerId": 86513,
         "shirtNo": 17,
-        "name": "Cédric Bakambu",
+        "name": "C\u00e9dric Bakambu",
         "position": "FW",
         "height": 182,
         "weight": 74,
@@ -6316,7 +6313,7 @@
       {
         "playerId": 444788,
         "shirtNo": 24,
-        "name": "Gédéon Kalulu",
+        "name": "G\u00e9d\u00e9on Kalulu",
         "position": "Sub",
         "height": 178,
         "weight": 72,
@@ -6531,7 +6528,7 @@
         "position": "Sub",
         "height": 185,
         "weight": 85,
-        "age": 31,
+        "age": 32,
         "isManOfTheMatch": false,
         "field": "away",
         "stats": {}
@@ -6563,11 +6560,11 @@
       {
         "playerId": 70291,
         "shirtNo": 11,
-        "name": "Gaël Kakuta",
+        "name": "Ga\u00ebl Kakuta",
         "position": "Sub",
         "height": 174,
         "weight": 68,
-        "age": 34,
+        "age": 35,
         "isManOfTheMatch": false,
         "field": "away",
         "stats": {}
@@ -6575,7 +6572,7 @@
       {
         "playerId": 136392,
         "shirtNo": 10,
-        "name": "Théo Bongonda",
+        "name": "Th\u00e9o Bongonda",
         "position": "Sub",
         "height": 176,
         "weight": 64,
@@ -6587,7 +6584,7 @@
       {
         "playerId": 380614,
         "shirtNo": 7,
-        "name": "Nathanaël Mbuku",
+        "name": "Nathana\u00ebl Mbuku",
         "position": "Sub",
         "height": 170,
         "weight": 70,
@@ -6634,10 +6631,7 @@
       }
     ],
     "stats": {},
-    "field": "away",
-    "scores": {
-      "fulltime": 1
-    }
+    "field": "away"
   },
   "events": [
     {
@@ -112417,9 +112411,61 @@
     }
   ],
   "match_stats": {
+    "big_chances_created": {
+      "home": 0,
+      "away": 1
+    },
     "big_chances_missed": {
       "home": 0,
       "away": 0
+    },
+    "blocks": {
+      "home": 2,
+      "away": 2
+    },
+    "clearances": {
+      "home": 10,
+      "away": 27
+    },
+    "corners": {
+      "home": 5,
+      "away": 4
+    },
+    "duels_won": {
+      "home": 45,
+      "away": 55
+    },
+    "fouls": {
+      "home": 9,
+      "away": 10
+    },
+    "interceptions": {
+      "home": 3,
+      "away": 5
+    },
+    "offsides": {
+      "home": 3,
+      "away": 2
+    },
+    "passes_accuracy": {
+      "home": 92,
+      "away": 78
+    },
+    "passes_accurate": {
+      "home": 751,
+      "away": 215
+    },
+    "passes_total": {
+      "home": 827,
+      "away": 279
+    },
+    "possession": {
+      "home": 75,
+      "away": 25
+    },
+    "saves": {
+      "home": 3,
+      "away": 2
     },
     "shots": {
       "home": 7,
@@ -112429,41 +112475,184 @@
       "home": 3,
       "away": 5
     },
-    "saves": {
-      "home": 3,
-      "away": 2
-    },
-    "fouls": {
-      "home": 9,
-      "away": 10
-    },
-    "big_chances_created": {
-      "home": 0,
-      "away": 1
-    },
-    "duels_won": {
-      "home": 43,
-      "away": 57
-    },
-    "possession": {
-      "home": 75,
-      "away": 25
-    },
-    "passes_total": {
-      "home": 827,
-      "away": 279
-    },
-    "passes_accurate": {
-      "home": 751,
-      "away": 215
-    },
-    "passes_accuracy": {
-      "home": 91,
-      "away": 77
+    "xg": {
+      "home": 0.65,
+      "away": 0.87
     }
   },
-  "playerIdNameDictionary": {},
-  "_scraped_at": "2026-06-18T02:49:47.424505+00:00",
+  "stats_by_source": {
+    "fotmob": {
+      "possession": {
+        "home": 75,
+        "away": 25
+      },
+      "xg": {
+        "home": 0.65,
+        "away": 0.87
+      },
+      "shots": {
+        "home": 7,
+        "away": 8
+      },
+      "shots_on_target": {
+        "home": 1,
+        "away": 2
+      },
+      "big_chances_created": {
+        "home": 0,
+        "away": 1
+      },
+      "big_chances_missed": {
+        "home": 0,
+        "away": 0
+      },
+      "passes_accurate": {
+        "home": 724,
+        "away": 195
+      },
+      "passes_accuracy": {
+        "home": 92,
+        "away": 78
+      },
+      "corners": {
+        "home": 5,
+        "away": 4
+      },
+      "passes_total": {
+        "home": 783,
+        "away": 249
+      },
+      "offsides": {
+        "home": 3,
+        "away": 2
+      },
+      "interceptions": {
+        "home": 3,
+        "away": 5
+      },
+      "blocks": {
+        "home": 2,
+        "away": 2
+      },
+      "clearances": {
+        "home": 10,
+        "away": 27
+      },
+      "saves": {
+        "home": 1,
+        "away": 0
+      },
+      "duels_won": {
+        "home": 45,
+        "away": 55
+      },
+      "fouls": {
+        "home": 9,
+        "away": 10
+      }
+    },
+    "whoscored": {
+      "shots": {
+        "home": 7,
+        "away": 8
+      },
+      "shots_on_target": {
+        "home": 3,
+        "away": 5
+      },
+      "saves": {
+        "home": 3,
+        "away": 2
+      },
+      "fouls": {
+        "home": 9,
+        "away": 10
+      },
+      "big_chances_created": {
+        "home": 0,
+        "away": 1
+      },
+      "duels_won": {
+        "home": 43,
+        "away": 57
+      },
+      "possession": {
+        "home": 75,
+        "away": 25
+      },
+      "passes_total": {
+        "home": 827,
+        "away": 279
+      },
+      "passes_accurate": {
+        "home": 751,
+        "away": 215
+      },
+      "passes_accuracy": {
+        "home": 91,
+        "away": 77
+      },
+      "big_chances_missed": {
+        "home": 0,
+        "away": 0
+      }
+    }
+  },
+  "playerIdNameDictionary": {
+    "373842": "Diogo Costa",
+    "128967": "Jo\u00e3o Cancelo",
+    "434077": "Renato Veiga",
+    "426502": "Tom\u00e1s Ara\u00fajo",
+    "395221": "Nuno Mendes",
+    "465388": "Jo\u00e3o Neves",
+    "384887": "Vitinha",
+    "136741": "Bernardo Silva",
+    "123761": "Bruno Fernandes",
+    "337916": "Pedro Neto",
+    "5583": "Cristiano Ronaldo",
+    "395802": "Gon\u00e7alo Ramos",
+    "296363": "N\u00e9lson Semedo",
+    "349207": "Rafael Le\u00e3o",
+    "409221": "Francisco Concei\u00e7\u00e3o",
+    "394933": "Matheus Nunes",
+    "395992": "Gon\u00e7alo In\u00e1cio",
+    "122714": "Jos\u00e9 S\u00e1",
+    "141833": "Rui Silva",
+    "238244": "R\u00faben Neves",
+    "247995": "Gon\u00e7alo Guedes",
+    "313171": "R\u00faben Dias",
+    "353418": "Diogo Dalot",
+    "362431": "Jo\u00e3o F\u00e9lix",
+    "368409": "Trinc\u00e3o",
+    "391562": "Sam\u00fa Costa",
+    "461465": "Lionel Mpasi",
+    "331924": "Aaron Wan-Bissaka",
+    "104368": "Chancel Mbemba",
+    "566738": "Steve Kapuadi",
+    "299271": "Axel Tuanzebe",
+    "122980": "Arthur Masuaku",
+    "363718": "Edo Kayembe",
+    "342571": "Samuel Moutoussamy",
+    "468938": "Ngal'ayel Mukau",
+    "296240": "Yoane Wissa",
+    "86513": "C\u00e9dric Bakambu",
+    "141392": "Joris Kayembe",
+    "437449": "Noah Sadiki",
+    "444788": "G\u00e9d\u00e9on Kalulu",
+    "300483": "Simon Banza",
+    "316532": "Charles Pickel",
+    "416039": "Matthieu Epolo",
+    "487782": "Fiston Mayele",
+    "541727": "Brian Cipenga",
+    "315228": "Meschack Elia",
+    "70291": "Ga\u00ebl Kakuta",
+    "136392": "Th\u00e9o Bongonda",
+    "380614": "Nathana\u00ebl Mbuku",
+    "400243": "Dylan Batubinsika",
+    "136644": "Aaron Tshibola",
+    "412301": "Timothy Fayulu"
+  },
+  "_scraped_at": "2026-07-02T02:42:09.114713+00:00",
   "_sources": [
     "fotmob",
     "whoscored"
