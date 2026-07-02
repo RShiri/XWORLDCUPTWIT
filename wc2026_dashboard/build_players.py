@@ -16,7 +16,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 from build_match_details import norm, _match_extras, _player_rating, is_match_file
-from xg_model import ascii_name, SHOT_TYPES, shot_xg, is_shootout
+from xg_model import (ascii_name, SHOT_TYPES, shot_xg, is_shootout,
+                      player_xa_from_events)
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT = os.path.join(HERE, "players.js")
@@ -167,7 +168,8 @@ def aggregate():
     for mid, d in _iter_played():
         ex = _match_extras(d)
         shot_xg_map = _player_shot_xg(d)
-        prog_map, xa_map = _player_creation(d)
+        prog_map, _ = _player_creation(d)
+        xa_map = player_xa_from_events(d)  # pass-level xA model (xg_core)
         blk_map, clrbox_map = _player_blocks_clears(d)
         shotlist = _defense_shotlist(d)
         team_ids = {s: d[s].get("teamId") for s in ("home", "away")}
