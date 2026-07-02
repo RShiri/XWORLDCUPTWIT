@@ -21,3 +21,14 @@ useless/
 
 # Log files
 *.log
+
+# La Liga dev copy — lives ONLY on this machine; canonical repo is RShiri/XLALIGA.
+# Ignored so it never shows as untracked noise and can't be swept by `git stash -u`
+# (the raw laliga/matches scrapes exist nowhere else — never clean these).
+laliga/
+laliga_dashboard/
+laliga_png/
+team_logos/laliga/
+
+# Local Claude Code session config
+.claude/
