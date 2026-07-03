@@ -1,0 +1,86 @@
+/* ===========================================================================
+   WC2026 dashboard - SAMPLE reskin. Loaded AFTER styles.css (and match.css).
+   Chrome-only: re-tokenises the palette + type toward the portfolio's
+   broadcast / match-day identity (Blaugrana - deep blue base, garnet accent,
+   gold trim, Archivo display + IBM Plex Mono labels, squared corners).
+   Charts, tabs, tables and every interaction are untouched. Delete this file
+   + its <link> from sample.html / match_sample.html to drop the reskin.
+   =========================================================================== */
+
+:root {
+  /* deep blue base */
+  --bg: #0a1630;
+  --bg-2: #0c1b3b;
+  --card: #0f1d3d;
+  --card-2: #13244c;
+  --line: rgba(255, 255, 255, .10);
+  --text: #eaf0fb;
+  --muted: #7385ab;
+  /* garnet accent (bright enough to read on the dark base) + Barca blue */
+  --accent: #d6497a;
+  --accent-2: #5b8ad6;
+  --warn: #ffc72c;              /* Barca gold - xG / warnings */
+  --bad: #ff6b81;
+  --good: #34d399;
+  --gold: #ffc72c;
+  --garnet: #a50044;           /* authentic garnet for solid fills */
+  --shadow: 0 24px 60px -34px rgba(0, 0, 0, .9);
+  --radius: 4px;
+}
+
+/* ---- type: Archivo display, IBM Plex Mono labels, Inter body ---- */
+body {
+  font-family: "Inter", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 80% -10%, #12244a 0%, var(--bg) 55%) fixed;
+}
+h1, h2, h3, h4,
+.brand .title, .section-head h2, .group-card h3,
+.mv-title, .sb-team .nm, .sb-score, .stat .v {
+  font-family: "Archivo", "Inter", sans-serif; letter-spacing: -.01em;
+}
+.brand .sub, nav.tabs button, .stat .k, thead th, .day-label,
+.controls, .legend, .footer-note, .back-link {
+  font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+/* ---- header: blue glass, gold "2026", garnet brand mark ---- */
+header.site { background: rgba(10, 22, 48, .82); border-bottom-color: var(--line); }
+.brand .title span { color: var(--gold); }        /* the "2026" */
+.brand .sub { letter-spacing: .08em; text-transform: uppercase; font-size: 11px; }
+
+/* ---- tabs: squared, mono, garnet active (no green glow) ---- */
+nav.tabs button {
+  border-radius: var(--radius); font-size: 12.5px; letter-spacing: .04em;
+  text-transform: uppercase;
+}
+nav.tabs button:hover { color: var(--text); background: var(--card); }
+nav.tabs button.active {
+  color: #fff; background: var(--garnet);
+  box-shadow: 0 0 0 1px var(--garnet);
+}
+
+/* ---- squared inputs / chips / cards where radii were hard-coded ---- */
+.controls input, .controls select { border-radius: var(--radius); }
+.controls input:focus, .controls select:focus { border-color: var(--accent); }
+.back-link { border-radius: var(--radius); }
+.back-link:hover { border-color: var(--accent); color: var(--accent); }
+.timeline .goal-ev { border-radius: var(--radius); }
+.timeline .goal-ev .min { color: var(--accent); }
+
+/* stat tiles: mono uppercase keys, tabular numbers */
+.stat .v { font-variant-numeric: tabular-nums; }
+.stat .k { letter-spacing: .1em; }
+.stat .v.accent { color: var(--accent); }
+.stat .v.blue { color: var(--accent-2); }
+
+/* section intros read like axis labels */
+.section-head p { color: var(--muted); }
+
+/* links */
+a { color: var(--accent); }
+a:hover { color: var(--gold); }
+
+/* scoreboard xG in gold, kept honest */
+.sb-xg b { color: var(--gold); }
+
+/* qualification rails already use --accent / --accent-2 (now garnet / blue) */
