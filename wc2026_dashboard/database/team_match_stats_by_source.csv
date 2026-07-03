@@ -43,6 +43,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_03_1B_vs_3EFGIJ,2026-07-03,Algeria,Switzerland,away,fotmob,0,2,55,8,2,561,85,1,1,2,12,47,0.74,2
 2026_07_03_1B_vs_3EFGIJ,2026-07-03,Switzerland,Algeria,home,whoscored,2,0,45,11,7,478,79,2,1,5,10,56,,
 2026_07_03_1B_vs_3EFGIJ,2026-07-03,Algeria,Switzerland,away,whoscored,0,2,55,8,5,587,84,1,1,6,12,44,,
+2026_07_03_2D_vs_2G,2026-07-03,Australia,Egypt,home,fotmob,1,1,42,16,1,507,80,0,0,3,12,51,0.87,4
+2026_07_03_2D_vs_2G,2026-07-03,Egypt,Australia,away,fotmob,1,1,58,14,4,723,85,3,2,1,14,49,1.36,7
+2026_07_03_2D_vs_2G,2026-07-03,Australia,Egypt,home,whoscored,1,1,42,16,10,564,78,0,0,9,12,54,,
+2026_07_03_2D_vs_2G,2026-07-03,Egypt,Australia,away,whoscored,1,1,58,15,11,772,84,3,2,9,14,46,,
 2026_07_03_2K_vs_2L,2026-07-02,Portugal,Croatia,home,fotmob,2,1,60,15,3,584,91,5,4,5,6,56,2.18,9
 2026_07_03_2K_vs_2L,2026-07-02,Croatia,Portugal,away,fotmob,1,2,40,13,6,368,85,4,3,2,12,44,1.34,5
 2026_07_03_2K_vs_2L,2026-07-02,Portugal,Croatia,home,whoscored,2,1,60,15,7,615,89,5,4,8,6,56,,

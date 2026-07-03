@@ -167,5 +167,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_02_1H_vs_2J,2026-07-02,Austria,Spain,away,0,3,36,5,1,367,82,1,1,14,15,36,0.47
 2026_07_03_1B_vs_3EFGIJ,2026-07-03,Switzerland,Algeria,home,2,0,45,11,7,478,81,2,1,5,10,53,2.2
 2026_07_03_1B_vs_3EFGIJ,2026-07-03,Algeria,Switzerland,away,0,2,55,8,5,587,85,1,1,6,12,47,0.81
+2026_07_03_2D_vs_2G,2026-07-03,Australia,Egypt,home,1,1,42,16,10,564,80,0,0,9,12,51,0.88
+2026_07_03_2D_vs_2G,2026-07-03,Egypt,Australia,away,1,1,58,15,11,772,85,3,2,9,14,49,1.43
 2026_07_03_2K_vs_2L,2026-07-02,Portugal,Croatia,home,2,1,60,15,7,615,91,5,4,8,6,56,2.48
 2026_07_03_2K_vs_2L,2026-07-02,Croatia,Portugal,away,1,2,40,13,8,410,85,4,3,6,12,44,1.58
