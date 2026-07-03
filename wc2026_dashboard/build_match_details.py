@@ -355,8 +355,10 @@ def extract(match_data):
             ok = ev.get("outcomeType", {}).get("displayName") == "Successful"
             x, y = ev.get("x", 0), ev.get("y", 0)
             ex_, ey_ = ev.get("endX", x), ev.get("endY", y)
-            # progressive = meaningful forward advance toward the opponent goal
-            prog = (ex_ - x) >= 15
+            # progressive = meaningful forward advance toward the opponent goal.
+            # >=14 (was 15) keeps this in sync with build_players.py's progPasses,
+            # calibrated to FotMob's progressive-pass counts.
+            prog = (ex_ - x) >= 14
             passes.append({
                 "team": side,
                 "x": round(x, 1),

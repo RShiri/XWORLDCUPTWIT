@@ -70,8 +70,11 @@ def _player_shot_xg(match_data):
 def _player_creation(match_data):
     """playerId -> (progressive-pass count, summed expected assists xA).
 
-    Progressive pass = a SUCCESSFUL pass that advances the ball >=15 WhoScored x-units
+    Progressive pass = a SUCCESSFUL pass that advances the ball >=14 WhoScored x-units
     toward the opponent goal — the same `prog` rule the dashboard pass-explorer uses.
+    The >=14 cutoff (was 15) is calibrated to FotMob's published progressive-pass
+    counts: a ~14-15m forward pass is progressive by any standard, and the old 15
+    clipped exactly those borderline balls (e.g. Cubarsi 47 -> 51, matching FotMob).
     xA (expected assists) credits the player whose KEY pass set up each shot with that
     shot's xG: WhoScored key passes are by definition the pass that leads to a shot, so
     we credit the next shot by the same team that lands within a few events of the key
@@ -87,7 +90,7 @@ def _player_creation(match_data):
         if tname == "Pass":
             ok = ev.get("outcomeType", {}).get("displayName") == "Successful"
             pid = ev.get("playerId")
-            if ok and pid is not None and (ev.get("endX", ev.get("x", 0)) - ev.get("x", 0)) >= 15:
+            if ok and pid is not None and (ev.get("endX", ev.get("x", 0)) - ev.get("x", 0)) >= 14:
                 prog[pid] = prog.get(pid, 0) + 1
             if ok and pid is not None:
                 quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
