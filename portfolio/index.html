@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ram Shiri - Data Engineer &amp; Sports Analytics</title>
+<meta name="description" content="Ram Shiri - Data Engineering student turning sports data into insight. Interactive xG shot maps, take-on maps and live match centres built from raw event data with Python, Pandas &amp; JavaScript. Open to work." />
+<meta name="author" content="Ram Shiri" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Ram Shiri - Data Engineer &amp; Sports Analytics" />
+<meta property="og:description" content="Data Engineering student turning sports data into insight - xG shot maps, take-on maps & live match centres built straight from raw event data." />
+<meta property="og:url" content="https://rshiri.github.io/XWORLDCUPTWIT/portfolio/" />
+<meta property="og:image" content="https://rshiri.github.io/XWORLDCUPTWIT/portfolio/assets/img/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Ram Shiri - Data Engineer &amp; Sports Analytics" />
+<meta name="twitter:description" content="xG shot maps, take-on maps & live match centres built straight from raw event data." />
+<meta name="twitter:image" content="https://rshiri.github.io/XWORLDCUPTWIT/portfolio/assets/img/og.png" />
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="canonical" href="https://rshiri.github.io/XWORLDCUPTWIT/portfolio/" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>/* theme before CSS paints (no flash): dark is the default */
+(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}
+document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");})();</script>
+<link rel="stylesheet" href="styles.css?v=9" />
+<link rel="stylesheet" href="sample.css?v=4" />
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top"><span class="monogram">RS</span><span class="brand-name">Ram Shiri</span></a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#analytics">Analytics</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+      <a class="btn btn--sm" href="assets/Ram_Shiri_CV.pdf" download>Download CV</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Switch to light mode">☀️</button>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+<span id="top"></span>
+
+<!-- HERO: player card -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <div class="pos-line">Data Engineer · B.Sc. Yr 3 · Sports Analytics</div>
+      <h1 class="hero-name">Ram<br />Shiri</h1>
+      <p class="lead">
+        I build the analytics you scroll past on broadcast - xG shot maps, take-on maps
+        and pass-by-pass match centres - straight from raw event data.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="#analytics">See it in action</a>
+        <a class="btn btn--outline" href="assets/Ram_Shiri_CV.pdf" download>Download CV</a>
+        <a class="btn btn--text" href="#contact">Contact →</a>
+      </div>
+    </div>
+    <figure class="hero-card">
+      <img src="assets/img/ram.jpg" alt="Ram Shiri" width="768" height="1024" />
+      <figcaption><span>Shiri</span><span class="live">Open to work</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+  <div class="wrap">
+    <span class="kicker" data-idx="01">Scouting report</span>
+    <div class="about-grid">
+      <div>
+        <h2>Creative thinking, backed by engineering.</h2>
+        <p>
+          I love combining creativity with technical skills to drive real-world impact - especially
+          in sports analytics. <br> I'm comfortable using AI tools to move fast while keeping a deep
+          understanding of the core logic underneath.
+        </p>
+        <dl class="skill-rows">
+          <div class="skill-row"><dt>Languages</dt><dd>Python <span>·</span> Java <span>·</span> SQL <span>·</span> JavaScript</dd></div>
+          <div class="skill-row"><dt>Data stack</dt><dd>Pandas <span>·</span> NumPy <span>·</span> Streamlit <span>·</span> Plotly</dd></div>
+          <div class="skill-row"><dt>Web &amp; data</dt><dd>HTML/CSS <span>·</span> Web scraping <span>·</span> REST APIs <span>·</span> Git &amp; GitHub</dd></div>
+          <div class="skill-row"><dt>Traits</dt><dd>Fast learning <span>·</span> Problem solving</dd></div>
+        </dl>
+      </div>
+      <dl class="facts">
+        <div><dt>Focus</dt><dd>Data Science · Sports Analytics</dd></div>
+        <div><dt>Studying</dt><dd>B.Sc. Data Engineering (3rd yr)</dd></div>
+        <div><dt>Status</dt><dd class="ok">Open to work</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYTICS (unchanged from the live site) -->
+<section id="analytics" class="section section--alt">
+  <div class="wrap">
+    <span class="kicker" data-idx="02">Live analytics</span>
+    <h2>Data you can play with.</h2>
+    <p class="section-sub">Interactive graphs I build from match data - hover a shot, or play the goal replay.</p>
+
+    <!-- Shot map -->
+    <div class="viz">
+      <div class="viz-head">
+        <div>
+          <h3>Lamine Yamal - xG shot map · 2025/26</h3>
+          <p class="viz-sub">Every shot from his 2025/26 season (all competitions), goal at top ▲. Dot size = expected goals (xG); filled = goal. Built from WhoScored event data; xG is my model estimate.</p>
+        </div>
+        <div class="viz-stats" id="shotStats"><!-- filled by JS --></div>
+      </div>
+      <div class="pitch-wrap">
+        <svg id="shotmap" viewBox="0 0 680 520" role="img" aria-label="Lamine Yamal shot map">
+          <defs>
+            <linearGradient id="goalDot" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2f6bff"/><stop offset="1" stop-color="#c8154f"/>
+            </linearGradient>
+          </defs>
+          <rect x="4" y="4" width="672" height="512" rx="12" fill="#0f1626"/>
+          <g fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2">
+            <rect x="20" y="30" width="640" height="470" rx="4"/>
+            <rect x="164" y="30" width="352" height="141"/>
+            <rect x="260" y="30" width="160" height="47"/>
+            <path d="M276,171 A79 79 0 0 0 404,171"/>
+            <path d="M268,500 A72 72 0 0 1 412,500"/>
+          </g>
+          <rect x="308" y="23" width="64" height="7" fill="rgba(255,255,255,.4)"/>
+          <circle cx="340" cy="124" r="2.5" fill="rgba(255,255,255,.5)"/>
+          <g id="pathLayer"></g>
+          <g id="shotLayer"></g>
+        </svg>
+      </div>
+      <div class="viz-foot">
+        <div class="legend">
+          <span><i class="lg-goal"></i> Goal</span>
+          <span><i class="lg-saved"></i> On target</span>
+          <span><i class="lg-off"></i> Off target</span>
+          <span><i class="lg-blocked"></i> Blocked</span>
+          <span class="lg-size"><i></i><i></i><i></i> size = xG</span>
+          <span class="lg-path"><i></i> shot path → goal</span>
+        </div>
+        <div class="chart-tip" id="shotTip">Tap or hover a shot for details.</div>
+      </div>
+    </div>
+
+    <!-- xG method note -->
+    <div class="method">
+      <span class="method-tag">Method · xG model</span>
+      <h4>How my expected-goals model works</h4>
+      <p>
+        Expected goals (xG) is the probability an average shot from a given situation ends in a
+        goal. My model reads a set of engineered features off each shot -
+      </p>
+      <div class="feat">
+        <span>Distance to goal</span><span>Shooting angle</span><span>Header vs. foot</span>
+        <span>Assist / pass type</span><span>Open play vs. set piece</span>
+      </div>
+      <p>
+        - and runs them through <b>two</b> learners in parallel: an L2-regularised logistic
+        regression and a gradient-boosted tree ensemble (LightGBM) with <b>monotonic</b>
+        constraints, so closer, straighter chances can never be scored below worse ones. Their
+        outputs are blended in log-odds space at the weight that minimises out-of-fold error.
+      </p>
+      <p>
+        I anchor the shape to bookmakers' and providers' public xG by <b>distillation</b> - a
+        student model learns their values from the same features, so it still works on shots that
+        were never covered - while real goals keep the overall level honest. A final
+        <b>isotonic calibration</b>, always fit out-of-fold to avoid optimism, plus a per-league
+        level shift, forces the model's summed xG to match the goals that were actually scored.
+      </p>
+      <p>
+        Deliberately <b>no</b> resampling or class-weighting for the ~10% goal rate: reweighting
+        inflates the probabilities, and an honest probability is the whole point. The trained
+        model exports to a small JSON artifact scored by a dependency-free Python runtime - the
+        same one that powers the dots and numbers above, and my Barça xG Lab.
+      </p>
+    </div>
+
+    <!-- Take-on map -->
+    <div class="viz">
+      <div class="viz-head">
+        <div>
+          <h3>Lamine Yamal - take-on map · 2025/26</h3>
+          <p class="viz-sub">388 take-ons attempted (all competitions). Won = beat his marker (arrow shows where he carried it); failed = tackled or dispossessed. Hover a dot for details; use the buttons to remove a category.</p>
+        </div>
+        <div class="viz-stats" id="takeonStats"><!-- filled by JS --></div>
+      </div>
+      <div class="toggles" id="takeonToggles">
+        <button class="toggle-chip won" data-cat="won" aria-pressed="true"><i></i> Won</button>
+        <button class="toggle-chip failed" data-cat="failed" aria-pressed="true"><i></i> Failed</button>
+      </div>
+      <div class="pitch-wrap">
+        <svg id="takeonmap" viewBox="0 0 700 440" role="img" aria-label="Lamine Yamal take-on map">
+          <defs>
+            <marker id="tkArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#34d399"/>
+            </marker>
+          </defs>
+          <rect x="4" y="4" width="692" height="432" rx="12" fill="#0f1626"/>
+          <g fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2">
+            <rect x="18" y="18" width="664" height="404" rx="4"/>
+            <line x1="350" y1="18" x2="350" y2="422"/>
+            <circle cx="350" cy="220" r="54"/>
+            <rect x="18" y="100" width="104" height="240"/>
+            <rect x="18" y="166" width="34" height="108"/>
+            <path d="M122,170 A54 54 0 0 1 122,270"/>
+            <rect x="578" y="100" width="104" height="240"/>
+            <rect x="648" y="166" width="34" height="108"/>
+            <path d="M578,170 A54 54 0 0 0 578,270"/>
+          </g>
+          <circle cx="350" cy="220" r="2.5" fill="rgba(255,255,255,.5)"/>
+          <circle cx="88" cy="220" r="2" fill="rgba(255,255,255,.45)"/>
+          <circle cx="612" cy="220" r="2" fill="rgba(255,255,255,.45)"/>
+          <rect x="12" y="200" width="6" height="40" fill="rgba(255,255,255,.3)"/>
+          <rect x="682" y="200" width="6" height="40" fill="rgba(255,255,255,.3)"/>
+          <g id="takeonArrows"></g>
+          <g id="takeonLayer"></g>
+        </svg>
+      </div>
+      <div class="viz-foot">
+        <div class="chart-tip">Attacking → · each dot is one take-on. Toggle Won / Failed above to remove a category.</div>
+      </div>
+    </div>
+
+    <!-- Match centre (native) -->
+    <div class="viz" id="matchcentre">
+      <div class="viz-head">
+        <div>
+          <h3>Match Centre - Argentina vs Algeria · WC2026</h3>
+          <p class="viz-sub">Built straight into this page from my World Cup 2026 event pipeline - head-to-head stats, both teams' shots, and every goal replayed pass-by-pass. Press <b>Play</b> on a goal to watch it rebuild.</p>
+        </div>
+        <a class="btn btn--sm btn--outline" href="https://rshiri.github.io/XWORLDCUPTWIT/wc2026_dashboard/match.html?id=2026_06_17_Argentina_vs_Algeria" target="_blank" rel="noopener">Full WC2026 match centre ↗</a>
+      </div>
+
+      <div class="mc-score" id="mcScore"><!-- filled by JS --></div>
+      <div class="mc-stats" id="mcStats"><!-- filled by JS --></div>
+
+      <h4 class="mc-subhead">Shot map <span>· dot size = xG · hover for details</span></h4>
+      <div class="pitch-wrap">
+        <svg id="mcShotmap" viewBox="0 0 700 440" role="img" aria-label="Argentina vs Algeria shot map">
+          <rect x="4" y="4" width="692" height="432" rx="12" fill="#0f1626"/>
+          <g fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2">
+            <rect x="18" y="18" width="664" height="404" rx="4"/>
+            <line x1="350" y1="18" x2="350" y2="422"/>
+            <circle cx="350" cy="220" r="54"/>
+            <rect x="18" y="100" width="104" height="240"/>
+            <rect x="18" y="166" width="34" height="108"/>
+            <path d="M122,170 A54 54 0 0 1 122,270"/>
+            <rect x="578" y="100" width="104" height="240"/>
+            <rect x="648" y="166" width="34" height="108"/>
+            <path d="M578,170 A54 54 0 0 0 578,270"/>
+          </g>
+          <circle cx="350" cy="220" r="2.5" fill="rgba(255,255,255,.5)"/>
+          <circle cx="88" cy="220" r="2" fill="rgba(255,255,255,.45)"/>
+          <circle cx="612" cy="220" r="2" fill="rgba(255,255,255,.45)"/>
+          <rect x="12" y="200" width="6" height="40" fill="rgba(255,255,255,.3)"/>
+          <rect x="682" y="200" width="6" height="40" fill="rgba(255,255,255,.3)"/>
+          <g id="mcShotLayer"></g>
+        </svg>
+      </div>
+      <div class="viz-foot">
+        <div class="legend" id="mcShotLegend"><!-- filled by JS --></div>
+        <div class="chart-tip" id="mcShotTip">Argentina attack → · ← Algeria attack. Tap or hover a shot.</div>
+      </div>
+
+      <h4 class="mc-subhead">Goal replays <span>· the ball travels the real build-up: passes, carries, then the finish</span></h4>
+      <div class="mc-goalbar">
+        <div class="toggles mc-goaltabs" id="mcGoalTabs"><!-- filled by JS --></div>
+        <button class="btn btn--sm btn--primary mc-play" id="mcPlay">▶ Play</button>
+      </div>
+      <div class="pitch-wrap">
+        <svg id="mcReplay" viewBox="0 0 700 452" role="img" aria-label="Goal replay">
+          <defs>
+            <marker id="mcArrPass" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4.6" markerHeight="4.6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#cfe0ff"/>
+            </marker>
+            <marker id="mcArrShot" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4.6" markerHeight="4.6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#ff6b81"/>
+            </marker>
+          </defs>
+          <rect x="4" y="4" width="692" height="444" rx="12" fill="#0f1626"/>
+          <g fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2">
+            <rect x="18" y="18" width="664" height="404" rx="4"/>
+            <line x1="350" y1="18" x2="350" y2="422"/>
+            <circle cx="350" cy="220" r="54"/>
+            <rect x="18" y="100" width="104" height="240"/>
+            <rect x="18" y="166" width="34" height="108"/>
+            <path d="M122,170 A54 54 0 0 1 122,270"/>
+            <rect x="578" y="100" width="104" height="240"/>
+            <rect x="648" y="166" width="34" height="108"/>
+            <path d="M578,170 A54 54 0 0 0 578,270"/>
+          </g>
+          <circle cx="350" cy="220" r="2.5" fill="rgba(255,255,255,.5)"/>
+          <circle cx="88" cy="220" r="2" fill="rgba(255,255,255,.45)"/>
+          <circle cx="612" cy="220" r="2" fill="rgba(255,255,255,.45)"/>
+          <rect x="12" y="200" width="6" height="40" fill="rgba(255,255,255,.3)"/>
+          <rect x="682" y="200" width="6" height="40" fill="rgba(255,255,255,.3)"/>
+          <text id="mcReplayDir" x="350" y="444" text-anchor="middle" fill="rgba(255,255,255,.45)" font-size="12"></text>
+          <g id="mcReplayLayer"></g>
+        </svg>
+      </div>
+      <div class="viz-foot">
+        <div class="legend">
+          <span><i class="lg-node"></i> Touch (shirt #)</span>
+          <span class="lg-line pass"><i></i> Pass</span>
+          <span class="lg-line carry"><i></i> Carry / dribble</span>
+          <span class="lg-line shot"><i></i> Shot</span>
+        </div>
+        <div class="chart-tip" id="mcReplayMeta">Pick a goal and press Play.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS: fixture list -->
+<section id="projects" class="section">
+  <div class="wrap">
+    <span class="kicker" data-idx="03">Selected work</span>
+    <h2>Live sports-analytics products.</h2>
+    <p class="section-sub">Real, deployed apps - click through to explore each one.</p>
+    <div class="projects">
+      <article class="project">
+        <a class="project-shot" href="https://rshiri.github.io/BCNFINAL/" target="_blank" rel="noopener">
+          <img src="assets/img/bcn.png" alt="FC Barcelona 2025/26 analytics dashboard" loading="lazy" onerror="this.closest('.project-shot').classList.add('noshot')" />
+          <span class="project-fallback">FC Barcelona<br />xG Lab</span>
+        </a>
+        <div class="project-body">
+          <span class="project-idx">P-01 · 2025/26</span>
+          <h3>FC Barcelona - xG Lab</h3>
+          <p>Every Barça fixture: results, an xG model, shot maps and a player lab.</p>
+          <div class="project-callouts">
+            <div><b>Full</b><span>Season tracked</span></div>
+            <div><b>xG</b><span>Shot model</span></div>
+          </div>
+          <div class="tags"><span>Python</span><span>Pandas</span><span>xG model</span></div>
+          <a class="project-link" href="https://rshiri.github.io/BCNFINAL/" target="_blank" rel="noopener">Live site ↗</a>
+        </div>
+      </article>
+      <article class="project">
+        <a class="project-shot" href="https://nba-dashboard-ramshiri.streamlit.app/" target="_blank" rel="noopener">
+          <img src="assets/img/nba.png" alt="NBA analytics dashboard built with Streamlit" loading="lazy" onerror="this.closest('.project-shot').classList.add('noshot')" />
+          <span class="project-fallback">NBA<br />Dashboard</span>
+        </a>
+        <div class="project-body">
+          <span class="project-idx">P-02 · Live</span>
+          <h3>NBA Analytics Dashboard</h3>
+          <p>An interactive Streamlit app for exploring NBA team &amp; player performance.</p>
+          <div class="project-callouts">
+            <div><b>30</b><span>Teams</span></div>
+            <div><b>Live</b><span>Streamlit app</span></div>
+          </div>
+          <div class="tags"><span>Streamlit</span><span>Plotly</span><span>Pandas</span></div>
+          <a class="project-link" href="https://nba-dashboard-ramshiri.streamlit.app/" target="_blank" rel="noopener">Live app ↗</a>
+        </div>
+      </article>
+      <article class="project">
+        <a class="project-shot" href="https://rshiri.github.io/XWORLDCUPTWIT/wc2026_dashboard/index.html" target="_blank" rel="noopener">
+          <img src="assets/img/wc2026.png" alt="World Cup 2026 analytics dashboard" loading="lazy" onerror="this.closest('.project-shot').classList.add('noshot')" />
+          <span class="project-fallback">World Cup<br />2026</span>
+        </a>
+        <div class="project-body">
+          <span class="project-idx">P-03 · 2026</span>
+          <h3>World Cup 2026 Dashboard</h3>
+          <p>A tournament hub with groups, fixtures, predictions &amp; match centres.</p>
+          <div class="project-callouts">
+            <div><b>48</b><span>Teams</span></div>
+            <div><b>104</b><span>Matches</span></div>
+          </div>
+          <div class="tags"><span>Data pipeline</span><span>Automation</span><span>Dataviz</span></div>
+          <a class="project-link" href="https://rshiri.github.io/XWORLDCUPTWIT/wc2026_dashboard/index.html" target="_blank" rel="noopener">Live site ↗</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section section--alt">
+  <div class="wrap contact">
+    <span class="kicker" data-idx="04">Contact</span>
+    <h2>Open to work.</h2>
+    <p class="section-sub">Actively seeking a student or full-time role in software or data engineering.</p>
+    <div class="contact-actions">
+      <a class="btn btn--primary" href="mailto:puzik7399@gmail.com">Email me</a>
+      <a class="btn btn--outline" href="assets/Ram_Shiri_CV.pdf" download>Download CV</a>
+    </div>
+    <ul class="contact-links">
+      <li><a href="https://github.com/rshiri" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="#" data-linkedin target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="mailto:puzik7399@gmail.com">puzik7399@gmail.com</a></li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span>© <span id="year"></span> Ram Shiri</span>
+    <a href="#top" class="to-top">Back to top ↑</a>
+  </div>
+</footer>
+
+<div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+<script src="main.js?v=7" defer></script>
+</body>
+</html>
