@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+# Robust replacement for the legacy "deploy from a branch" Pages deploy.
+#
+# Why this exists: every push to main triggers a Pages deploy, and our flow
+# usually produces TWO pushes back-to-back (the content/source change, then the
+# regen-dashboard-data CI that rebuilds the data). GitHub Pages only allows one
+# live deployment, so in "deploy from a branch" mode the first deploy is knocked
+# out by the second and reported as a hard FAILURE — spamming a "Some jobs were
+# not successful" email even though the site ends up correct. Pages also flakes
+# occasionally with "Deployment failed, try again later".
+#
+# This workflow fixes both:
+#   * concurrency.cancel-in-progress cancels a superseded deploy instead of
+#     failing it — a cancelled run sends no failure email.
+#   * a superseded/flaky deploy is simply replaced by the newer run.
+# actions/deploy-pages already retries the sync internally.
+#
+# ACTIVATION (one-time, in the repo UI — the Pages REST API is blocked from the
+# agent sandbox so this can't be scripted from here):
+#   Settings -> Pages -> Build and deployment -> Source -> "GitHub Actions".
+# That switches Pages off "deploy from a branch" and lets this workflow deploy.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; a newer one CANCELS the older in-flight run
+# (cancelled != failed, so no "job failed" email on supersession).
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # Publish the whole repo root: index.html redirects to
+      # wc2026_dashboard/, and Infographic links point at WorldCup2026/.
+      # .nojekyll serves the static files as-is (no Jekyll processing).
+      - name: Disable Jekyll processing
+        run: touch .nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
