@@ -1,0 +1,29 @@
+/* DESIGN A - "Indigo" : clean modern SaaS. Dark, soft, rounded, indigo+cyan.
+   Loaded after styles.css. Chrome-only token/type override. Preview - not live. */
+:root {
+  --bg: #0b101d; --bg-2: #101828; --card: #141d33; --card-2: #1a2542;
+  --line: #263150; --text: #e9eefb; --muted: #93a0bd;
+  --accent: #6d78ff; --accent-2: #35c9e8;
+  --warn: #ffb454; --bad: #ff6b81; --good: #3ddc97;
+  --shadow: 0 18px 44px -24px rgba(0,0,0,.7); --radius: 14px;
+}
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: radial-gradient(900px 480px at 82% -12%, rgba(53,201,232,.10), transparent 60%),
+              radial-gradient(760px 460px at 4% 0%, rgba(109,120,255,.12), transparent 55%), var(--bg) fixed;
+}
+h1,h2,h3,h4,.brand .title,.section-head h2,.group-card h3,.stat .v {
+  font-family: "Space Grotesk", "Inter", sans-serif; letter-spacing: -.01em;
+}
+header.site { background: rgba(11,16,29,.82); }
+.brand .title span { color: var(--accent-2); }
+nav.tabs button { border-radius: 999px; }
+nav.tabs button.active {
+  color: #fff; background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: 0 10px 22px -12px rgba(109,120,255,.9);
+}
+.controls input, .controls select, .back-link { border-radius: 10px; }
+.controls input:focus, .controls select:focus { border-color: var(--accent); }
+.stat { border-radius: var(--radius); }
+.stat .v.accent { color: var(--accent); } .stat .v.blue { color: var(--accent-2); }
+a { color: var(--accent-2); }

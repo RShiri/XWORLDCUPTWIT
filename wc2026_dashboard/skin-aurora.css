@@ -1,0 +1,33 @@
+/* DESIGN D - "Aurora" : deep indigo-black with a violet->teal gradient identity.
+   Loaded after styles.css. Chrome-only token/type override. Preview - not live. */
+:root {
+  --bg: #0b0918; --bg-2: #140f2b; --card: #171233; --card-2: #201948;
+  --line: #2e2660; --text: #ece9fb; --muted: #9a92c0;
+  --accent: #b06bff; --accent-2: #2fd6c6;
+  --warn: #ffcf5c; --bad: #ff7aa2; --good: #2fd6c6;
+  --shadow: 0 22px 54px -28px rgba(120,60,255,.55); --radius: 16px;
+}
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: radial-gradient(1000px 520px at 85% -12%, rgba(47,214,198,.12), transparent 60%),
+              radial-gradient(820px 520px at 0% 4%, rgba(176,107,255,.18), transparent 58%), var(--bg) fixed;
+}
+h1,h2,h3,h4,.brand .title,.section-head h2,.group-card h3,.stat .v {
+  font-family: "Space Grotesk", "Inter", sans-serif; letter-spacing: -.01em;
+}
+header.site { background: rgba(11,9,24,.80); }
+.brand .title span {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+nav.tabs button { border-radius: 999px; }
+nav.tabs button.active {
+  color: #0b0918; background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: 0 12px 26px -12px rgba(176,107,255,.85);
+}
+.stat { border-radius: var(--radius); }
+.stat .v.accent { color: var(--accent); } .stat .v.blue { color: var(--accent-2); }
+.group-card, .third-card { border-radius: var(--radius); }
+.controls input, .controls select, .back-link { border-radius: 12px; }
+.controls input:focus, .controls select:focus { border-color: var(--accent); }
+a { color: var(--accent-2); }

@@ -1,0 +1,32 @@
+/* DESIGN C - "Terminal" : midnight data-terminal. Near-black, mono, amber accent.
+   Loaded after styles.css. Chrome-only token/type override. Preview - not live. */
+:root {
+  --bg: #0a0c10; --bg-2: #0f1319; --card: #12171f; --card-2: #161d27;
+  --line: #232c3a; --text: #d7e0ea; --muted: #7d8a9c;
+  --accent: #ffb454; --accent-2: #57d1a0;
+  --warn: #ffb454; --bad: #ff6b81; --good: #57d1a0;
+  --shadow: 0 14px 34px -22px rgba(0,0,0,.85); --radius: 2px;
+}
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background:
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px) 0 0 / 100% 34px,
+    var(--bg);
+}
+h1,h2,h3,h4,.brand .title,.section-head h2,.group-card h3,.stat .v,
+.brand .sub, nav.tabs button, .stat .k, thead th, .day-label {
+  font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+.brand .title { letter-spacing: -.01em; }
+.brand .title span { color: var(--accent); }
+.brand .sub, nav.tabs button, .stat .k, thead th, .day-label { text-transform: uppercase; letter-spacing: .1em; }
+header.site { background: rgba(10,12,16,.85); }
+nav.tabs button { border-radius: var(--radius); font-size: 12px; }
+nav.tabs button.active { color: #0a0c10; background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.stat { border-radius: var(--radius); }
+.stat .v { font-variant-numeric: tabular-nums; }
+.stat .v.accent { color: var(--accent); } .stat .v.blue { color: var(--accent-2); }
+.group-card, .third-card { border-radius: var(--radius); }
+.controls input, .controls select, .back-link { border-radius: var(--radius); }
+.controls input:focus, .controls select:focus { border-color: var(--accent); }
+a { color: var(--accent); }

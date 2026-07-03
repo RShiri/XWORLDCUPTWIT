@@ -1,0 +1,33 @@
+/* DESIGN B - "Editorial" : LIGHT, bold magazine. Paper bg, black ink, red accent.
+   Loaded after styles.css. Chrome-only token/type override. Preview - not live. */
+:root {
+  --bg: #f5f2ea; --bg-2: #ffffff; --card: #ffffff; --card-2: #f3efe6;
+  --line: #e4ded1; --text: #17130d; --muted: #6a6357;
+  --accent: #d5312b; --accent-2: #1f5c8f;
+  --warn: #b07d00; --bad: #d5312b; --good: #1f8f5f;
+  --shadow: 0 12px 30px -20px rgba(30,22,10,.35); --radius: 3px;
+}
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+h1,h2,h3,h4,.brand .title,.section-head h2,.group-card h3,.stat .v {
+  font-family: "Archivo", "Inter", sans-serif; letter-spacing: -.015em; font-weight: 800;
+}
+.brand .sub, nav.tabs button, .stat .k, thead th, .day-label {
+  font-family: "Archivo", "Inter", sans-serif; text-transform: uppercase; letter-spacing: .08em;
+}
+header.site { background: rgba(245,242,234,.86); border-bottom: 1px solid var(--line); }
+.brand .title span { color: var(--accent); }
+nav.tabs button { border-radius: var(--radius); font-size: 12.5px; }
+nav.tabs button:hover { color: var(--text); background: var(--card-2); }
+nav.tabs button.active { color: #fff; background: var(--accent); box-shadow: none; }
+.stat { border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: var(--radius); }
+.stat .v.accent { color: var(--accent); } .stat .v.blue { color: var(--accent-2); }
+.group-card, .third-card { border-radius: var(--radius); }
+.group-card h3 { background: var(--card-2); }
+.controls input, .controls select, .back-link { border-radius: var(--radius); }
+.controls input:focus, .controls select:focus { border-color: var(--accent); }
+tbody td { border-bottom: 1px solid var(--line); }
+a { color: var(--accent-2); }
