@@ -1317,13 +1317,16 @@
       r32by[key] = m;
     });
     // R16 numbered 1..8 (EF). The QF/SF ids link by EF number, so EF order must follow the
-    // OFFICIAL FIFA bracket (match 89 → 96), NOT kickoff order: three R16 ties share each of the
-    // last two match-days and their same-day order is not the bracket order, which mis-pairs the
-    // quarter-finals (e.g. the 2K2L/1H2J tie belongs to the same QF as 1D3/1G3, though a later
-    // same-day tie sorts between them). Pin the canonical order by each tie's sorted R32-slot
-    // signature; a tie not in the table (a different schedule) falls back to date order.
-    var R16_ORDER = ["1F2C|2A2B", "1E3ABCDF|1I3CDFGH", "1C2F|2E2I", "1A3CEFHI|1L3EHIJK",
-                     "1H2J|2K2L", "1D3BEFIJ|1G3AEHIJ", "1B3EFGIJ|1K3DEIJL", "1J2H|2D2G"];
+    // OFFICIAL FIFA bracket (match 89 → 96), NOT kickoff order: R16 ties share match-days and
+    // same-day order is not the bracket order. The QF ids pair (EF1,EF2)(EF3,EF4)(EF5,EF6)(EF7,EF8)
+    // and the SF ids pair (QF1,QF2)→SF1 / (QF3,QF4)→SF2, so EF1–4 form the top half (SF1) and
+    // EF5–8 the bottom half (SF2). Getting the half assignment wrong swaps whole quarters between
+    // semi-finals. Pin the canonical order by each tie's sorted R32-slot signature = FIFA matches
+    // 89..96; a tie not in the table (a different schedule) falls back to date order.
+    //  EF1=M89 Par/Fra  EF2=M90 Can/Mor  EF3=M93 Por/Spa  EF4=M94 USA/Bel   → QF97,QF98 → SF1
+    //  EF5=M91 Bra/Nor  EF6=M92 Mex/Eng  EF7=M95 Arg-half EF8=M96 Swi-half  → QF99,QF100 → SF2
+    var R16_ORDER = ["1E3ABCDF|1I3CDFGH", "1F2C|2A2B", "1H2J|2K2L", "1D3BEFIJ|1G3AEHIJ",
+                     "1C2F|2E2I", "1A3CEFHI|1L3EHIJK", "1J2H|2D2G", "1B3EFGIJ|1K3DEIJL"];
     function r16rank(m) { var i = R16_ORDER.indexOf(strip(m.id).split("_vs_").slice().sort().join("|")); return i < 0 ? 99 : i; }
     rounds.R16.sort(function (a, b) { var ra = r16rank(a), rb = r16rank(b); return ra !== rb ? ra - rb : byDate(a, b); });
     // each R16's feeders are its two R32 ties
