@@ -82,3 +82,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_sou
 2026_07_01_1L_vs_3EHIJK,2026-07-01,Round of 32,Atlanta Stadium,England,DR Congo,2,1,2.31,0.75,avg,2.58,0.7,2.04,0.8
 2026_07_02_1D_vs_3BEFIJ,2026-07-02,Round of 32,San Francisco Bay Area Stadium,USA,Bosnia and Herzegovina,2,0,0.93,0.34,avg,0.94,0.43,0.92,0.25
 2026_07_02_1H_vs_2J,2026-07-02,Round of 32,Los Angeles Stadium,Spain,Austria,3,0,2.83,0.47,avg,2.82,0.63,2.84,0.32
+2026_07_03_2K_vs_2L,2026-07-02,Round of 32,Toronto Stadium,Portugal,Croatia,2,1,2.48,1.58,avg,2.77,1.82,2.18,1.34
