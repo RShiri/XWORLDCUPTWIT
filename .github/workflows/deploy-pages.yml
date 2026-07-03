@@ -2,24 +2,19 @@ name: Deploy to GitHub Pages
 
 # Robust replacement for the legacy "deploy from a branch" Pages deploy.
 #
-# Why this exists: every push to main triggers a Pages deploy, and our flow
-# usually produces TWO pushes back-to-back (the content/source change, then the
-# regen-dashboard-data CI that rebuilds the data). GitHub Pages only allows one
-# live deployment, so in "deploy from a branch" mode the first deploy is knocked
-# out by the second and reported as a hard FAILURE — spamming a "Some jobs were
-# not successful" email even though the site ends up correct. Pages also flakes
-# occasionally with "Deployment failed, try again later".
+# Two failure modes this handles:
+#   1. SUPERSESSION — our flow usually produces two pushes to main back-to-back
+#      (the content/source change, then the regen-dashboard-data CI push). Pages
+#      allows only one live deployment, so the first would be reported as a hard
+#      FAILURE (and emailed) when the second replaces it. concurrency.cancel-in-
+#      progress cancels the superseded run instead — cancelled runs send no
+#      failure email.
+#   2. TRANSIENT BACKEND FLAKE — the Pages sync service intermittently returns
+#      "Deployment failed, try again later" during syncing_files. actions/
+#      deploy-pages does NOT retry that, so we retry it ourselves up to 3 times
+#      with backoff; only if all three fail does the job (and the email) fire.
 #
-# This workflow fixes both:
-#   * concurrency.cancel-in-progress cancels a superseded deploy instead of
-#     failing it — a cancelled run sends no failure email.
-#   * a superseded/flaky deploy is simply replaced by the newer run.
-# actions/deploy-pages already retries the sync internally.
-#
-# ACTIVATION (one-time, in the repo UI — the Pages REST API is blocked from the
-# agent sandbox so this can't be scripted from here):
-#   Settings -> Pages -> Build and deployment -> Source -> "GitHub Actions".
-# That switches Pages off "deploy from a branch" and lets this workflow deploy.
+# ACTIVATION (already done): Settings -> Pages -> Source -> "GitHub Actions".
 
 on:
   push:
@@ -31,7 +26,7 @@ permissions:
   pages: write
   id-token: write
 
-# Only one deploy at a time; a newer one CANCELS the older in-flight run
+# One deploy at a time; a newer push CANCELS the older in-flight run
 # (cancelled != failed, so no "job failed" email on supersession).
 concurrency:
   group: pages
@@ -42,17 +37,39 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: https://rshiri.github.io/XWORLDCUPTWIT/
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      # Publish the whole repo root: index.html redirects to
-      # wc2026_dashboard/, and Infographic links point at WorldCup2026/.
-      # .nojekyll serves the static files as-is (no Jekyll processing).
+      # Publish the whole repo root: index.html redirects to wc2026_dashboard/,
+      # Infographic links point at WorldCup2026/. .nojekyll serves as-is.
       - name: Disable Jekyll processing
         run: touch .nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - id: deployment
+
+      # Retry the deploy against the flaky Pages sync backend. Each attempt
+      # after the first only runs if every prior attempt failed; the artifact
+      # uploaded above is reused, so each attempt just re-requests a deployment.
+      - name: Deploy to GitHub Pages (attempt 1)
+        id: deploy1
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Backoff before attempt 2
+        if: steps.deploy1.outcome == 'failure'
+        run: sleep 30
+      - name: Deploy to GitHub Pages (attempt 2)
+        id: deploy2
+        if: steps.deploy1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Backoff before attempt 3
+        if: steps.deploy1.outcome == 'failure' && steps.deploy2.outcome == 'failure'
+        run: sleep 60
+      - name: Deploy to GitHub Pages (attempt 3)
+        id: deploy3
+        if: steps.deploy1.outcome == 'failure' && steps.deploy2.outcome == 'failure'
         uses: actions/deploy-pages@v4
