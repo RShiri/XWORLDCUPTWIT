@@ -1240,7 +1240,7 @@
   function buildGoalSequences(D) {
     var ev = [].concat(
       (D.passes || []).filter(function (p) { return p.ok; })
-        .map(function (p) { return { k: "pass", t: agmT(p), team: p.team, x: p.x, y: p.y, ex: p.ex, ey: p.ey, player: p.player, cross: !!p.cross }; }),
+        .map(function (p) { return { k: "pass", t: agmT(p), team: p.team, x: p.x, y: p.y, ex: p.ex, ey: p.ey, player: p.player, cross: !!p.cross, key: !!p.key, through: !!p.through }; }),
       (D.dribbles || []).filter(function (d) { return d.ok; })
         .map(function (d) { return { k: "dribble", t: agmT(d), team: d.team, x: d.x, y: d.y, player: d.player }; })
     ).sort(function (a, b) { return a.t - b.t; });
@@ -1286,7 +1286,12 @@
     (D.goals || []).forEach(function (g) {
       if (!g.own || g.x == null) return;
       var benef = g.team;                                      // side that benefits from the OG
-      var T = (g.min || 0) * 60 + 59;
+      // Own-goal events carry only a minute (no second), so anchor on the beneficiary's
+      // LAST touch within that minute (the cross/shot that forced it) instead of assuming
+      // the :59 mark — otherwise the look-back window sits AFTER the real build-up and the
+      // diagram collapses to a lone OG node.
+      var ogEnd = ((g.min || 0) + 1) * 60, T = (g.min || 0) * 60 + 59;
+      for (var q = ev.length - 1; q >= 0; q--) { if (ev[q].team === benef && ev[q].t <= ogEnd) { T = ev[q].t; break; } }
       var chain = ev.filter(function (e) { return e.team === benef && e.t <= T && e.t >= T - 30; });
       var seq = [];
       for (var k = chain.length - 1; k >= 0; k--) { if (seq.length && seq[0].t - chain[k].t > 6) break; seq.unshift(chain[k]); }
@@ -1325,8 +1330,12 @@
   }
   function agmSegTip(kind, opt) {
     opt = opt || {};
-    if (kind === "pass")  return "<b>Pass</b>" + (opt.by ? "<br>from " + esc(opt.by) : "");
-    if (kind === "cross") return "<b>Cross</b>" + (opt.by ? "<br>from " + esc(opt.by) : "");
+    if (kind === "pass")  {
+      var lab = opt.through ? "Through ball" : opt.key ? "Key pass" : "Pass";
+      if (opt.assist) lab = (opt.through || opt.key) ? "Assist (" + lab.toLowerCase() + ")" : "Assist";
+      return "<b>" + lab + "</b>" + (opt.by ? "<br>from " + esc(opt.by) : "");
+    }
+    if (kind === "cross") return "<b>" + (opt.assist ? "Assist (cross)" : "Cross") + "</b>" + (opt.by ? "<br>from " + esc(opt.by) : "");
     if (kind === "carry") return "<b>Carry / dribble</b>" + (opt.to ? "<br>to " + esc(opt.to) : "");
     if (kind === "shot")  return "<b>Shot</b>" + (opt.by ? "<br>" + esc(opt.by) : "") + (opt.xg != null ? " · xG " + opt.xg.toFixed(2) : "");
     return "<b>" + esc(kind) + "</b>";
@@ -1379,9 +1388,14 @@
       '<marker id="agmAs" markerWidth="3" markerHeight="3" refX="2.4" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 Z" class="agm-mk-shot"/></marker></defs>';
     var P = seq.steps.map(function (st) {
       var sd = st.team || seq.side;
-      return { k: st.k, player: st.player, xg: st.xg, team: sd, cross: !!st.cross, og: !!st.og,
+      return { k: st.k, player: st.player, xg: st.xg, team: sd, cross: !!st.cross, key: !!st.key, through: !!st.through, og: !!st.og,
                x: tx(sd, st.x), y: ty(sd, st.y), ex: tx(sd, st.ex != null ? st.ex : st.x), ey: ty(sd, st.ey != null ? st.ey : st.y) };
     });
+    // Mark the assisting delivery — the last pass by the credited assister before the
+    // finish — so it labels as "Assist" rather than a generic "Pass".
+    var assistNorm = seq.assist ? agmNorm(seq.assist) : null, lastPassIx = -1;
+    for (var pi = 0; pi < P.length; pi++) if (P[pi].k === "pass") lastPassIx = pi;
+    if (assistNorm && lastPassIx >= 0 && agmNorm(P[lastPassIx].player) === assistNorm) P[lastPassIx].assist = true;
     var teamName = seq.side === "home" ? D.home.name : D.away.name;
     // Home attacks right (▶); away attacks left (◀) — match the rest of the dashboard.
     var dirTxt = seq.side === "home" ? (esc(teamName) + " attacking ▶") : ("◀ " + esc(teamName) + " attacking");
@@ -1389,8 +1403,8 @@
       '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle">' + dirTxt + '</text>'];
     for (var i = 0; i < P.length; i++) {
       var pt = P[i];
-      if (pt.k === "pass") a.push(pt.cross ? agmArc(pt.x, pt.y, pt.ex, pt.ey, "agm-cross", agmSegTip("cross", { by: pt.player }))   // curved dotted = cross
-                                           : agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass", agmSegTip("pass", { by: pt.player }))); // straight dotted = pass
+      if (pt.k === "pass") a.push(pt.cross ? agmArc(pt.x, pt.y, pt.ex, pt.ey, "agm-cross", agmSegTip("cross", { by: pt.player, assist: pt.assist }))   // curved dotted = cross
+                                           : agmLine(pt.x, pt.y, pt.ex, pt.ey, "agm-pass", agmSegTip("pass", { by: pt.player, key: pt.key, through: pt.through, assist: pt.assist }))); // straight dotted = pass
       if (i < P.length - 1) {
         var nx = P[i + 1];
         var fx = pt.k === "pass" ? pt.ex : pt.x, fy = pt.k === "pass" ? pt.ey : pt.y;

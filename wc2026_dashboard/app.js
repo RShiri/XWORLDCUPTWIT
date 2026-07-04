@@ -3068,6 +3068,8 @@
   function plDrawMaps(main, pc, cmpTeam) {
     var ea = plEvents(main.team, main.name), eb = pc ? plEvents(cmpTeam, pc.name) : null;
     var cols = pc ? "1fr 1fr" : "1fr", host = document.getElementById("plHeatGrid");
+    // Comparing: one map per full-width row (bigger A|B pitches); single: compact 2x2.
+    host.classList.toggle("pl-heat-grid--rows", !!pc);
     host.innerHTML = PL_MAPS.map(function (mt, i) {
       var sumA = '<div class="pl-map-sum" style="color:' + PL_ACC + '">' + (pc ? "<b>" + esc(main.name) + "</b> · " : "") + plMapSummary(plDataFor(ea, mt[0]), mt[0], ea.passes) + "</div>";
       var sumB = pc ? '<div class="pl-map-sum" style="color:' + PL_BLUE + '"><b>' + esc(pc.name) + "</b> · " + plMapSummary(plDataFor(eb, mt[0]), mt[0], eb.passes) + "</div>" : "";
