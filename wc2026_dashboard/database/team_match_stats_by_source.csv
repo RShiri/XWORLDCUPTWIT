@@ -55,3 +55,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_04_1J_vs_2H,2026-07-03,Cape Verde,Argentina,away,fotmob,2,3,36,16,5,476,86,0,0,8,12,48,0.45,8
 2026_07_04_1J_vs_2H,2026-07-03,Argentina,Cape Verde,home,whoscored,3,2,50,22,17,0,0,0,0,0,0,0,,
 2026_07_04_1J_vs_2H,2026-07-03,Cape Verde,Argentina,away,whoscored,2,3,50,17,12,0,0,0,0,0,0,0,,
+2026_07_04_1K_vs_3DEIJL,2026-07-04,Colombia,Ghana,home,fotmob,1,0,61,20,8,586,91,5,4,0,14,47,2.19,3
+2026_07_04_1K_vs_3DEIJL,2026-07-04,Ghana,Colombia,away,fotmob,0,1,39,8,0,377,83,0,0,7,10,53,0.26,2
+2026_07_04_1K_vs_3DEIJL,2026-07-04,Colombia,Ghana,home,whoscored,1,0,50,20,12,0,0,0,0,0,0,0,,
+2026_07_04_1K_vs_3DEIJL,2026-07-04,Ghana,Colombia,away,whoscored,0,1,50,8,5,0,0,0,0,0,0,0,,

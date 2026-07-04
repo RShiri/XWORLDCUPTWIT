@@ -1,18 +1,1620 @@
 {
-  "match_id": 4653718,
-  "date": "2026-07-04",
-  "stage": "Round of 32",
+  "matchId": "4653718",
+  "wc_metadata": {
+    "stage": "Round of 32",
+    "group": null,
+    "venue": "Kansas City Stadium",
+    "city": "Kansas City, Missouri",
+    "country": "United States",
+    "date": "2026-07-04",
+    "attendance": null
+  },
   "home": {
-    "name": "1K",
-    "score": null,
-    "players": []
+    "teamId": 8258,
+    "name": "Colombia",
+    "score": 1,
+    "penalty_score": null,
+    "players": [
+      {
+        "playerId": 50207,
+        "name": "Camilo Vargas",
+        "shirtNo": "12",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 859282,
+        "name": "Daniel Mu\u00f1oz",
+        "shirtNo": "2",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 643533,
+        "name": "Davinson S\u00e1nchez",
+        "shirtNo": "23",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 860913,
+        "name": "Jhon Lucum\u00ed",
+        "shirtNo": "3",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 474673,
+        "name": "Johan Mojica",
+        "shirtNo": "17",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 1331597,
+        "name": "Gustavo Puerta",
+        "shirtNo": "14",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 466672,
+        "name": "Jefferson Lerma",
+        "shirtNo": "16",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 1023030,
+        "name": "Jhon Arias",
+        "shirtNo": "11",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 164684,
+        "name": "James Rodr\u00edguez",
+        "shirtNo": "10",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 291425,
+        "name": "Jhon C\u00f3rdoba",
+        "shirtNo": "9",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 860914,
+        "name": "Luis D\u00edaz",
+        "shirtNo": "7",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 792303,
+        "name": "Luis Su\u00e1rez",
+        "shirtNo": "25",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1174630,
+        "name": "Richard R\u00edos",
+        "shirtNo": "6",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 207617,
+        "name": "Juan Quintero",
+        "shirtNo": "20",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 837870,
+        "name": "Jaminton Campaz",
+        "shirtNo": "21",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 498457,
+        "name": "\u00c1lvaro Montero",
+        "shirtNo": "24",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 50065,
+        "name": "David Ospina",
+        "shirtNo": "1",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 207642,
+        "name": "Santiago Arias",
+        "shirtNo": "4",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 965205,
+        "name": "Willer Ditta",
+        "shirtNo": "18",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 496042,
+        "name": "Yerry Mina",
+        "shirtNo": "13",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 578756,
+        "name": "Deiver Machado",
+        "shirtNo": "22",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1281230,
+        "name": "Juan Portilla",
+        "shirtNo": "15",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1434853,
+        "name": "Kevin Casta\u00f1o",
+        "shirtNo": "5",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1353421,
+        "name": "Andr\u00e9s G\u00f3mez",
+        "shirtNo": "26",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 784834,
+        "name": "Jorge Carrascal",
+        "shirtNo": "8",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 852071,
+        "name": "Juan Hern\u00e1ndez",
+        "shirtNo": "19",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      }
+    ],
+    "stats": {},
+    "field": "home"
   },
   "away": {
-    "name": "3DEIJL",
-    "score": null,
-    "players": []
+    "teamId": 6714,
+    "name": "Ghana",
+    "score": 0,
+    "penalty_score": null,
+    "players": [
+      {
+        "playerId": 615411,
+        "name": "Lawrence Ati-Zigi",
+        "shirtNo": "1",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 1201760,
+        "name": "Marvin Senaya",
+        "shirtNo": "26",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 562801,
+        "name": "Derrick Luckassen",
+        "shirtNo": "23",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 873227,
+        "name": "Jerome Opoku",
+        "shirtNo": "18",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 771630,
+        "name": "Gideon Mensah",
+        "shirtNo": "14",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 434325,
+        "name": "Thomas Partey",
+        "shirtNo": "5",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 1615927,
+        "name": "Caleb Yirenkyi",
+        "shirtNo": "3",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 948745,
+        "name": "Kwasi Sibo",
+        "shirtNo": "8",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 604105,
+        "name": "I\u00f1aki Williams",
+        "shirtNo": "19",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 154280,
+        "name": "Jordan Ayew",
+        "shirtNo": "9",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 933576,
+        "name": "Antoine Semenyo",
+        "shirtNo": "11",
+        "position": "MC",
+        "isFirstEleven": true,
+        "stats": {}
+      },
+      {
+        "playerId": 1177779,
+        "name": "Alidu Seidu",
+        "shirtNo": "2",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 883823,
+        "name": "Elisha Owusu",
+        "shirtNo": "15",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1265626,
+        "name": "Abdul Fatawu",
+        "shirtNo": "7",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1338390,
+        "name": "Ernest Nuamah",
+        "shirtNo": "24",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1220633,
+        "name": "Prince Adu",
+        "shirtNo": "25",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1806615,
+        "name": "Benjamin Asare",
+        "shirtNo": "16",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 963812,
+        "name": "Joseph Anang",
+        "shirtNo": "12",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 776591,
+        "name": "Abdul Mumin",
+        "shirtNo": "6",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 324910,
+        "name": "Abdul Rahman Baba",
+        "shirtNo": "17",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1432344,
+        "name": "Jonas Adjetey",
+        "shirtNo": "4",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1429607,
+        "name": "Kojo Peprah Oppong",
+        "shirtNo": "21",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1452385,
+        "name": "Christopher Bonsu Baah",
+        "shirtNo": "13",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1130691,
+        "name": "Kamaldeen Sulemana",
+        "shirtNo": "22",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 1211610,
+        "name": "Augustine Boakye",
+        "shirtNo": "20",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      },
+      {
+        "playerId": 776184,
+        "name": "Brandon Thomas-Asante",
+        "shirtNo": "10",
+        "position": "MC",
+        "isFirstEleven": false,
+        "stats": {}
+      }
+    ],
+    "stats": {},
+    "field": "away"
   },
-  "events": [],
-  "match_stats": {},
-  "_sources": []
+  "events": [
+    {
+      "id": 2946046057.0,
+      "eventId": 2946046057,
+      "minute": 1,
+      "second": 0,
+      "teamId": 6714,
+      "x": 21.344174756,
+      "y": 67.60125,
+      "expandedMinute": 1,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 434325,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946048015.0,
+      "eventId": 2946048015,
+      "minute": 14,
+      "second": 0,
+      "teamId": 8258,
+      "x": 97.6666666661,
+      "y": 37.58375000000001,
+      "expandedMinute": 14,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "Goal",
+        "value": 16
+      },
+      "outcomeType": {
+        "displayName": "Successful",
+        "value": 1
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 1023030,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946048807.0,
+      "eventId": 2946048807,
+      "minute": 20,
+      "second": 0,
+      "teamId": 8258,
+      "x": 81.5839805832,
+      "y": 35.90625,
+      "expandedMinute": 20,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 860914,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946050635.0,
+      "eventId": 2946050635,
+      "minute": 34,
+      "second": 0,
+      "teamId": 6714,
+      "x": 6.400000000000006,
+      "y": 55.2985987305,
+      "expandedMinute": 34,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 604105,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946050889.0,
+      "eventId": 2946050889,
+      "minute": 37,
+      "second": 0,
+      "teamId": 6714,
+      "x": 18.979126212799997,
+      "y": 67.75375,
+      "expandedMinute": 37,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 933576,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946050985.0,
+      "eventId": 2946050985,
+      "minute": 39,
+      "second": 0,
+      "teamId": 8258,
+      "x": 95.2543859636,
+      "y": 41.656875,
+      "expandedMinute": 39,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 860914,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946051057.0,
+      "eventId": 2946051057,
+      "minute": 40,
+      "second": 0,
+      "teamId": 6714,
+      "x": 17.627669902399987,
+      "y": 81.0453503161,
+      "expandedMinute": 40,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 604105,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946051139.0,
+      "eventId": 2946051139,
+      "minute": 42,
+      "second": 0,
+      "teamId": 8258,
+      "x": 92.2,
+      "y": 27.446428571,
+      "expandedMinute": 42,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 792303,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946051399.0,
+      "eventId": 2946051399,
+      "minute": 44,
+      "second": 0,
+      "teamId": 6714,
+      "x": 16.050970873600008,
+      "y": 54.457834398900005,
+      "expandedMinute": 44,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 933576,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946051407.0,
+      "eventId": 2946051407,
+      "minute": 44,
+      "second": 0,
+      "teamId": 6714,
+      "x": 11.0,
+      "y": 64.32249999999999,
+      "expandedMinute": 44,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 604105,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946051603.0,
+      "eventId": 2946051603,
+      "minute": 45,
+      "second": 0,
+      "teamId": 8258,
+      "x": 100.1637931038,
+      "y": 36.745000000000005,
+      "expandedMinute": 45,
+      "period": {
+        "displayName": "FirstHalf",
+        "value": 1
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 474673,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946053205.0,
+      "eventId": 2946053205,
+      "minute": 48,
+      "second": 0,
+      "teamId": 8258,
+      "x": 90.5,
+      "y": 16.152101911899997,
+      "expandedMinute": 48,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 1174630,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946053851.0,
+      "eventId": 2946053851,
+      "minute": 55,
+      "second": 0,
+      "teamId": 8258,
+      "x": 93.1,
+      "y": 52.758726114000005,
+      "expandedMinute": 55,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 1331597,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946053929.0,
+      "eventId": 2946053929,
+      "minute": 56,
+      "second": 0,
+      "teamId": 8258,
+      "x": 84.286893204,
+      "y": 22.037452233099998,
+      "expandedMinute": 56,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 643533,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946054169.0,
+      "eventId": 2946054169,
+      "minute": 58,
+      "second": 0,
+      "teamId": 8258,
+      "x": 93.5,
+      "y": 39.376904763,
+      "expandedMinute": 58,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 860914,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946055095.0,
+      "eventId": 2946055095,
+      "minute": 69,
+      "second": 0,
+      "teamId": 6714,
+      "x": 19.880097086399985,
+      "y": 63.254999999999995,
+      "expandedMinute": 69,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 933576,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946055103.0,
+      "eventId": 2946055103,
+      "minute": 69,
+      "second": 0,
+      "teamId": 6714,
+      "x": 17.177184465600007,
+      "y": 55.4387261191,
+      "expandedMinute": 69,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 434325,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946055491.0,
+      "eventId": 2946055491,
+      "minute": 77,
+      "second": 0,
+      "teamId": 8258,
+      "x": 74.82669903120001,
+      "y": 47.9243312073,
+      "expandedMinute": 77,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 207617,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946055673.0,
+      "eventId": 2946055673,
+      "minute": 80,
+      "second": 0,
+      "teamId": 8258,
+      "x": 85.81617647,
+      "y": 45.1918471296,
+      "expandedMinute": 80,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 860914,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946055745.0,
+      "eventId": 2946055745,
+      "minute": 81,
+      "second": 0,
+      "teamId": 8258,
+      "x": 98.7280701752,
+      "y": 36.135000000000005,
+      "expandedMinute": 81,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 643533,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946056053.0,
+      "eventId": 2946056053,
+      "minute": 84,
+      "second": 0,
+      "teamId": 8258,
+      "x": 81.1334951464,
+      "y": 23.438726119099996,
+      "expandedMinute": 84,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 207617,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946056301.0,
+      "eventId": 2946056301,
+      "minute": 87,
+      "second": 0,
+      "teamId": 8258,
+      "x": 95.640350876,
+      "y": 48.4848407617,
+      "expandedMinute": 87,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 860914,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946056727.0,
+      "eventId": 2946056727,
+      "minute": 90,
+      "second": 0,
+      "teamId": 8258,
+      "x": 100.44827586240001,
+      "y": 31.4075,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 1174630,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946056983.0,
+      "eventId": 2946056983,
+      "minute": 90,
+      "second": 0,
+      "teamId": 8258,
+      "x": 101.58620689680001,
+      "y": 44.2810191037,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 837870,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946057057.0,
+      "eventId": 2946057057,
+      "minute": 90,
+      "second": 0,
+      "teamId": 8258,
+      "x": 94.09649122639999,
+      "y": 45.2619108239,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 792303,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946057065.0,
+      "eventId": 2946057065,
+      "minute": 90,
+      "second": 0,
+      "teamId": 8258,
+      "x": 76.5160194192,
+      "y": 45.4020382125,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 1331597,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946057105.0,
+      "eventId": 2946057105,
+      "minute": 90,
+      "second": 0,
+      "teamId": 8258,
+      "x": 86.889705882,
+      "y": 12.593744083199999,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 1174630,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946057141.0,
+      "eventId": 2946057141,
+      "minute": 90,
+      "second": 0,
+      "teamId": 8258,
+      "x": 94.9649122793,
+      "y": 55.930995253599995,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "LeftFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 837870,
+      "_source": "fotmob"
+    }
+  ],
+  "match_stats": {
+    "big_chances_created": {
+      "home": 5,
+      "away": 0
+    },
+    "big_chances_missed": {
+      "home": 4,
+      "away": 0
+    },
+    "blocks": {
+      "home": 5,
+      "away": 4
+    },
+    "clearances": {
+      "home": 25,
+      "away": 11
+    },
+    "corners": {
+      "home": 3,
+      "away": 2
+    },
+    "duels_won": {
+      "home": 47,
+      "away": 53
+    },
+    "fouls": {
+      "home": 14,
+      "away": 10
+    },
+    "interceptions": {
+      "home": 5,
+      "away": 5
+    },
+    "offsides": {
+      "home": 2,
+      "away": 0
+    },
+    "passes_accuracy": {
+      "home": 91,
+      "away": 83
+    },
+    "passes_accurate": {
+      "home": 532,
+      "away": 313
+    },
+    "passes_total": {
+      "home": 586,
+      "away": 377
+    },
+    "possession": {
+      "home": 61,
+      "away": 39
+    },
+    "saves": {
+      "home": 0,
+      "away": 7
+    },
+    "shots": {
+      "home": 20,
+      "away": 8
+    },
+    "shots_on_target": {
+      "home": 12,
+      "away": 5
+    },
+    "xg": {
+      "home": 2.19,
+      "away": 0.26
+    }
+  },
+  "stats_by_source": {
+    "fotmob": {
+      "possession": {
+        "home": 61,
+        "away": 39
+      },
+      "xg": {
+        "home": 2.19,
+        "away": 0.26
+      },
+      "shots": {
+        "home": 20,
+        "away": 8
+      },
+      "shots_on_target": {
+        "home": 8,
+        "away": 0
+      },
+      "big_chances_created": {
+        "home": 5,
+        "away": 0
+      },
+      "big_chances_missed": {
+        "home": 4,
+        "away": 0
+      },
+      "passes_accurate": {
+        "home": 532,
+        "away": 313
+      },
+      "passes_accuracy": {
+        "home": 91,
+        "away": 83
+      },
+      "corners": {
+        "home": 3,
+        "away": 2
+      },
+      "passes_total": {
+        "home": 586,
+        "away": 377
+      },
+      "offsides": {
+        "home": 2,
+        "away": 0
+      },
+      "interceptions": {
+        "home": 5,
+        "away": 5
+      },
+      "blocks": {
+        "home": 5,
+        "away": 4
+      },
+      "clearances": {
+        "home": 25,
+        "away": 11
+      },
+      "saves": {
+        "home": 0,
+        "away": 7
+      },
+      "duels_won": {
+        "home": 47,
+        "away": 53
+      },
+      "fouls": {
+        "home": 14,
+        "away": 10
+      }
+    },
+    "whoscored": {
+      "shots": {
+        "home": 20,
+        "away": 8
+      },
+      "shots_on_target": {
+        "home": 12,
+        "away": 5
+      },
+      "saves": {
+        "home": 0,
+        "away": 0
+      },
+      "fouls": {
+        "home": 0,
+        "away": 0
+      },
+      "big_chances_created": {
+        "home": 0,
+        "away": 0
+      },
+      "duels_won": {
+        "home": 0,
+        "away": 0
+      },
+      "possession": {
+        "home": 50,
+        "away": 50
+      },
+      "passes_total": {
+        "home": 0,
+        "away": 0
+      },
+      "passes_accurate": {
+        "home": 0,
+        "away": 0
+      },
+      "passes_accuracy": {
+        "home": 0,
+        "away": 0
+      },
+      "big_chances_missed": {
+        "home": 0,
+        "away": 0
+      }
+    }
+  },
+  "playerIdNameDictionary": {
+    "50207": "Camilo Vargas",
+    "859282": "Daniel Mu\u00f1oz",
+    "643533": "Davinson S\u00e1nchez",
+    "860913": "Jhon Lucum\u00ed",
+    "474673": "Johan Mojica",
+    "1331597": "Gustavo Puerta",
+    "466672": "Jefferson Lerma",
+    "1023030": "Jhon Arias",
+    "164684": "James Rodr\u00edguez",
+    "291425": "Jhon C\u00f3rdoba",
+    "860914": "Luis D\u00edaz",
+    "792303": "Luis Su\u00e1rez",
+    "1174630": "Richard R\u00edos",
+    "207617": "Juan Quintero",
+    "837870": "Jaminton Campaz",
+    "498457": "\u00c1lvaro Montero",
+    "50065": "David Ospina",
+    "207642": "Santiago Arias",
+    "965205": "Willer Ditta",
+    "496042": "Yerry Mina",
+    "578756": "Deiver Machado",
+    "1281230": "Juan Portilla",
+    "1434853": "Kevin Casta\u00f1o",
+    "1353421": "Andr\u00e9s G\u00f3mez",
+    "784834": "Jorge Carrascal",
+    "852071": "Juan Hern\u00e1ndez",
+    "615411": "Lawrence Ati-Zigi",
+    "1201760": "Marvin Senaya",
+    "562801": "Derrick Luckassen",
+    "873227": "Jerome Opoku",
+    "771630": "Gideon Mensah",
+    "434325": "Thomas Partey",
+    "1615927": "Caleb Yirenkyi",
+    "948745": "Kwasi Sibo",
+    "604105": "I\u00f1aki Williams",
+    "154280": "Jordan Ayew",
+    "933576": "Antoine Semenyo",
+    "1177779": "Alidu Seidu",
+    "883823": "Elisha Owusu",
+    "1265626": "Abdul Fatawu",
+    "1338390": "Ernest Nuamah",
+    "1220633": "Prince Adu",
+    "1806615": "Benjamin Asare",
+    "963812": "Joseph Anang",
+    "776591": "Abdul Mumin",
+    "324910": "Abdul Rahman Baba",
+    "1432344": "Jonas Adjetey",
+    "1429607": "Kojo Peprah Oppong",
+    "1452385": "Christopher Bonsu Baah",
+    "1130691": "Kamaldeen Sulemana",
+    "1211610": "Augustine Boakye",
+    "776184": "Brandon Thomas-Asante"
+  },
+  "_scraped_at": "2026-07-04T04:32:37.156424+00:00",
+  "_sources": [
+    "fotmob"
+  ]
 }
