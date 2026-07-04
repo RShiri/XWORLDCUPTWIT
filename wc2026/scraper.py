@@ -1043,8 +1043,13 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
-        h_key = re.sub(r"[^a-z0-9]", "", home_name.lower())
-        a_key = re.sub(r"[^a-z0-9]", "", away_name.lower())
+        # Normalise through _ws_slug_key so alias teams match WhoScored's slug:
+        # WhoScored calls Cape Verde "cabo-verde", South Korea "republic-of-korea",
+        # etc. Without the alias map the raw name ("capeverde") never matches the
+        # href ("cabo-verde") — group games only worked because they had a cache
+        # entry; uncached knockout ties (Argentina vs Cape Verde) fell through here.
+        h_key = re.sub(r"[^a-z0-9]", "", _ws_slug_key(home_name))
+        a_key = re.sub(r"[^a-z0-9]", "", _ws_slug_key(away_name))
         for base in WC2026_WS_BASES:
             try:
                 driver.get(base)
