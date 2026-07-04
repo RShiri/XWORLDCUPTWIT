@@ -171,3 +171,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_03_2D_vs_2G,2026-07-03,Egypt,Australia,away,1,1,58,15,11,772,85,3,2,9,14,49,1.43
 2026_07_03_2K_vs_2L,2026-07-02,Portugal,Croatia,home,2,1,60,15,7,615,91,5,4,8,6,56,2.48
 2026_07_03_2K_vs_2L,2026-07-02,Croatia,Portugal,away,1,2,40,13,8,410,85,4,3,6,12,44,1.58
+2026_07_04_1J_vs_2H,2026-07-03,Argentina,Cape Verde,home,3,2,64,22,17,849,92,3,2,3,13,52,1.6
+2026_07_04_1J_vs_2H,2026-07-03,Cape Verde,Argentina,away,2,3,36,17,12,476,86,0,0,8,12,48,0.26
