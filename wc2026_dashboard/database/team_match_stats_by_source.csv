@@ -63,3 +63,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_04_2A2B_vs_1F2C,2026-07-04,Morocco,Canada,away,fotmob,3,0,55,5,4,472,82,3,1,3,14,53,0.78,1
 2026_07_04_2A2B_vs_1F2C,2026-07-04,Canada,Morocco,home,whoscored,0,3,45,10,6,413,71,1,1,1,24,48,,
 2026_07_04_2A2B_vs_1F2C,2026-07-04,Morocco,Canada,away,whoscored,3,0,55,5,4,506,83,3,1,6,14,52,,
+2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,Paraguay,France,home,fotmob,0,1,24,5,0,183,54,0,0,4,13,47,0.15,2
+2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,France,Paraguay,away,fotmob,1,0,76,15,5,568,90,2,1,0,11,53,1.36,12
+2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,Paraguay,France,home,whoscored,0,1,50,5,1,0,0,0,0,0,0,0,,
+2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,France,Paraguay,away,whoscored,1,0,50,15,9,0,0,0,0,0,0,0,,
