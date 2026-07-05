@@ -55,20 +55,23 @@ def _norm(s: str) -> str:
 
 
 def _is_real(d: dict) -> bool:
-    """True only if the JSON holds an actually-scraped match, not the empty stub
-    a crashed run leaves behind.
+    """True only if the JSON holds a COMPLETE scrape, not a stub — where "complete"
+    means it carries the WhoScored event stream (the passes/dribbles/touches/player
+    stats behind every event-driven panel).
 
-    IMPORTANT: a crashed WhoScored scrape still writes ``_sources=['fotmob']``
-    and ``_scraped_at`` (the FotMob metadata step succeeds before the browser
-    step fails), while leaving ``events: []`` and empty lineups. So those fields
-    must NOT be used as the "real" signal — doing so made the sweep skip
-    crash-stubs as "already published" and they vanished from the site. The only
-    reliable evidence of a completed scrape is real event data or lineups."""
-    if d.get("events"):
-        return True
-    home = d.get("home") or {}
-    away = d.get("away") or {}
-    return bool(home.get("players") or away.get("players"))
+    IMPORTANT: two different failures both leave a file that *looks* scraped:
+      1. A crashed WhoScored scrape still writes ``_sources=['fotmob']`` and
+         ``_scraped_at`` (the FotMob metadata step succeeds before the browser step
+         fails), with ``events: []`` and empty lineups.
+      2. A WhoScored *flake* falls back to FotMob and writes ~20 shot events + a bare
+         lineup with empty per-player stats — so ``events`` and ``players`` are both
+         non-empty yet every pass/dribble/avg-position/all-goals-map/rating is blank.
+    Checking only ``events``/``players`` (as before) caught case 1 but NOT case 2, so a
+    FotMob-only game was treated as "already published" and never re-scraped — it just
+    sat blank on the site. The reliable signal for a completed scrape is the WhoScored
+    event stream itself, so defer to has_whoscored_stream (shared with the scraper)."""
+    from wc2026.scraper import has_whoscored_stream
+    return has_whoscored_stream(d)
 
 
 def _published_name_sets() -> set[frozenset]:
