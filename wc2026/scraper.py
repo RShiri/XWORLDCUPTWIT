@@ -1133,6 +1133,30 @@ def _merge_sources(by_source: "dict[str, dict]") -> dict:
     return merged
 
 
+def has_whoscored_stream(match_json: dict) -> bool:
+    """True if the match carries a real WhoScored event stream — the payload behind the
+    pass network, pass explorer, dribbles, average-position, the all-goals map and every
+    per-player stat/rating.
+
+    This is the difference between a COMPLETE scrape and a WhoScored flake that fell back
+    to FotMob. When the headless-browser step crashes (Cloudflare / undetected-chromedriver
+    WinError) FotMob still yields ~20 shot events (MissedShots/SavedShot/Goal) and a bare
+    lineup with empty per-player stats, so the file *looks* scraped — but every
+    event-stream panel renders blank. That FotMob-only fallback is exactly the "all data
+    empty on the last match" symptom, so both the scraper (don't publish / don't clobber)
+    and the catch-up sweep (re-scrape it) must be able to tell the two apart on disk.
+
+    Signal: the WhoScored source was merged in (``_sources`` contains ``whoscored``) OR the
+    event stream contains a ``Pass`` — FotMob's shot-only fallback never has passes, so a
+    Pass event is unambiguous evidence of the real stream even in a hand-edited file."""
+    if "whoscored" in (match_json.get("_sources") or []):
+        return True
+    for e in match_json.get("events") or []:
+        if (e.get("type") or {}).get("displayName") == "Pass":
+            return True
+    return False
+
+
 # ══════════════════════════════════════════════════════════════════════════
 # BUILD WC2026 MATCH JSON
 # ══════════════════════════════════════════════════════════════════════════
@@ -1340,8 +1364,13 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         "stats_by_source": stats_by_source,
         "playerIdNameDictionary": pid_name,
         "_scraped_at": datetime.now(timezone.utc).isoformat(),
+        # Only claim "whoscored" when it actually contributed the event stream. A
+        # truthy-but-empty ws_data (Cloudflare block / interstitial page returns a dict
+        # with no events, so the FotMob shot fallback ran above) must NOT be recorded as a
+        # WhoScored source — otherwise _sources lies and has_whoscored_stream / catchup
+        # would treat a FotMob-only game as complete.
         "_sources":    ([fm_data.get("_source_name", "fotmob")] if not fotmob_unavailable else [])
-                       + (["whoscored"] if ws_data else []),
+                       + (["whoscored"] if (ws_data and ws_data.get("events")) else []),
     }
 
 
@@ -1460,6 +1489,36 @@ def fetch_and_save(fotmob_id: int, fotmob_only: bool = False,
         return bool(mj.get("events")
                     or (mj.get("home") or {}).get("players")
                     or (mj.get("away") or {}).get("players"))
+
+    # Completeness gate — the FotMob-only fallback trap. A full scrape (not --fotmob-only)
+    # is only COMPLETE when it carries the WhoScored event stream. When the browser step
+    # flakes, FotMob still hands back ~20 shot events + a bare lineup, so _has_data is True
+    # and the match looks scraped — but the pass network, dribbles, average-position,
+    # all-goals-map and every player stat are blank. Publishing that silently is the
+    # "all data empty on the last match" bug. So a full scrape with no event stream is
+    # treated as INCOMPLETE: we refuse to overwrite a good file with it, and return None so
+    # run_match retries it (and, all retries failing, the daily catch-up sweep re-scrapes
+    # it — catchup._is_real uses the same has_whoscored_stream signal). --fotmob-only opts
+    # out explicitly; WC2026_REQUIRE_EVENT_STREAM=0 disables the gate entirely if ever
+    # needed for a game WhoScored genuinely never lists.
+    require_stream = (not fotmob_only
+                      and os.environ.get("WC2026_REQUIRE_EVENT_STREAM", "1") != "0")
+    if require_stream and not has_whoscored_stream(match_json):
+        if out_path.exists():
+            try:
+                existing = json.loads(out_path.read_text(encoding="utf-8"))
+            except Exception:
+                existing = {}
+            if has_whoscored_stream(existing):
+                log.warning("Scrape for id=%s has no WhoScored event stream — keeping the "
+                            "existing complete file %s (refusing to overwrite it with a "
+                            "FotMob-only stub).", fotmob_id, out_path.name)
+                return None
+        log.warning("Scrape for id=%s produced no WhoScored event stream (FotMob-only) — "
+                    "treating as an INCOMPLETE scrape so it is retried, not published "
+                    "blank. Pass --fotmob-only to accept FotMob shot data on purpose.",
+                    fotmob_id)
+        return None
 
     if not _has_data(match_json) and out_path.exists():
         try:
