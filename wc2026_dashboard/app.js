@@ -2254,7 +2254,10 @@
       var cells = [];
       for (var i = 0; i < CW * CH; i++) cells.push(0);
       shots.forEach(function (s) {
-        var cx = Math.min(CW - 1, Math.max(0, Math.floor(s.y / 100 * CW)));
+        // Flip WhoScored y (100 - y) into broadcast/PNG orientation, matching
+        // match.js ty(), renderer build_shot_df (80 - y) and Player Lab plMapX.
+        // Raw y is the attacker's-left frame and mirrors the shot map left↔right.
+        var cx = Math.min(CW - 1, Math.max(0, Math.floor((100 - s.y) / 100 * CW)));
         var cr = Math.min(CH - 1, Math.max(0, Math.floor((Math.max(50, Math.min(100, s.x)) - 50) / 50 * CH)));
         cells[cr * CW + cx] += s.xg;
       });
@@ -2276,7 +2279,7 @@
         var op = s.g ? 0.95 : s.ot ? 0.6 : 0.35;
         var stroke = s.g ? ' stroke="#0b0f1a" stroke-width="0.8"' : "";
         var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : s.ot ? " (on target)" : "") + " · " + s.s + " · " + s.m + "'";
-        svg.push('<circle cx="' + P.px(s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
+        svg.push('<circle cx="' + P.px(100 - s.y).toFixed(1) + '" cy="' + P.py(s.x).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + stroke + ' data-info="' + esc(info) + '"></circle>');
       });
     }
     svg.push("</svg>");

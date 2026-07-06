@@ -554,7 +554,10 @@
         if (state.goalsOnly && !sh.goal) return;
         shown++;
         if (sh.team === "home") hg++; else ag++;
-        var cx = GM.gxOf(sh.gy), cy = GM.gyOf(sh.gz);
+        // WhoScored GoalMouthY grows toward the attacker's LEFT (same axis as pitch y),
+        // so gxOf puts a far-post finish on the wrong side. Flip (GW - gxOf) to draw the
+        // goal from the shooter's/broadcast perspective: attacker's-right → screen right.
+        var cx = GM.GW - GM.gxOf(sh.gy), cy = GM.gyOf(sh.gz);
         var r = 1.4 + Math.sqrt(sh.xg) * 2.6;
         var ring = sh.team === "home" ? D.home.color : D.away.color;
         var c = document.createElementNS(NS, "circle");
@@ -1973,7 +1976,9 @@
       pens.forEach(function (k) {
         if (!state[k.team]) return;
         if (k.gy == null || k.gz == null) return;   // no placement coords → list only
-        var cx = gxOf(k.gy), cy = gyOf(k.gz);
+        // Flip (GW - gxOf) so placement reads from the shooter's/broadcast perspective —
+        // GoalMouthY grows toward the attacker's left. Matches the on-target shot map.
+        var cx = GW - gxOf(k.gy), cy = gyOf(k.gz);
         var ring = k.team === "home" ? D.home.color : D.away.color;
         var c = document.createElementNS(NS, "circle");
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
