@@ -67,3 +67,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,France,Paraguay,away,fotmob,1,0,76,15,5,569,90,2,1,0,11,53,1.45,12
 2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,Paraguay,France,home,whoscored,0,1,25,5,1,209,51,0,0,8,13,46,,
 2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,France,Paraguay,away,whoscored,1,0,75,15,9,614,87,2,1,2,11,54,,
+2026_07_06_1C2F_vs_2E2I,2026-07-05,Brazil,Norway,home,fotmob,1,2,34,14,4,330,85,5,4,3,7,51,2.75,5
+2026_07_06_1C2F_vs_2E2I,2026-07-05,Norway,Brazil,away,fotmob,2,1,66,9,5,679,91,3,2,4,6,49,0.84,5
+2026_07_06_1C2F_vs_2E2I,2026-07-05,Brazil,Norway,home,whoscored,1,2,34,14,8,364,82,4,3,4,7,41,,
+2026_07_06_1C2F_vs_2E2I,2026-07-05,Norway,Brazil,away,whoscored,2,1,66,9,6,709,89,3,2,7,6,59,,
