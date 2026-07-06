@@ -1258,6 +1258,9 @@
       var chain = ev.filter(function (e) { return e.team === shot.team && e.t <= T && e.t >= T - 35; });
       var seq = [];
       for (var i = chain.length - 1; i >= 0; i--) { if (seq.length && seq[0].t - chain[i].t > 6) break; seq.unshift(chain[i]); }
+      // Turnover / defensive-error goal: no same-team passing build-up. Show where the ball
+      // was won (build_match_details `won`) as the move origin so the map isn't a lone node.
+      if (!seq.length && shot.won) seq.push({ k: "won", team: shot.team, x: shot.won.x, y: shot.won.y, player: null, kind: shot.won.kind, by: shot.won.by });
       var rebound = false;
       // Rebound: a same-team shot saved/blocked in the ~4s before the goal → splice in
       // the original effort + keeper save, in time order, before the goal node. Runs
@@ -1323,6 +1326,11 @@
   }
   function agmNodeTip(pt, i, seq, numMap) {
     if (pt.og) return "<b>Own goal</b><br>" + esc(pt.player || "");
+    if (pt.k === "won") {
+      var wl = { error: "opponent error", dispossession: "dispossession", interception: "interception",
+                 "loose ball": "loose ball", tackle: "tackle won" }[pt.kind] || "turnover";
+      return "<b>Ball won</b><br>" + wl + (pt.by ? " · " + esc(pt.by) : "");
+    }
     var who = agmWho(pt.player, numMap, i), mm = (seq && seq.min != null) ? (" · " + seq.min + "'") : "";
     if (pt.k === "save") return "<b>" + who + "</b><br>Goalkeeper save";
     if (pt.k === "shot") return "<b>" + who + "</b><br>⚽ Goal" + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "") + mm;
@@ -1392,6 +1400,7 @@
     var P = seq.steps.map(function (st) {
       var sd = st.team || seq.side;
       return { k: st.k, player: st.player, xg: st.xg, team: sd, cross: !!st.cross, key: !!st.key, through: !!st.through, og: !!st.og,
+               kind: st.kind, by: st.by,
                x: tx(sd, st.x), y: ty(sd, st.y), ex: tx(sd, st.ex != null ? st.ex : st.x), ey: ty(sd, st.ey != null ? st.ey : st.y) };
     });
     // Mark the assisting delivery — the last pass by the credited assister before the
@@ -1427,13 +1436,14 @@
     P.forEach(function (pt, i) {
       var cls = pt.k === "save" ? "save" : (pt.k === "shot" ? "shot" : (pt.k === "dribble" ? "drib" : (i === 0 ? "start" : "")));
       var num = numMap[agmNorm(pt.player)];
-      var label = pt.og ? "OG" : ((num != null) ? num : (agmIni(pt.player) || (i + 1)));
+      var label = pt.og ? "OG" : pt.k === "won" ? "" : ((num != null) ? num : (agmIni(pt.player) || (i + 1)));
       a.push(agmNode(pt.x, pt.y, label, agmNodeTip(pt, i, seq, numMap), cls));
     });
     var ly = Math.max(3.4, L.y - 2.0);                                              // scorer name + xG ABOVE the finishing node
     a.push('<text class="agm-scorelab" x="' + L.x.toFixed(2) + '" y="' + (ly - 1.7).toFixed(2) + '">' + esc(seq.scorer) + "</text>");
     if (L.xg != null) a.push('<text class="agm-xglab" x="' + L.x.toFixed(2) + '" y="' + ly.toFixed(2) + '">xG ' + L.xg.toFixed(2) + "</text>");
     for (var j = 0; j < P.length; j++) if (P[j].k === "save") { a.push('<text class="agm-savelab" x="' + P[j].x.toFixed(2) + '" y="' + (P[j].y - 2.0).toFixed(2) + '" text-anchor="middle">SAVE</text>'); break; }
+    for (var jw = 0; jw < P.length; jw++) if (P[jw].k === "won") { a.push('<text class="agm-savelab" x="' + P[jw].x.toFixed(2) + '" y="' + (P[jw].y + 3.4).toFixed(2) + '" text-anchor="middle">ball won</text>'); break; }
     return '<svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' + a.join("") + "</svg>";
   }
   // Self-contained <style> for export: the live SVG relies on external match.css

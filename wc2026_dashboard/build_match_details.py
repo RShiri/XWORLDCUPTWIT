@@ -244,6 +244,46 @@ def find_png(match_id):
     return None
 
 
+# Event types that mark the scoring team winning the ball just before a goal — used to
+# give a turnover / defensive-error goal (one with no passing build-up) a visible origin
+# on the All Goals Map. Opponent giveaways are stored in the opponent's frame, so their
+# coords get mirrored 180° into the scorer's attacking frame.
+_WON_OPP = {"Error": "error", "Dispossessed": "dispossession"}          # opponent gave it away
+_WON_OWN = {"Interception": "interception", "BallRecovery": "loose ball",  # scoring team won it
+            "Tackle": "tackle"}
+
+
+def _ball_won_origin(events, goal_idx, scorer_tid, match_data):
+    """Where the scoring team won possession in the ~12s before this goal. Returns
+    {x, y, kind, by} in the scorer's attacking frame (opponent coords mirrored 180°),
+    picking the ball-win closest to the goal, or None if there is no clear turnover.
+    Lets match.js draw an origin node for goals that have no same-team build-up chain."""
+    g = events[goal_idx]
+    t0 = (g.get("minute") or 0) * 60 + (g.get("second") or 0)
+    for k in range(goal_idx - 1, -1, -1):
+        e = events[k]
+        tk = (e.get("minute") or 0) * 60 + (e.get("second") or 0)
+        if t0 - tk > 12:
+            break
+        tn = e.get("type", {})
+        tn = tn.get("displayName") if isinstance(tn, dict) else ""
+        etid = e.get("teamId")
+        kind = mirror = None
+        if etid is not None and etid != scorer_tid and tn in _WON_OPP:
+            kind, mirror = _WON_OPP[tn], True
+        elif etid == scorer_tid and tn in _WON_OWN:
+            if tn == "Tackle" and e.get("outcomeType", {}).get("displayName") != "Successful":
+                continue
+            kind, mirror = _WON_OWN[tn], False
+        if kind:
+            x, y = ev_x, ev_y = e.get("x", 0), e.get("y", 0)
+            if mirror:
+                x, y = 100 - ev_x, 100 - ev_y
+            return {"x": round(x, 1), "y": round(y, 1), "kind": kind,
+                    "by": player_full_name(match_data, e.get("playerId"))}
+    return None
+
+
 def extract(match_data):
     """Build the detail dict for one match (assumes it has events)."""
     home, away = match_data.get("home", {}), match_data.get("away", {})
@@ -322,7 +362,7 @@ def extract(match_data):
                         gz = round(float(q.get("value")), 1)
                 except (TypeError, ValueError):
                     pass
-            shots.append({
+            shot_row = {
                 "team": side,
                 "x": round(ev.get("x", 0), 1),
                 "y": round(ev.get("y", 0), 1),
@@ -339,7 +379,14 @@ def extract(match_data):
                 "big": meta["big_chance"],
                 "gy": gy,
                 "gz": gz,
-            })
+            }
+            # Give a turnover / defensive-error goal (no passing build-up) a visible origin:
+            # where the scoring team won the ball. Skipped for penalties (no run of play).
+            if tname == "Goal" and not meta["penalty"]:
+                won = _ball_won_origin(events, _i, tid, match_data)
+                if won:
+                    shot_row["won"] = won
+            shots.append(shot_row)
             if tname == "Goal":
                 goals.append({
                     "team": side,
