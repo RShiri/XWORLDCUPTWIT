@@ -56,6 +56,14 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   shots.js,breaks.js,matches_detail/,database/}` **+** the raw match JSON. Needs `GIT_TOKEN` env var.
 - It only auto-pushes **generated** files. Edits to dashboard **source**
   (`app.js`, `match.js`, `styles.css`, `match.css`, `*.html`) need a **manual** `git push`.
+- `run_match` step 4b → `git_ops.push_argentina_portfolio()`: keeps the personal
+  portfolio's **Argentina Match Centre** (rshiri.github.io homepage) fresh. **No-op unless
+  the match involves Argentina.** For an Argentina game it clones `RShiri/RShiri.github.io`,
+  runs that repo's `assets/data/build_argentina.py --source <this repo>` (the single source
+  of truth — it ports `match.js buildGoalSequences`) to regenerate `assets/data/argentina/*`
+  from THIS repo's fresh `matches_detail/`, and pushes only that folder. Same `GIT_TOKEN`,
+  same non-fatal handling. Override the target via `PORTFOLIO_REPO`/`PORTFOLIO_BRANCH`/
+  `PORTFOLIO_TEAM`. Skips (with a warning) if the clone lacks the generator.
 - The render hook `_refresh_web_dashboard_db()` (renderer.py, runs on EVERY render)
   regenerates ALL dashboard data LOCALLY: the match-detail JS **and** `build_data.py`,
   `build_players.py`, `build_shots.py`, `build_database.py` (CSVs + sqlite + manifest),
