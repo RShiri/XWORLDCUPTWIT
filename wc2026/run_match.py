@@ -46,7 +46,7 @@ if hasattr(sys.stderr, "reconfigure"):
 from wc2026.scraper     import (fetch_and_save, fotmob_fetch_wc_matches,
                                 schedule_team_names, schedule_lookup_by_teams)
 from wc2026.renderer    import render_wc_dashboard, output_filename
-from wc2026.git_ops     import push_png_to_xworldcuptwit, push_match_update
+from wc2026.git_ops     import push_png_to_xworldcuptwit, push_match_update, push_argentina_portfolio
 from wc2026._runlock    import scrape_lock
 from wc2026.knockout_resolve import resolve_fixture, find_fotmob_id_by_teams
 
@@ -340,6 +340,13 @@ def run_match(
             log.info("Match update pushed (PNG + site) → %s", raw_url)
         except Exception as exc:
             log.error("Git push failed (continuing): %s", exc)
+
+        # 4b. Refresh the personal-portfolio Argentina Match Centre (non-fatal,
+        # and a no-op for any match that doesn't involve Argentina).
+        try:
+            push_argentina_portfolio(match_id)
+        except Exception as exc:
+            log.error("Portfolio push failed (continuing): %s", exc)
     else:
         log.info("Skipping Git push (--no-push).")
 

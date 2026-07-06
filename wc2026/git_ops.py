@@ -6,6 +6,8 @@ Uses subprocess + a GitHub PAT embedded in the remote URL for auth.
 from __future__ import annotations
 
 import os
+import sys
+import json
 import shutil
 import logging
 import subprocess
@@ -17,6 +19,13 @@ log = logging.getLogger(__name__)
 XWCTWIT_REPO   = os.environ.get("XWORLDCUPTWIT_REPO",   "https://github.com/RShiri/XWORLDCUPTWIT.git")
 XWCTWIT_BRANCH = os.environ.get("XWORLDCUPTWIT_BRANCH", "main")
 XWCTWIT_SUBDIR = os.environ.get("XWORLDCUPTWIT_SUBDIR", "WorldCup2026")  # PNG subfolder in the repo
+
+# The personal portfolio site (rshiri.github.io) hosts a native "Argentina Match
+# Centre". Its per-match data is regenerated from THIS repo's event stream and
+# pushed there so the portfolio auto-updates the same way the dashboard does.
+PORTFOLIO_REPO   = os.environ.get("PORTFOLIO_REPO",   "https://github.com/RShiri/RShiri.github.io.git")
+PORTFOLIO_BRANCH = os.environ.get("PORTFOLIO_BRANCH", "main")
+PORTFOLIO_TEAM   = os.environ.get("PORTFOLIO_TEAM",   "Argentina")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # repo root (holds wc2026_dashboard/, WorldCup2026/, wc2026/)
 
@@ -203,6 +212,64 @@ def push_match_update(png_path: str, match_id: str | None = None,
     raw_url = _raw_url(filename)
     log.info("Match update pushed → %s", raw_url)
     return raw_url
+
+
+def _match_involves(match_id: str, team: str) -> bool:
+    """True if the given team played in this match (checks the raw scraped JSON)."""
+    raw = PROJECT_ROOT / "wc2026" / "matches" / f"{match_id}.json"
+    try:
+        d = json.loads(raw.read_text(encoding="utf-8"))
+        return team in (d.get("home", {}).get("name"), d.get("away", {}).get("name"))
+    except (OSError, ValueError):
+        return False
+
+
+def push_argentina_portfolio(match_id: str) -> bool:
+    """
+    Regenerate the personal-portfolio Argentina Match Centre data from THIS
+    repo's event stream and push it to rshiri.github.io — so a new Argentina
+    game reaches the portfolio the same way it reaches the dashboard.
+
+    No-op (returns False) unless the just-scraped match involves PORTFOLIO_TEAM,
+    keeping every other match free. The generator (build_argentina.py) lives in
+    the portfolio repo and is the single source of truth; we run the copy in the
+    fresh clone against this repo's freshly-refreshed matches_detail/. Non-fatal:
+    any failure is logged and swallowed by the caller.
+    """
+    if not _match_involves(match_id, PORTFOLIO_TEAM):
+        log.info("Portfolio sync: %s does not involve %s — skipped.", match_id, PORTFOLIO_TEAM)
+        return False
+
+    repo_url = _authed_url(PORTFOLIO_REPO)
+    with tempfile.TemporaryDirectory(prefix="portfolio_") as tmpdir:
+        log.info("Cloning %s …", PORTFOLIO_REPO)
+        _run(["git", "clone", "--depth=1", "--branch", PORTFOLIO_BRANCH, repo_url, tmpdir])
+
+        gen = os.path.join(tmpdir, "assets", "data", "build_argentina.py")
+        if not os.path.exists(gen):
+            log.warning("Portfolio sync: %s not found in the clone (branch not merged yet?) — "
+                        "skipping.", "assets/data/build_argentina.py")
+            return False
+        out_dir = os.path.join(tmpdir, "assets", "data", "argentina")
+
+        log.info("Regenerating %s Match Centre data …", PORTFOLIO_TEAM)
+        _run([sys.executable, gen, "--source", str(PROJECT_ROOT), "--out", out_dir])
+
+        _run(["git", "config", "user.email", "wc2026bot@github.com"], cwd=tmpdir)
+        _run(["git", "config", "user.name",  "WC2026 Analytics Bot"],  cwd=tmpdir)
+        # Stage only the generated data (never a blind add — the repo has hand-edited source).
+        _run(["git", "add", "assets/data/argentina"], cwd=tmpdir)
+
+        msg = f"[portfolio] {PORTFOLIO_TEAM} match centre: {match_id}"
+        result = _run(["git", "commit", "-m", msg], cwd=tmpdir, check=False)
+        if result.returncode != 0 and "nothing to commit" in (result.stdout + result.stderr):
+            log.warning("Portfolio sync: nothing new to commit — already up to date.")
+            return False
+        log.info("Pushing portfolio update to %s / %s …", PORTFOLIO_REPO, PORTFOLIO_BRANCH)
+        _run(["git", "push", "origin", PORTFOLIO_BRANCH], cwd=tmpdir)
+
+    log.info("Portfolio Match Centre updated for %s.", match_id)
+    return True
 
 
 def _raw_url(filename: str) -> str:
