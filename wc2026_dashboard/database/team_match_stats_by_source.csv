@@ -69,8 +69,8 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,France,Paraguay,away,whoscored,1,0,75,15,9,614,87,2,1,2,11,54,,
 2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,Mexico,England,home,fotmob,2,3,67,20,5,453,92,2,0,2,14,43,1.88,12
 2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,England,Mexico,away,fotmob,3,2,33,6,5,244,80,3,0,3,7,57,1.61,2
-2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,Mexico,England,home,whoscored,2,3,50,20,12,0,0,0,0,0,0,0,,
-2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,England,Mexico,away,whoscored,3,2,50,6,5,0,0,0,0,0,0,0,,
+2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,Mexico,England,home,whoscored,2,3,67,20,12,535,86,2,0,2,14,44,,
+2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,England,Mexico,away,whoscored,3,2,33,6,5,265,78,3,0,10,7,56,,
 2026_07_06_1C2F_vs_2E2I,2026-07-05,Brazil,Norway,home,fotmob,1,2,34,14,4,330,85,5,4,3,7,51,2.75,5
 2026_07_06_1C2F_vs_2E2I,2026-07-05,Norway,Brazil,away,fotmob,2,1,66,9,5,679,91,3,2,4,6,49,0.84,5
 2026_07_06_1C2F_vs_2E2I,2026-07-05,Brazil,Norway,home,whoscored,1,2,34,14,8,364,82,4,3,4,7,41,,
