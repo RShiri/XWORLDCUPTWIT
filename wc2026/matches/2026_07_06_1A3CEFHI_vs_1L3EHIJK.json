@@ -782,8 +782,8 @@
       "minute": 48,
       "second": 0,
       "teamId": 6710,
-      "x": 71.7859223328,
-      "y": 30.72125,
+      "x": 73.8131067984,
+      "y": 30.316,
       "expandedMinute": 48,
       "period": {
         "displayName": "SecondHalf",
@@ -848,8 +848,8 @@
       "minute": 57,
       "second": 0,
       "teamId": 6710,
-      "x": 80.4577669912,
-      "y": 49.1854777047,
+      "x": 82.03446602,
+      "y": 49.3256050933,
       "expandedMinute": 57,
       "period": {
         "displayName": "SecondHalf",
@@ -1122,8 +1122,8 @@
       "minute": 90,
       "second": 0,
       "teamId": 6710,
-      "x": 82.03446602,
-      "y": 50.166369424900005,
+      "x": 82.1470873792,
+      "y": 48.695031844599995,
       "expandedMinute": 90,
       "period": {
         "displayName": "SecondHalf",
@@ -1155,8 +1155,8 @@
       "minute": 90,
       "second": 0,
       "teamId": 6710,
-      "x": 87.31911764680001,
-      "y": 30.279999999999998,
+      "x": 86.6749999996,
+      "y": 32.0175,
       "expandedMinute": 90,
       "period": {
         "displayName": "SecondHalf",
@@ -1188,8 +1188,8 @@
       "minute": 90,
       "second": 0,
       "teamId": 6710,
-      "x": 77.9800970888,
-      "y": 35.60125,
+      "x": 75.38980582720001,
+      "y": 32.856249999999996,
       "expandedMinute": 90,
       "period": {
         "displayName": "SecondHalf",
@@ -1247,6 +1247,72 @@
       "isTouch": true,
       "playerId": 292313,
       "_source": "fotmob"
+    },
+    {
+      "id": 2946439985.0,
+      "eventId": 2946439985,
+      "minute": 90,
+      "second": 0,
+      "teamId": 6710,
+      "x": 91.9,
+      "y": 18.674394906699998,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "MissedShots",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 292313,
+      "_source": "fotmob"
+    },
+    {
+      "id": 2946439989.0,
+      "eventId": 2946439989,
+      "minute": 90,
+      "second": 0,
+      "teamId": 6710,
+      "x": 96.0263157884,
+      "y": 20.84636943,
+      "expandedMinute": 90,
+      "period": {
+        "displayName": "SecondHalf",
+        "value": 2
+      },
+      "type": {
+        "displayName": "SavedShot",
+        "value": 13
+      },
+      "outcomeType": {
+        "displayName": "Unsuccessful",
+        "value": 0
+      },
+      "qualifiers": [
+        {
+          "type": {
+            "displayName": "RightFoot"
+          }
+        }
+      ],
+      "satisfiedEventsTypes": [],
+      "isTouch": true,
+      "playerId": 895954,
+      "_source": "fotmob"
     }
   ],
   "match_stats": {
@@ -1260,19 +1326,19 @@
     },
     "blocks": {
       "home": 0,
-      "away": 6
+      "away": 7
     },
     "clearances": {
-      "home": 11,
-      "away": 42
+      "home": 13,
+      "away": 49
     },
     "corners": {
-      "home": 9,
+      "home": 12,
       "away": 2
     },
     "duels_won": {
-      "home": 42,
-      "away": 58
+      "home": 43,
+      "away": 57
     },
     "fouls": {
       "home": 14,
@@ -1280,57 +1346,57 @@
     },
     "interceptions": {
       "home": 7,
-      "away": 3
+      "away": 4
     },
     "offsides": {
       "home": 1,
       "away": 0
     },
     "passes_accuracy": {
-      "home": 93,
-      "away": 81
+      "home": 92,
+      "away": 80
     },
     "passes_accurate": {
-      "home": 406,
-      "away": 192
+      "home": 418,
+      "away": 195
     },
     "passes_total": {
-      "home": 438,
-      "away": 236
+      "home": 453,
+      "away": 244
     },
     "possession": {
-      "home": 66,
-      "away": 34
+      "home": 67,
+      "away": 33
     },
     "saves": {
       "home": 2,
       "away": 3
     },
     "shots": {
-      "home": 18,
+      "home": 20,
       "away": 6
     },
     "shots_on_target": {
-      "home": 11,
+      "home": 12,
       "away": 5
     },
     "xg": {
-      "home": 1.73,
-      "away": 1.55
+      "home": 1.88,
+      "away": 1.61
     }
   },
   "stats_by_source": {
     "fotmob": {
       "possession": {
-        "home": 66,
-        "away": 34
+        "home": 67,
+        "away": 33
       },
       "xg": {
-        "home": 1.73,
-        "away": 1.55
+        "home": 1.88,
+        "away": 1.61
       },
       "shots": {
-        "home": 18,
+        "home": 20,
         "away": 6
       },
       "shots_on_target": {
@@ -1346,20 +1412,20 @@
         "away": 0
       },
       "passes_accurate": {
-        "home": 406,
-        "away": 192
+        "home": 418,
+        "away": 195
       },
       "passes_accuracy": {
-        "home": 93,
-        "away": 81
+        "home": 92,
+        "away": 80
       },
       "corners": {
-        "home": 9,
+        "home": 12,
         "away": 2
       },
       "passes_total": {
-        "home": 438,
-        "away": 236
+        "home": 453,
+        "away": 244
       },
       "offsides": {
         "home": 1,
@@ -1367,23 +1433,23 @@
       },
       "interceptions": {
         "home": 7,
-        "away": 3
+        "away": 4
       },
       "blocks": {
         "home": 0,
-        "away": 6
+        "away": 7
       },
       "clearances": {
-        "home": 11,
-        "away": 42
+        "home": 13,
+        "away": 49
       },
       "saves": {
         "home": 2,
         "away": 3
       },
       "duels_won": {
-        "home": 42,
-        "away": 58
+        "home": 43,
+        "away": 57
       },
       "fouls": {
         "home": 14,
@@ -1392,11 +1458,11 @@
     },
     "whoscored": {
       "shots": {
-        "home": 18,
+        "home": 20,
         "away": 6
       },
       "shots_on_target": {
-        "home": 11,
+        "home": 12,
         "away": 5
       },
       "saves": {
@@ -1491,7 +1557,7 @@
     "1084981": "Noni Madueke",
     "540088": "Ollie Watkins"
   },
-  "_scraped_at": "2026-07-06T03:02:30.430239+00:00",
+  "_scraped_at": "2026-07-06T15:01:50.530397+00:00",
   "_sources": [
     "fotmob"
   ]

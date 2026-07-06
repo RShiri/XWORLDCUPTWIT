@@ -179,7 +179,7 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_04_2A2B_vs_1F2C,2026-07-04,Morocco,Canada,away,3,0,55,5,4,506,83,3,1,6,14,53,1.01
 2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,Paraguay,France,home,0,1,24,5,1,209,54,0,0,8,13,47,0.16
 2026_07_05_1E3ABCDF_vs_1I3CDFGH,2026-07-04,France,Paraguay,away,1,0,76,15,9,614,90,2,1,2,11,53,1.57
-2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,Mexico,England,home,2,3,66,18,11,438,93,2,0,2,14,42,1.74
-2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,England,Mexico,away,3,2,34,6,5,236,81,3,0,3,7,58,1.18
+2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,Mexico,England,home,2,3,67,20,12,453,92,2,0,2,14,43,1.88
+2026_07_06_1A3CEFHI_vs_1L3EHIJK,2026-07-06,England,Mexico,away,3,2,33,6,5,244,80,3,0,3,7,57,1.21
 2026_07_06_1C2F_vs_2E2I,2026-07-05,Brazil,Norway,home,1,2,34,14,8,364,85,5,4,4,7,51,2.69
 2026_07_06_1C2F_vs_2E2I,2026-07-05,Norway,Brazil,away,2,1,66,9,6,709,91,3,2,7,6,49,1.06
