@@ -299,7 +299,47 @@ _TOUCH_TYPES = {"Pass", "BallTouch", "TakeOn", "Tackle", "Interception", "BallRe
 # defender's losing header duel on the very cross that gets scored looks like a touch a moment
 # before the goal and wipes out the entire delivery/build-up.
 _DUEL_TYPES = {"Aerial", "Challenge", "Tackle"}
+# Ambiguous 50/50-loose-ball types only — a half-clearance or stray touch that stays in a
+# crowded area. Deliberately EXCLUDES Save, Interception, Tackle, and Dispossessed: those
+# are decisive defensive actions (the opponent actually won or stopped the ball), and a
+# quick regain right after one of them is normal, not a sign the touch wasn't real — a
+# keeper Save followed by the scoring team netting the rebound a moment later is the
+# definition of a rebound goal, and must stay a hard build-up boundary or every rebound
+# would wrongly chain back into whatever preceded the original shot.
+_LOOSE_BALL_TYPES = {"Clearance", "BallTouch"}
 _BUILDUP_CAP = 120  # seconds; sane ceiling on how far back a reconstructed build-up can reach
+_REGAIN_GAP = 2.0  # seconds; how quickly the scoring team must win a loose ball back for an
+                    # opponent touch to be treated as noise rather than a real turnover
+
+
+def _regained_quickly(events, k, scorer_tid, p0, goal_idx):
+    """True if the scoring team touches the ball again within _REGAIN_GAP seconds after
+    events[k] — i.e. events[k] was a contested loose ball (a block, half-clearance, or
+    stray touch in a goalmouth scramble) that never actually left the danger area, not a
+    clean turnover. Without this, a defender's half-clearance that bounces straight back
+    counts as a fresh opponent possession and chops a live scramble off the build-up, even
+    though the ball never settled with them. The goal event itself never counts as a
+    "regain" — a touch immediately (≤2s) before the shot is a deflection/block the shot
+    came off, not noise, and must stay a hard boundary the same as a keeper's Save (a
+    rebound goal, just via BallTouch/Clearance instead of Save). Only counts real touch
+    events (_TOUCH_TYPES) — a CornerAwarded sharing the scorer's team ID right after a
+    clearance means the ball went out for a corner (a genuine dead-ball stoppage), not
+    that they already have it back."""
+    tk = (events[k].get("minute") or 0) * 60 + (events[k].get("second") or 0)
+    for j in range(k + 1, min(k + 6, len(events))):
+        e2 = events[j]
+        pj = e2.get("period", {})
+        pj = pj.get("value") if isinstance(pj, dict) else pj
+        if pj != p0:
+            break
+        tj = (e2.get("minute") or 0) * 60 + (e2.get("second") or 0)
+        if tj - tk > _REGAIN_GAP:
+            break
+        tn2 = e2.get("type", {})
+        tn2 = tn2.get("displayName") if isinstance(tn2, dict) else ""
+        if j != goal_idx and e2.get("teamId") == scorer_tid and tn2 in _TOUCH_TYPES:
+            return True
+    return False
 
 
 def _buildup_window(events, goal_idx, scorer_tid):
@@ -327,6 +367,8 @@ def _buildup_window(events, goal_idx, scorer_tid):
         if e.get("teamId") is None or e.get("teamId") == scorer_tid or tn not in _TOUCH_TYPES:
             continue
         if tn in _DUEL_TYPES and e.get("outcomeType", {}).get("displayName") != "Successful":
+            continue
+        if tn in _LOOSE_BALL_TYPES and _regained_quickly(events, k, scorer_tid, pk, goal_idx):
             continue
         return round(t0 - tk, 1)
     return _BUILDUP_CAP
