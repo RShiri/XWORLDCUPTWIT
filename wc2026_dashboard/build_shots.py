@@ -49,7 +49,7 @@ def main():
             if not info:
                 continue
             side, team, opp = info
-            xg, meta = shot_xg(ev)
+            xg, meta = shot_xg(ev, d)
             shots.append({
                 "t": team, "o": opp, "h": side == "home",
                 "x": round(ev.get("x", 0), 1), "y": round(ev.get("y", 0), 1),

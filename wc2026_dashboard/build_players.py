@@ -62,7 +62,7 @@ def _player_shot_xg(match_data):
         pid = ev.get("playerId")
         if pid is None:
             continue
-        xg, _ = shot_xg(ev)
+        xg, _ = shot_xg(ev, match_data)
         out[pid] = out.get(pid, 0.0) + xg
     return out
 
@@ -99,7 +99,7 @@ def _player_creation(match_data):
         elif tname in SHOT_TYPES and not ev.get("isOwnGoal"):
             kp = pending.get(tid)
             if kp and (i - kp[1]) <= 4 and kp[0] != ev.get("playerId"):
-                xg, _ = shot_xg(ev)
+                xg, _ = shot_xg(ev, match_data)
                 xa[kp[0]] = xa.get(kp[0], 0.0) + xg
             pending.pop(tid, None)
     return prog, xa
@@ -148,7 +148,7 @@ def _defense_shotlist(match_data):
         if tn not in SHOT_TYPES or is_shootout(ev):
             continue
         is_own = bool(ev.get("isOwnGoal"))
-        xg = 0.0 if is_own else shot_xg(ev)[0]
+        xg = 0.0 if is_own else shot_xg(ev, match_data)[0]
         out.append((ev.get("teamId"), ev.get("minute", 0), xg, tn == "Goal", is_own))
     return out
 

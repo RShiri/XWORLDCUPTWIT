@@ -153,7 +153,7 @@ def window_stats(ev, t0, t1, home_id, away_id):
         typ = (e.get("type") or {}).get("displayName")
         x = e.get("x") or 0
         if typ in SHOT_TYPES and not is_shootout(e) and not is_own_goal(e):
-            s[tid]["xg"] += shot_xg(e)[0]
+            s[tid]["xg"] += shot_xg(e, {"events": ev})[0]
         if typ == "Goal":
             credit = tid
             if is_own_goal(e):

@@ -15,12 +15,27 @@ import sys
 import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from xg_core.score import XGScorer
-from xg_core.xa_score import XAScorer
+from xg_core_v3 import XGScorer, XAScorer   # v3: 23-feature xG + retrained pass-level xA
 
 _LEAGUE = "WorldCup"         # per-league calibration shift inside the artifacts
 _XG = XGScorer()
 _XA = XAScorer()
+
+# The v3 xG uses each shot's assisting pass, so it must be scored per MATCH, not per
+# isolated shot. We compute the whole match's {eventId: xG} once via iter_match_xg and
+# cache it (keyed by matchId), so shot_xg(ev, match_data) is a cheap lookup. Penalties,
+# own goals and shootout kicks are handled inside iter_match_xg.
+_XG_MAP = {"key": None, "map": {}}
+
+
+def _match_xg_map(match_data):
+    key = match_data.get("matchId")
+    if key is None:
+        key = id(match_data.get("events"))
+    if _XG_MAP["key"] != key:
+        _XG_MAP["key"] = key
+        _XG_MAP["map"] = dict(_XG.iter_match_xg(match_data, league=_LEAGUE))
+    return _XG_MAP["map"]
 
 SCALE_Y = 0.80
 SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
@@ -103,18 +118,28 @@ def extract_qualifiers(ev):
     return body, situation, zone, big_chance, quals
 
 
-def shot_xg(ev):
-    """Return (xg, meta) for a single shot event using the renderer's model."""
-    x_sb = ws_to_sb_x(ev.get("x", 0))
-    y_sb = 80 - ev.get("y", 0) * SCALE_Y
+def shot_xg(ev, match_data=None):
+    """Return (xg, meta) for a single shot event.
+
+    Pass the whole ``match_data`` to get the calibrated v3 (23-feature) value —
+    it's looked up from the per-match map, which needs the shot's assisting pass.
+    Without ``match_data`` it falls back to the scalar path (assist-context
+    features zeroed); kept for backward compatibility so no caller can crash."""
     body, situation, zone, big_chance, quals = extract_qualifiers(ev)
     is_penalty = situation == "Penalty"
+    meta = dict(body=body, situation=situation, zone=zone,
+                big_chance=big_chance, penalty=is_penalty)
+    if match_data is not None:
+        xg = _match_xg_map(match_data).get(ev.get("eventId"))
+        if xg is not None:
+            return xg, meta
+    x_sb = ws_to_sb_x(ev.get("x", 0))
+    y_sb = 80 - ev.get("y", 0) * SCALE_Y
     if is_penalty:
         x_sb, y_sb = 108.0, 40.0
     xg = estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
                      assisted=ev.get("relatedPlayerId") is not None)
-    return xg, dict(body=body, situation=situation, zone=zone,
-                    big_chance=big_chance, penalty=is_penalty)
+    return xg, meta
 
 
 def team_xg_from_events(match_data):
@@ -134,7 +159,7 @@ def team_xg_from_events(match_data):
         tid = ev.get("teamId")
         if tid not in totals:
             continue
-        xg, _ = shot_xg(ev)
+        xg, _ = shot_xg(ev, match_data)
         totals[tid] += xg
         n += 1
     if n == 0:

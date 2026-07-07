@@ -348,7 +348,7 @@ def extract(match_data):
                     "y": round(100 - ev.get("y", 0), 1),
                 })
                 continue
-            xg, meta = shot_xg(ev)
+            xg, meta = shot_xg(ev, match_data)
             # goal-mouth landing spot (where the shot crossed/was aimed at the goal line):
             # GoalMouthY = across the goal, GoalMouthZ = height. Powers the on-target
             # "where in the goal" map. Absent on some events → null.

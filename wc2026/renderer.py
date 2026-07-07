@@ -52,7 +52,7 @@ def _ws_to_sb_x(ws_x: float) -> float:
 # the website report identical xG. Canonical xg_core lives in XLALIGA; this
 # repo carries a vendored copy. Retrain there, re-copy here.
 sys.path.insert(0, str(_REPO_ROOT))
-from xg_core.score import XGScorer
+from xg_core_v3 import XGScorer   # v3: 23-feature xG (event-based scoring)
 
 _XG_SCORER = XGScorer()
 _XG_LEAGUE = "WorldCup"
@@ -136,6 +136,8 @@ _SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
 def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
     tid = _team_id_for_name(match_data, team_name)
     rows = []
+    # v3 xG per shot (assist-context aware), keyed by eventId, computed once per match
+    xg_map = dict(_XG_SCORER.iter_match_xg(match_data, league=_XG_LEAGUE))
     for ev in match_data.get("events", []):
         if ev.get("teamId") != tid:
             continue
@@ -173,8 +175,9 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
             "is_goal":      type_name == "Goal",
             "is_on_target": type_name in ("SavedShot", "Goal"),
             "xG":           (xg_stored if xg_stored is not None
-                             else _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
-                                               assisted=ev.get("relatedPlayerId") is not None)),
+                             else xg_map.get(ev.get("eventId"),
+                                  _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
+                                               assisted=ev.get("relatedPlayerId") is not None))),
             "body_part":    body,
             "situation":    situation,
             "zone":         zone,
