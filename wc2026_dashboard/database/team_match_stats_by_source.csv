@@ -79,6 +79,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Spain,Portugal,away,fotmob,1,0,56,15,6,531,88,3,2,2,13,44,1.77,7
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Portugal,Spain,home,whoscored,0,1,45,10,5,465,82,1,1,8,9,54,,
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Spain,Portugal,away,whoscored,1,0,55,15,9,573,86,3,2,5,13,46,,
+2026_07_07_1B3EFGIJ_vs_1K3DEIJL,2026-07-07,Switzerland,Colombia,home,fotmob,0,0,53,7,2,626,87,0,0,3,22,46,0.35,3
+2026_07_07_1B3EFGIJ_vs_1K3DEIJL,2026-07-07,Colombia,Switzerland,away,fotmob,0,0,47,15,3,548,83,2,2,2,21,54,1.03,7
+2026_07_07_1B3EFGIJ_vs_1K3DEIJL,2026-07-07,Switzerland,Colombia,home,whoscored,0,0,53,7,3,666,85,0,0,7,22,45,,
+2026_07_07_1B3EFGIJ_vs_1K3DEIJL,2026-07-07,Colombia,Switzerland,away,whoscored,0,0,47,15,7,586,81,2,2,3,21,55,,
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,fotmob,1,4,56,7,2,527,87,0,0,3,11,47,0.67,3
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,fotmob,4,1,44,15,7,410,81,4,2,1,9,53,2.15,5
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,whoscored,1,4,56,7,2,570,86,0,0,7,11,48,,
