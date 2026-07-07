@@ -293,6 +293,12 @@ _TOUCH_TYPES = {"Pass", "BallTouch", "TakeOn", "Tackle", "Interception", "BallRe
                  "Clearance", "Aerial", "KeeperPickup", "Save", "Claim", "Punch",
                  "KeeperSweeper", "Dispossessed", "Challenge", "ShieldBallOpp", "BlockedPass",
                  "Error"}
+# Duel-type events where BOTH sides get an event but only the winner actually has the ball —
+# an "Unsuccessful" Aerial/Challenge/Tackle from the opponent means THEY lost the contest (the
+# scoring team kept/won the ball), so it must not count as an opponent touch. Without this, a
+# defender's losing header duel on the very cross that gets scored looks like a touch a moment
+# before the goal and wipes out the entire delivery/build-up.
+_DUEL_TYPES = {"Aerial", "Challenge", "Tackle"}
 _BUILDUP_CAP = 120  # seconds; sane ceiling on how far back a reconstructed build-up can reach
 
 
@@ -318,8 +324,11 @@ def _buildup_window(events, goal_idx, scorer_tid):
             break
         tn = e.get("type", {})
         tn = tn.get("displayName") if isinstance(tn, dict) else ""
-        if e.get("teamId") is not None and e.get("teamId") != scorer_tid and tn in _TOUCH_TYPES:
-            return round(t0 - tk, 1)
+        if e.get("teamId") is None or e.get("teamId") == scorer_tid or tn not in _TOUCH_TYPES:
+            continue
+        if tn in _DUEL_TYPES and e.get("outcomeType", {}).get("displayName") != "Successful":
+            continue
+        return round(t0 - tk, 1)
     return _BUILDUP_CAP
 
 
