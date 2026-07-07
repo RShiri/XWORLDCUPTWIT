@@ -83,3 +83,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,fotmob,4,1,44,15,7,410,81,4,2,1,9,53,2.15,5
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,whoscored,1,4,56,7,2,570,86,0,0,7,11,48,,
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,whoscored,4,1,44,15,11,443,78,4,2,1,9,52,,
+2026_07_07_1J2H_vs_2D2G,2026-07-07,Argentina,Egypt,home,fotmob,3,2,64,19,7,602,90,6,4,0,13,53,2.8,6
+2026_07_07_1J2H_vs_2D2G,2026-07-07,Egypt,Argentina,away,fotmob,2,3,36,5,2,349,83,2,0,4,11,47,0.98,1
+2026_07_07_1J2H_vs_2D2G,2026-07-07,Argentina,Egypt,home,whoscored,3,2,63,19,11,648,88,6,4,0,13,58,,
+2026_07_07_1J2H_vs_2D2G,2026-07-07,Egypt,Argentina,away,whoscored,2,3,37,5,2,385,82,2,0,8,11,42,,

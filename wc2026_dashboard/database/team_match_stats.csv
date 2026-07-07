@@ -187,3 +187,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Spain,Portugal,away,1,0,56,15,9,573,88,3,2,5,13,44,1.77
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,1,4,56,7,2,570,87,0,0,7,11,47,0.6
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,4,1,44,15,11,443,81,4,2,1,9,53,2.42
+2026_07_07_1J2H_vs_2D2G,2026-07-07,Argentina,Egypt,home,3,2,64,19,11,648,90,6,4,0,13,53,3.06
+2026_07_07_1J2H_vs_2D2G,2026-07-07,Egypt,Argentina,away,2,3,36,5,2,385,83,2,0,8,11,47,1.02
