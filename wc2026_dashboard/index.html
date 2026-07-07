@@ -156,17 +156,21 @@
       <p>So if a team racks up <b>2.5 xG but scores 1</b>, they created good chances and wasted them (or met a great
          keeper). Score <b>3 from 1.0 xG</b> and they finished brilliantly — or got lucky. Over a few games xG tends to
          predict results better than the scoreline alone, which is why it's the go-to "who deserved it" number.</p>
-      <p><b>Where does our xG come from? We built the model ourselves.</b> Every shot is scored by a
-         logistic-regression model trained on <b>11,830 real shots</b> — this World Cup plus the whole 2025/26
-         La Liga season — against what actually happened to them. It weighs the shot's <b>distance</b>, the
-         <b>angle the goal mouth opens up</b> from that spot, whether it was a <b>header</b>, an Opta
-         <b>big chance</b>, and the <b>situation</b> (open play, free kick, corner, set piece or fast break). A
-         per-competition finishing calibration then keeps summed xG in line with goals actually scored — World Cup
-         finishing runs hotter than league play, and the calibration accounts for it (penalties are fixed at 0.76).
-         The same model runs across our World Cup, La Liga and FC Barcelona dashboards, so the numbers compare
-         cleanly everywhere.</p>
-      <p class="explainer-note">Note: where official xG was also published, the canonical number shown averages it
-         with our model; games with model-only xG are tagged <span class="est-tag">est</span>.</p>
+      <p><b>Where does our xG come from? We built the model ourselves.</b> Every shot is scored by a blend
+         of logistic regression and gradient boosting, trained on <b>~78,000 real shots</b> — four seasons
+         each of La Liga and the Premier League, plus this World Cup. It weighs the shot's <b>distance</b>,
+         the <b>angle the goal mouth opens up</b> from that spot, whether it was a <b>header</b>, an Opta
+         <b>big chance</b>, the <b>situation</b> (open play, free kick, corner, set piece, fast break), and
+         context like a <b>one-on-one</b>, a <b>cross</b> or a <b>through ball</b>. A per-competition
+         calibration keeps summed xG in line with goals actually scored — World Cup finishing runs hotter
+         than league play, and the calibration accounts for it (penalties are fixed at 0.79).</p>
+      <p><b>Expected assists (xA)</b> works the same way for passes: every completed pass is scored on how
+         likely it was to directly set up a goal, trained on <b>2.4 million real passes</b>. A teammate's
+         shot doesn't need to actually go in for the pass to earn credit — a great through-ball that gets
+         wasted still counts, the same way a great chance still counts as good xG even if it's missed.</p>
+      <p class="explainer-note">Where official xG is also published (e.g. FotMob), the Matches list shows
+         both side by side — <b>Model</b> and <b>FotMob</b> — rather than blending them, so you can compare
+         directly.</p>
     </div>
 
     <div class="stats-strip" id="xgStats"></div>
