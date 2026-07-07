@@ -185,3 +185,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_06_1C2F_vs_2E2I,2026-07-05,Norway,Brazil,away,2,1,66,9,6,709,91,3,2,7,6,49,1.06
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Portugal,Spain,home,0,1,44,10,5,465,84,1,1,8,9,56,0.7
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Spain,Portugal,away,1,0,56,15,9,573,88,3,2,5,13,44,1.66
+2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,1,4,56,7,2,570,87,0,0,7,11,47,0.57
+2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,4,1,44,15,11,443,81,4,2,1,9,53,2.39

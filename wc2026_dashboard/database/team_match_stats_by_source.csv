@@ -79,3 +79,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Spain,Portugal,away,fotmob,1,0,56,15,6,531,88,3,2,2,13,44,1.77,7
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Portugal,Spain,home,whoscored,0,1,45,10,5,465,82,1,1,8,9,54,,
 2026_07_06_2K2L_vs_1H2J,2026-07-06,Spain,Portugal,away,whoscored,1,0,55,15,9,573,86,3,2,5,13,46,,
+2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,fotmob,1,4,56,7,2,527,87,0,0,3,11,47,0.67,3
+2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,fotmob,4,1,44,15,7,410,81,4,2,1,9,53,2.15,5
+2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,USA,Belgium,home,whoscored,1,4,56,7,2,570,86,0,0,7,11,48,,
+2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,whoscored,4,1,44,15,11,443,78,4,2,1,9,52,,
