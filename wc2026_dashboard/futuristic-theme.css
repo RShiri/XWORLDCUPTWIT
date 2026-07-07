@@ -1,0 +1,275 @@
+/* ============================================================
+   "Telemetry" theme — a broadcast-HUD skin for the WC2026 dashboard.
+   Loads AFTER styles.css; the original styles.css / index.html are
+   untouched. Alternate skin served only from index_futuristic.html.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #050611;
+  --bg-2: #0b0d1f;
+  --card: rgba(15, 16, 34, 0.72);
+  --card-2: rgba(21, 20, 46, 0.8);
+  --line: rgba(140, 150, 210, 0.16);
+  --line-strong: rgba(140, 150, 210, 0.32);
+  --text: #eef0fb;
+  --muted: #8b8fb8;
+  --accent: #33e893;
+  --accent-soft: rgba(51, 232, 147, 0.14);
+  --accent-2: #9d6bff;
+  --accent-2-soft: rgba(157, 107, 255, 0.14);
+  --warn: #ffc857;
+  --bad: #ff5c7a;
+  --good: #33e893;
+  --shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+  --radius: 10px;
+  --font-display: 'Rajdhani', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+}
+
+* { font-variant-numeric: tabular-nums; }
+
+body {
+  font-family: var(--font-body);
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 68px),
+    repeating-linear-gradient(25deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 68px),
+    radial-gradient(1100px 620px at 8% -10%, rgba(157, 107, 255, 0.16), transparent 55%),
+    radial-gradient(1000px 640px at 96% 0%, rgba(51, 232, 147, 0.10), transparent 52%),
+    radial-gradient(800px 500px at 50% 115%, rgba(255, 200, 87, 0.05), transparent 55%),
+    var(--bg) fixed;
+  position: relative;
+}
+
+h1, h2, h3, .brand .title, nav.tabs button,
+.stat .v, .champ-name, table thead th, .bk-side .sc,
+.power-table td.pwr b, .db-match-head .score, .match-row .score,
+td.pts, .third-table td.rk, .pos {
+  font-family: var(--font-display);
+}
+
+.section-head h2 {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-size: 21px;
+  position: relative;
+  padding-left: 16px;
+}
+.section-head h2::before {
+  content: '';
+  position: absolute; left: 0; top: 3px; bottom: 3px; width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+}
+.card h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.3px; }
+
+/* ---- corner-cut geometry: the recurring signature shape ---- */
+.card, .stat, .group-card, .third-card, .data-card, .db-match,
+.match-row, .bk-match, .explainer, .insight, .champ-badge, .pred-card {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  background-color: var(--card);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  position: relative;
+}
+/* the cut corners need their own diagonal hairline since clip-path removes the border there */
+.card::after, .stat::after, .group-card::after, .third-card::after, .data-card::after,
+.db-match::after, .match-row::after, .bk-match::after, .explainer::after, .insight::after,
+.champ-badge::after, .pred-card::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(135deg, transparent calc(100% - 15px), var(--line-strong) calc(100% - 15px), var(--line-strong) calc(100% - 14px), transparent calc(100% - 14px)),
+    linear-gradient(-45deg, transparent calc(100% - 15px), var(--line-strong) calc(100% - 15px), var(--line-strong) calc(100% - 14px), transparent calc(100% - 14px));
+}
+.group-card, .third-card, .data-card, .db-match, .bk-match { overflow: visible; }
+
+/* corner HUD brackets on the primary cards only, so it reads as a signature, not noise */
+.card {
+  padding: 18px 20px;
+}
+.card.full-card::before, .explainer::before {
+  content: '';
+  position: absolute; top: 10px; left: 10px; width: 11px; height: 11px;
+  border-top: 2px solid var(--accent); border-left: 2px solid var(--accent);
+  opacity: 0.7;
+}
+
+/* ---- header ---- */
+header.site {
+  background: rgba(5, 6, 17, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line-strong);
+  position: sticky;
+  overflow: hidden;
+}
+header.site::before {
+  content: '';
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), var(--warn), transparent);
+  background-size: 200% 100%;
+  animation: scanline 7s linear infinite;
+}
+@keyframes scanline { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+
+.header-inner { position: relative; z-index: 1; }
+.brand { position: relative; }
+.brand::before {
+  content: '26';
+  position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+  font-family: var(--font-display); font-weight: 700; font-size: 58px;
+  color: var(--accent-2); opacity: 0.06; letter-spacing: -2px; pointer-events: none;
+}
+.brand .title {
+  font-weight: 700; font-size: 22px; letter-spacing: 0.3px; text-transform: uppercase;
+}
+.brand .title span {
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(51, 232, 147, 0.55);
+}
+.brand .sub {
+  font-family: var(--font-body); font-size: 11px; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px;
+}
+.brand .sub::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent); animation: pulse-dot 1.8s ease-in-out infinite;
+  flex: 0 0 auto;
+}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* nav tabs: compact segmented HUD control */
+nav.tabs { padding: 3px; background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: 11px; gap: 2px; }
+nav.tabs button {
+  font-family: var(--font-display); font-weight: 600; letter-spacing: 0.3px;
+  text-transform: uppercase; font-size: 12.5px; border-radius: 8px;
+  position: relative; border: 1px solid transparent;
+}
+nav.tabs button:hover { color: var(--text); background: rgba(255,255,255,0.04); border-color: var(--line); }
+nav.tabs button.active {
+  color: #04150c;
+  background: linear-gradient(120deg, var(--accent), #7ef7bd);
+  box-shadow: 0 0 0 1px rgba(51,232,147,0.4), 0 0 16px rgba(51, 232, 147, 0.4);
+}
+
+.skin-toggle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  border-color: var(--line-strong);
+  background: rgba(157, 107, 255, 0.06);
+}
+.skin-toggle:hover {
+  color: #fff;
+  border-color: var(--accent-2);
+  background: rgba(157, 107, 255, 0.14);
+  box-shadow: 0 0 14px rgba(157, 107, 255, 0.3);
+}
+
+/* ---- stat tiles ---- */
+.stats-strip { gap: 12px; }
+.stat { padding: 14px 16px 12px; }
+.stat .v {
+  font-size: 30px; font-weight: 700; letter-spacing: 0.2px;
+  background: linear-gradient(135deg, var(--text), var(--muted));
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+}
+.stat .v.accent { background: linear-gradient(135deg, #7ef7bd, var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.stat .v.blue { background: linear-gradient(135deg, #c9adff, var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.stat .k {
+  font-size: 10px; letter-spacing: 0.9px; color: var(--muted); display: flex; align-items: center; gap: 5px;
+}
+.stat .k::before { content: ''; width: 8px; height: 1px; background: var(--line-strong); }
+
+/* ---- group cards: hex badge for the group letter ---- */
+.group-card h3 {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted);
+}
+.group-card h3 b {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 24px; color: #04150c; font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+table thead th { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.7px; font-size: 11px; }
+tbody tr.qual td:first-child { box-shadow: inset 3px 0 0 var(--accent), -8px 0 16px -8px rgba(51,232,147,0.45); }
+tbody tr.qual2 td:first-child { box-shadow: inset 3px 0 0 var(--accent-2), -8px 0 16px -8px rgba(157,107,255,0.45); }
+td.pts { color: var(--accent); font-weight: 700; }
+
+/* ---- controls ---- */
+.controls input, .controls select, .so-controls select, .so-controls input {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 8px;
+  font-family: var(--font-body);
+}
+.controls input:focus, .controls select:focus,
+.so-controls select:focus, .so-controls input:focus {
+  border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-2-soft);
+}
+.seg { background: rgba(255,255,255,0.02); border-color: var(--line); }
+.seg-btn { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.3px; }
+.seg-btn.active { background: linear-gradient(120deg, var(--accent), #7ef7bd); color: #04150c; box-shadow: 0 0 14px rgba(51,232,147,0.4); }
+
+/* ---- legend / tags ---- */
+.legend i.q1 { background: var(--accent); box-shadow: 0 0 8px rgba(51,232,147,0.6); }
+.legend i.q2 { background: var(--accent-2); box-shadow: 0 0 8px rgba(157,107,255,0.6); }
+.est-tag, .xg-cmp { color: var(--warn); border-color: var(--warn); font-family: var(--font-display); }
+.ko-stage { color: var(--accent-2); border-color: var(--line); font-family: var(--font-display); }
+
+/* ---- champion hero ---- */
+.champ-badge {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), transparent),
+    radial-gradient(420px 220px at 50% -20%, rgba(51,232,147,0.16), var(--card-2));
+}
+.champ-name {
+  font-weight: 700; font-size: 30px; letter-spacing: 0.5px; text-transform: uppercase;
+  background: linear-gradient(135deg, var(--warn), #ffe3a3);
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+}
+.champ-sub { font-family: var(--font-display); letter-spacing: 1.5px; }
+
+.pwr-bar span, .corr-scale-fill {
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  box-shadow: 0 0 8px rgba(51, 232, 147, 0.4);
+}
+.power-table tr.champ-row td { background: rgba(255, 200, 87, 0.06); }
+.champ-star { color: var(--warn); }
+
+.data-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(51, 232, 147, 0.22), var(--shadow); }
+.data-card .dc-name { font-family: var(--font-display); font-weight: 700; }
+
+/* ---- bracket ---- */
+.bk-match.played { border-color: rgba(51,232,147,0.4); }
+.bk-side.win .sc { color: var(--accent); text-shadow: 0 0 6px rgba(51,232,147,0.5); }
+.bk-match { font-family: var(--font-body); }
+.bk-side .sc { font-size: 13px; }
+
+/* ---- misc polish ---- */
+.live-toast {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  color: #04150c; font-family: var(--font-display); font-weight: 700; letter-spacing: 0.4px;
+  box-shadow: 0 0 24px rgba(51, 232, 147, 0.45);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.tooltip {
+  background: rgba(8, 8, 20, 0.94); border-color: var(--line-strong);
+  box-shadow: 0 0 24px rgba(157, 107, 255, 0.2), var(--shadow);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+}
+::selection { background: rgba(157, 107, 255, 0.35); color: #fff; }
+::-webkit-scrollbar { height: 9px; width: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-2), var(--accent)); border-radius: 8px; }
+
+@media (max-width: 640px) {
+  .brand::before { display: none; }
+}
