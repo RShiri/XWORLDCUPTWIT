@@ -284,6 +284,45 @@ def _ball_won_origin(events, goal_idx, scorer_tid, match_data):
     return None
 
 
+# Event types that count as the OPPONENT having the ball — used to find the true start of
+# a goal's build-up (the moment the scoring team won it back), as opposed to a fixed
+# lookback clock. Excludes non-touch admin events (Foul, Card, Offside*, CornerAwarded,
+# substitutions, period markers) so a foul won mid-move (advantage played) doesn't cut the
+# build-up short.
+_TOUCH_TYPES = {"Pass", "BallTouch", "TakeOn", "Tackle", "Interception", "BallRecovery",
+                 "Clearance", "Aerial", "KeeperPickup", "Save", "Claim", "Punch",
+                 "KeeperSweeper", "Dispossessed", "Challenge", "ShieldBallOpp", "BlockedPass",
+                 "Error"}
+_BUILDUP_CAP = 120  # seconds; sane ceiling on how far back a reconstructed build-up can reach
+
+
+def _buildup_window(events, goal_idx, scorer_tid):
+    """Seconds to look back from the goal for the scoring team's passing build-up, bounded
+    by the last time the opponent actually touched the ball (not a fixed clock) — so a
+    patient, unbroken keep-ball move isn't truncated mid-sequence just because it ran past
+    an arbitrary lookback window, while a quick turnover doesn't drag in unrelated earlier
+    play. Stops at the start of the period (half-time is always a hard boundary) and is
+    capped at _BUILDUP_CAP so an exceptionally long spell still renders a bounded diagram."""
+    g = events[goal_idx]
+    t0 = (g.get("minute") or 0) * 60 + (g.get("second") or 0)
+    p0 = g.get("period", {})
+    p0 = p0.get("value") if isinstance(p0, dict) else p0
+    for k in range(goal_idx - 1, -1, -1):
+        e = events[k]
+        pk = e.get("period", {})
+        pk = pk.get("value") if isinstance(pk, dict) else pk
+        if pk != p0:
+            break
+        tk = (e.get("minute") or 0) * 60 + (e.get("second") or 0)
+        if t0 - tk > _BUILDUP_CAP:
+            break
+        tn = e.get("type", {})
+        tn = tn.get("displayName") if isinstance(tn, dict) else ""
+        if e.get("teamId") is not None and e.get("teamId") != scorer_tid and tn in _TOUCH_TYPES:
+            return round(t0 - tk, 1)
+    return _BUILDUP_CAP
+
+
 def extract(match_data):
     """Build the detail dict for one match (assumes it has events)."""
     home, away = match_data.get("home", {}), match_data.get("away", {})
@@ -383,6 +422,7 @@ def extract(match_data):
             # Give a turnover / defensive-error goal (no passing build-up) a visible origin:
             # where the scoring team won the ball. Skipped for penalties (no run of play).
             if tname == "Goal" and not meta["penalty"]:
+                shot_row["buildupWindow"] = _buildup_window(events, _i, tid)
                 won = _ball_won_origin(events, _i, tid, match_data)
                 if won:
                     shot_row["won"] = won

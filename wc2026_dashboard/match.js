@@ -1256,9 +1256,18 @@
     }
     var seqs = (D.shots || []).filter(function (s) { return s.goal; }).map(function (shot) {
       var T = agmT(shot);
-      var chain = ev.filter(function (e) { return e.team === shot.team && e.t <= T && e.t >= T - 35; });
+      // buildupWindow (build_match_details `_buildup_window`) bounds the lookback to when the
+      // OPPONENT last actually touched the ball, not a fixed clock — a patient, unbroken
+      // keep-ball move can run well past 35s (e.g. a 60s+ passing spell before a stoppage-time
+      // winner) without getting truncated. Falls back to 35 for older cached data. Within that
+      // window the chain is trusted to be one continuous spell, so gaps between actions (a
+      // held-up dribble/carry that isn't itself a logged event) get a generous 9s tolerance
+      // instead of the tighter cutoff a fixed-clock heuristic needed to avoid drifting into
+      // unrelated earlier play.
+      var win = shot.buildupWindow != null ? shot.buildupWindow : 35;
+      var chain = ev.filter(function (e) { return e.team === shot.team && e.t <= T && e.t >= T - win; });
       var seq = [];
-      for (var i = chain.length - 1; i >= 0; i--) { if (seq.length && seq[0].t - chain[i].t > 6) break; seq.unshift(chain[i]); }
+      for (var i = chain.length - 1; i >= 0; i--) { if (seq.length && seq[0].t - chain[i].t > 9) break; seq.unshift(chain[i]); }
       // Turnover / defensive-error goal: no same-team passing build-up. Show where the ball
       // was won (build_match_details `won`) as the move origin so the map isn't a lone node.
       if (!seq.length && shot.won) seq.push({ k: "won", team: shot.team, x: shot.won.x, y: shot.won.y, player: null, kind: shot.won.kind, by: shot.won.by });
