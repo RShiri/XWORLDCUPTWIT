@@ -274,12 +274,9 @@
     // Canonical xG = average of our model and FotMob when both exist (matches build_data).
     var cH = hasFot ? (mH + fx[0]) / 2 : mH;
     var cA = hasFot ? (mA + fx[1]) / 2 : mA;
-    var detailTxt = hasFot
-      ? '<span class="est">· avg of model ' + mH.toFixed(2) + "–" + mA.toFixed(2) +
-        " &amp; FotMob " + fx[0].toFixed(2) + "–" + fx[1].toFixed(2) + "</span>"
-      : '<span class="est">· model-estimated from ' + D.shots.length + " shots</span>";
-    xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + cH.toFixed(2) + "</b> — <b>" +
-      cA.toFixed(2) + "</b> " + detailTxt + "</div>";
+    var detailTxt = '<span class="est">· our model (from ' + D.shots.length + " shots)</span>";
+    xgTxt = '<div class="sb-xg">Expected goals (xG): <b>' + mH.toFixed(2) + "</b> — <b>" +
+      mA.toFixed(2) + "</b> " + detailTxt + "</div>";
 
     var goals = D.goals.map(function (g) {
       var as = g.assist ? '<span class="as">(' + esc(g.assist) + ")</span>" : "";
@@ -355,6 +352,10 @@
     var rows = STAT_DEFS.map(function (def) {
       var key = def[0];
       var pair = s[key] || [null, null];
+      // xG: show OUR model (event-derived from the shot dots), not the multi-source average
+      if (key === "xg" && D.shots.length) {
+        pair = [es.home.xg, es.away.xg];
+      }
       // fall back to event-derived numbers when the provider gave us nothing
       if (pair[0] == null && pair[1] == null && es.home[key] != null) {
         pair = [es.home[key], es.away[key]];

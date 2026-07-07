@@ -331,10 +331,14 @@
         if (m.png) links.push('<a class="open-match png" href="' + esc(m.png) +
           '" target="_blank" rel="noopener">PNG 🖼️</a>');
         var xgline = "";
-        if (m.xg_home != null) {
-          // Canonical xG = average of our model + FotMob when both exist (see build_data).
-          xgline = 'xG <b>' + m.xg_home.toFixed(2) + "</b> — <b>" + m.xg_away.toFixed(2) + "</b>";
-          if (m.xg_source === "avg") xgline += ' <span class="xg-cmp">avg</span>';
+        {
+          // Show our model xG and FotMob xG separately (no longer the blended average).
+          var xgparts = [];
+          if (m.model_xg_home != null)
+            xgparts.push('Model <b>' + m.model_xg_home.toFixed(2) + "</b>–<b>" + m.model_xg_away.toFixed(2) + "</b>");
+          if (m.fot_xg_home != null)
+            xgparts.push('FotMob <b>' + m.fot_xg_home.toFixed(2) + "</b>–<b>" + m.fot_xg_away.toFixed(2) + "</b>");
+          xgline = xgparts.join(' <span class="xg-cmp">·</span> ');
         }
         var meta = (xgline || links.length)
           ? '<div class="xgline">' + xgline + (xgline && links.length ? " &nbsp;·&nbsp; " : "") + links.join(" ") + "</div>"
