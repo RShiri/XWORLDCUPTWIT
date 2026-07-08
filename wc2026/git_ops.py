@@ -185,10 +185,14 @@ def push_match_update(png_path: str, match_id: str | None = None,
         _run(["git", "config", "user.email", "wc2026bot@github.com"], cwd=tmpdir)
         _run(["git", "config", "user.name",  "WC2026 Analytics Bot"],  cwd=tmpdir)
 
-        # 1. the infographic PNG
+        # 1. the infographic PNG (+ its dark-mode sibling when rendered)
         subdir_path = os.path.join(tmpdir, XWCTWIT_SUBDIR)
         os.makedirs(subdir_path, exist_ok=True)
         shutil.copy2(png_path, os.path.join(subdir_path, filename))
+        stem, ext = os.path.splitext(png_path)
+        dark_path = f"{stem}_dark{ext}"
+        if os.path.exists(dark_path):
+            shutil.copy2(dark_path, os.path.join(subdir_path, os.path.basename(dark_path)))
 
         # 2. the regenerated interactive-site outputs (NOT the hand-edited source)
         _copy_file_into(tmpdir, "wc2026_dashboard/data.js")

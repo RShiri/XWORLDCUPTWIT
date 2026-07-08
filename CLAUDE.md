@@ -20,6 +20,13 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 - One-shot per match: `py -m wc2026.run_match --fotmob-id <id>` (or `--from-file <json>`).
   Flags: `--no-push` (skip git), `--no-post` (skip WhatsApp). Scrapes FotMob + WhoScored
   → renders PNG → refreshes local dashboard data → **auto-deploys** to the live site.
+- **Infographic themes**: `renderer.render_wc_dashboard(..., theme="light"|"dark")` — the
+  palette lives in `_THEMES`/`set_theme()`. `run_match` renders the canonical light
+  `<id>.png` **plus** a night-mode `<id>_dark.png` (non-fatal if it fails); `git_ops`
+  pushes the dark sibling when present, and the Match Centre shows a "🌙 Dark PNG" button
+  when `png_dark` is set in the match detail (old matches without the file get no button —
+  backfill with `tools/render_all.py`, which renders both). Only the light render triggers
+  `_refresh_web_dashboard_db()` — a `<id>_dark` stem must never create a detail file.
 - Data sources merge per match JSON in `wc2026/matches/<id>.json`: FotMob = match
   stats/xG/venue; WhoScored = event stream (shots/passes/dribbles) + player ratings;
   SofaScore = stats/xG/lineups (no token).

@@ -572,8 +572,14 @@
       ? '<a class="png-btn" href="' + esc(D.png) + '" target="_blank" rel="noopener" download>' +
         '🖼️ Infographic PNG</a>'
       : "";
+    // Dark-mode variant of the same infographic (rendered since 2026-07; older
+    // matches without a _dark.png simply don't get the button).
+    var pngDarkBtn = D.png_dark
+      ? '<a class="png-btn" href="' + esc(D.png_dark) + '" target="_blank" rel="noopener" download>' +
+        '🌙 Dark PNG</a>'
+      : "";
 
-    return '<div class="match-top">' + pngBtn + "</div>" +
+    return '<div class="match-top">' + pngBtn + pngDarkBtn + "</div>" +
       '<div class="scoreboard"><div class="sb-main">' +
         '<div class="sb-team home"><span class="nm">' + esc(D.home.name) + "</span>" + logoImg(D.home.name) + "</div>" +
         '<div class="sb-score">' + (D.home.score == null ? "-" : D.home.score) + " : " +

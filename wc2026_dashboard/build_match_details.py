@@ -244,6 +244,11 @@ def find_png(match_id):
     return None
 
 
+def find_png_dark(match_id):
+    """Same as find_png but for the dark-mode variant (<id>_dark.png)."""
+    return find_png(match_id + "_dark")
+
+
 # Event types that mark the scoring team winning the ball just before a goal — used to
 # give a turnover / defensive-error goal (one with no passing build-up) a visible origin
 # on the All Goals Map. Opponent giveaways are stored in the opponent's frame, so their
@@ -597,6 +602,7 @@ def write_detail(match_data, match_id=None):
     detail = extract(match_data)
     detail["id"] = match_id
     detail["png"] = find_png(match_id)
+    detail["png_dark"] = find_png_dark(match_id)
     out = os.path.join(OUT_DIR, match_id + ".js")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("window.MATCH_DETAIL = ")

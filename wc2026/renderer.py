@@ -190,17 +190,84 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
         })
     return pd.DataFrame(rows)
 
-# ── Visual constants (white-canvas theme) ──────────────────────────────────
-CANVAS_BG       = "#ffffff"
-DIVIDER_CLR     = "#D3D3D3"
-TEXT_DARK       = "#111111"
-TEXT_MID        = "#555555"
-TEXT_LIGHT      = "#888888"
+# ── Visual constants (themable) ─────────────────────────────────────────────
+# Two palettes for the same layout: "light" is the classic white-canvas
+# infographic, "dark" is a night-mode variant matching the web dashboard's
+# colours. set_theme() rebinds the module-level names every draw helper reads,
+# so the whole figure follows whichever theme render_wc_dashboard() was given.
+_THEMES = {
+    "light": {
+        "CANVAS_BG":        "#ffffff",
+        "DIVIDER_CLR":      "#D3D3D3",
+        "TEXT_DARK":        "#111111",   # primary text
+        "TEXT_MID":         "#555555",
+        "TEXT_LIGHT":       "#888888",
+        "PITCH_WHITE":      "#f5f5f5",   # shot-map / final-third pitch surface
+        "PITCH_LINE_DARK":  "#888888",   # visible lines on that surface
+        "PITCH_FACE":       "#ffffff",   # lineup / pass-network pitch surface
+        "PITCH_EDGE":       "#c7c7c7",   # its line colour
+        "PANEL_BG":         "#f5f5f5",   # legend box fill (pass network)
+        "PANEL_BG_2":       "#eeeeee",   # legend box fill (shot map)
+        "PANEL_EDGE":       "#aaaaaa",
+        "ROW_BAND":         "#f7f7f7",   # stats-table zebra stripe
+        "NODE_FACE":        "#ffffff",   # pass-network node fill
+        "SHOT_EDGE":        "#666666",   # non-goal shot outline
+        "GOAL_EDGE":        "#ffffff",   # goal marker outline
+        "LEGEND_MARK_EDGE": "#444444",
+        "LABEL_BOX":        "#ffffff",   # final-third channel-count backdrop
+        "MID_GRID":         "#b9b9b9",   # win-prob 50% gridline
+        "GOLD":             "#c8881b",   # assist marker
+        "RATING_HIGH":      "#1a8a1a",
+        "RATING_GOOD":      "#5b9e1e",
+        "RATING_LOW":       "#cc4400",
+        "SUB_OFF":          "#cc4400",   # ↓min' subbed-off marker
+    },
+    "dark": {
+        "CANVAS_BG":        "#0b0f1a",
+        "DIVIDER_CLR":      "#2a3554",
+        "TEXT_DARK":        "#e8edf7",
+        "TEXT_MID":         "#aab4cf",
+        "TEXT_LIGHT":       "#8290b0",
+        "PITCH_WHITE":      "#121829",
+        "PITCH_LINE_DARK":  "#55617a",
+        "PITCH_FACE":       "#121829",
+        "PITCH_EDGE":       "#3a4666",
+        "PANEL_BG":         "#1b2440",
+        "PANEL_BG_2":       "#1b2440",
+        "PANEL_EDGE":       "#3a4666",
+        "ROW_BAND":         "#141b2e",
+        "NODE_FACE":        "#0b0f1a",
+        "SHOT_EDGE":        "#9aa5c0",
+        "GOAL_EDGE":        "#ffffff",
+        "LEGEND_MARK_EDGE": "#aab4cf",
+        "LABEL_BOX":        "#0b0f1a",
+        "MID_GRID":         "#55617a",
+        "GOLD":             "#ffc857",
+        "RATING_HIGH":      "#3ddc97",
+        "RATING_GOOD":      "#9bd54a",
+        "RATING_LOW":       "#ff7a4d",
+        "SUB_OFF":          "#ff7a4d",
+    },
+}
+
+THEME = "light"
 PITCH_GREEN     = "#2d572c"   # kept for backwards compat
 PITCH_LINE      = "#ffffff"
 PITCH_GREEN_LIGHT = "#3a6b38"
-PITCH_WHITE     = "#f5f5f5"   # clean white/off-white pitch surface
-PITCH_LINE_DARK = "#888888"   # visible lines on white pitch
+
+
+def set_theme(name: str) -> str:
+    """Switch the renderer palette ("light" / "dark"). Returns the previous theme."""
+    global THEME
+    if name not in _THEMES:
+        raise ValueError(f"Unknown renderer theme {name!r} (use 'light' or 'dark')")
+    prev = THEME
+    THEME = name
+    globals().update(_THEMES[name])
+    return prev
+
+
+set_theme("light")
 
 FONT_MAIN    = "DejaVu Sans"
 FONT_BOLD    = "DejaVu Sans"
@@ -223,6 +290,21 @@ def _contrasting_text(bg_hex: str) -> str:
     r, g, b = _hex_to_rgb(bg_hex)
     luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
     return "#ffffff" if luminance < 0.45 else "#111111"
+
+
+def _dark_safe_color(hex_color: str) -> str:
+    """Lift a near-black team colour so it stays visible on the dark canvas
+    (navy/black kits would otherwise melt into the background)."""
+    try:
+        r, g, b = _hex_to_rgb(hex_color)
+    except Exception:
+        return hex_color
+    lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    if lum >= 0.16:
+        return hex_color
+    t = 0.5  # blend halfway toward white
+    r, g, b = (c + (1 - c) * t for c in (r, g, b))
+    return f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
 
 
 def _load_logo(team_name: str, size: tuple[int, int] = (80, 80)):
@@ -512,8 +594,8 @@ def _draw_pass_network(ax: plt.Axes, match_data: dict,
     passes_between = passes_between.loc[passes_between["pass_count"] >= 3]
 
     # ── Draw pitch on the supplied axes ───────────────────────────────
-    pitch = VerticalPitch(pitch_type="statsbomb", pitch_color="#ffffff",
-                          line_color="#c7c7c7", linewidth=1.2)
+    pitch = VerticalPitch(pitch_type="statsbomb", pitch_color=PITCH_FACE,
+                          line_color=PITCH_EDGE, linewidth=1.2)
     pitch.draw(ax=ax)
     ax.set_facecolor(CANVAS_BG)
 
@@ -544,7 +626,7 @@ def _draw_pass_network(ax: plt.Axes, match_data: dict,
     if not avg_locs.empty:
         sizes = 180 + avg_locs["count"] * 22
         pitch.scatter(avg_locs.x, avg_locs.y, s=sizes,
-                      color="white", edgecolors=color_val, linewidth=2,
+                      color=NODE_FACE, edgecolors=color_val, linewidth=2,
                       alpha=1, ax=ax, zorder=2)
 
         for pid, row in avg_locs.iterrows():
@@ -571,7 +653,8 @@ def _draw_pass_network(ax: plt.Axes, match_data: dict,
         leg = ax.legend(handles=lw_handles, loc="lower right",
                         fontsize=10, title="Pass volume",
                         title_fontsize=11, framealpha=0.8,
-                        facecolor="#f5f5f5", edgecolor=DIVIDER_CLR)
+                        facecolor=PANEL_BG, edgecolor=DIVIDER_CLR,
+                        labelcolor=TEXT_DARK)
         leg.get_title().set_color(TEXT_MID)
 
     ax.set_title(f"{team_name} — Pass Network",
@@ -581,8 +664,8 @@ def _draw_pass_network(ax: plt.Axes, match_data: dict,
 
 def _draw_empty_pass_network(ax: plt.Axes, team_name: str,
                               color_val: str, reason: str = "") -> None:
-    pitch = VerticalPitch(pitch_type="statsbomb", pitch_color="#ffffff",
-                          line_color="#c7c7c7", linewidth=1.2)
+    pitch = VerticalPitch(pitch_type="statsbomb", pitch_color=PITCH_FACE,
+                          line_color=PITCH_EDGE, linewidth=1.2)
     pitch.draw(ax=ax)
     ax.set_facecolor(CANVAS_BG)
     ax.text(0.5, 0.5, reason or "No data",
@@ -716,7 +799,7 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
         if i % 2 == 0:
             bg = FancyBboxPatch((0.01, y_center - row_h * 0.45), 0.98, row_h * 0.9,
                                 boxstyle="round,pad=0.005",
-                                facecolor="#f7f7f7", edgecolor="none",
+                                facecolor=ROW_BAND, edgecolor="none",
                                 transform=ax.transAxes, zorder=0)
             ax.add_patch(bg)
 
@@ -775,7 +858,7 @@ def _draw_shot_map(ax: plt.Axes, match_data: dict,
 
     if df.empty:
         ax.text(0.5, 0.5, "No shots", ha="center", va="center",
-                fontsize=11, color="white", transform=ax.transAxes)
+                fontsize=11, color=TEXT_LIGHT, transform=ax.transAxes)
         ax.text(0.5, 0.97, f"{team_name} — Shot Map",
                 ha="center", va="top", fontsize=11, fontweight="bold", color=TEXT_DARK,
                 fontfamily=FONT_BOLD, transform=ax.transAxes, zorder=5)
@@ -794,7 +877,7 @@ def _draw_shot_map(ax: plt.Axes, match_data: dict,
         size       = max(size, 25)
 
         colour = color_val if is_goal else "none"
-        edge   = "white"  if is_goal else "#666666"
+        edge   = GOAL_EDGE if is_goal else SHOT_EDGE
         lw     = 2.0      if is_goal else 1.0
         marker = "o"
 
@@ -825,16 +908,16 @@ def _draw_shot_map(ax: plt.Axes, match_data: dict,
     # Mini legend
     legend_handles = [
         Line2D([0], [0], marker="o", color=PITCH_WHITE, markersize=10,
-               markerfacecolor=color_val, markeredgecolor="#444444",
+               markerfacecolor=color_val, markeredgecolor=LEGEND_MARK_EDGE,
                markeredgewidth=1.5, label="Goal"),
         Line2D([0], [0], marker="o", color=PITCH_WHITE, markersize=8,
-               markerfacecolor="none", markeredgecolor="#666666",
+               markerfacecolor="none", markeredgecolor=SHOT_EDGE,
                markeredgewidth=1.0, label="No Goal"),
     ]
     leg = ax.legend(handles=legend_handles, loc="lower left",
                     fontsize=11, framealpha=0.85,
-                    facecolor="#eeeeee", edgecolor="#aaaaaa",
-                    labelcolor="#111111")
+                    facecolor=PANEL_BG_2, edgecolor=PANEL_EDGE,
+                    labelcolor=TEXT_DARK)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -938,14 +1021,14 @@ def _draw_final_third_entries(ax: plt.Axes, match_data: dict,
     ac = _channel_counts(away_df)
 
     # Home channel bar — LEFT side (matches dashboard layout)
-    bbox_h_chan = dict(boxstyle="round,pad=0.2", facecolor="#ffffff", edgecolor="none", alpha=0.75)
+    bbox_h_chan = dict(boxstyle="round,pad=0.2", facecolor=LABEL_BOX, edgecolor="none", alpha=0.75)
     for i, (label, key) in enumerate([("LW", "L"), ("CTR", "C"), ("RW", "R")]):
         ax.text(2, 15 + i * 25, f"{label}: {hc[key]}",
                 ha="left", va="center", fontsize=12,
                 color=home_color, fontfamily=FONT_MAIN, fontweight="bold", zorder=5, bbox=bbox_h_chan)
 
     # Away channel bar — RIGHT side (matches dashboard layout)
-    bbox_a_chan = dict(boxstyle="round,pad=0.2", facecolor="#ffffff", edgecolor="none", alpha=0.75)
+    bbox_a_chan = dict(boxstyle="round,pad=0.2", facecolor=LABEL_BOX, edgecolor="none", alpha=0.75)
     for i, (label, key) in enumerate([("LW", "L"), ("CTR", "C"), ("RW", "R")]):
         ax.text(118, 15 + i * 25, f"{label}: {ac[key]}",
                 ha="right", va="center", fontsize=12,
@@ -1036,10 +1119,10 @@ def _short_player_name(p: dict) -> str:
 
 
 def _rating_color(r_val: float) -> str:
-    return ("#1a8a1a" if r_val >= 7.5 else
-            "#5b9e1e" if r_val >= 6.5 else
-            TEXT_MID  if r_val >= 6.0 else
-            "#cc4400")
+    return (RATING_HIGH if r_val >= 7.5 else
+            RATING_GOOD if r_val >= 6.5 else
+            TEXT_MID    if r_val >= 6.0 else
+            RATING_LOW)
 
 
 def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
@@ -1100,11 +1183,11 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
         if g:
             gtxt = "●" * g if g <= 3 else f"● x{g}"
             ax.text(goal_x, y, gtxt, ha="center", va="center",
-                    fontsize=10.2, color="#111111", transform=ax.transAxes)
+                    fontsize=10.2, color=TEXT_DARK, transform=ax.transAxes)
         if a:
             atxt = "A" if a == 1 else f"A{a}"
             ax.text(ast_x, y, atxt, ha="center", va="center",
-                    fontsize=10.4, fontweight="bold", color="#c8881b",
+                    fontsize=10.4, fontweight="bold", color=GOLD,
                     transform=ax.transAxes)
 
     def _rating(y, p, fs):
@@ -1135,7 +1218,7 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
                 fontsize=fs, color=TEXT_DARK, transform=ax.transAxes, clip_on=True)
         if pid in off_min:
             ax.text(min_x, y, f"↓{off_min[pid]}'", ha="center", va="center",
-                    fontsize=9.4, color="#cc4400", transform=ax.transAxes)
+                    fontsize=9.4, color=SUB_OFF, transform=ax.transAxes)
         _markers(y, pid)
         _rating(y, p, fs - 0.5)
         y -= row_h
@@ -1362,7 +1445,7 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
     ax.set_xticklabels(["" if (max_min - x) < 3 else f"{x}'" for x in xticks],
                        fontsize=11, color=TEXT_MID, fontfamily=FONT_MAIN)
     for yv in (0, 25, 50, 75, 100):
-        ax.axhline(yv, color=(DIVIDER_CLR if yv != 50 else "#b9b9b9"), linewidth=(0.7 if yv != 50 else 1.1), zorder=1)
+        ax.axhline(yv, color=(DIVIDER_CLR if yv != 50 else MID_GRID), linewidth=(0.7 if yv != 50 else 1.1), zorder=1)
     ax.axvline(45, color=DIVIDER_CLR, linewidth=1.0, linestyle=(0, (3, 3)), zorder=1)  # half-time
     ax.tick_params(length=0)
     for spine in ("top", "right"):
@@ -1520,7 +1603,8 @@ def _put_endpoint_crest(ax, max_min, y, pct, team_name, color):
         pass
 
 
-def render_wc_dashboard(match_data: dict, output_path: str) -> str:
+def render_wc_dashboard(match_data: dict, output_path: str,
+                        theme: str = "light") -> str:
     """
     Render the complete WC 2026 analytics dashboard as a high-resolution PNG.
 
@@ -1528,10 +1612,20 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
         match_data:   WhoScored-compatible dict with 'wc_metadata', 'home', 'away',
                       'events', and 'match_stats' keys.
         output_path:  Full path for the output .png file.
+        theme:        "light" (classic white canvas) or "dark" (night-mode
+                      variant, saved as the *_dark.png the Match Centre links).
 
     Returns:
         output_path on success.
     """
+    _prev_theme = set_theme(theme)
+    try:
+        return _render_wc_dashboard(match_data, output_path, theme)
+    finally:
+        set_theme(_prev_theme)
+
+
+def _render_wc_dashboard(match_data: dict, output_path: str, theme: str) -> str:
     home_d = match_data.get("home", {})
     away_d = match_data.get("away", {})
     home_name = home_d.get("name", "Home")
@@ -1558,6 +1652,9 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
 
     home_color = home_colors["primary"]
     away_color = away_colors["primary"]
+    if theme == "dark":
+        home_color = _dark_safe_color(home_color)
+        away_color = _dark_safe_color(away_color)
 
     log.info("Rendering dashboard: %s vs %s", home_name, away_name)
 
@@ -1638,9 +1735,12 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     # rebuild the interactive match page for it and regenerate the index data.js.
     # Never let this break a render. Name the match-centre detail after the OUTPUT
     # file (the slot-coded id for knockout games) so the PNG, the detail JS and the
-    # dashboard match id all line up.
-    _match_id = os.path.splitext(os.path.basename(output_path))[0]
-    _refresh_web_dashboard_db(match_data, _match_id)
+    # dashboard match id all line up. The dark variant is always a re-render of the
+    # same data right after the light one, and its "<id>_dark" stem would create a
+    # bogus matches_detail entry — so only the canonical light render refreshes.
+    if theme != "dark":
+        _match_id = os.path.splitext(os.path.basename(output_path))[0]
+        _refresh_web_dashboard_db(match_data, _match_id)
 
     return output_path
 
