@@ -1260,6 +1260,36 @@
       return { nodes: nodes, links: links, cutoff: cutoff };
     }
 
+    // Iterative overlap removal: push any two nodes whose circles intersect apart
+    // along the line between them (each moves half the overlap), a few passes, then
+    // clamp inside the pitch. Deterministic tie-break for exactly-coincident nodes.
+    function declusterNodes(items, iters, minX, maxX, minY, maxY, pad) {
+      for (var it = 0; it < iters; it++) {
+        var moved = false;
+        for (var i = 0; i < items.length; i++) {
+          for (var j = i + 1; j < items.length; j++) {
+            var a = items[i], b = items[j];
+            var dx = b.cx - a.cx, dy = b.cy - a.cy;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            var need = a.r + b.r + pad;
+            if (d < need) {
+              if (d < 1e-4) { dx = (i - j) || 1; dy = (i + 1); d = Math.sqrt(dx * dx + dy * dy); }
+              var ux = dx / d, uy = dy / d, sh = (need - d) / 2;
+              a.cx -= ux * sh; a.cy -= uy * sh;
+              b.cx += ux * sh; b.cy += uy * sh;
+              moved = true;
+            }
+          }
+        }
+        for (var m = 0; m < items.length; m++) {
+          var t = items[m];
+          t.cx = Math.max(minX + t.r, Math.min(maxX - t.r, t.cx));
+          t.cy = Math.max(minY + t.r, Math.min(maxY - t.r, t.cy));
+        }
+        if (!moved) break;
+      }
+    }
+
     function draw() {
       var net = compute();
       var col = state.side === "home" ? D.home.color : D.away.color;
@@ -1269,17 +1299,28 @@
       var maxLink = 1;
       Object.keys(net.links).forEach(function (k) { maxLink = Math.max(maxLink, net.links[k]); });
 
+      // Place each node at its average location (in SVG units), then nudge any
+      // that overlap apart so crowded players (same zone) stay readable. Both the
+      // pass lines and the nodes use these de-clustered positions.
+      var pos = {};
+      Object.keys(net.nodes).forEach(function (k) {
+        var nd = net.nodes[k];
+        pos[k] = { cx: tx(state.side, nd.x), cy: ty(state.side, nd.y),
+                   r: 1.6 + 2.6 * nd.passes / maxPasses };
+      });
+      declusterNodes(Object.keys(pos).map(function (k) { return pos[k]; }), 80, 0, PW, 0, PH, 0.5);
+
       var nLinks = 0;
       Object.keys(net.links).forEach(function (key) {
         var count = net.links[key];
         if (count < state.minLink) return;
         var parts = key.split("|");
-        var a = net.nodes[parts[0]], b = net.nodes[parts[1]];
+        var a = pos[parts[0]], b = pos[parts[1]];
         if (!a || !b) return;
         nLinks++;
         var ln = document.createElementNS(NS, "line");
-        ln.setAttribute("x1", tx(state.side, a.x).toFixed(2)); ln.setAttribute("y1", ty(state.side, a.y).toFixed(2));
-        ln.setAttribute("x2", tx(state.side, b.x).toFixed(2)); ln.setAttribute("y2", ty(state.side, b.y).toFixed(2));
+        ln.setAttribute("x1", a.cx.toFixed(2)); ln.setAttribute("y1", a.cy.toFixed(2));
+        ln.setAttribute("x2", b.cx.toFixed(2)); ln.setAttribute("y2", b.cy.toFixed(2));
         ln.setAttribute("stroke", col);
         ln.setAttribute("stroke-opacity", (0.25 + 0.6 * count / maxLink).toFixed(2));
         ln.setAttribute("stroke-width", (0.3 + 1.5 * count / maxLink).toFixed(2));
@@ -1293,8 +1334,7 @@
 
       Object.keys(net.nodes).forEach(function (k) {
         var nd = net.nodes[k];
-        var cx = tx(state.side, nd.x), cy = ty(state.side, nd.y);
-        var r = 1.6 + 2.6 * nd.passes / maxPasses;
+        var p = pos[k], cx = p.cx, cy = p.cy, r = p.r;
         var c = document.createElementNS(NS, "circle");
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
