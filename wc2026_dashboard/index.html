@@ -298,35 +298,47 @@
     <div class="section-head">
       <h2>Power Rank &amp; Knockout Predictions</h2>
       <p>A single <b>Power Index</b> for the 32 teams in the Round of 32, blending each side's
-         <b>pre-tournament FIFA ranking</b> with how they actually played in the group stage
-         (points won, goal difference and expected-goal difference). Those ratings then drive a
-         model that simulates every knockout tie — all the way to a predicted champion.</p>
+         <b>pre-tournament FIFA ranking</b> with how they've actually played — recency-weighted form,
+         finishing &amp; shot-stopping quality, and <b>squad quality</b> (best-XI average rating).
+         Those ratings then drive a model that simulates every knockout tie — all the way to a
+         predicted champion.</p>
     </div>
 
     <div class="explainer">
       <h3>How the Power Index &amp; predictions work</h3>
       <p>Every team starts from its <b>FIFA/Coca-Cola World Ranking</b> points (the 11&nbsp;June&nbsp;2026
-         list, the last update before kick-off). We then add a <b>form adjustment</b> of up to ±100 points
-         from the group stage: points per game, goal difference per game, and <b>xG difference</b> per game
-         (chance quality created minus allowed). The result is the <b>Power Index</b> below.</p>
+         list, the last update before kick-off). Three capped adjustments sit on top of that baseline:</p>
+      <p>1. <b>Form</b> (±100 pts) — points per game (group stage), plus goal difference and
+         <b>xG difference</b> per game computed across <i>every</i> match played so far, group and
+         knockout alike, with a recency weighting (half-life ~4 games) so a team's most recent
+         result counts for more than its opener. Folded into the same term: <b>finishing &amp;
+         shot-stopping quality</b> (±20 pts) — goals scored vs xG, and goals conceded vs xG
+         allowed — rewarding clinical finishing and last-ditch goalkeeping beyond raw chance volume.</p>
+      <p>2. <b>Squad</b> (±55 pts) — a "best XI" proxy: each team's 11 most-used players this
+         tournament (by minutes played), their match ratings averaged and minutes-weighted, compared
+         against the 48-team field average.</p>
       <p>For each knockout tie we turn the two teams' Power Index gap into a win probability with an
          Elo-style curve (a 100-point edge ≈ 64%, 200 ≈ 74%). The higher-rated side is projected to advance,
          with a likely scoreline derived from the same gap and each team's scoring form. Because it's a
          knockout, the model always picks a winner — level games are decided "on penalties" by the higher
-         Power Index. It's a deterministic projection, not a probability over every possible bracket: real
-         tournaments throw up upsets the favourites-advance path can't.</p>
+         Power Index. Once a tie is actually played, the real result replaces the projection and feeds
+         forward into the next round — this is a deterministic projection for what hasn't happened yet,
+         not a probability over every possible bracket: real tournaments throw up upsets the
+         favourites-advance path can't.</p>
       <p class="explainer-note">FIFA ranking source: the FIFA/Coca-Cola Men's World Ranking published
          11&nbsp;June&nbsp;2026 (Argentina 1st on 1877 pts). Points for the lowest-ranked sides are
-         approximate. Form &amp; xG come from this site's own scraped group-stage data.</p>
+         approximate. Form, xG, quality and squad ratings all come from this site's own scraped
+         match &amp; player data.</p>
     </div>
 
     <div class="stats-strip" id="predStats"></div>
 
     <div class="card full-card">
       <h3>Power Index — Round-of-32 teams</h3>
-      <p class="hint">Ranked by Power Index. <b>FIFA</b> = pre-tournament ranking points; <b>Form</b> = the
-         group-stage adjustment (＋ in-form, − underwhelming); <b>xGD/g</b> = expected goal difference per game.
-         The bar shows the Power Index relative to the field.</p>
+      <p class="hint">Ranked by Power Index. <b>FIFA</b> = pre-tournament ranking points; <b>xGD/g</b> =
+         recency-weighted expected goal difference per game; <b>Form</b> = the combined form + finishing/
+         shot-stopping quality adjustment (＋ in-form, − underwhelming); <b>Squad</b> = best-XI average
+         match rating and its adjustment vs the field. The bar shows the Power Index relative to the field.</p>
       <div class="table-scroll" id="powerTable"></div>
     </div>
 
