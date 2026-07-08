@@ -328,7 +328,9 @@
           : '<div class="score upcoming">vs</div>';
         var links = [];
         // The whole played-match row opens the Match Centre now, so no separate link.
-        if (m.png) links.push('<a class="open-match png" href="' + esc(m.png) +
+        // Prefer the dark infographic (matches the dark dashboard); fall back to light.
+        var mpng = m.png_dark || m.png;
+        if (mpng) links.push('<a class="open-match png" href="' + esc(mpng) +
           '" target="_blank" rel="noopener">PNG 🖼️</a>');
         var xgline = "";
         {
