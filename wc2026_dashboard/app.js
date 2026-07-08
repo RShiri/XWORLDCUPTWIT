@@ -1580,6 +1580,7 @@
       host.innerHTML = '<p class="hint">The Power Rank and predictions appear once all groups have finished and the Round of 32 is set.</p>';
       var rr = document.getElementById("predRounds"); if (rr) rr.innerHTML = "";
       var pc = document.getElementById("predChampion"); if (pc) pc.innerHTML = "";
+      var pk0 = document.getElementById("powerKOCard"); if (pk0) pk0.style.display = "none";
       return;
     }
 
@@ -1633,6 +1634,90 @@
 
     renderPredChampion(P);
     renderPredRounds(P);
+    renderPowerKO(list, P, K);
+  }
+
+  /* ---- Updated Power Index for Quarter-finalists and beyond ----
+     The Round-of-32 index above is frozen at "pedigree + group-stage form". Once the Round
+     of 16 is done we know who actually won knockout matches, so surviving teams get a second,
+     updated index: their Round-of-32 rating plus a bonus for each knockout win (bigger for a
+     later round and a wider margin, discounted if it took penalties). Rendered as a separate
+     table below the original so both views stay visible. */
+  var KO_ROUND_BASE = { R32: 16, R16: 22, QF: 28, SF: 34 };
+  var KO_ROUND_LABEL = { R32: "Round of 32", R16: "Round of 16", QF: "quarter-final", SF: "semi-final" };
+  function koRoundWin(m, team) {
+    var isHome = m.home === team;
+    if (m.hs === m.as) return isHome ? (m.hpen != null && m.hpen > m.apen) : (m.apen != null && m.apen > m.hpen);
+    return isHome ? m.hs > m.as : m.as > m.hs;
+  }
+  function koBonusFor(team, K) {
+    var bonus = 0, notes = [];
+    ["R32", "R16", "QF", "SF"].forEach(function (rd) {
+      (K.rounds[rd] || []).forEach(function (m) {
+        if (!m.played || m.hs == null || m.as == null) return;
+        if (m.home !== team && m.away !== team) return;
+        if (!koRoundWin(m, team)) return;
+        var isHome = m.home === team;
+        var gf = isHome ? m.hs : m.as, ga = isHome ? m.as : m.hs;
+        var opp = isHome ? m.away : m.home;
+        var pens = gf === ga;
+        var margin = Math.max(0, gf - ga);
+        bonus += KO_ROUND_BASE[rd] + Math.min(margin, 3) * 4 - (pens ? 6 : 0);
+        notes.push(opp + " " + gf + "–" + ga + (pens ? " (pens)" : "") + " in the " + KO_ROUND_LABEL[rd]);
+      });
+    });
+    return { bonus: bonus, notes: notes };
+  }
+  function renderPowerKO(list, P, K) {
+    var card = document.getElementById("powerKOCard"), host = document.getElementById("powerKOTable");
+    if (!card || !host) return;
+    // QF fixtures carry "Winner EF n" placeholders until the Round of 16 is actually played,
+    // so use the real bracket resolver (koSide, same as the calendar/bracket views) rather
+    // than the projection model — this table reports what happened, not what's predicted.
+    var teamSet = {};
+    var qfSet = K.rounds.QF && K.rounds.QF.length > 0 && K.rounds.QF.every(function (m) {
+      var s0 = koSide(K, m, 0), s1 = koSide(K, m, 1);
+      if (s0.team) teamSet[s0.team] = 1;
+      if (s1.team) teamSet[s1.team] = 1;
+      return !!(s0.team && s1.team);
+    });
+    if (!qfSet) { card.style.display = "none"; host.innerHTML = ""; return; }
+    card.style.display = "";
+
+    var oldRank = {};
+    list.forEach(function (p, i) { oldRank[p.team] = i + 1; });
+
+    var rows = Object.keys(teamSet).map(function (team) {
+      var base = powerRating(team), ko = koBonusFor(team, K);
+      return { team: team, base: base, ko: ko, rating: base.rating + ko.bonus };
+    }).sort(function (a, b) { return b.rating - a.rating; });
+    var maxR = rows[0].rating, minR = rows[rows.length - 1].rating, span = (maxR - minR) || 1;
+    var champ = P && P.champion;
+
+    var body = rows.map(function (p, i) {
+      var w = ((p.rating - minR) / span) * 100;
+      var old = oldRank[p.team];
+      var delta = old ? old - (i + 1) : 0;
+      var deltaTxt = delta > 0 ? "▲" + delta : delta < 0 ? "▼" + (-delta) : "–";
+      var deltaCls = delta > 0 ? "pos" : delta < 0 ? "neg" : "";
+      var explain = p.ko.notes.length
+        ? "Beat " + p.ko.notes.join(", then beat ") + " — knockout form adds +" +
+          Math.round(p.ko.bonus) + " to its Round-of-32 index of " + Math.round(p.base.rating) + "."
+        : "No completed knockout matches yet — index unchanged from the Round-of-32 table.";
+      return '<tr' + (champ === p.team ? ' class="champ-row"' : '') + '>' +
+        '<td class="rk">' + (i + 1) + "</td>" +
+        '<td class="team"><div class="team-cell">' + logoImg(p.team) + '<span class="nm">' + esc(p.team) +
+          (champ === p.team ? ' <span class="champ-star">★</span>' : '') + "</span></div></td>" +
+        '<td><span class="delta ' + deltaCls + '">' + deltaTxt + "</span></td>" +
+        '<td><span class="delta ' + (p.ko.bonus > 0 ? "pos" : "") + '">+' + Math.round(p.ko.bonus) + "</span></td>" +
+        '<td class="pwr"><div class="pwr-bar"><span style="width:' + w.toFixed(1) + '%"></span></div><b>' + Math.round(p.rating) + "</b></td>" +
+        '<td class="why">' + esc(explain) + "</td>" +
+        "</tr>";
+    }).join("");
+
+    host.innerHTML = '<table class="rank power-table power-table-ko"><thead><tr>' +
+      "<th>#</th><th class='team'>Team</th><th>Δ vs R32</th><th>KO bonus</th><th class='pwr'>Power Index</th><th>Why</th>" +
+      "</tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   function predSide(p, name, isWin) {
