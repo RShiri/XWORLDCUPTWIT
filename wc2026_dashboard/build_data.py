@@ -13,7 +13,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from xg_model import team_xg_from_events
-from build_match_details import find_png, is_match_file
+from build_match_details import find_png, find_png_dark, is_match_file
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
@@ -149,6 +149,7 @@ def load_matches():
             "fot_xg_home": fot_xg_home,
             "fot_xg_away": fot_xg_away,
             "png": find_png(mid),
+            "png_dark": find_png_dark(mid),
             "stats": stats,
             "statsBySource": stats_by_source,
             "sources": d.get("_sources", []),

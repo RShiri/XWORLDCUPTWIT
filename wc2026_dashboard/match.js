@@ -568,18 +568,20 @@
         esc(g.scorer) + (g.pen ? " (P)" : "") + (g.own ? " (OG)" : "") + " " + as + "</span>";
     }).join("");
 
-    var pngBtn = D.png
-      ? '<a class="png-btn" href="' + esc(D.png) + '" target="_blank" rel="noopener" download>' +
+    // The infographic matches the dark dashboard: the primary button opens the DARK render
+    // when one exists (older matches without a _dark.png fall back to the light file), and the
+    // light version is offered as a secondary option.
+    var pngPrimary = D.png_dark || D.png;
+    var pngBtn = pngPrimary
+      ? '<a class="png-btn" href="' + esc(pngPrimary) + '" target="_blank" rel="noopener" download>' +
         '🖼️ Infographic PNG</a>'
       : "";
-    // Dark-mode variant of the same infographic (rendered since 2026-07; older
-    // matches without a _dark.png simply don't get the button).
-    var pngDarkBtn = D.png_dark
-      ? '<a class="png-btn" href="' + esc(D.png_dark) + '" target="_blank" rel="noopener" download>' +
-        '🌙 Dark PNG</a>'
+    var pngLightBtn = (D.png_dark && D.png)
+      ? '<a class="png-btn png-btn-alt" href="' + esc(D.png) + '" target="_blank" rel="noopener" download>' +
+        '☀️ Light PNG</a>'
       : "";
 
-    return '<div class="match-top">' + pngBtn + pngDarkBtn + "</div>" +
+    return '<div class="match-top">' + pngBtn + pngLightBtn + "</div>" +
       '<div class="scoreboard"><div class="sb-main">' +
         '<div class="sb-team home"><span class="nm">' + esc(D.home.name) + "</span>" + logoImg(D.home.name) + "</div>" +
         '<div class="sb-score">' + (D.home.score == null ? "-" : D.home.score) + " : " +
