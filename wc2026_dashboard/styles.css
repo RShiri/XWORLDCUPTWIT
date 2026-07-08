@@ -602,6 +602,7 @@ code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4p
 .pwr-bar span { display: block; height: 100%; border-radius: 5px;
   background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
 .power-table tr.champ-row td { background: rgba(61, 220, 151, 0.08); }
+.power-table td.why { min-width: 260px; max-width: 420px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
 .champ-star { color: var(--accent); }
 
 /* champion hero */
