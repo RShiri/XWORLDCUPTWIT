@@ -35,6 +35,7 @@ from matplotlib.lines import Line2D
 from mplsoccer import Pitch, VerticalPitch
 
 from wc2026.team_colors import get_team_colors
+from wc2026.team_ratings import fifa_pts
 
 # ── Coordinate + shot helpers (inlined — renderer is self-contained) ────────
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -204,7 +205,7 @@ PITCH_LINE_DARK = "#888888"   # visible lines on white pitch
 FONT_MAIN    = "DejaVu Sans"
 FONT_BOLD    = "DejaVu Sans"
 
-FIG_W, FIG_H = 30, 17
+FIG_W, FIG_H = 30, 20   # extra height for the full-width win-probability timeline row
 FIG_DPI      = 200
 
 logging.basicConfig(level=logging.INFO, format="[WC2026] %(message)s")
@@ -1183,6 +1184,225 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
 # MAIN RENDER FUNCTION
 # ══════════════════════════════════════════════════════════════════════════
 
+def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away_color):
+    """Live win-probability timeline (mirrors the dashboard match.js buildWinProb).
+
+    Each side's line is seeded at kickoff from the FIFA-ranking gap, then re-estimated every
+    minute from the running score + live xG through a double-Poisson outcome model, converging
+    to the actual result by full time. Knockouts fold the draw 50/50 into the two team lines;
+    group games add a grey Draw line. An estimate, not a betting market."""
+    import math
+
+    meta = match_data.get("wc_metadata", {})
+    is_ko = not meta.get("group")
+
+    # ---- pull goals (minute + beneficiary side, own goals credited to the opponent) ----
+    home_id = _team_id_for_name(match_data, home_name)
+    away_id = _team_id_for_name(match_data, away_name)
+    goals = []  # (minute, "home"/"away")
+    last_min = 90
+    for ev in match_data.get("events", []):
+        _p = ev.get("period", {})
+        if isinstance(_p, dict) and (_p.get("value") == 5 or "Shoot" in (_p.get("displayName") or "")):
+            continue
+        m = ev.get("minute") or 0
+        if m > last_min:
+            last_min = m
+        if ev.get("type", {}).get("displayName", "") != "Goal":
+            continue
+        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        own = bool(ev.get("isOwnGoal") or "OwnGoal" in quals)
+        tid = ev.get("teamId")
+        side = "home" if tid == home_id else "away"
+        if own:  # own goal counts for the opponent
+            side = "away" if side == "home" else "home"
+        goals.append((m, side))
+    max_min = max(90, int(math.ceil(last_min / 5.0) * 5))
+
+    # ---- per-side cumulative xG over time (from the shared shot builder) ----
+    def shot_series(name):
+        df = build_shot_df(match_data, name)
+        if df is None or df.empty:
+            return []
+        return sorted([(float(r["minute"]), float(r["xG"])) for _, r in df.iterrows()])
+    sh = {"home": shot_series(home_name), "away": shot_series(away_name)}
+
+    def xg_up_to(side, t):
+        return sum(xg for mn, xg in sh[side] if mn <= t + 1e-9)
+
+    def goals_up_to(side, t):
+        return sum(1 for mn, s in goals if s == side and mn <= t + 1e-9)
+
+    # ---- model ----
+    HALF_MU, GOAL_PER_ELO, HFA, T0 = 1.35, 0.006, 0.10, 25.0
+    clamp = lambda v, lo, hi: max(lo, min(hi, v))
+
+    def poisson(k, lam):
+        f = 1
+        for i in range(2, k + 1):
+            f *= i
+        return math.exp(-lam) * (lam ** k) / f
+
+    def p3(mu_h, mu_a, c_h, c_a):
+        pw = pd = pl = 0.0
+        ph = [poisson(i, mu_h) for i in range(9)]
+        pa = [poisson(j, mu_a) for j in range(9)]
+        for i in range(9):
+            for j in range(9):
+                p = ph[i] * pa[j]
+                fh, fa = c_h + i, c_a + j
+                if fh > fa:
+                    pw += p
+                elif fh == fa:
+                    pd += p
+                else:
+                    pl += p
+        return pw, pd, pl
+
+    sup = GOAL_PER_ELO * (fifa_pts(home_name) - fifa_pts(away_name))
+    lam_h0 = clamp(HALF_MU + sup / 2 + HFA / 2, 0.15, 4)
+    lam_a0 = clamp(HALF_MU - sup / 2 - HFA / 2, 0.15, 4)
+    base_h, base_a = lam_h0 / 90.0, lam_a0 / 90.0
+
+    def wp_at(t):
+        r = max(0.0, max_min - t)
+        c_h, c_a = goals_up_to("home", t), goals_up_to("away", t)
+        xr_h = xg_up_to("home", t) / t if t > 0 else base_h
+        xr_a = xg_up_to("away", t) / t if t > 0 else base_a
+        w = t / (t + T0)
+        rate_h = (1 - w) * base_h + w * xr_h
+        rate_a = (1 - w) * base_a + w * xr_a
+        pw, pd, pl = p3(clamp(rate_h, 0, 10) * r, clamp(rate_a, 0, 10) * r, c_h, c_a)
+        if is_ko:
+            return (pw + pd / 2) * 100, (pl + pd / 2) * 100, 0.0
+        return pw * 100, pl * 100, pd * 100
+
+    goal_mins = {m for m, _ in goals}
+    times = []
+    for t in range(0, max_min + 1):
+        if t in goal_mins and t > 0:
+            times.append(t - 0.001)
+        times.append(float(t))
+    xs, yh, ya, yd = [], [], [], []
+    for tt in times:
+        h, a, d = wp_at(tt)
+        xs.append(tt); yh.append(h); ya.append(a); yd.append(d)
+
+    # ---- force the endpoint to the true result (level KO → shootout winner) ----
+    def _score(team_d):
+        scores = team_d.get("scores")
+        if isinstance(scores, dict) and scores.get("fulltime") is not None:
+            return scores["fulltime"]
+        s = team_d.get("score")
+        return s if s is not None else 0
+    hs = _score(match_data.get("home", {}))
+    as_ = _score(match_data.get("away", {}))
+    hpk = match_data.get("home", {}).get("penalty_score")
+    apk = match_data.get("away", {}).get("penalty_score")
+    if hs != as_:
+        fin_h = 100.0 if hs > as_ else 0.0
+    elif is_ko and hpk is not None and apk is not None:
+        fin_h = 100.0 if hpk > apk else 0.0
+    else:
+        fin_h = yh[-1]
+    fin_a = 100.0 - fin_h
+    if is_ko:
+        yh[-1], ya[-1] = fin_h, fin_a
+    fin_d = 0.0 if is_ko else yd[-1]
+
+    # ---- colours (blue/orange fallback for near-identical kits) ----
+    def _rgb(hx):
+        try:
+            return _hex_to_rgb(hx)
+        except Exception:
+            return None
+    ch, ca = _rgb(home_color), _rgb(away_color)
+    col_h, col_a = home_color, away_color
+    if ch and ca and math.dist([c * 255 for c in ch], [c * 255 for c in ca]) < 90:
+        col_h, col_a = "#4ea1ff", "#ff6a3d"
+    col_d = "#8a94ad"
+
+    # ---- draw ----
+    ax.set_facecolor(CANVAS_BG)
+    ax.set_xlim(0, max_min)
+    ax.set_ylim(0, 100)
+    ax.set_yticks([0, 25, 50, 75, 100])
+    ax.set_yticklabels(["0%", "25%", "50%", "75%", "100%"], fontsize=11, color=TEXT_MID, fontfamily=FONT_MAIN)
+    xticks = list(range(0, max_min + 1, 15))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([f"{x}'" for x in xticks], fontsize=11, color=TEXT_MID, fontfamily=FONT_MAIN)
+    for yv in (0, 25, 50, 75, 100):
+        ax.axhline(yv, color=(DIVIDER_CLR if yv != 50 else "#b9b9b9"), linewidth=(0.7 if yv != 50 else 1.1), zorder=1)
+    ax.axvline(45, color=DIVIDER_CLR, linewidth=1.0, linestyle=(0, (3, 3)), zorder=1)  # half-time
+    ax.tick_params(length=0)
+    for spine in ("top", "right"):
+        ax.spines[spine].set_visible(False)
+    for spine in ("left", "bottom"):
+        ax.spines[spine].set_color(DIVIDER_CLR)
+
+    if not is_ko:
+        ax.plot(xs, yd, color=col_d, linewidth=1.8, linestyle=(0, (5, 4)), alpha=0.85, zorder=2)
+    ax.plot(xs, ya, color=col_a, linewidth=2.6, zorder=3, solid_capstyle="round")
+    ax.plot(xs, yh, color=col_h, linewidth=2.6, zorder=4, solid_capstyle="round")
+
+    # goal markers on the beneficiary line
+    def val_at(ys, minute):
+        v = ys[0] if ys else 0
+        for i, tt in enumerate(xs):
+            if tt <= minute + 1e-9:
+                v = ys[i]
+            else:
+                break
+        return v
+    for m, side in goals:
+        ys = yh if side == "home" else ya
+        col = col_h if side == "home" else col_a
+        gy = val_at(ys, m)
+        # DejaVu Sans has no ⚽ glyph — mark goals with a ringed dot + a minute tick instead.
+        ax.scatter([m], [gy], s=150, color=col, edgecolors="#ffffff", linewidths=1.6, zorder=6)
+        ax.scatter([m], [gy], s=26, color="#ffffff", zorder=7)
+        ax.annotate(f"{m}'", (m, gy), textcoords="offset points", xytext=(0, 11),
+                    ha="center", va="bottom", fontsize=9.5, fontweight="bold",
+                    color=col, fontfamily=FONT_BOLD, zorder=7)
+
+    # crest + final-% endpoints (nudge apart if the two finals nearly coincide)
+    e_h, e_a = fin_h, fin_a
+    if abs(e_h - e_a) < 8:
+        mid = (fin_h + fin_a) / 2
+        if fin_h >= fin_a:
+            e_h, e_a = mid + 4, mid - 4
+        else:
+            e_h, e_a = mid - 4, mid + 4
+    for name, col, ev in ((home_name, col_h, e_h), (away_name, col_a, e_a)):
+        _put_endpoint_crest(ax, max_min, ev, name, col)
+
+    # title + subtitle (panel convention: ax.text in axes coords)
+    ax.text(0.5, 1.14, "W I N   P R O B A B I L I T Y", transform=ax.transAxes,
+            ha="center", va="bottom", fontsize=14, color=TEXT_MID, fontfamily=FONT_BOLD, fontweight="bold")
+    ax.text(0.5, 1.055, "Seeded from the FIFA-ranking gap, then updated each minute by the running score + live xG   ·   an estimate, not a betting market",
+            transform=ax.transAxes, ha="center", va="bottom", fontsize=9.5, color=TEXT_LIGHT, fontfamily=FONT_MAIN)
+
+
+def _put_endpoint_crest(ax, max_min, y, team_name, color):
+    """Place a small team crest + a final-% label at the right edge of the win-prob panel."""
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+    ax.text(max_min, y, f"  {int(round(y))}%", ha="left", va="center",
+            fontsize=13, fontweight="bold", color=color, fontfamily=FONT_BOLD, clip_on=False, zorder=8)
+    try:
+        logo_path = _REPO_ROOT / "team_logos" / "wc2026" / f"{team_name}.png"
+        if logo_path.exists():
+            img = plt.imread(str(logo_path))
+            # scale to a consistent ~52px crest regardless of the source resolution
+            target_px = 52.0
+            zoom = target_px / max(img.shape[0], img.shape[1])
+            im = OffsetImage(img, zoom=zoom)
+            ab = AnnotationBbox(im, (max_min, y), frameon=False, box_alignment=(1.15, 0.5),
+                                xycoords="data", clip_on=False, zorder=8)
+            ax.add_artist(ab)
+    except Exception:
+        pass
+
+
 def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     """
     Render the complete WC 2026 analytics dashboard as a high-resolution PNG.
@@ -1227,13 +1447,13 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
     # ── Figure & GridSpec ────────────────────────────────────────────
     fig = plt.figure(figsize=(FIG_W, FIG_H), facecolor=CANVAS_BG)
     gs  = GridSpec(
-        nrows=3, ncols=3,
+        nrows=4, ncols=3,
         figure=fig,
-        height_ratios=[1.35, 5.50, 5.00],
-        hspace=0.08,
+        height_ratios=[1.35, 5.50, 5.00, 2.85],
+        hspace=0.10,
         wspace=0.04,
         left=0.01, right=0.99,
-        top=0.98, bottom=0.01,
+        top=0.98, bottom=0.02,
     )
 
     # ── Header ──────────────────────────────────────────────────────
@@ -1280,6 +1500,14 @@ def render_wc_dashboard(match_data: dict, output_path: str) -> str:
         for spine in ax.spines.values():
             spine.set_color(DIVIDER_CLR)
             spine.set_linewidth(0.7)
+
+    # ── Win-probability timeline (full-width) ────────────────────────
+    # A blank top band (height_ratios[0]) reserves room for the panel title so it can't
+    # collide with the Final-Third caption above; side margins keep the crests un-clipped.
+    gs_wp = gs[3, :].subgridspec(2, 3, width_ratios=[0.6, 6.0, 0.6],
+                                 height_ratios=[0.22, 1.0], wspace=0, hspace=0)
+    ax_wp = fig.add_subplot(gs_wp[1, 1])
+    _draw_win_probability(ax_wp, match_data, home_name, home_color, away_name, away_color)
 
     # ── Save ─────────────────────────────────────────────────────────
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)

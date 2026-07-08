@@ -670,6 +670,7 @@
   // shows the latest results (the local dev server sends no-cache too).
   (function () {
     var v = Date.now();
+    document.write('<scr' + 'ipt src="ratings.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="shots.js?v=' + v + '"></scr' + 'ipt>');

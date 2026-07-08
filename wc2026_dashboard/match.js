@@ -137,6 +137,8 @@
     root.innerHTML = scoreboard(D) +
       (hasStats ? block("Match stats", "mv-stats") : "") +
       block("xG momentum", "mv-momentum") +
+      // Live win probability sits right under the xG race — both are minute-based timelines.
+      block("Win probability", "mv-winprob") +
       block("Shot map", "mv-shots") +
       // On-target shot map sits directly under the xG shot map.
       block("On-target shots", "mv-shots-ot") +
@@ -154,6 +156,7 @@
 
     if (hasStats) buildMatchStats(rec, D);
     buildMomentum(D);
+    buildWinProb(D);
     buildShots(D);
     buildOnTargetShots(D);
     buildPasses(D);
@@ -258,6 +261,168 @@
     });
     host.addEventListener("pointerleave", hideTip);
     // touch tap: caption line under the chart
+    host.addEventListener("click", function (e) {
+      if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); }
+    });
+  }
+
+  /* Live win probability — a betting-style "who wins?" timeline. Each side's line is seeded at
+     kickoff from the FIFA-ranking gap (the favourite starts higher), then re-estimated every
+     minute from the running score + live xG through a double-Poisson outcome model. It converges
+     to the actual result by full time (a level knockout resolves to the shootout winner).
+     Knockouts fold the draw 50/50 into the two team lines; group games add a grey Draw line. */
+  function buildWinProb(D) {
+    var host = document.getElementById("mv-winprob");
+    if (!host) return;
+    var shots = (D.shots || []).filter(function (s) { return s.min != null; });
+    if (!shots.length) { host.innerHTML = '<p class="hint">No shot data for the win-probability timeline.</p>'; return; }
+    function tm(s) { return (s.min || 0) + (s.sec || 0) / 60; }
+    shots = shots.slice().sort(function (a, b) { return tm(a) - tm(b); });
+    var lastMin = Math.max.apply(null, shots.map(function (s) { return s.min || 0; }));
+    (D.goals || []).forEach(function (g) { if (g.min > lastMin) lastMin = g.min; });
+    var maxMin = Math.max(90, Math.ceil(lastMin / 5) * 5);
+    var isKO = /round of|quarter|semi|final|3rd place|third place|play-?off/i.test(D.stage || "");
+
+    // ---- model constants ----
+    var HALF_MU = 1.35, GOAL_PER_ELO = 0.006, HFA = 0.10, T0 = 25;
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function poisson(k, lam) { var f = 1; for (var i = 2; i <= k; i++) f *= i; return Math.exp(-lam) * Math.pow(lam, k) / f; }
+    // double-Poisson over remaining goals, offset by the current score → P(final H/D/A)
+    function P3(muH, muA, cH, cA) {
+      var pW = 0, pD = 0, pL = 0;
+      for (var i = 0; i <= 8; i++) for (var j = 0; j <= 8; j++) {
+        var p = poisson(i, muH) * poisson(j, muA);
+        var fh = cH + i, fa = cA + j;
+        if (fh > fa) pW += p; else if (fh === fa) pD += p; else pL += p;
+      }
+      return [pW, pD, pL];
+    }
+    var FIFA = window.FIFA_PTS || {};
+    function fifa(name) { return FIFA[name] || 1400; }
+
+    // pre-match seed λ from the ranking gap
+    var sup = GOAL_PER_ELO * (fifa(D.home.name) - fifa(D.away.name));
+    var lamH0 = clamp(HALF_MU + sup / 2 + HFA / 2, 0.15, 4);
+    var lamA0 = clamp(HALF_MU - sup / 2 - HFA / 2, 0.15, 4);
+    var baseRateH = lamH0 / 90, baseRateA = lamA0 / 90;
+
+    // cumulative xG up to a given minute, per side
+    function xgUpTo(side, t) { var c = 0; for (var i = 0; i < shots.length; i++) { if (tm(shots[i]) <= t + 1e-9) { if (shots[i].team === side) c += shots[i].xg; } else break; } return c; }
+    function goalsUpTo(side, t) { var c = 0; (D.goals || []).forEach(function (g) { if (g.team === side && g.min <= t + 1e-9) c++; }); return c; }
+
+    // win-prob (home,away,draw) at minute t
+    function wpAt(t) {
+      var R = Math.max(0, maxMin - t);
+      var cH = goalsUpTo("home", t), cA = goalsUpTo("away", t);
+      var xgRH = t > 0 ? xgUpTo("home", t) / t : baseRateH;
+      var xgRA = t > 0 ? xgUpTo("away", t) / t : baseRateA;
+      var w = t / (t + T0);
+      var rateH = (1 - w) * baseRateH + w * xgRH, rateA = (1 - w) * baseRateA + w * xgRA;
+      var pr = P3(clamp(rateH, 0, 10) * R, clamp(rateA, 0, 10) * R, cH, cA);
+      var pW = pr[0], pD = pr[1], pL = pr[2];
+      if (isKO) return [(pW + pD / 2) * 100, (pL + pD / 2) * 100, 0];
+      return [pW * 100, pL * 100, pD * 100];
+    }
+
+    // sample every minute + a sharp kink either side of each goal minute
+    var goalMins = {};
+    (D.goals || []).forEach(function (g) { goalMins[g.min] = true; });
+    var times = [];
+    for (var t = 0; t <= maxMin; t++) {
+      if (goalMins[t] && t > 0) times.push(t - 0.001);
+      times.push(t);
+    }
+    var ptsH = [], ptsA = [], ptsD = [];
+    times.forEach(function (tt) { var wp = wpAt(tt); ptsH.push([tt, wp[0]]); ptsA.push([tt, wp[1]]); ptsD.push([tt, wp[2]]); });
+
+    // force the endpoint to the true result (level KO → shootout winner)
+    var finH, finA;
+    var hs = D.home.score, as = D.away.score;
+    if (hs != null && as != null && hs !== as) { finH = hs > as ? 100 : 0; finA = 100 - finH; }
+    else if (isKO && D.home.pens != null && D.away.pens != null) { finH = D.home.pens > D.away.pens ? 100 : 0; finA = 100 - finH; }
+    else { var lw = wpAt(maxMin); finH = lw[0]; finA = lw[1]; }
+    if (isKO) {
+      ptsH[ptsH.length - 1] = [maxMin, finH]; ptsA[ptsA.length - 1] = [maxMin, finA];
+    }
+    var finD = isKO ? 0 : ptsD[ptsD.length - 1][1];
+
+    // ---- colours (reuse the momentum blue/orange fallback for near-identical kits) ----
+    var colH = D.home.color || "#4ea1ff", colA = D.away.color || "#ff6a3d";
+    function hex(c) { var m = /^#?([0-9a-f]{6})$/i.exec(c || ""); if (!m) return null; var n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+    var ch = hex(colH), ca = hex(colA);
+    if (ch && ca && Math.sqrt(Math.pow(ch[0] - ca[0], 2) + Math.pow(ch[1] - ca[1], 2) + Math.pow(ch[2] - ca[2], 2)) < 90) {
+      colH = "#4ea1ff"; colA = "#ff6a3d";
+    }
+    var colD = "#8a94ad";
+
+    // ---- geometry (mirrors buildMomentum) ----
+    var W = 820, HT = 360, padL = 46, padR = 40, padT = 18, padB = 42;
+    var plotW = W - padL - padR, plotH = HT - padT - padB;
+    function sx(m) { return padL + plotW * m / maxMin; }
+    function sy(p) { return padT + plotH * (1 - p / 100); }
+    function linePath(pts) { var d = ""; pts.forEach(function (p, i) { d += (i ? " L " : "M ") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1); }); return d; }
+    function valAt(pts, minute) { var v = pts.length ? pts[0][1] : 0; for (var i = 0; i < pts.length; i++) { if (pts[i][0] <= minute + 1e-9) v = pts[i][1]; else break; } return v; }
+
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // y gridlines at 0/25/50/75/100 with a brighter 50% midline
+    [0, 25, 50, 75, 100].forEach(function (yv) {
+      var y = sy(yv);
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="' + (yv === 50 ? "#33405f" : "#1e2740") + '" stroke-width="' + (yv === 50 ? 1.3 : 1) + '"/>');
+      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + yv + '%</text>');
+    });
+    // x ticks every 15' + HT dashed line at 45
+    for (var xm = 0; xm <= maxMin; xm += 15) {
+      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
+    }
+    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#2c3656" stroke-width="1" stroke-dasharray="3 3"/>');
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Minute</text>');
+    // draw line (group only), then away, then home on top
+    if (!isKO) svg.push('<path d="' + linePath(ptsD) + '" fill="none" stroke="' + colD + '" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.85"/>');
+    svg.push('<path d="' + linePath(ptsA) + '" fill="none" stroke="' + colA + '" stroke-width="2.4"/>');
+    svg.push('<path d="' + linePath(ptsH) + '" fill="none" stroke="' + colH + '" stroke-width="2.4"/>');
+    // goal markers on the beneficiary side's line
+    (D.goals || []).forEach(function (g) {
+      var col = g.team === "home" ? colH : colA;
+      var pts = g.team === "home" ? ptsH : ptsA;
+      var gx = sx(g.min), gy = sy(valAt(pts, g.min));
+      var gName = g.team === "home" ? D.home.name : D.away.name;
+      var info = g.min + "' " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + " — " + gName;
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"></circle>');
+      svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" fill="' + col + '" font-size="11" text-anchor="middle">⚽</text>');
+    });
+    // crest + final-% endpoints (nudge apart if the two finals nearly coincide)
+    var yH = sy(finH), yA = sy(finA);
+    if (Math.abs(yH - yA) < 20) { var mid = (yH + yA) / 2; yH = yH <= yA ? mid - 10 : mid + 10; yA = yH <= yA ? mid + 10 : mid - 10; }
+    function crest(name, col, y, pct) {
+      var ex = sx(maxMin);
+      return '<image href="' + LOGO + encodeURIComponent(name) + '.png" x="' + (ex - 11).toFixed(1) + '" y="' + (y - 11).toFixed(1) + '" width="22" height="22"/>' +
+        '<text x="' + (ex - 15).toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="12.5" font-weight="bold" fill="' + col + '">' + Math.round(pct) + '%</text>';
+    }
+    svg.push(crest(D.home.name, colH, yH, finH));
+    svg.push(crest(D.away.name, colA, yA, finA));
+    svg.push("</svg>");
+
+    var legend = '<div class="mv-mom-legend">' +
+      '<span><i style="background:' + colH + '"></i>' + esc(D.home.name) + " — <b>" + Math.round(finH) + "%</b> win</span>" +
+      '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + Math.round(finA) + "%</b> win</span>" +
+      (isKO ? "" : '<span><i style="background:' + colD + '"></i>Draw — <b>' + Math.round(finD) + "%</b></span>") +
+      "</div>";
+    host.innerHTML = '<p class="hint">Live <b>win probability</b> — seeded at kickoff from the FIFA-ranking gap, then updated each minute by the running score and live xG. ' +
+      (isKO ? "A level knockout resolves to the shootout winner. " : "The grey line is the draw chance. ") +
+      '⚽ marks goals (tap one for the scorer). An estimate, not a betting market.</p>' +
+      '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend +
+      '<div class="chart-tip" id="mvWpTip"></div>';
+    var tip = document.getElementById("mvWpTip");
+    function isDot(el) { return el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info"); }
+    function wpHTML(info) {
+      var i = info.indexOf(" — "), a = i >= 0 ? info.slice(0, i) : info, bb = i >= 0 ? info.slice(i + 3) : "";
+      return '<div class="t-team">' + esc(a) + "</div>" + (bb ? '<div class="t-line">' + esc(bb) + "</div>" : "");
+    }
+    host.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      if (isDot(e.target)) showTip(e, wpHTML(e.target.getAttribute("data-info"))); else hideTip();
+    });
+    host.addEventListener("pointerleave", hideTip);
     host.addEventListener("click", function (e) {
       if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); }
     });

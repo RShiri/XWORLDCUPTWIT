@@ -1474,7 +1474,9 @@
   // FIFA/Coca-Cola Men's World Ranking points — 11 June 2026 edition (the last update before
   // kick-off; Argentina 1st on 1877). Top ~45 are the published values; a few of the lowest
   // debutants are approximated. This is the "class" half of the Power Index.
-  var FIFA_PTS = {
+  // Canonical copy now lives in ratings.js (window.FIFA_PTS), shared with the match-page
+  // Win-probability chart; the inline literal below is a fallback if that file fails to load.
+  var FIFA_PTS = window.FIFA_PTS || {
     "Argentina": 1877, "Spain": 1867, "France": 1862, "England": 1819, "Portugal": 1779, "Brazil": 1760,
     "Netherlands": 1751, "Belgium": 1740, "Morocco": 1736, "Germany": 1724, "Croatia": 1709, "Colombia": 1696,
     "Mexico": 1690, "Senegal": 1684, "Uruguay": 1679, "USA": 1665, "Japan": 1652, "Switzerland": 1648,
