@@ -1526,6 +1526,14 @@
     if (sf <= su) { su = sf; pens = true; }   // not a clear win on goals → tight game, penalties
     return { sf: sf, su: su, pens: pens };
   }
+  // If a tie has actually been played, its real result — not the model — is the truth.
+  function actualResult(m) {
+    if (!m || !m.played || m.hs == null || m.as == null) return null;
+    if (m.hs !== m.as) return { winner: m.hs > m.as ? m.home : m.away, loser: m.hs > m.as ? m.away : m.home };
+    if (m.hpen != null && m.apen != null && m.hpen !== m.apen)
+      return { winner: m.hpen > m.apen ? m.home : m.away, loser: m.hpen > m.apen ? m.away : m.home };
+    return null;
+  }
   function makePred(m, hName, aName) {
     var res = { m: m, home: hName, away: aName };
     if (hName && aName) {
@@ -1533,14 +1541,26 @@
       var pH = winProb(A.rating, B.rating);
       var fav = pH >= 0.5 ? A : B, dog = pH >= 0.5 ? B : A;
       res.A = A; res.B = B; res.pH = pH;
-      res.winner = fav.team; res.loser = dog.team;
       res.favProb = Math.max(pH, 1 - pH);
-      res.score = predictScore(fav, dog);
+      var real = actualResult(m);
+      if (real) {
+        // The tie already happened — report what did, don't second-guess it with the model.
+        res.actual = true;
+        res.winner = real.winner; res.loser = real.loser;
+        res.upset = fav.team !== real.winner;
+        var winIsHome = real.winner === m.home;
+        res.score = { sf: winIsHome ? m.hs : m.as, su: winIsHome ? m.as : m.hs, pens: m.hs === m.as };
+      } else {
+        res.winner = fav.team; res.loser = dog.team;
+        res.score = predictScore(fav, dog);
+      }
     }
     return res;
   }
 
-  // Walk the linked knockout tree, projecting each tie from the predicted winners feeding it.
+  // Walk the linked knockout tree. Already-played ties feed their REAL winner forward;
+  // only ties that haven't happened yet get projected from the Power Index model — so the
+  // predicted road (and champion) is always seeded by what's actually happened so far.
   function predictAll() {
     var K = buildKnockout();
     if (!K) return null;
@@ -1735,9 +1755,16 @@
     }
     var hWin = p.winner === p.home;
     var sc = p.score, scoreTxt = hWin ? (sc.sf + "–" + sc.su) : (sc.su + "–" + sc.sf);
-    var foot = "Predicted: <b>" + esc(p.winner) + "</b> " + Math.round(p.favProb * 100) + "% · " +
-      scoreTxt + (sc.pens ? " (pens)" : "");
-    return '<div class="pred-card">' + head +
+    var foot;
+    if (p.actual) {
+      foot = "Result: <b>" + esc(p.winner) + "</b> " + scoreTxt + (sc.pens ? " (pens)" : "") +
+        (p.upset ? ' <span class="pc-upset">upset</span> — model favoured ' + esc(p.loser) +
+          " (" + Math.round(p.favProb * 100) + "%)" : "");
+    } else {
+      foot = "Predicted: <b>" + esc(p.winner) + "</b> " + Math.round(p.favProb * 100) + "% · " +
+        scoreTxt + (sc.pens ? " (pens)" : "");
+    }
+    return '<div class="pred-card' + (p.actual ? " pc-actual" : "") + '">' + head +
       predSide(p, p.home, hWin) + predSide(p, p.away, !hWin) +
       '<div class="pc-foot">' + foot + "</div></div>";
   }
