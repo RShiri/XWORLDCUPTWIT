@@ -497,6 +497,35 @@ def _draw_header(fig: plt.Figure, ax: plt.Axes, match_data: dict) -> None:
 # SECTION 2A – PASS NETWORK (per-team, on subplot axes)
 # ══════════════════════════════════════════════════════════════════════════
 
+def _decluster(xs, ys, rs, xlim, ylim, pad=0.8, iters=80):
+    """Push apart any pass-network nodes whose circles overlap, keeping them near
+    their true average position and inside the pitch. Same relaxation the dashboard
+    pass network uses, so PNG and web separate crowded players identically.
+    xs/ys are mutated in place (parallel lists); rs = per-node radius (data units)."""
+    n = len(xs)
+    for _ in range(iters):
+        moved = False
+        for i in range(n):
+            for j in range(i + 1, n):
+                dx = xs[j] - xs[i]; dy = ys[j] - ys[i]
+                d = math.hypot(dx, dy)
+                need = rs[i] + rs[j] + pad
+                if d < need:
+                    if d < 1e-6:                       # coincident → deterministic nudge
+                        dx = (i - j) or 1.0; dy = float(i + 1); d = math.hypot(dx, dy)
+                    ux, uy = dx / d, dy / d
+                    sh = (need - d) / 2.0
+                    xs[i] -= ux * sh; ys[i] -= uy * sh
+                    xs[j] += ux * sh; ys[j] += uy * sh
+                    moved = True
+        for k in range(n):
+            xs[k] = min(xlim[1] - rs[k], max(xlim[0] + rs[k], xs[k]))
+            ys[k] = min(ylim[1] - rs[k], max(ylim[0] + rs[k], ys[k]))
+        if not moved:
+            break
+    return xs, ys
+
+
 def _draw_pass_network(ax: plt.Axes, match_data: dict,
                        team_side: str, team_name: str, color_val: str) -> None:
     """
@@ -581,6 +610,15 @@ def _draw_pass_network(ax: plt.Axes, match_data: dict,
     suc_actions = df_pre.loc[(df_pre["team_id"] == tid) & (df_pre["outcome"] == "Successful")]
     avg_locs = suc_actions.groupby("player_id").agg({"x": "mean", "y": "mean", "id": "count"})
     avg_locs.columns = ["x", "y", "count"]
+
+    # De-cluster overlapping nodes so crowded players stay readable. Node radius (statsbomb
+    # units) tracks the drawn marker size (s = 180 + count*22 → r ≈ 0.13·√s). Done before the
+    # passes_between merge so the arrows connect the de-clustered node centres too.
+    if len(avg_locs) > 1:
+        rs = [0.13 * math.sqrt(180 + 22 * c) for c in avg_locs["count"].tolist()]
+        xs = avg_locs["x"].tolist(); ys = avg_locs["y"].tolist()
+        _decluster(xs, ys, rs, (0.0, 120.0), (0.0, 80.0), pad=1.4, iters=90)
+        avg_locs["x"] = xs; avg_locs["y"] = ys
 
     completions["passer"] = completions["player_id"]
     passes_between = (
