@@ -1463,9 +1463,13 @@
   }
 
   /* ================= POWER RANK & KNOCKOUT PREDICTIONS (Power Rank tab) =================
-     A single Power Index per knockout team = pre-tournament FIFA ranking points + a capped
-     group-stage "form" adjustment (points, goal difference and xG difference per game). The
-     ratings then drive a favourite-advances simulation of every knockout tie up to the final. */
+     A single Power Index per knockout team = pre-tournament FIFA ranking points, plus three
+     capped adjustments: (1) recency-weighted goal/xG form across every match played so far —
+     group AND knockout, with the most recent matches weighted higher than early group games;
+     (2) finishing & shot-stopping quality (goals vs xG, on both ends) beyond raw chance
+     volume; (3) squad quality — the minutes-weighted average match rating of each team's
+     most-used XI, standardised against the field. The ratings then drive a favourite-advances
+     simulation of every knockout tie up to the final. */
 
   // FIFA/Coca-Cola Men's World Ranking points — 11 June 2026 edition (the last update before
   // kick-off; Argentina 1st on 1877). Top ~45 are the published values; a few of the lowest
@@ -1494,20 +1498,72 @@
     }
     return null;
   }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  // Power Index = FIFA points + group-stage form adjustment, the adjustment capped at ±100 so
-  // a hot group stage tilts but can't fully override pedigree.
+  // Recency-weighted per-game goal/xG difference across EVERY match a team has played so far
+  // (group + knockout, in date order) — a half-life of 4 games means a team's most recent
+  // outing counts noticeably more than its opener, so a squad peaking late (or fading) shows
+  // up in the index instead of being smoothed away by a flat season average.
+  var FORM_HALF_LIFE = 4;
+  function weightedForm(team) {
+    var recs = R.filter(function (r) { return r.team === team; })
+      .slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    var n = recs.length;
+    if (!n) return { xgdpg: 0, gdpg: 0, n: 0 };
+    var decay = Math.pow(0.5, 1 / FORM_HALF_LIFE), wSum = 0, xgdW = 0, gdW = 0;
+    recs.forEach(function (r, i) {
+      var w = Math.pow(decay, n - 1 - i);          // most recent match → w = 1
+      wSum += w; xgdW += w * (r.xgf - r.xga); gdW += w * (r.gf - r.ga);
+    });
+    return { xgdpg: xgdW / wSum, gdpg: gdW / wSum, n: n };
+  }
+
+  // Squad quality — proxy for "best XI": each team's 11 most-used players (by minutes played)
+  // this tournament, their match ratings averaged and weighted by minutes. Standardised against
+  // the field (48 WC teams) so a small ratings gap can't swamp the FIFA/form terms.
+  var SQUAD_SIZE = 11, SQUAD_SCALE = 55, SQUAD_CAP = 55, QUALITY_SCALE = 8, QUALITY_CAP = 20;
+  function squadRating(team) {
+    var roster = PLAYERS.filter(function (p) { return p.team === team && p.mins > 0 && p.rating > 0; })
+      .sort(function (a, b) { return b.mins - a.mins; }).slice(0, SQUAD_SIZE);
+    if (!roster.length) return null;
+    var wSum = 0, rSum = 0;
+    roster.forEach(function (p) { wSum += p.mins; rSum += p.mins * p.rating; });
+    return wSum ? rSum / wSum : null;
+  }
+  var SQUAD_RATING_BY = {}, SQUAD_FIELD_MEAN = (function () {
+    var teams = Object.keys(D.teamGroup || {}), sum = 0, n = 0;
+    teams.forEach(function (t) {
+      var sq = squadRating(t); SQUAD_RATING_BY[t] = sq;
+      if (sq != null) { sum += sq; n++; }
+    });
+    return n ? sum / n : 6.8;
+  })();
+
+  // Power Index = FIFA points, plus three capped adjustments: recency-weighted form (points,
+  // goal difference, xG difference), finishing/shot-stopping quality (goals vs xG on both
+  // ends), and squad quality (best-XI average rating vs the field).
   function powerRating(team) {
     var fifa = FIFA_PTS[team] || 1400;
     var row = standingRow(team), ag = AGG_BY[team];
-    var ppg = 0, gdpg = 0, xgdpg = 0, P = 0;
-    if (row && row.P) { P = row.P; ppg = row.Pts / P; gdpg = row.GD / P; }
-    if (ag && ag.n) { xgdpg = (ag.xgf - ag.xga) / ag.n; }
-    var adj = 40 * (ppg - 1.6) + 28 * xgdpg + 10 * gdpg;
-    adj = Math.max(-100, Math.min(100, adj));
+    var ppg = 0, P = 0;
+    if (row && row.P) { P = row.P; ppg = row.Pts / P; }
+    var wf = weightedForm(team), xgdpg = wf.xgdpg, gdpg = wf.gdpg;
+    var adj = clamp(40 * (ppg - 1.6) + 28 * xgdpg + 10 * gdpg, -100, 100);
+
+    var attDpg = 0, defDpg = 0, qualAdj = 0;
+    if (ag && ag.n) {
+      attDpg = ag.attDelta / ag.n; defDpg = ag.defDelta / ag.n;
+      qualAdj = clamp(QUALITY_SCALE * attDpg + QUALITY_SCALE * defDpg, -QUALITY_CAP, QUALITY_CAP);
+    }
+
+    var sq = SQUAD_RATING_BY[team], squadAdj = sq != null ? clamp((sq - SQUAD_FIELD_MEAN) * SQUAD_SCALE, -SQUAD_CAP, SQUAD_CAP) : 0;
+
     return {
-      team: team, fifa: fifa, fifaRank: FIFA_RANK[team] || null, adj: adj, rating: fifa + adj,
-      ppg: ppg, gdpg: gdpg, xgdpg: xgdpg, pts: row ? row.Pts : null, gd: row ? row.GD : null, P: P
+      team: team, fifa: fifa, fifaRank: FIFA_RANK[team] || null, adj: adj,
+      qualAdj: qualAdj, squadAdj: squadAdj, squadRating: sq,
+      rating: fifa + adj + qualAdj + squadAdj,
+      ppg: ppg, gdpg: gdpg, xgdpg: xgdpg, attDpg: attDpg, defDpg: defDpg,
+      pts: row ? row.Pts : null, gd: row ? row.GD : null, P: P
     };
   }
   // Elo-style: a 100-pt Power-Index edge ≈ 64%, 200 ≈ 74%. Knockout → this is "A advances".
@@ -1637,6 +1693,7 @@
     var body = list.map(function (p, i) {
       var w = ((p.rating - minR) / span) * 100;
       var champ = P && P.champion === p.team;
+      var formAdj = p.adj + p.qualAdj;
       return '<tr' + (champ ? ' class="champ-row"' : '') + '>' +
         '<td class="rk">' + (i + 1) + "</td>" +
         '<td class="team"><div class="team-cell">' + logoImg(p.team) + '<span class="nm">' + esc(p.team) +
@@ -1644,12 +1701,15 @@
         '<td class="fifa">' + (p.fifaRank ? "#" + p.fifaRank : "–") + ' <span class="sub">' + p.fifa + "</span></td>" +
         "<td>" + (p.pts != null ? p.pts : "–") + ' <span class="sub">' + (p.gd != null ? (p.gd > 0 ? "+" + p.gd : p.gd) : "") + "</span></td>" +
         "<td>" + (p.xgdpg >= 0 ? "+" : "") + p.xgdpg.toFixed(2) + "</td>" +
-        '<td><span class="delta ' + (p.adj > 2 ? "pos" : p.adj < -2 ? "neg" : "") + '">' + (p.adj >= 0 ? "+" : "") + Math.round(p.adj) + "</span></td>" +
+        '<td><span class="delta ' + (formAdj > 2 ? "pos" : formAdj < -2 ? "neg" : "") + '">' + (formAdj >= 0 ? "+" : "") + Math.round(formAdj) + "</span></td>" +
+        "<td>" + (p.squadRating != null ? p.squadRating.toFixed(2) : "–") +
+          ' <span class="delta ' + (p.squadAdj > 2 ? "pos" : p.squadAdj < -2 ? "neg" : "") + '">' +
+          (p.squadAdj >= 0 ? "+" : "") + Math.round(p.squadAdj) + "</span></td>" +
         '<td class="pwr"><div class="pwr-bar"><span style="width:' + w.toFixed(1) + '%"></span></div><b>' + Math.round(p.rating) + "</b></td>" +
         "</tr>";
     }).join("");
     host.innerHTML = '<table class="rank power-table"><thead><tr>' +
-      "<th>#</th><th class='team'>Team</th><th>FIFA</th><th>Group</th><th>xGD/g</th><th>Form</th><th class='pwr'>Power Index</th>" +
+      "<th>#</th><th class='team'>Team</th><th>FIFA</th><th>Group</th><th>xGD/g</th><th>Form</th><th>Squad</th><th class='pwr'>Power Index</th>" +
       "</tr></thead><tbody>" + body + "</tbody></table>";
 
     renderPredChampion(P);
