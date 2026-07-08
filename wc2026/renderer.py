@@ -1184,6 +1184,27 @@ def _draw_lineup(ax: plt.Axes, match_data: dict, side: str,
 # MAIN RENDER FUNCTION
 # ══════════════════════════════════════════════════════════════════════════
 
+def _scorer_names(match_data, home_id, away_id):
+    """{(minute, beneficiary_side): 'Scorer (pen/OG)'} for the win-prob goal callouts."""
+    out = {}
+    for ev in match_data.get("events", []):
+        _p = ev.get("period", {})
+        if isinstance(_p, dict) and (_p.get("value") == 5 or "Shoot" in (_p.get("displayName") or "")):
+            continue
+        if ev.get("type", {}).get("displayName", "") != "Goal":
+            continue
+        quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+        own = bool(ev.get("isOwnGoal") or "OwnGoal" in quals)
+        pen = "Penalty" in quals
+        side = "home" if ev.get("teamId") == home_id else "away"
+        if own:
+            side = "away" if side == "home" else "home"
+        name = _player_name(match_data, ev.get("playerId")) or ""
+        name += " (OG)" if own else (" (pen)" if pen else "")
+        out[(ev.get("minute") or 0, side)] = name.strip()
+    return out
+
+
 def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away_color):
     """Live win-probability timeline (mirrors the dashboard match.js buildWinProb).
 
@@ -1192,9 +1213,13 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
     to the actual result by full time. Knockouts fold the draw 50/50 into the two team lines;
     group games add a grey Draw line. An estimate, not a betting market."""
     import math
+    import re
 
     meta = match_data.get("wc_metadata", {})
-    is_ko = not meta.get("group")
+    # Detect knockout from the STAGE string (same as the dashboard buildWinProb) — the `group`
+    # field is null even for group games in this dataset, so it can't be trusted here.
+    is_ko = bool(re.search(r"round of|quarter|semi|final|3rd place|third place|play-?off",
+                           meta.get("stage") or "", re.I))
 
     # ---- pull goals (minute + beneficiary side, own goals credited to the opponent) ----
     home_id = _team_id_for_name(match_data, home_name)
@@ -1301,11 +1326,14 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
     apk = match_data.get("away", {}).get("penalty_score")
     if hs != as_:
         fin_h = 100.0 if hs > as_ else 0.0
+        fin_a = 100.0 - fin_h
     elif is_ko and hpk is not None and apk is not None:
         fin_h = 100.0 if hpk > apk else 0.0
+        fin_a = 100.0 - fin_h
     else:
-        fin_h = yh[-1]
-    fin_a = 100.0 - fin_h
+        # level & (group, or KO with no shootout data): each team's own win% — for a group
+        # draw both are small and the Draw line carries the rest (NOT 100-fin_h).
+        fin_h, fin_a = yh[-1], ya[-1]
     if is_ko:
         yh[-1], ya[-1] = fin_h, fin_a
     fin_d = 0.0 if is_ko else yd[-1]
@@ -1330,7 +1358,9 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
     ax.set_yticklabels(["0%", "25%", "50%", "75%", "100%"], fontsize=11, color=TEXT_MID, fontfamily=FONT_MAIN)
     xticks = list(range(0, max_min + 1, 15))
     ax.set_xticks(xticks)
-    ax.set_xticklabels([f"{x}'" for x in xticks], fontsize=11, color=TEXT_MID, fontfamily=FONT_MAIN)
+    # blank the final tick if it lands within 3' of the right edge (a crest sits there)
+    ax.set_xticklabels(["" if (max_min - x) < 3 else f"{x}'" for x in xticks],
+                       fontsize=11, color=TEXT_MID, fontfamily=FONT_MAIN)
     for yv in (0, 25, 50, 75, 100):
         ax.axhline(yv, color=(DIVIDER_CLR if yv != 50 else "#b9b9b9"), linewidth=(0.7 if yv != 50 else 1.1), zorder=1)
     ax.axvline(45, color=DIVIDER_CLR, linewidth=1.0, linestyle=(0, (3, 3)), zorder=1)  # half-time
@@ -1340,12 +1370,57 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
     for spine in ("left", "bottom"):
         ax.spines[spine].set_color(DIVIDER_CLR)
 
-    if not is_ko:
-        ax.plot(xs, yd, color=col_d, linewidth=1.8, linestyle=(0, (5, 4)), alpha=0.85, zorder=2)
-    ax.plot(xs, ya, color=col_a, linewidth=2.6, zorder=3, solid_capstyle="round")
-    ax.plot(xs, yh, color=col_h, linewidth=2.6, zorder=4, solid_capstyle="round")
+    # smooth each line WITHIN inter-goal segments (moving avg + Catmull-Rom), keeping goal
+    # jumps sharp — same treatment as the dashboard buildWinProb so PNG and web agree.
+    def _catmull(p0, p1, p2, p3, t):
+        return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t
+                      + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t)
 
-    # goal markers on the beneficiary line
+    def smooth_series(xa, ya_):
+        xo, yo, seg = [], [], []
+
+        def flush():
+            n = len(seg)
+            if not n:
+                return
+            sm = []
+            for i in range(n):
+                if i == 0 or i == n - 1:
+                    sm.append(seg[i][1])
+                else:
+                    lo, hi = max(0, i - 2), min(n - 1, i + 2)
+                    sm.append(sum(seg[k][1] for k in range(lo, hi + 1)) / (hi - lo + 1))
+            pts = [(seg[i][0], min(100.0, max(0.0, sm[i]))) for i in range(n)]
+            xo.append(pts[0][0]); yo.append(pts[0][1])   # segment start (jump connector if not first)
+            for i in range(n - 1):
+                p0 = pts[i - 1] if i - 1 >= 0 else pts[i]
+                p1, p2 = pts[i], pts[i + 1]
+                p3 = pts[i + 2] if i + 2 < n else pts[i + 1]
+                for k in range(1, 9):
+                    tt = k / 8.0
+                    xo.append(_catmull(p0[0], p1[0], p2[0], p3[0], tt))
+                    yo.append(min(100.0, max(0.0, _catmull(p0[1], p1[1], p2[1], p3[1], tt))))
+            seg.clear()
+
+        for i in range(len(xa)):
+            if seg and abs(xa[i] - seg[-1][0]) < 0.5:
+                flush()
+            seg.append((xa[i], ya_[i]))
+        flush()
+        return xo, yo
+
+    xs_h, ys_h = smooth_series(xs, yh)
+    xs_a, ys_a = smooth_series(xs, ya)
+    # area fills under each line (behind the strokes)
+    ax.fill_between(xs_a, 0, ys_a, color=col_a, alpha=0.12, zorder=2, linewidth=0)
+    ax.fill_between(xs_h, 0, ys_h, color=col_h, alpha=0.12, zorder=2, linewidth=0)
+    if not is_ko:
+        xs_d, ys_d = smooth_series(xs, yd)
+        ax.plot(xs_d, ys_d, color=col_d, linewidth=1.8, linestyle=(0, (5, 4)), alpha=0.85, zorder=3)
+    ax.plot(xs_a, ys_a, color=col_a, linewidth=2.6, zorder=4, solid_capstyle="round")
+    ax.plot(xs_h, ys_h, color=col_h, linewidth=2.6, zorder=5, solid_capstyle="round")
+
+    # goal markers + running-score callout chips
     def val_at(ys, minute):
         v = ys[0] if ys else 0
         for i, tt in enumerate(xs):
@@ -1354,27 +1429,69 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
             else:
                 break
         return v
-    for m, side in goals:
+    scorer_by = _scorer_names(match_data, home_id, away_id)
+    gsorted = sorted(goals, key=lambda gg: gg[0])
+    hc = ac = 0
+    trans, inv = ax.transData, ax.transData.inverted()
+    placed = []   # display-pixel rects
+
+    def _ov(a, b):
+        return not (a[2] < b[0] - 4 or b[2] < a[0] - 4 or a[3] < b[1] - 4 or b[3] < a[1] - 4)
+
+    for m, side in gsorted:
+        if side == "home":
+            hc += 1
+        else:
+            ac += 1
         ys = yh if side == "home" else ya
         col = col_h if side == "home" else col_a
         gy = val_at(ys, m)
-        # DejaVu Sans has no ⚽ glyph — mark goals with a ringed dot + a minute tick instead.
-        ax.scatter([m], [gy], s=150, color=col, edgecolors="#ffffff", linewidths=1.6, zorder=6)
-        ax.scatter([m], [gy], s=26, color="#ffffff", zorder=7)
-        ax.annotate(f"{m}'", (m, gy), textcoords="offset points", xytext=(0, 11),
-                    ha="center", va="bottom", fontsize=9.5, fontweight="bold",
-                    color=col, fontfamily=FONT_BOLD, zorder=7)
+        ax.scatter([m], [gy], s=150, color=col, edgecolors="#ffffff", linewidths=1.6, zorder=7)
+        ax.scatter([m], [gy], s=26, color="#ffffff", zorder=8)
+        score = f"{hc}–{ac}"
+        who = scorer_by.get((m, side), "")
+        sub = f"{m}′ {who}".rstrip()
+        ax0, ay0 = trans.transform((m, gy))
+        wpx = max(70.0, len(sub) * 8.0 + 26); hpx = 62.0
+        prefer_up = (side == "home")
+        near = (max_min - m) < 5
+        cands = []
+        if near:
+            cands.append((ax0 - wpx / 2 - 34, ay0))
+        for st in range(7):
+            off = 44 + st * (hpx + 12)
+            cands.append((ax0, ay0 + off) if prefer_up else (ax0, ay0 - off))
+        for st in range(7):
+            off = 44 + st * (hpx + 12)
+            cands.append((ax0, ay0 - off) if prefer_up else (ax0, ay0 + off))
+        ccx, ccy, rect = cands[-1][0], cands[-1][1], None
+        for (cxp, cyp) in cands:
+            r = (cxp - wpx / 2, cyp - hpx / 2, cxp + wpx / 2, cyp + hpx / 2)
+            if not any(_ov(r, p) for p in placed):
+                ccx, ccy, rect = cxp, cyp, r
+                break
+        if rect is None:
+            rect = (ccx - wpx / 2, ccy - hpx / 2, ccx + wpx / 2, ccy + hpx / 2)
+        placed.append(rect)
+        cxd, cyd = inv.transform((ccx, ccy))
+        # leader line from dot to chip
+        edge_y = inv.transform((ccx, ccy + (hpx / 2 if ccy < ay0 else -hpx / 2)))[1]
+        ax.plot([m, cxd], [gy, edge_y], color=col, linewidth=1.0, alpha=0.55, zorder=6)
+        # two-line chip: bold score over scorer, on a rounded card
+        ax.text(cxd, cyd, f"{score}\n{sub}", ha="center", va="center", zorder=9,
+                fontsize=10.5, color=col, fontfamily=FONT_BOLD, linespacing=1.5,
+                bbox=dict(boxstyle="round,pad=0.45", fc=CANVAS_BG, ec=col, lw=1.2, alpha=0.96))
 
-    # crest + final-% endpoints (nudge apart if the two finals nearly coincide)
-    e_h, e_a = fin_h, fin_a
-    if abs(e_h - e_a) < 8:
-        mid = (fin_h + fin_a) / 2
-        if fin_h >= fin_a:
-            e_h, e_a = mid + 4, mid - 4
-        else:
-            e_h, e_a = mid - 4, mid + 4
-    for name, col, ev in ((home_name, col_h, e_h), (away_name, col_a, e_a)):
-        _put_endpoint_crest(ax, max_min, ev, name, col)
+    # crest + final-% endpoints: the crest's vertical POSITION (e_h/e_a) may be nudged apart so
+    # the two crests don't overlap, but the LABEL always shows the true win % (fin_h/fin_a).
+    def _pos(v):
+        return min(97.0, max(3.0, v))
+    e_h, e_a = _pos(fin_h), _pos(fin_a)
+    if abs(e_h - e_a) < 12:                       # near-equal finals (e.g. a draw) → separate
+        base = min(max((fin_h + fin_a) / 2, 12.0), 88.0)
+        e_h, e_a = (base + 10, base - 10) if fin_h >= fin_a else (base - 10, base + 10)
+    for name, col, epos, pct in ((home_name, col_h, e_h, fin_h), (away_name, col_a, e_a, fin_a)):
+        _put_endpoint_crest(ax, max_min, epos, pct, name, col)
 
     # title + subtitle (panel convention: ax.text in axes coords)
     ax.text(0.5, 1.14, "W I N   P R O B A B I L I T Y", transform=ax.transAxes,
@@ -1383,17 +1500,17 @@ def _draw_win_probability(ax, match_data, home_name, home_color, away_name, away
             transform=ax.transAxes, ha="center", va="bottom", fontsize=9.5, color=TEXT_LIGHT, fontfamily=FONT_MAIN)
 
 
-def _put_endpoint_crest(ax, max_min, y, team_name, color):
-    """Place a small team crest + a final-% label at the right edge of the win-prob panel."""
+def _put_endpoint_crest(ax, max_min, y, pct, team_name, color):
+    """Place a team crest at display-y `y` + the true final-% label (`pct`) at the panel's right edge."""
     from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-    ax.text(max_min, y, f"  {int(round(y))}%", ha="left", va="center",
-            fontsize=13, fontweight="bold", color=color, fontfamily=FONT_BOLD, clip_on=False, zorder=8)
+    ax.text(max_min, y, f"    {int(round(pct))}%", ha="left", va="center",
+            fontsize=14, fontweight="bold", color=color, fontfamily=FONT_BOLD, clip_on=False, zorder=8)
     try:
         logo_path = _REPO_ROOT / "team_logos" / "wc2026" / f"{team_name}.png"
         if logo_path.exists():
             img = plt.imread(str(logo_path))
-            # scale to a consistent ~52px crest regardless of the source resolution
-            target_px = 52.0
+            # scale to a consistent ~60px crest regardless of the source resolution
+            target_px = 60.0
             zoom = target_px / max(img.shape[0], img.shape[1])
             im = OffsetImage(img, zoom=zoom)
             ab = AnnotationBbox(im, (max_min, y), frameon=False, box_alignment=(1.15, 0.5),

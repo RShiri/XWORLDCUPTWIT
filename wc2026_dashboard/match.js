@@ -356,14 +356,51 @@
     var colD = "#8a94ad";
 
     // ---- geometry (mirrors buildMomentum) ----
-    var W = 820, HT = 360, padL = 46, padR = 40, padT = 18, padB = 42;
+    var W = 820, HT = 360, padL = 46, padR = 64, padT = 18, padB = 42;
     var plotW = W - padL - padR, plotH = HT - padT - padB;
     function sx(m) { return padL + plotW * m / maxMin; }
     function sy(p) { return padT + plotH * (1 - p / 100); }
-    function linePath(pts) { var d = ""; pts.forEach(function (p, i) { d += (i ? " L " : "M ") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1); }); return d; }
     function valAt(pts, minute) { var v = pts.length ? pts[0][1] : 0; for (var i = 0; i < pts.length; i++) { if (pts[i][0] <= minute + 1e-9) v = pts[i][1]; else break; } return v; }
+    function cl(v) { return Math.max(0, Math.min(100, v)); }
+    // Smooth each line WITHIN inter-goal segments (moving avg + Catmull-Rom→bézier), but keep
+    // the goal jumps sharp: the series carries a t-ε pre-goal + t post-goal point, so a jump is
+    // a pair with tiny Δx — we split there and join the two segments with a straight vertical L.
+    function smoothD(pts) {
+      var d = "", seg = [];
+      function flush() {
+        if (!seg.length) return;
+        var ys = seg.map(function (p) { return p[1]; });
+        var P = seg.map(function (p, i) {
+          if (i === 0 || i === seg.length - 1) return [p[0], cl(p[1])];
+          var lo = Math.max(0, i - 2), hi = Math.min(seg.length - 1, i + 2), s = 0, c = 0;
+          for (var k = lo; k <= hi; k++) { s += ys[k]; c++; }
+          return [p[0], cl(s / c)];
+        });
+        d += (d === "" ? "M " : " L ") + sx(P[0][0]).toFixed(1) + " " + sy(P[0][1]).toFixed(1);
+        for (var i = 0; i < P.length - 1; i++) {
+          var p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || P[i + 1];
+          var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+          var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+          d += " C " + sx(c1x).toFixed(1) + " " + sy(c1y).toFixed(1) + " " + sx(c2x).toFixed(1) + " " + sy(c2y).toFixed(1) + " " + sx(p2[0]).toFixed(1) + " " + sy(p2[1]).toFixed(1);
+        }
+        seg = [];
+      }
+      for (var i = 0; i < pts.length; i++) {
+        if (seg.length && Math.abs(pts[i][0] - seg[seg.length - 1][0]) < 0.5) flush();
+        seg.push(pts[i]);
+      }
+      flush();
+      return d;
+    }
+    var baseY = sy(0);
+    function areaD(pts) { return smoothD(pts) + " L " + sx(maxMin).toFixed(1) + " " + baseY.toFixed(1) + " L " + sx(0).toFixed(1) + " " + baseY.toFixed(1) + " Z"; }
 
     var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    // vertical fade gradients for the area fills (opaque near the line → transparent at baseline)
+    svg.push('<defs>' +
+      '<linearGradient id="wpGradH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + colH + '" stop-opacity="0.30"/><stop offset="1" stop-color="' + colH + '" stop-opacity="0"/></linearGradient>' +
+      '<linearGradient id="wpGradA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + colA + '" stop-opacity="0.30"/><stop offset="1" stop-color="' + colA + '" stop-opacity="0"/></linearGradient>' +
+      '</defs>');
     // y gridlines at 0/25/50/75/100 with a brighter 50% midline
     [0, 25, 50, 75, 100].forEach(function (yv) {
       var y = sy(yv);
@@ -376,30 +413,70 @@
     }
     svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#2c3656" stroke-width="1" stroke-dasharray="3 3"/>');
     svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Minute</text>');
-    // draw line (group only), then away, then home on top
-    if (!isKO) svg.push('<path d="' + linePath(ptsD) + '" fill="none" stroke="' + colD + '" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.85"/>');
-    svg.push('<path d="' + linePath(ptsA) + '" fill="none" stroke="' + colA + '" stroke-width="2.4"/>');
-    svg.push('<path d="' + linePath(ptsH) + '" fill="none" stroke="' + colH + '" stroke-width="2.4"/>');
-    // goal markers on the beneficiary side's line
-    (D.goals || []).forEach(function (g) {
+    // area fills (behind the lines), then draw line (group only), away, home on top
+    svg.push('<path d="' + areaD(ptsA) + '" fill="url(#wpGradA)" stroke="none"/>');
+    svg.push('<path d="' + areaD(ptsH) + '" fill="url(#wpGradH)" stroke="none"/>');
+    if (!isKO) svg.push('<path d="' + smoothD(ptsD) + '" fill="none" stroke="' + colD + '" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.85"/>');
+    svg.push('<path d="' + smoothD(ptsA) + '" fill="none" stroke="' + colA + '" stroke-width="2.6" stroke-linejoin="round"/>');
+    svg.push('<path d="' + smoothD(ptsH) + '" fill="none" stroke="' + colH + '" stroke-width="2.6" stroke-linejoin="round"/>');
+    // running score at each goal (sorted), for the callout chips
+    var gsorted = (D.goals || []).slice().sort(function (a, b) { return a.min - b.min; });
+    var _hc = 0, _ac = 0;
+    gsorted.forEach(function (g) { if (g.team === "home") _hc++; else _ac++; g._sh = _hc; g._sa = _ac; });
+    var placed = [];   // chip bounding boxes, to avoid overlaps
+    function overlaps(a, b) { return !(a.x2 < b.x1 - 3 || b.x2 < a.x1 - 3 || a.y2 < b.y1 - 3 || b.y2 < a.y1 - 3); }
+    gsorted.forEach(function (g) {
       var col = g.team === "home" ? colH : colA;
       var pts = g.team === "home" ? ptsH : ptsA;
       var gx = sx(g.min), gy = sy(valAt(pts, g.min));
       var gName = g.team === "home" ? D.home.name : D.away.name;
       var info = g.min + "' " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + " — " + gName;
-      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"></circle>');
-      svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" fill="' + col + '" font-size="11" text-anchor="middle">⚽</text>');
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.4" data-info="' + esc(info) + '"></circle>');
+      // score chip: bold score line + "min' scorer" sub-line
+      var scoreTxt = g._sh + "–" + g._sa;
+      var sub = g.min + "′ " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "");
+      var chipW = Math.max(30, sub.length * 5.4 + 12), chipH = 27;
+      var near = (maxMin - g.min) < 5;                  // last goal on the endpoint → place left
+      var preferAbove = g.team === "home";              // home above, away below (then step away)
+      // candidate top-left positions, in preference order: (near→left), preferred dir stepped, other dir stepped
+      var cands = [];
+      if (near) cands.push([gx - chipW - 12, gy - chipH / 2]);
+      for (var st = 0; st < 7; st++) { var off = 14 + st * (chipH + 5); cands.push(preferAbove ? [gx - chipW / 2, gy - off - chipH] : [gx - chipW / 2, gy + off]); }
+      for (var st2 = 0; st2 < 7; st2++) { var off2 = 14 + st2 * (chipH + 5); cands.push(preferAbove ? [gx - chipW / 2, gy + off2] : [gx - chipW / 2, gy - off2 - chipH]); }
+      var chosen = null;
+      for (var ci = 0; ci < cands.length; ci++) {
+        var cx = Math.max(padL + 2, Math.min(cands[ci][0], W - padR - chipW - 2));
+        var cy = Math.max(padT + 2, Math.min(cands[ci][1], HT - padB - chipH - 2));
+        var rect = { x1: cx, y1: cy, x2: cx + chipW, y2: cy + chipH };
+        var clash = false;
+        for (var pi = 0; pi < placed.length; pi++) { if (overlaps(rect, placed[pi])) { clash = true; break; } }
+        if (!clash || ci === cands.length - 1) { chosen = rect; break; }
+      }
+      placed.push(chosen);
+      var cx0 = chosen.x1, cy0 = chosen.y1, midX = cx0 + chipW / 2;
+      var leadY = cy0 + (cy0 + chipH / 2 < gy ? chipH : 0);   // connect to the chip edge facing the dot
+      svg.push('<line x1="' + gx.toFixed(1) + '" y1="' + gy.toFixed(1) + '" x2="' + midX.toFixed(1) + '" y2="' + leadY.toFixed(1) + '" stroke="' + col + '" stroke-width="1" opacity="0.55"/>');
+      svg.push('<rect x="' + cx0.toFixed(1) + '" y="' + cy0.toFixed(1) + '" width="' + chipW.toFixed(1) + '" height="' + chipH + '" rx="4" fill="#0b0f1a" fill-opacity="0.82" stroke="' + col + '" stroke-opacity="0.6"/>');
+      svg.push('<text x="' + midX.toFixed(1) + '" y="' + (cy0 + 12).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="bold" fill="' + col + '">' + esc(scoreTxt) + '</text>');
+      svg.push('<text x="' + midX.toFixed(1) + '" y="' + (cy0 + 23).toFixed(1) + '" text-anchor="middle" font-size="9.5" fill="#c7d0e0">' + esc(sub) + '</text>');
     });
-    // crest + final-% endpoints (nudge apart if the two finals nearly coincide)
+    // crest + final-% endpoints (bigger, in the right margin; nudge apart if finals coincide)
     var yH = sy(finH), yA = sy(finA);
-    if (Math.abs(yH - yA) < 20) { var mid = (yH + yA) / 2; yH = yH <= yA ? mid - 10 : mid + 10; yA = yH <= yA ? mid + 10 : mid - 10; }
+    if (Math.abs(finH - finA) < 8) { var mid = (yH + yA) / 2; yH = finH >= finA ? mid - 14 : mid + 14; yA = finH >= finA ? mid + 14 : mid - 14; }
     function crest(name, col, y, pct) {
       var ex = sx(maxMin);
-      return '<image href="' + LOGO + encodeURIComponent(name) + '.png" x="' + (ex - 11).toFixed(1) + '" y="' + (y - 11).toFixed(1) + '" width="22" height="22"/>' +
-        '<text x="' + (ex - 15).toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="12.5" font-weight="bold" fill="' + col + '">' + Math.round(pct) + '%</text>';
+      return '<image href="' + LOGO + encodeURIComponent(name) + '.png" x="' + (ex - 15).toFixed(1) + '" y="' + (y - 15).toFixed(1) + '" width="30" height="30"/>' +
+        '<text x="' + (ex + 18).toFixed(1) + '" y="' + (y + 4.5).toFixed(1) + '" text-anchor="start" font-size="13.5" font-weight="bold" fill="' + col + '">' + Math.round(pct) + '%</text>';
     }
     svg.push(crest(D.home.name, colH, yH, finH));
     svg.push(crest(D.away.name, colA, yA, finA));
+    // hover crosshair (scrubber) — reads the win % at any minute; moved/shown by JS below
+    svg.push('<g id="wpCross" style="display:none" pointer-events="none">' +
+      '<line id="wpCrossLine" x1="0" y1="' + padT + '" x2="0" y2="' + (padT + plotH) + '" stroke="#5b6a8a" stroke-width="1" stroke-dasharray="2 3"/>' +
+      '<circle id="wpCrossH" r="4.2" fill="' + colH + '" stroke="#0b0f1a" stroke-width="1.2"/>' +
+      '<circle id="wpCrossA" r="4.2" fill="' + colA + '" stroke="#0b0f1a" stroke-width="1.2"/>' +
+      (isKO ? "" : '<circle id="wpCrossD" r="3.6" fill="' + colD + '" stroke="#0b0f1a" stroke-width="1.2"/>') +
+      '</g>');
     svg.push("</svg>");
 
     var legend = '<div class="mv-mom-legend">' +
@@ -409,22 +486,64 @@
       "</div>";
     host.innerHTML = '<p class="hint">Live <b>win probability</b> — seeded at kickoff from the FIFA-ranking gap, then updated each minute by the running score and live xG. ' +
       (isKO ? "A level knockout resolves to the shootout winner. " : "The grey line is the draw chance. ") +
-      '⚽ marks goals (tap one for the scorer). An estimate, not a betting market.</p>' +
+      'Each goal is labelled with the score; <b>hover (or drag) across the chart to read the win % at any minute</b>. An estimate, not a betting market.</p>' +
       '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend +
       '<div class="chart-tip" id="mvWpTip"></div>';
     var tip = document.getElementById("mvWpTip");
+    var svgEl = host.querySelector("svg");
+    var cross = host.querySelector("#wpCross"), crossLine = host.querySelector("#wpCrossLine");
+    var dotH = host.querySelector("#wpCrossH"), dotA = host.querySelector("#wpCrossA"), dotD = host.querySelector("#wpCrossD");
     function isDot(el) { return el && (el.tagName || "").toLowerCase() === "circle" && el.hasAttribute("data-info"); }
     function wpHTML(info) {
       var i = info.indexOf(" — "), a = i >= 0 ? info.slice(0, i) : info, bb = i >= 0 ? info.slice(i + 3) : "";
       return '<div class="t-team">' + esc(a) + "</div>" + (bb ? '<div class="t-line">' + esc(bb) + "</div>" : "");
     }
+    // client px → SVG viewBox user units, so we can map back to a minute
+    function clientToVB(e) {
+      if (!svgEl || !svgEl.getScreenCTM) return null;
+      var ctm = svgEl.getScreenCTM(); if (!ctm) return null;
+      var p = svgEl.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+      var q = p.matrixTransform(ctm.inverse());
+      return { x: q.x, y: q.y };
+    }
+    function minuteAt(e) {
+      var vb = clientToVB(e); if (!vb) return null;
+      if (vb.x < padL - 6 || vb.x > W - padR + 6 || vb.y < padT - 6 || vb.y > padT + plotH + 6) return null;
+      var xv = Math.max(padL, Math.min(W - padR, vb.x));
+      return Math.round((xv - padL) / plotW * maxMin);
+    }
+    function rowHTML(c, nm, v) {
+      return '<div class="t-line"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + c + ';margin-right:6px;vertical-align:middle"></i>' + esc(nm) + ' <b>' + Math.round(v) + '%</b></div>';
+    }
+    function readoutHTML(mn) {
+      return '<div class="t-team">' + mn + "′</div>" + rowHTML(colH, D.home.name, valAt(ptsH, mn)) +
+        rowHTML(colA, D.away.name, valAt(ptsA, mn)) + (isKO ? "" : rowHTML(colD, "Draw", valAt(ptsD, mn)));
+    }
+    function showCross(mn) {
+      var x = sx(mn);
+      crossLine.setAttribute("x1", x); crossLine.setAttribute("x2", x);
+      dotH.setAttribute("cx", x); dotH.setAttribute("cy", sy(valAt(ptsH, mn)));
+      dotA.setAttribute("cx", x); dotA.setAttribute("cy", sy(valAt(ptsA, mn)));
+      if (dotD) { dotD.setAttribute("cx", x); dotD.setAttribute("cy", sy(valAt(ptsD, mn))); }
+      cross.style.display = "";
+    }
+    function hideAll() { hideTip(); if (cross) cross.style.display = "none"; }
     host.addEventListener("pointermove", function (e) {
-      if (e.pointerType === "touch") return;
-      if (isDot(e.target)) showTip(e, wpHTML(e.target.getAttribute("data-info"))); else hideTip();
+      if (isDot(e.target)) { showTip(e, wpHTML(e.target.getAttribute("data-info"))); if (cross) cross.style.display = "none"; return; }
+      var mn = minuteAt(e);
+      if (mn == null) { hideAll(); return; }
+      showCross(mn); showTip(e, readoutHTML(mn));
     });
-    host.addEventListener("pointerleave", hideTip);
+    host.addEventListener("pointerleave", hideAll);
+    // touch: tap/drag shows the per-minute readout in the caption line (+ scorer on a dot)
     host.addEventListener("click", function (e) {
-      if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); }
+      if (isDot(e.target)) { tip.textContent = e.target.getAttribute("data-info"); tip.classList.add("show"); return; }
+      var mn = minuteAt(e);
+      if (mn == null) return;
+      showCross(mn);
+      tip.textContent = mn + "′ · " + D.home.name + " " + Math.round(valAt(ptsH, mn)) + "% · " +
+        D.away.name + " " + Math.round(valAt(ptsA, mn)) + "%" + (isKO ? "" : " · Draw " + Math.round(valAt(ptsD, mn)) + "%");
+      tip.classList.add("show");
     });
   }
 
