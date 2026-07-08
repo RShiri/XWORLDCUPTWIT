@@ -623,18 +623,16 @@ def _draw_stats_table(ax: plt.Axes, match_data: dict,
             return "—"
         return fmt.format(val)
 
-    xg_h = _stat("xg", "home")
-    xg_a = _stat("xg", "away")
-    # No real (FotMob/Opta) xG? Fall back to the geometric shot-model estimate
-    # — the same per-shot xG the shot maps display, so the two stay consistent.
-    if xg_h is None:
-        df_h = build_shot_df(match_data, home_name)
-        if not df_h.empty:
-            xg_h = float(df_h["xG"].sum())
-    if xg_a is None:
-        df_a = build_shot_df(match_data, away_name)
-        if not df_a.empty:
-            xg_a = float(df_a["xG"].sum())
+    # Always our own xg_core model (summed per-shot xG), never the provider's raw stat —
+    # the same number the shot maps below display and the dashboard match centre shows,
+    # so this table can't disagree with the rest of the PNG (or the site) on the same game.
+    xg_h = xg_a = None
+    df_h = build_shot_df(match_data, home_name)
+    if not df_h.empty:
+        xg_h = float(df_h["xG"].sum())
+    df_a = build_shot_df(match_data, away_name)
+    if not df_a.empty:
+        xg_a = float(df_a["xG"].sum())
 
     bc_created_h = _stat("big_chances_created", "home")
     bc_missed_h  = _stat("big_chances_missed",  "home") or 0

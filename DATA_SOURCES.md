@@ -54,6 +54,17 @@ feeds actually landed (e.g. `["sofascore","whoscored"]`).
   single geometric source (the renderer/`xg_model.py` orientation is tuned to it).
   FotMob/SofaScore shot coords use different frames; mixing them corrupts the maps.
 - **Lineups** — reconcile (union/prefer the most complete), don't numerically average.
+- **xG (displayed value)** — deliberate exception to the "average the providers" plan
+  above: both the PNG's stats table and the dashboard show **our own calibrated
+  `xg_core` model's xG** (summed per-shot from the WhoScored event stream — the same
+  number the shot maps, All Goals Map, and xG momentum chart already use), never the raw
+  provider `match_stats.xg` (FotMob/SofaScore) or an average of it. Provider xG models
+  disagree with each other and with our own shot-level model enough that showing a third
+  "averaged provider" number made the PNG's own stats table, its shot-map caption, and
+  the dashboard all disagree about the same match. `match_stats.xg` itself is still
+  recorded from the providers (still on the averaging TODO below) — it's just not what
+  gets *displayed*. See `wc2026_dashboard/match.js` `buildMatchStats` and
+  `wc2026/renderer.py` `_draw_stats_table`.
 
 ## Cross-source matching (already available)
 Team names differ across feeds (Türkiye/Turkey, Côte d'Ivoire/Ivory Coast, South Korea/
