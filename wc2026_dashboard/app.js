@@ -2651,7 +2651,10 @@
      baseline churn (mu/sd) and the regression-to-mean control per window length, so
      every panel can say how much of an effect is just "hot spells end anyway". */
   var BREAKS = window.WC_BREAKS || { meta: null, matches: [] };
-  var bkState = { br: 1, win: "420", dom: "auto", stage: "G", match: null };
+  // Defaults to "all" now the knockout rounds are underway, so freshly played R32/R16 (and
+  // later QF/SF) matches show up without an extra click — the μ/σ baseline in BREAKS.meta.base
+  // stays frozen on the group stage regardless of this filter (see file header note).
+  var bkState = { br: 1, win: "420", dom: "auto", stage: "all", match: null };
 
   function bkAvg(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : 0; }
   function bkMatches() {
