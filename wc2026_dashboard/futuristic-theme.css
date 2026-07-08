@@ -7,6 +7,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+  /* Tell the browser this skin is dark so NATIVE widgets (the <select> dropdown
+     popup, scrollbars) render dark too — without it a light-mode OS paints the
+     option list white while the option text inherits near-white --text. */
+  color-scheme: dark;
   --bg: #050611;
   --bg-2: #0b0d1f;
   --card: rgba(15, 16, 34, 0.72);
@@ -43,7 +47,7 @@ body {
 }
 
 h1, h2, h3, .brand .title, nav.tabs button,
-.stat .v, .champ-name, table thead th, .bk-side .sc,
+.stat .v, .stat .v2, .sc-val, .champ-name, table thead th, .bk-side .sc,
 .power-table td.pwr b, .db-match-head .score, .match-row .score,
 td.pts, .third-table td.rk, .pos {
   font-family: var(--font-display);
@@ -214,6 +218,14 @@ td.pts { color: var(--accent); font-weight: 700; }
 .so-controls select:focus, .so-controls input:focus {
   border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-2-soft);
 }
+/* The dropdown popup ignores the select's translucent styling — give options an
+   explicit solid dark background so the list is readable on every OS theme. */
+select option, select optgroup {
+  background-color: var(--bg-2);
+  color: var(--text);
+}
+select optgroup { color: var(--accent-2); font-style: italic; }
+select option:disabled { color: var(--muted); }
 .seg { background: rgba(255,255,255,0.02); border-color: var(--line); }
 .seg-btn { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.3px; }
 .seg-btn.active { background: linear-gradient(120deg, var(--accent), #7ef7bd); color: #04150c; box-shadow: 0 0 14px rgba(51,232,147,0.4); }

@@ -2855,8 +2855,12 @@
         '" height="' + (rowH - 2) + '" rx="2" fill="' + (v >= 0 ? "#4ea1ff" : "#55617a") + '" fill-opacity="' + (big ? "0.95" : "0.55") +
         '"><title>' + esc(tip) + "</title></rect>");
       if (big) {
-        s.push('<text x="' + (xv(v) + 5).toFixed(1) + '" y="' + (y + rowH - 3) + '" fill="#c2cce0" font-size="8.7">' +
-          esc(r.m.h + " – " + r.m.a) + "</text>");
+        // Long names on the longest bars overflow the viewBox and get clipped —
+        // flip those to the empty left half of the row (big bars are always positive).
+        var lbl = r.m.h + " – " + r.m.a, lx = xv(v) + 5, anc = "start";
+        if (lx + lbl.length * 4.8 > W - 2) { lx = xC - 6; anc = "end"; }
+        s.push('<text x="' + lx.toFixed(1) + '" y="' + (y + rowH - 3) + '" fill="#c2cce0" font-size="8.7" text-anchor="' + anc + '">' +
+          esc(lbl) + "</text>");
       }
     });
     s.push("</svg>");

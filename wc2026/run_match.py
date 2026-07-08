@@ -326,6 +326,15 @@ def run_match(
         log.error("Render failed for %s vs %s: %s", home, away, exc)
         return False
 
+    # 3b. Dark-mode variant of the same infographic (the Match Centre offers it
+    # as a second download). Non-fatal: the light PNG is the canonical output.
+    try:
+        dark_path = os.path.join(str(OUTPUT_DIR), match_id + "_dark.png")
+        render_wc_dashboard(match_data, dark_path, theme="dark")
+        log.info("Dark PNG rendered → %s", dark_path)
+    except Exception as exc:
+        log.warning("Dark PNG render failed (continuing): %s", exc)
+
     # ── 4. Push PNG + regenerated web dashboard to XWORLDCUPTWIT (non-fatal) ─
     # render_wc_dashboard() already refreshed the local dashboard files, so this
     # commit makes the live website (and the PNG) update for the new match.

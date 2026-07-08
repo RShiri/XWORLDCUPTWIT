@@ -26,6 +26,11 @@ for f in match_files:
             continue
         out = output_filename(md, 'wc2026/output')
         render_wc_dashboard(md, out)
+        stem, ext = os.path.splitext(out)
+        try:
+            render_wc_dashboard(md, stem + "_dark" + ext, theme="dark")
+        except Exception as e:
+            print(f"WARN dark render failed for {os.path.basename(out)}: {e}")
         print(f"OK  {os.path.basename(out)}")
         ok += 1
     except Exception as e:
