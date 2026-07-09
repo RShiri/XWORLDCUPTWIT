@@ -89,7 +89,18 @@ td.pts, .third-table td.rk, .pos {
     linear-gradient(135deg, transparent calc(100% - 15px), var(--line-strong) calc(100% - 15px), var(--line-strong) calc(100% - 14px), transparent calc(100% - 14px)),
     linear-gradient(-45deg, transparent calc(100% - 15px), var(--line-strong) calc(100% - 15px), var(--line-strong) calc(100% - 14px), transparent calc(100% - 14px));
 }
-.group-card, .third-card, .data-card, .db-match, .bk-match { overflow: visible; }
+.data-card, .bk-match { overflow: visible; }
+/* .group-card / .third-card / .db-match hold plain <table>s that don't reflow
+   (group standings, the third-place "destination" table, the expanded match
+   stat-comparison table) — at some viewport widths (a 2-up group-card grid on
+   tablet widths, any width for the wider third-place/db-team tables) the table
+   is wider than its card. overflow:visible here let that spill out past the
+   clip-path shape instead of just being invisible, which stretched the WHOLE
+   PAGE's scrollable width, making the entire site shift/rubber-band sideways
+   on mobile and on in-between desktop widths. overflow-x:auto keeps the
+   corner-cut decoration (inset:0, never exceeds the box) intact while
+   containing the overflow to a scroll INSIDE the card. */
+.group-card, .third-card, .db-match { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
 
 /* corner HUD brackets on the primary cards only, so it reads as a signature, not noise */
 .card {
