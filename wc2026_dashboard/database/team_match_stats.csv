@@ -191,3 +191,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_07_1D3BEFIJ_vs_1G3AEHIJ,2026-07-07,Belgium,USA,away,4,1,44,15,11,443,81,4,2,1,9,53,2.42
 2026_07_07_1J2H_vs_2D2G,2026-07-07,Argentina,Egypt,home,3,2,64,19,11,648,90,6,4,0,13,53,3.06
 2026_07_07_1J2H_vs_2D2G,2026-07-07,Egypt,Argentina,away,2,3,36,5,2,385,83,2,0,8,11,47,1.02
+2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,France,Morocco,home,2,0,48,22,13,517,89,5,5,2,10,54,3.21
+2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,away,0,2,52,5,2,558,86,0,0,12,13,46,0.16
