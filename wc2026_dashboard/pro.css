@@ -1,0 +1,251 @@
+/* ============================================================================
+   pro.css — "Stats Lab Pro" skin (third skin, coexists with Classic + Futuristic)
+   Loaded AFTER styles.css so it (a) re-tokens the palette — every component ported
+   verbatim by app.js/match.js inherits the new look for free — and (b) adds the
+   premium multi-page chrome (top-nav, sub-nav, lab-shell, pane-split, pill controls,
+   sticky/heat tables). It never edits app.js, match.js, styles.css or the data layer.
+   Design language: "Futuristic Sports Book" — deep slate surfaces, thin borders,
+   one restrained neon accent, tabular numerals, monospace for raw engineering data.
+   ============================================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+/* ---- 1. Design tokens (override styles.css :root; keep old names as aliases) ---- */
+:root {
+  color-scheme: dark;
+  --bg:        #0a0e17;
+  --bg-2:      #0f1420;
+  --surface:   #131a29;
+  --surface-2: #182136;
+  --line:      #232d45;
+  --line-soft: #1a2236;
+
+  --text:      #eef2fb;
+  --text-dim:  #aab4cf;
+  --muted:     #7c88a8;
+
+  --accent:        #35e28f;   /* electric neon green — primary brand */
+  --accent-2:      #4ea1ff;   /* electric blue — secondary / links / away */
+  --accent-crimson:#ff3b5c;   /* crimson — home default / high-alert */
+
+  --clinical:  #35e28f;
+  --wasteful:  #ff5f6d;
+  --neutral-stat: #ffc857;
+
+  /* aliases so ported code referencing old tokens keeps working + restyled */
+  --card:   var(--surface);
+  --card-2: var(--surface-2);
+  --good:   var(--clinical);
+  --bad:    var(--wasteful);
+  --warn:   var(--neutral-stat);
+
+  --shadow:      0 10px 34px rgba(0,0,0,.5);
+  --glow-accent: 0 0 0 1px rgba(53,226,143,.28), 0 0 26px rgba(53,226,143,.14);
+  --radius:     16px;
+  --radius-sm:  10px;
+
+  --font-head: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ---- 2. Base ---- */
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(1100px 620px at 82% -12%, #14243f 0%, rgba(10,14,23,0) 55%),
+    radial-gradient(900px 520px at 10% -8%, #101b33 0%, rgba(10,14,23,0) 50%),
+    var(--bg) fixed;
+  color: var(--text);
+}
+.pro *::selection { background: rgba(53,226,143,.28); }
+h1, h2, h3, .brand .title { font-family: var(--font-head); letter-spacing: .2px; }
+
+/* Numerals: tabular everywhere they matter so scoreboards/tables never jitter */
+.stat .v, .match-row .score, .db-match-head .score, table td, table th,
+.bar-val, .sc-val, .r-big { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* ---- 3. Premium top-nav + sub-nav (built by pro/shell.js) ---- */
+header.site { background: rgba(10,14,23,.82); border-bottom: 1px solid var(--line); }
+.pro-header-inner {
+  max-width: 1240px; margin: 0 auto; padding: 12px 22px;
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+}
+.pro-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.pro-brand .mark {
+  width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+  font-size: 18px; background: linear-gradient(150deg, var(--accent), #1f9c67);
+  box-shadow: var(--glow-accent); color: #04140c;
+}
+.pro-brand .txt { display: flex; flex-direction: column; line-height: 1.05; }
+.pro-brand .txt .t { font-family: var(--font-head); font-weight: 700; font-size: 17px; color: var(--text); }
+.pro-brand .txt .s { font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+.pro-topnav { display: flex; gap: 4px; margin-left: 8px; flex-wrap: wrap; }
+.pro-topnav a {
+  display: inline-flex; align-items: center; gap: 7px;
+  color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px;
+  padding: 9px 15px; border-radius: 10px; border: 1px solid transparent;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.pro-topnav a .ic { font-size: 15px; opacity: .85; }
+.pro-topnav a:hover { color: var(--text); background: var(--surface); }
+.pro-topnav a.active {
+  color: var(--text); background: var(--surface-2);
+  border-color: var(--line); box-shadow: inset 0 0 0 1px rgba(53,226,143,.12);
+}
+.pro-topnav a.active .ic { color: var(--accent); opacity: 1; }
+
+.pro-skins { margin-left: auto; display: flex; gap: 7px; align-items: center; }
+.pro-skins a {
+  font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: none;
+  border: 1px solid var(--line); border-radius: 9px; padding: 7px 11px; white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.pro-skins a:hover { color: var(--text); border-color: var(--accent-2); background: var(--surface); }
+
+/* mobile nav toggle */
+.pro-navtoggle { display: none; margin-left: auto; background: var(--surface); border: 1px solid var(--line);
+  color: var(--text); border-radius: 9px; padding: 8px 12px; font-size: 16px; cursor: pointer; }
+
+/* Sub-nav (contextual pills under the header, per page) */
+.pro-subnav-wrap { position: sticky; top: 0; z-index: 15; background: rgba(10,14,23,.8);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line-soft); }
+.pro-subnav { max-width: 1240px; margin: 0 auto; padding: 10px 22px; display: flex; gap: 6px; flex-wrap: wrap; }
+.pro-subnav button {
+  background: transparent; color: var(--muted); border: 1px solid var(--line);
+  padding: 7px 15px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer; transition: all .15s ease;
+}
+.pro-subnav button:hover { color: var(--text); border-color: var(--accent-2); }
+.pro-subnav button.active { color: #04140c; background: var(--accent); border-color: var(--accent); }
+
+/* ---- 4. Page shell ---- */
+main { max-width: 1240px; padding: 26px 22px 90px; }
+.pro-section { display: none; animation: proFade .28s ease; }
+.pro-section.active { display: block; }
+@keyframes proFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Hero band at top of each section */
+.pro-hero { margin: 4px 0 24px; }
+.pro-hero .eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+.pro-hero h1 { margin: 0; font-size: 30px; font-weight: 700; }
+.pro-hero p { margin: 8px 0 0; color: var(--text-dim); font-size: 14px; max-width: 780px; line-height: 1.55; }
+
+/* ---- 5. Reskin shared components (thin borders, flat surfaces, no heavy gradients) ---- */
+.card, .group-card, .third-card, .stat, .db-match {
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none;
+}
+.stat { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
+.stat .v { font-family: var(--font-head); }
+.stat .v.accent { color: var(--accent); }
+.stat .v.blue { color: var(--accent-2); }
+.group-card h3, .db-match-head { background: transparent; }
+.group-card h3 { border-bottom: 1px solid var(--line-soft); }
+.card h3, .lboard h3 { font-family: var(--font-head); }
+
+tbody tr.qual td:first-child, .third-table tbody tr.qual td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+tbody tr.qual2 td:first-child { box-shadow: inset 3px 0 0 var(--accent-2); }
+table.rank tbody tr:hover td, table.rank.players tbody tr:hover td { background: rgba(78,161,255,.07); }
+
+/* Match rows → premium cards */
+.match-row, .db-match { transition: border-color .15s, transform .12s; }
+.match-row:hover, .db-match-head:hover { border-color: var(--accent-2); background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+.match-row .score, .db-match-head .score { font-family: var(--font-head); background: var(--surface-2); }
+
+/* ---- 6. Pill controls: reskin native selects + .seg groups into a unified system ---- */
+.controls select, .controls input, .so-controls select, .so-controls input, .pl-controls select {
+  background: var(--surface); border: 1px solid var(--line); color: var(--text);
+  border-radius: 999px; padding: 9px 15px; font-size: 13.5px; font-family: var(--font-body);
+}
+.controls input { border-radius: 12px; }
+.controls select:hover, .so-controls select:hover { border-color: var(--accent-2); }
+.controls select:focus, .controls input:focus, .so-controls select:focus, .so-controls input:focus { border-color: var(--accent); }
+
+.seg { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.seg-btn { border-radius: 999px; color: var(--muted); font-family: var(--font-body); }
+.seg-btn.active { background: var(--accent); color: #04140c; }
+
+.so-controls label, .pl-controls label { color: var(--muted); font-size: 12px; font-weight: 600; }
+
+/* ---- 7. Lab Shell — uniform premium container for every analytical tool ---- */
+.card.full-card, .card {
+  position: relative;
+}
+.card.full-card > h3, .card > h3 {
+  display: flex; align-items: center; gap: 8px;
+}
+/* Monospace engineering footer (used where present) */
+.pro-labfoot { font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft);
+  display: flex; gap: 16px; flex-wrap: wrap; }
+.pro-labfoot b { color: var(--text-dim); font-weight: 500; }
+
+/* Explainers become quiet, collapsible-feeling info blocks */
+.explainer { background: color-mix(in srgb, var(--surface) 50%, transparent);
+  border: 1px solid var(--line-soft); border-radius: var(--radius); }
+.explainer h3 { font-family: var(--font-head); }
+
+/* ---- 8. Pane-split (Player Lab / Breaks): sticky control rail + canvas ---- */
+.pro-split { display: grid; grid-template-columns: 288px 1fr; gap: 20px; align-items: start; }
+.pro-split .pro-rail {
+  position: sticky; top: 74px; align-self: start;
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.pro-split .pro-rail h4 { margin: 0; font-family: var(--font-head); font-size: 13px;
+  text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+.pro-split .pro-canvas { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+@media (max-width: 900px) {
+  .pro-split { grid-template-columns: 1fr; }
+  .pro-split .pro-rail { position: static; }
+}
+
+/* ---- 9. Sticky + heat-mapped data tables ---- */
+.pro-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line); border-radius: var(--radius); }
+.pro-table-wrap table { min-width: max-content; }
+.pro-table-wrap thead th { position: sticky; top: 0; z-index: 3;
+  background: var(--surface-2); backdrop-filter: blur(6px); }
+.pro-table-wrap tbody td.team, .pro-table-wrap thead th.team {
+  position: sticky; left: 0; z-index: 2; background: var(--surface); }
+.pro-table-wrap thead th.team { z-index: 4; background: var(--surface-2); }
+
+/* ---- 10. Focus/glow accents — reserved, one per view ---- */
+.pro-glow { box-shadow: var(--glow-accent) !important; border-color: rgba(53,226,143,.5) !important; }
+
+/* ---- 11. Live toast restyle ---- */
+.live-toast { font-family: var(--font-body); border-radius: 999px; }
+
+/* ---- 12. Footer ---- */
+.footer-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+
+/* ---- 13. Responsive header ---- */
+@media (max-width: 940px) {
+  .pro-navtoggle { display: inline-block; }
+  .pro-topnav { display: none; flex-basis: 100%; flex-direction: column; margin: 8px 0 0; }
+  .pro-topnav.open { display: flex; }
+  .pro-topnav a { border: 1px solid var(--line); }
+  .pro-skins { order: -1; }
+}
+@media (max-width: 640px) {
+  .pro-hero h1 { font-size: 24px; }
+  main { padding: 20px 14px 80px; }
+  .pro-header-inner { padding: 11px 14px; }
+}
+
+/* ---- 14. Card-per-row table collapse on small screens for the big ledgers ---- */
+@media (max-width: 600px) {
+  .pro-stack-sm table.rank.players thead { display: none; }
+  .pro-stack-sm table.rank.players tbody tr {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px;
+    border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; padding: 10px 12px; }
+  .pro-stack-sm table.rank.players tbody td { text-align: left; border: none; padding: 3px 0; }
+  .pro-stack-sm table.rank.players tbody td.team { grid-column: 1 / -1; font-weight: 700; }
+  .pro-stack-sm table.rank.players tbody td::before {
+    content: attr(data-lab) " "; color: var(--muted); font-size: 10px; text-transform: uppercase; }
+}

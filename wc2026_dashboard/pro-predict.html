@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prediction Lab — Stats Lab Pro</title>
+<script>
+  var _v = Date.now();
+  document.write('<link rel="stylesheet" href="styles.css?v=' + _v + '">');
+  document.write('<link rel="stylesheet" href="pro.css?v=' + _v + '">');
+</script>
+<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="pro.css" /></noscript>
+</head>
+<body class="pro" data-page="predict">
+
+<header class="site"><div class="pro-header-inner" id="proHeader"></div></header>
+<div class="pro-subnav-wrap"><div class="pro-subnav" id="proSubnav"></div></div>
+
+<main>
+  <section class="pro-section" data-sub="power" data-sub-label="Power Rank">
+    <div class="pro-hero">
+      <p class="eyebrow">Power Index · Knockout Simulation</p>
+      <h1>Prediction Lab</h1>
+      <p>A single <b>Power Index</b> for the 32 teams in the Round of 32, blending each side's pre-tournament
+         FIFA ranking with how they've actually played — recency-weighted form, finishing &amp; shot-stopping
+         quality, and squad quality. Those ratings then simulate every knockout tie to a predicted champion.</p>
+    </div>
+
+    <div class="explainer">
+      <h3>How the Power Index &amp; predictions work</h3>
+      <p>Every team starts from its <b>FIFA/Coca-Cola World Ranking</b> points (11 June 2026). Three capped
+         adjustments sit on top: <b>Form</b> (±100, recency-weighted pts/GD/xGD per game plus finishing &amp;
+         shot-stopping), and <b>Squad</b> (±55, a best-XI rating proxy vs the field average).</p>
+      <p>For each knockout tie the Power Index gap becomes a win probability via an Elo-style curve (100-pt edge ≈ 64%).
+         The higher-rated side is projected to advance; real results replace projections as ties are played.
+         A deterministic favourites-advance projection, not a full bracket-probability sim.</p>
+    </div>
+
+    <div class="stats-strip" id="predStats"></div>
+
+    <div class="card full-card">
+      <h3>Power Index — Round-of-32 teams</h3>
+      <p class="hint">Ranked by Power Index. <b>FIFA</b> = pre-tournament points; <b>xGD/g</b> = recency-weighted
+         expected goal difference per game; <b>Form</b> = combined form + finishing/shot-stopping; <b>Squad</b> = best-XI rating.</p>
+      <div class="pro-table-wrap" id="powerTable"></div>
+    </div>
+
+    <div class="card full-card" id="powerKOCard" style="display:none">
+      <h3>Power Index — Quarter-finals and beyond</h3>
+      <p class="hint">Once the Round of 16 is finished, survivors get an updated Power Index folding in their knockout
+         run. <b>Δ</b> is places gained/lost vs the Round-of-32 ranking; <b>Why</b> spells out the run.</p>
+      <div class="pro-table-wrap" id="powerKOTable"></div>
+    </div>
+
+    <div class="card full-card" id="champCard">
+      <h3>Predicted champion</h3>
+      <div id="predChampion"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Predicted road to the final</h3>
+      <p class="hint">Every tie from the Round of 32 to the final, as projected by the Power Index model. The side
+         tipped to go through is highlighted with its win probability and likely scoreline.</p>
+      <div id="predRounds"></div>
+    </div>
+
+    <div class="card full-card" id="sourcesCard">
+      <h3>Sources</h3>
+      <p class="hint">FIFA world-ranking points are the <b>FIFA/Coca-Cola Men's World Ranking</b> published 11 June 2026.
+         Group-stage form &amp; xG come from this site's own scraped match data.</p>
+      <ul class="src-list">
+        <li><a href="https://inside.fifa.com/fifa-world-ranking/men" target="_blank" rel="noopener">FIFA/Coca-Cola Men's World Ranking — inside.fifa.com</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/FIFA_Men%27s_World_Ranking" target="_blank" rel="noopener">FIFA Men's World Ranking — Wikipedia</a></li>
+        <li><b>FotMob</b> &amp; <b>WhoScored</b> — match results, xG and the event stream scraped for this dashboard.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footer-note" id="footerNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  (function () {
+    var v = Date.now(), s = document;
+    ["ratings.js", "data.js", "players.js", "shots.js", "breaks.js",
+     "database/manifest.js", "pro/shell.js", "app.js"].forEach(function (src) {
+      s.write('<scr' + 'ipt src="' + src + '?v=' + v + '"></scr' + 'ipt>');
+    });
+  })();
+</script>
+</body>
+</html>

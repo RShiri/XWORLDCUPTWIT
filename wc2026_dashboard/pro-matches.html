@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Matches — Stats Lab Pro</title>
+<script>
+  var _v = Date.now();
+  document.write('<link rel="stylesheet" href="styles.css?v=' + _v + '">');
+  document.write('<link rel="stylesheet" href="pro.css?v=' + _v + '">');
+</script>
+<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="pro.css" /></noscript>
+</head>
+<body class="pro" data-page="matches">
+
+<header class="site"><div class="pro-header-inner" id="proHeader"></div></header>
+<div class="pro-subnav-wrap"><div class="pro-subnav" id="proSubnav"></div></div>
+
+<main>
+  <!-- FIXTURES & RESULTS -->
+  <section class="pro-section" data-sub="fixtures" data-sub-label="Fixtures & Results">
+    <div class="pro-hero">
+      <p class="eyebrow">Fixtures · Results · Team Totals</p>
+      <h1>Matches</h1>
+      <p>Every fixture and result in one place. Tap a played match to open its full head-to-head stat line,
+         or jump into the interactive Match Centre. <a href="pro-leagues.html" style="color:var(--accent)">View full bracket →</a></p>
+    </div>
+    <div class="controls">
+      <div class="seg">
+        <button id="mModeList" class="seg-btn active">Fixtures &amp; results</button>
+        <button id="mModeTeam" class="seg-btn">Team totals</button>
+      </div>
+      <input id="mSearch" type="text" placeholder="Search a team…" />
+      <select id="mStatus">
+        <option value="all">All matches</option>
+        <option value="played">Played only</option>
+        <option value="upcoming">Upcoming only</option>
+        <option value="xg">With xG data</option>
+      </select>
+    </div>
+    <div id="mListView">
+      <p class="hint" style="margin:0 0 12px;color:var(--muted);font-size:12.5px">
+        xG comes from our own logistic-regression model. The <span class="xg-cmp">avg</span> tag means it's the
+        <b>average of our model and FotMob's xG</b>; without it, FotMob didn't publish xG so the value is our model alone.
+      </p>
+      <div id="matchList"></div>
+    </div>
+    <div id="mTeamView" style="display:none">
+      <div class="pro-table-wrap"><div id="teamTable"></div></div>
+      <p class="hint" style="margin-top:10px;color:var(--muted);font-size:12.5px">Averages are per game played. Tap a column header to sort.</p>
+    </div>
+  </section>
+
+  <!-- COOLING BREAKS (pane-split) -->
+  <section class="pro-section" data-sub="breaks" data-sub-label="Match Conditions">
+    <div id="view-breaks" hidden></div>
+    <div class="pro-hero">
+      <p class="eyebrow">Cooling Breaks · Momentum</p>
+      <h1>Match Conditions</h1>
+      <p>What the two cooling breaks (~min 23 and ~min 74) actually do to a game — momentum blends window xG,
+         field tilt and possession, measured against the churn of ordinary 7-minute windows.</p>
+    </div>
+    <div class="stats-strip" id="bkStats"></div>
+    <div class="pro-split">
+      <aside class="pro-rail">
+        <h4>Controls</h4>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Break</div>
+          <div class="seg" id="bkBr">
+            <button class="seg-btn active" data-v="1">Break 1</button>
+            <button class="seg-btn" data-v="2">Break 2</button>
+          </div>
+        </div>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Window</div>
+          <div class="seg" id="bkWin">
+            <button class="seg-btn" data-v="300">5 min</button>
+            <button class="seg-btn active" data-v="420">7 min</button>
+            <button class="seg-btn" data-v="600">10 min</button>
+          </div>
+        </div>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Stage</div>
+          <div class="seg" id="bkStage">
+            <button class="seg-btn" data-v="G">Group stage</button>
+            <button class="seg-btn active" data-v="all">All matches</button>
+          </div>
+        </div>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Match</div>
+          <select id="bkMatch" style="width:100%"></select>
+        </div>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Dominance rule</div>
+          <div class="seg" id="bkDom" style="flex-wrap:wrap">
+            <button class="seg-btn active" data-v="auto">Score, else momentum</button>
+            <button class="seg-btn" data-v="score">Scoreline only</button>
+            <button class="seg-btn" data-v="mom">Momentum only</button>
+          </div>
+        </div>
+      </aside>
+      <div class="pro-canvas">
+        <div class="card">
+          <h3 id="bkRiverTitle">Momentum river</h3>
+          <p class="hint">The rolling momentum balance (above 0 = home on top). Shaded bands are the cooling
+             breaks, the dashed line is half-time, ⚽ marks goals. Pick a match — or click a bar in the strip.</p>
+          <div id="bkRiver"></div>
+          <div class="chart-tip" id="bkRiverTip"></div>
+        </div>
+        <div class="card">
+          <h3 id="bkStripTitle">Who got shaken — every match</h3>
+          <p class="hint">One bar per match: how far the momentum shift across this break sits above (or below)
+             the tournament's ordinary window-to-window churn (μ). Bars past +1σ are the higher-than-average games.</p>
+          <div id="bkStrip"></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Pace before → after</h3>
+            <p class="hint">Per in-play minute, both teams pooled, across all matches with this break.</p>
+            <div id="bkPace"></div>
+          </div>
+          <div class="card">
+            <h3>Dominant vs chasing side</h3>
+            <p class="hint">Mean momentum index before → after the break. The grey band is the
+               regression-to-mean control.</p>
+            <div id="bkDominance"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note" id="footerNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  (function () {
+    var v = Date.now(), s = document;
+    ["ratings.js", "data.js", "players.js", "shots.js", "breaks.js",
+     "database/manifest.js", "pro/shell.js", "app.js"].forEach(function (src) {
+      s.write('<scr' + 'ipt src="' + src + '?v=' + v + '"></scr' + 'ipt>');
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Team Analytics — Stats Lab Pro</title>
+<script>
+  var _v = Date.now();
+  document.write('<link rel="stylesheet" href="styles.css?v=' + _v + '">');
+  document.write('<link rel="stylesheet" href="pro.css?v=' + _v + '">');
+</script>
+<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="pro.css" /></noscript>
+</head>
+<body class="pro" data-page="teams">
+
+<header class="site"><div class="pro-header-inner" id="proHeader"></div></header>
+<div class="pro-subnav-wrap"><div class="pro-subnav" id="proSubnav"></div></div>
+
+<main>
+  <!-- TEAM LAB -->
+  <section class="pro-section" data-sub="teamlab" data-sub-label="Team Lab">
+    <div id="view-teamlab" hidden></div>
+    <div class="pro-hero">
+      <p class="eyebrow">Shot Maps · xG Heatmaps · Style</p>
+      <h1>Team Lab</h1>
+      <p>Where every chance comes from, and how each team likes to play. Pick a team to see its shot map and a
+         style fingerprint against the tournament — or leave it on <i>All teams</i> for the whole picture.</p>
+    </div>
+    <div class="so-controls">
+      <label>Team<select id="tlTeam"></select></label>
+      <label>Compare<select id="tlTeamB"></select></label>
+      <label>Compare<select id="tlTeamC"></select></label>
+      <label>Shots
+        <select id="tlFilter">
+          <option value="all">All shots</option>
+          <option value="ot">On target</option>
+          <option value="goal">Goals only</option>
+        </select>
+      </label>
+      <label>Situation
+        <select id="tlSit">
+          <option value="all">All situations</option>
+          <option value="open">Open play</option>
+          <option value="set">Set pieces</option>
+          <option value="pen">Penalties</option>
+        </select>
+      </label>
+      <label>View
+        <select id="tlMode">
+          <option value="dots">Shot dots</option>
+          <option value="heat">xG heatmap</option>
+        </select>
+      </label>
+    </div>
+    <div class="stats-strip" id="tlStats"></div>
+    <div class="card full-card">
+      <h3 id="tlMapTitle">Shot map</h3>
+      <p class="hint">Attacking <b>↑</b> (toward the top goal). In <b>Shot dots</b> mode each dot is a shot, sized
+         by xG: goals pink, on-target blue, off-target grey. Switch to <b>xG heatmap</b> to shade by chance quality.</p>
+      <div class="tl-maps" id="tlMaps"></div>
+      <div class="chart-tip" id="tlMapTip">Tap any shot to see its details.</div>
+    </div>
+    <div class="card full-card" id="tlStyleCard">
+      <h3 id="tlStyleTitle">Style fingerprint</h3>
+      <p class="hint">Each spoke is a <b>percentile</b> versus all other teams (further out = more of that trait).
+         Comparing teams overlays them in different colours.</p>
+      <div class="so-radar-wrap" id="tlRadar"></div>
+      <div class="tl-legend" id="tlLegend"></div>
+    </div>
+  </section>
+
+  <!-- xG EFFICIENCY LAB -->
+  <section class="pro-section" data-sub="xg" data-sub-label="xG Lab">
+    <div class="pro-hero">
+      <p class="eyebrow">Expected Goals · Efficiency</p>
+      <h1>xG Efficiency Lab</h1>
+      <p>Do teams score as much as the quality of their chances says they should? These charts compare
+         <b>expected goals (xG)</b> with what actually happened.</p>
+    </div>
+    <div class="explainer">
+      <h3>New here? What is xG?</h3>
+      <p><b>Expected goals (xG)</b> rates every shot by how likely it was to be scored, from 0 to 1. Add up a
+         team's shots and you get how many goals an <i>average</i> finisher would have scored from those chances.</p>
+      <p><b>We built the model ourselves.</b> Every shot is scored by a blend of logistic regression and gradient
+         boosting, trained on <b>~78,000 real shots</b>. <b>Expected assists (xA)</b> works the same way for passes,
+         trained on <b>2.4 million real passes</b>.</p>
+    </div>
+    <div class="stats-strip" id="xgStats"></div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Did chances turn into goals?</h3>
+        <p class="hint">Every dot is one team's performance in one match: expected (across →) vs actual (up ↑).
+           Above the dashed line = clinical finishing; below = chances wasted.</p>
+        <div class="scatter-wrap" id="scatter"></div>
+      </div>
+      <div class="card">
+        <h3>How closely do goals follow xG?</h3>
+        <p class="hint">If xG were perfect, goals would track it exactly. This measures how strong that link is.</p>
+        <div id="corrBox"></div>
+        <div class="insight" id="corrInsight"></div>
+      </div>
+    </div>
+    <div class="card full-card">
+      <h3>Games by chance quality</h3>
+      <p class="hint">Every team-match bucketed by xG produced; under each bar, avg xG → avg goals scored.
+         <b style="color:var(--good)">Green over-delivered</b>, <b style="color:var(--bad)">red under-delivered</b>.</p>
+      <div id="xgDist"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Finishing: goals scored minus xG</h3>
+      <p class="hint"><b style="color:var(--good)">Green = clinical</b>, <b style="color:var(--bad)">red = wasteful</b>.</p>
+      <div class="bars" id="finishingBars"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Attack vs. defence quality</h3>
+      <p class="hint">Placed by attack danger (right = more/better chances created) and defensive meanness (up = fewer allowed).</p>
+      <div class="scatter-wrap" id="quadrant"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Are teams getting the points they deserve?</h3>
+      <p class="hint"><b>Expected points</b> vs real points: above the line = winning more than performances merit.</p>
+      <div class="scatter-wrap" id="xpts"></div>
+      <div class="insight" id="xptsInsight"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Quality vs quantity of shots</h3>
+      <p class="hint">Shots per game (→) vs average xG per shot (↑ = better chances).</p>
+      <div class="scatter-wrap" id="shotquality"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Is there a home advantage?</h3>
+      <p class="hint">Average xG created by teams listed as "home" vs "away".</p>
+      <div id="homeAway"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Team-by-team xG ledger</h3>
+      <p class="hint">Click any column header to sort. <b>xG</b> created; <b>xGA</b> allowed; <b>G−xG</b> finishing; <b>xGD</b> = out-chance margin.</p>
+      <div class="pro-table-wrap" id="ledger"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Did the team that "deserved" it actually win?</h3>
+      <p class="hint">For every game with xG, whether the side with more xG got the result.</p>
+      <div class="pro-table-wrap" id="agreement"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Unluckiest results (deserved more)</h3>
+      <p class="hint">Games where the side that out-created their opponent by the most xG still failed to win.</p>
+      <div class="pro-table-wrap" id="unlucky"></div>
+    </div>
+  </section>
+
+  <!-- STANDOUTS -->
+  <section class="pro-section" data-sub="standouts" data-sub-label="Standouts">
+    <div id="view-standouts" hidden></div>
+    <div class="pro-hero">
+      <p class="eyebrow">Distributions · Anomalies · Radars</p>
+      <h1>Standouts — Every Dot Is a Player</h1>
+      <p>Pick a stat and see the whole tournament's distribution at once. The curve is how all players spread out,
+         the dashed line is the average, and each dot is one player.</p>
+    </div>
+    <div class="so-controls">
+      <label>Stat<select id="soStat"></select></label>
+      <label>Position
+        <select id="soPos">
+          <option value="all">All outfield + GK</option>
+          <option value="FWD">Attackers</option>
+          <option value="MID">Midfielders</option>
+          <option value="DEF">Defenders</option>
+          <option value="GK">Goalkeepers</option>
+        </select>
+      </label>
+      <label>Minimum minutes
+        <select id="soMins">
+          <option value="0">Any</option>
+          <option value="90" selected>90+</option>
+          <option value="180">180+</option>
+          <option value="270">270+</option>
+        </select>
+      </label>
+      <label>Spotlight player
+        <input id="soPlayer" list="soPlayerList" placeholder="Type a name…" autocomplete="off">
+        <datalist id="soPlayerList"></datalist>
+      </label>
+    </div>
+    <div class="stats-strip" id="soStats"></div>
+    <div class="card full-card">
+      <h3 id="soChartTitle">Distribution</h3>
+      <p class="hint" id="soChartHint">Every qualifying player placed by their value for the chosen stat.</p>
+      <div class="so-chart-wrap" id="soChart"></div>
+      <div class="chart-tip" id="soChartTip">Tap any dot to see the player.</div>
+      <div class="insight" id="soSpotlight"></div>
+    </div>
+    <div class="card full-card">
+      <h3>The unique ones — biggest anomalies</h3>
+      <p class="hint">The players furthest above the field for the chosen stat, ranked by <b>σ over average</b>.</p>
+      <div id="soStandouts"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Two-stat scatter — find the complete players</h3>
+      <p class="hint">Plot every player on two stats at once; dot size carries a third. Start from a preset:</p>
+      <div class="so-presets" id="soPresets"></div>
+      <div class="so-controls">
+        <label>X axis<select id="soScX"></select></label>
+        <label>Y axis<select id="soScY"></select></label>
+        <label>Dot size<select id="soScSize"></select></label>
+        <label>Position
+          <select id="soScPos">
+            <option value="all">All outfield + GK</option>
+            <option value="FWD">Attackers</option>
+            <option value="MID">Midfielders</option>
+            <option value="DEF">Defenders</option>
+            <option value="GK">Goalkeepers</option>
+          </select>
+        </label>
+        <label>Minimum minutes
+          <select id="soScMins">
+            <option value="0">Any</option>
+            <option value="90">90+</option>
+            <option value="180" selected>180+</option>
+            <option value="270">270+</option>
+          </select>
+        </label>
+      </div>
+      <div class="so-chart-wrap" id="soScatter"></div>
+      <div class="chart-tip" id="soScatterTip">Tap any dot to see the player.</div>
+      <div class="insight" id="soScInsight"></div>
+    </div>
+    <div class="card full-card">
+      <h3>Player radar — percentile profile</h3>
+      <p class="hint">How the spotlight player ranks against peers in the same position (90+ minutes). Each spoke is a percentile.</p>
+      <div class="so-radar-wrap" id="soRadar"></div>
+    </div>
+  </section>
+
+  <!-- EXPORT -->
+  <section class="pro-section" data-sub="export" data-sub-label="Export">
+    <div class="pro-hero">
+      <p class="eyebrow">CSV · SQLite · Raw JSON</p>
+      <h1>Full Database</h1>
+      <p>The complete dataset behind this site — results, per-game team stats, per-game and aggregate player stats,
+         and standings. Download the tables as CSV, the whole thing as SQLite, or browse the raw match files.</p>
+    </div>
+    <div class="data-grid" id="dataDownloads"></div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>SQLite database</h3>
+      <p class="hint">One file with every table, ready for SQL queries in any tool (DB Browser for SQLite, Python, etc.).</p>
+      <a class="png-btn" id="sqliteLink" href="database/wc2026.sqlite" download>⬇ wc2026.sqlite</a>
+    </div>
+    <div class="card full-card" style="margin-top:18px">
+      <h3>Raw match files</h3>
+      <p class="hint" id="rawNote">The original scraped JSON for every match (FotMob + WhoScored merged) lives in <code>wc2026/matches/</code>.</p>
+    </div>
+  </section>
+
+  <div class="footer-note" id="footerNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  (function () {
+    var v = Date.now(), s = document;
+    ["ratings.js", "data.js", "players.js", "shots.js", "breaks.js",
+     "database/manifest.js", "pro/shell.js", "app.js"].forEach(function (src) {
+      s.write('<scr' + 'ipt src="' + src + '?v=' + v + '"></scr' + 'ipt>');
+    });
+  })();
+</script>
+</body>
+</html>

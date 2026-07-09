@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Player Stats — Stats Lab Pro</title>
+<script>
+  var _v = Date.now();
+  document.write('<link rel="stylesheet" href="styles.css?v=' + _v + '">');
+  document.write('<link rel="stylesheet" href="pro.css?v=' + _v + '">');
+</script>
+<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="pro.css" /></noscript>
+</head>
+<body class="pro" data-page="players">
+
+<header class="site"><div class="pro-header-inner" id="proHeader"></div></header>
+<div class="pro-subnav-wrap"><div class="pro-subnav" id="proSubnav"></div></div>
+
+<main>
+  <!-- LEADERBOARDS -->
+  <section class="pro-section pro-stack-sm" data-sub="leaders" data-sub-label="Leaderboards">
+    <div class="pro-hero">
+      <p class="eyebrow">Aggregated · Every Played Match</p>
+      <h1>Player Statistics</h1>
+      <p>Goals, assists, ratings, shots, key passes, cards and more — from the WhoScored player feeds and event
+         stream. xG and xA come from <b>our own shot model</b>, trained on 11,830 real shots.</p>
+    </div>
+    <div class="stats-strip" id="playerLeaders"></div>
+    <div class="controls">
+      <div class="seg" id="playerPresets">
+        <button class="seg-btn active" data-preset="ga">G + A</button>
+        <button class="seg-btn" data-preset="g">Goals</button>
+        <button class="seg-btn" data-preset="a">Assists</button>
+        <button class="seg-btn" data-preset="rating">Rating</button>
+        <button class="seg-btn" data-preset="xg">xG</button>
+        <button class="seg-btn" data-preset="keyPasses">Creativity</button>
+      </div>
+      <input id="playerSearch" type="text" placeholder="Search a player…" />
+      <select id="playerTeam"><option value="">All teams</option></select>
+    </div>
+    <div class="pro-table-wrap"><div id="playersTable"></div></div>
+    <p class="hint" style="margin-top:10px;color:var(--muted);font-size:12.5px">Min. = minutes · Rt = average match rating · xG± = goals minus xG (finishing).</p>
+
+    <div class="pro-hero" style="margin-top:34px">
+      <p class="eyebrow">Top Eight</p>
+      <h1 style="font-size:22px">Leaderboards</h1>
+    </div>
+    <div class="lboards" id="playerBoards"></div>
+  </section>
+
+  <!-- PLAYER LAB (pane-split) -->
+  <section class="pro-section" data-sub="lab" data-sub-label="Player Lab">
+    <div id="view-playerlab" hidden></div>
+    <div class="pro-hero">
+      <p class="eyebrow">Head-to-Head · Percentile Radar · Action Maps</p>
+      <h1>Player Lab</h1>
+      <p>Pick a <b>team</b>, then a <b>player</b> — and optionally a second to compare. Tournament totals, a
+         percentile radar vs all players, head-to-head bars, and shot / take-on / pass maps.</p>
+    </div>
+    <div class="pro-split">
+      <aside class="pro-rail">
+        <h4>Teams</h4>
+        <div class="pl-badges" id="plBadges"></div>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Player</div>
+          <select id="plMain" style="width:100%"></select>
+        </div>
+        <div>
+          <div class="pro-labfoot" style="border:none;margin:0 0 6px;padding:0">Compare</div>
+          <select id="plCompare" style="width:100%"></select>
+        </div>
+      </aside>
+      <div class="pro-canvas">
+        <div class="stats-strip" id="plStats"></div>
+        <div class="pl-grid" style="display:grid;grid-template-columns:1fr;gap:18px">
+          <div class="card">
+            <h3 class="pl-h">Percentile radar <span class="pl-sub" style="color:var(--muted);font-weight:400;font-size:12px">vs all tournament players (90+ min)</span></h3>
+            <div id="plRadar"></div>
+            <div class="pl-legend" id="plRadarLegend"></div>
+          </div>
+          <div class="card" id="plBarsCard" style="display:none">
+            <h3 class="pl-h" id="plCompareTitle"></h3>
+            <div id="plCompareBody"></div>
+          </div>
+          <div class="card">
+            <div class="pl-maps-head">
+              <span class="pl-name-a" id="plHeatNameA"></span>
+              <span class="pl-name-b" id="plHeatNameB"></span>
+            </div>
+            <div class="pl-heat-grid" id="plHeatGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note" id="footerNote"></div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  (function () {
+    var v = Date.now(), s = document;
+    ["ratings.js", "data.js", "players.js", "shots.js", "breaks.js",
+     "database/manifest.js", "pro/shell.js", "app.js"].forEach(function (src) {
+      s.write('<scr' + 'ipt src="' + src + '?v=' + v + '"></scr' + 'ipt>');
+    });
+  })();
+</script>
+</body>
+</html>
