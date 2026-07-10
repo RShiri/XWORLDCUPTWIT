@@ -95,3 +95,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,away,fotmob,0,2,52,5,1,524,86,0,0,6,13,46,0.14,5
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,France,Morocco,home,whoscored,2,0,48,22,13,517,88,5,5,2,10,62,,
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,away,whoscored,0,2,52,5,2,558,85,0,0,12,13,38,,
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,home,fotmob,2,1,68,17,8,665,90,2,0,1,13,51,2.1,5
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,away,fotmob,1,2,32,5,2,314,78,1,0,6,18,49,0.37,1
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,home,whoscored,2,1,68,17,13,713,88,2,0,3,13,44,,
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,away,whoscored,1,2,32,5,4,343,76,1,0,11,18,56,,
