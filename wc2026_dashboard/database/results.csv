@@ -98,4 +98,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_sou
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Quarterfinal,Boston Stadium,France,Morocco,2,0,3.21,0.16,avg,3.37,0.18,3.05,0.14
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Quarterfinal,Los Angeles Stadium,Spain,Belgium,2,1,1.98,0.44,avg,1.99,0.53,1.96,0.34
 2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Quarterfinal,Miami Stadium,Norway,England,1,2,0.86,1.19,avg,0.95,1.41,0.77,0.96
-2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Quarterfinal,Kansas City Stadium,Argentina,Switzerland,3,1,2.42,0.58,avg,2.84,0.64,2.0,0.53
+2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Quarterfinal,Kansas City Stadium,Argentina,Switzerland,3,1,2.39,0.55,avg,2.84,0.64,1.94,0.47
