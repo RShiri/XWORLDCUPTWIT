@@ -3058,19 +3058,19 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,484526,Zakaria El Ouahdi,Sub,0,23,0,0,0,0,6.0,0.0,0,0,7,7,0,17,1,0,0,0,1,1,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,332823,Unai Simon,GK,1,97,0,0,0,0,5.8,0.0,0,0,33,24,0,44,1,0,1,0,0,1,0,1
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,362352,Pedro Porro,DR,1,97,0,0,0,0,6.8,0.04,1,0,75,66,1,101,4,1,0,2,4,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,122117,Aymeric Laporte,DC,1,97,0,0,1,0,6.4,0.0,0,0,67,64,0,73,1,1,1,0,1,2,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,498386,Pau Cubarsi,DC,1,97,0,0,1,0,7.1,0.03,1,1,91,89,2,106,1,2,2,0,1,5,0,0
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,122117,Aymeric Laporte,DC,1,97,0,0,1,0,6.4,0.0,0,0,67,64,0,73,1,1,1,0,1,2,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,363496,Marc Cucurella,DL,1,97,0,0,0,0,6.5,0.04,1,1,47,43,1,60,1,0,0,0,1,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,294193,Fabian Ruiz,DMC,1,54,1,0,0,0,7.0,0.59,2,1,40,35,1,51,2,0,0,0,0,1,1,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,303139,Rodri,DMC,1,97,0,0,0,0,6.8,0.07,1,0,104,98,2,118,1,0,0,0,0,2,0,0
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,294193,Fabian Ruiz,DMC,1,54,1,0,0,0,7.0,0.59,2,1,40,35,1,51,2,0,0,0,0,1,1,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,480249,Lamine Yamal,AMR,1,97,0,0,0,0,7.3,0.38,6,2,46,39,0,81,2,0,0,4,2,0,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,261212,Dani Olmo,AMC,1,85,0,0,0,0,6.7,0.12,2,1,42,41,1,57,0,0,1,2,0,0,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,395242,Alex Baena,AML,1,54,0,0,0,0,6.2,0.09,1,0,28,22,1,41,1,0,0,0,2,0,1,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,298839,Mikel Oyarzabal,FW,1,78,0,0,0,0,6.8,0.05,1,1,25,22,2,33,2,1,0,0,1,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,238916,Mikel Merino,Sub,0,12,1,0,0,0,7.1,0.56,1,1,4,4,1,8,0,0,1,0,1,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,349760,Ferran Torres,Sub,0,43,0,0,0,0,6.0,0.0,0,0,12,8,0,16,0,0,0,0,0,0,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,402197,Pedri,Sub,0,43,0,0,0,0,6.2,0.0,0,0,43,37,1,49,2,0,1,0,0,0,1,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,408449,Nico Williams,Sub,0,19,0,0,0,0,6.1,0.0,0,0,7,6,0,12,0,0,0,0,0,1,0,0
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,402197,Pedri,Sub,0,43,0,0,0,0,6.2,0.0,0,0,43,37,1,49,2,0,1,0,0,0,1,0
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,349760,Ferran Torres,Sub,0,43,0,0,0,0,6.0,0.0,0,0,12,8,0,16,0,0,0,0,0,0,1,0
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,238916,Mikel Merino,Sub,0,12,1,0,0,0,7.1,0.56,1,1,4,4,1,8,0,0,1,0,1,1,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,73798,Thibaut Courtois,GK,1,70,0,0,0,0,7.2,0.0,0,0,29,22,0,38,0,0,0,0,0,1,0,4
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,141169,Timothy Castagne,DR,1,97,0,1,0,0,6.8,0.0,0,0,25,17,1,41,2,0,0,0,0,2,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,129832,Brandon Mechele,DC,1,97,0,0,0,0,6.8,0.0,0,0,36,33,0,51,3,2,3,0,1,8,0,0
@@ -3084,8 +3084,8 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,386390,Charles De Ketelaere,FW,1,97,1,0,0,0,6.9,0.41,2,1,20,10,0,32,1,0,5,0,0,0,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,25191,Axel Witsel,Sub,0,38,0,0,1,0,5.9,0.0,0,0,5,4,0,9,0,0,1,0,2,1,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,78498,Romelu Lukaku,Sub,0,38,0,0,0,0,5.9,0.0,0,0,4,1,0,5,0,0,1,0,1,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,365308,Alexis Saelemaekers,Sub,0,12,0,0,0,0,6.1,0.0,0,0,2,1,0,5,0,0,0,1,0,0,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,402184,Senne Lammens,Sub,0,27,0,0,0,0,5.4,0.0,0,0,13,7,0,15,0,0,0,0,0,0,0,2
+2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,365308,Alexis Saelemaekers,Sub,0,12,0,0,0,0,6.1,0.0,0,0,2,1,0,5,0,0,0,1,0,0,0,0
 2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,483461,Joaquin Seys,Sub,0,37,0,0,0,0,6.3,0.0,0,0,7,5,0,15,1,0,0,0,0,3,0,0
 2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,39187,rjan Nyland,GK,1,122,0,0,0,0,6.6,0.0,0,0,43,24,1,51,0,0,0,0,0,0,0,6
 2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,320436,Julian Ryerson,DR,1,59,0,0,0,0,6.9,0.0,0,0,12,11,2,24,7,0,0,0,2,4,0,0
