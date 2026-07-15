@@ -3289,8 +3289,30 @@
   function renderBestXI() {
     var host = document.getElementById("bestXI");
     if (!host) return;
+    // Deep-run bonus: a Team of the Tournament should lean toward players still playing
+    // in the final stages, not group-stage peaks from eliminated sides. Each player's
+    // pick score = avg rating + DEEP_BONUS per knockout round their team reached — a
+    // finalist gets +0.75, a round-of-32 exit +0.15. Sides already RESOLVED into an
+    // unplayed tie count as having reached it (the finalists rank as finalists before
+    // kick-off), so the XI shifts by itself as the bracket advances.
+    var runIdx = { R32: 1, R16: 2, QF: 3, SF: 4, TP: 4, F: 5 };
+    var runName = { 1: "Round of 32", 2: "Round of 16", 3: "Quarter-final", 4: "Semi-final", 5: "Final" };
+    var deep = {};
+    var K = buildKnockout();
+    if (K) Object.keys(K.rounds).forEach(function (rd) {
+      (K.rounds[rd] || []).forEach(function (m) {
+        if (m.played && m.hs != null)
+          [m.home, m.away].forEach(function (t) { deep[t] = Math.max(deep[t] || 0, runIdx[rd]); });
+        else [0, 1].forEach(function (i) {
+          var s = koSide(K, m, i);
+          if (s.team) deep[s.team] = Math.max(deep[s.team] || 0, runIdx[rd]);
+        });
+      });
+    });
+    var DEEP_BONUS = 0.15;   // per knockout round reached
+    function xiScore(p) { return p.rating + DEEP_BONUS * (deep[p.team] || 0); }
     var pool = PLAYERS.filter(function (p) { return (p.mins || 0) >= 180 && p.rating != null; })
-      .sort(function (a, b) { return b.rating - a.rating; });
+      .sort(function (a, b) { return xiScore(b) - xiScore(a); });
     var used = {};
     function take(roles, n) {
       var out = [];
@@ -3332,7 +3354,8 @@
       line.forEach(function (p, i) {
         var x = W * (i + 1) / (line.length + 1), y = rowY[li];
         var tip = p.name + " (" + p.team + ") · " + p.pos + " · rating " + p.rating.toFixed(2) +
-          " · " + p.g + "G " + (p.a || 0) + "A · " + p.mins + "′";
+          " · " + p.g + "G " + (p.a || 0) + "A · " + p.mins + "′ · run: " +
+          (deep[p.team] ? runName[deep[p.team]] : "Group stage");
         svg.push('<g class="axi-node"><title>' + esc(tip) + "</title>" +
           '<circle cx="' + x + '" cy="' + y + '" r="24" fill="#1b2440" stroke="#3ddc97" stroke-width="1.4"/>' +
           '<image href="' + LOGO + encodeURIComponent(p.team) + '.png" x="' + (x - 15) + '" y="' + (y - 15) +
