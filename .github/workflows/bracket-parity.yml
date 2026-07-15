@@ -1,0 +1,21 @@
+# Bracket parity guardrail — fails the build if the pipeline's knockout resolver and
+# the dashboard's bracket ever disagree, if a team lands in two ties of one round
+# (the "Spain in both semis" bug), or if the third-place/final would resolve to the
+# wrong teams before a scrape. Stdlib-only and fast (<5s).
+name: bracket-parity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run bracket parity checks
+        run: python3 tests/test_bracket_parity.py
