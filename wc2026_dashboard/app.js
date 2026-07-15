@@ -3311,8 +3311,16 @@
     });
     var DEEP_BONUS = 0.15;   // per knockout round reached
     function xiScore(p) { return p.rating + DEEP_BONUS * (deep[p.team] || 0); }
+    // Equal scores are common (same avg rating, same team run — e.g. two team-mates at
+    // 7.16). Don't let players.js array order decide the shirt: break ties on tournament
+    // peak rating, then on minutes played — at the same average, the bigger body of
+    // evidence wins.
     var pool = PLAYERS.filter(function (p) { return (p.mins || 0) >= 180 && p.rating != null; })
-      .sort(function (a, b) { return xiScore(b) - xiScore(a); });
+      .sort(function (a, b) {
+        return (xiScore(b) - xiScore(a)) ||
+               ((b.rating_best || 0) - (a.rating_best || 0)) ||
+               ((b.mins || 0) - (a.mins || 0));
+      });
     var used = {};
     function take(roles, n) {
       var out = [];
