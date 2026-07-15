@@ -199,5 +199,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,away,2,1,52,14,11,682,91,3,1,7,8,53,1.19
 2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Argentina,Switzerland,home,3,1,59,22,14,734,89,4,2,7,14,58,2.39
 2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Switzerland,Argentina,away,1,3,41,11,8,512,84,1,0,11,18,42,0.55
-2026_07_14_Winner_QF_1_vs_Winner_QF_2,2026-07-14,France,Spain,home,0,2,49,10,5,517,84,0,0,3,11,45,0.34
-2026_07_14_Winner_QF_1_vs_Winner_QF_2,2026-07-14,Spain,France,away,2,0,51,10,5,529,86,3,1,5,12,55,1.79
+2026_07_14_Winner_QF_1_vs_Winner_QF_2,2026-07-14,France,Spain,home,0,2,49,10,5,517,84,0,0,3,11,46,0.35
+2026_07_14_Winner_QF_1_vs_Winner_QF_2,2026-07-14,Spain,France,away,2,0,51,10,5,530,85,3,1,5,12,54,1.8
