@@ -250,11 +250,27 @@
     if (g3) return g3[1].split("").map(function (g) { var gr = D.standings && D.standings[g]; return gr && gr[2] ? gr[2].team : ("3" + g); });
     return [];
   }
+  // Teams that can still emerge as the LOSER of match m — what a "Loser_SF_n" slot
+  // (the third-place play-off) actually feeds on. A decided tie narrows to its beaten
+  // side; an undecided one leaves everyone still alive in the tie as a possible loser.
+  function koLoserCands(K, m) {
+    if (!m) return [];
+    if (m.played && m.hs != null && m.as != null) {
+      if (m.hs !== m.as) return [m.hs > m.as ? m.away : m.home];
+      if (m.hpen != null && m.apen != null && m.hpen !== m.apen) return [m.hpen > m.apen ? m.away : m.home];
+      return [];
+    }
+    return koCands(K, m);   // unplayed: any remaining participant could lose it
+  }
   // {team, label} for one side of a knockout fixture (team = null when not narrowed to one).
   function koSide(K, m, idx) {
     if (m.played && m.hs != null) { var t = idx === 0 ? m.home : m.away; return { team: t, label: t, possible: [t] }; }
+    var rawSide = K.strip(m.id).split("_vs_")[idx];
     var poss;
-    if (m._kids && m._kids[idx]) poss = koCands(K, m._kids[idx]);
+    if (m._kids && m._kids[idx])
+      // A "Loser_SF_n" side (third-place play-off) advances the BEATEN semi-finalist —
+      // following koCands here would promote the winner into the bronze match.
+      poss = /^Loser_/.test(rawSide) ? koLoserCands(K, m._kids[idx]) : koCands(K, m._kids[idx]);
     else {
       var code = K.strip(m.id).split("_vs_")[idx], r = K.resolveSlot(code);
       if (r.team) return { team: r.team, label: r.team, possible: [r.team] };

@@ -50,6 +50,17 @@ FIFA_THIRD_ALLOC = {
     "BDEFIJKL": {"A": "E", "B": "J", "D": "B", "E": "D", "G": "I", "I": "F", "K": "L", "L": "K"},
 }
 
+# Official FIFA R16 bracket order (matches 89..96), keyed by each tie's sorted R32-slot
+# signature. Kept in sync with app.js buildKnockout R16_ORDER. This numbering (EF1..EF8)
+# decides which quarter-final — and thus which semi-final half — each R16 winner feeds:
+# EF1..EF4 → QF1/QF2 → SF1, EF5..EF8 → QF3/QF4 → SF2. Kickoff/date order is NOT the bracket
+# order (same-day R16 ties are not in bracket order), so getting it wrong swaps whole
+# quarters between the semi-finals. Pin it explicitly; unlisted ties fall back to date order.
+R16_ORDER = [
+    "1E3ABCDF|1I3CDFGH", "1F2C|2A2B", "1H2J|2K2L", "1D3BEFIJ|1G3AEHIJ",
+    "1C2F|2E2I", "1A3CEFHI|1L3EHIJK", "1J2H|2D2G", "1B3EFGIJ|1K3DEIJL",
+]
+
 
 def _norm(name: str) -> str:
     return NAME_MAP.get(name, name)
@@ -184,6 +195,18 @@ def _ref_nums(slot_id: str, tag: str) -> list:
     return [int(a or b) for a, b in re.findall(r"Winner_%s_(\d)|Loser_%s_(\d)" % (tag, tag), slot_id)]
 
 
+def _r16_rank(m: dict) -> int:
+    """Position of an R16 tie in the official FIFA bracket order (99 if unlisted).
+
+    Keyed by the tie's sorted R32-slot signature (e.g. ``1F2C|2A2B``), mirroring app.js
+    ``r16rank`` so the pipeline numbers EF1..EF8 exactly as the dashboard bracket does."""
+    sig = "|".join(sorted(m["_sid"].split("_vs_")))
+    try:
+        return R16_ORDER.index(sig)
+    except ValueError:
+        return 99
+
+
 class _Tree:
     """Links each knockout match to its two feeder ties, mirroring app.js buildKnockout."""
     def __init__(self, matches: list):
@@ -197,8 +220,12 @@ class _Tree:
             m["_sid"], m["_ix"] = sid, ix
             rounds[rd].append(m)
             self.by_slot[sid] = m
-        for k in ("R32", "R16", "QF", "SF"):
+        for k in ("R32", "QF", "SF"):
             rounds[k].sort(key=lambda m: (m["date"], m["_ix"]))
+        # R16 (EF) numbering must follow the OFFICIAL FIFA bracket order (R16_ORDER), NOT
+        # kickoff order — same-day R16 ties are not in bracket order, and a wrong EF number
+        # cascades into the wrong QF/SF half. Mirrors app.js buildKnockout's R16 sort.
+        rounds["R16"].sort(key=lambda m: (_r16_rank(m), m["date"], m["_ix"]))
         self.rounds = rounds
         r32by = {}
         for m in rounds["R32"]:
@@ -241,6 +268,21 @@ def _winner_of(m: dict):
     hp, ap = m.get("hpen"), m.get("apen")
     if hp is not None and ap is not None and hp != ap:
         return m["home"] if hp > ap else m["away"]
+    return None
+
+
+def _loser_of(m: dict):
+    """Loser of a played knockout tie, penalty-shootout aware — what a ``Loser_SF_n``
+    slot (the third-place play-off) feeds on. None until the tie is decided."""
+    if not (m and m["played"]):
+        return None
+    if m["hs"] > m["as"]:
+        return m["away"]
+    if m["as"] > m["hs"]:
+        return m["home"]
+    hp, ap = m.get("hpen"), m.get("apen")
+    if hp is not None and ap is not None and hp != ap:
+        return m["away"] if hp > ap else m["home"]
     return None
 
 
@@ -304,6 +346,11 @@ def resolve_fixture(fotmob_id, ctx: dict | None = None) -> tuple:
             return None
         kids = match.get("_kids")
         if kids and idx < len(kids) and kids[idx] is not None:
+            # A "Loser_SF_n" side (third-place play-off) takes the BEATEN semi-finalist.
+            # Resolving the winner here would send the scraper after the FINAL's teams
+            # and overwrite the bronze-match stub with the wrong game.
+            if sid_side(match, idx).startswith("Loser_"):
+                return _loser_of(kids[idx])
             return _winner_of(kids[idx])           # winner of the feeder tie
         return resolve_slot(sid_side(match, idx))  # group/third slot
 
