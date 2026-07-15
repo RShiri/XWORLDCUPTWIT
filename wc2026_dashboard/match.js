@@ -318,11 +318,28 @@
       var xgRA = t > 0 ? xgUpTo("away", t) / t : baseRateA;
       var w = t / (t + T0);
       var rateH = (1 - w) * baseRateH + w * xgRH, rateA = (1 - w) * baseRateA + w * xgRA;
+      // Game state: a side chasing a deficit pushes (rate up ~25% per goal down, capped
+      // at two), the side protecting a lead manages the game (rate down ~15%). Without
+      // this, a trailing team is priced off its own starved in-match xG — France '26 SF
+      // (0.40 xG all game) flat-lined at 0% from the second goal, which no in-play
+      // model would show while a comeback was still mathematically live.
+      var d = cH - cA;
+      if (d < 0) { rateH *= 1 + 0.25 * Math.min(2, -d); rateA *= 0.85; }
+      else if (d > 0) { rateA *= 1 + 0.25 * Math.min(2, d); rateH *= 0.85; }
+      // Residual threat: blended rates never drop below half the pre-match base — a
+      // World Cup side always carries some chance of the next goal, however blunt its
+      // xG has been so far.
+      rateH = Math.max(rateH, 0.5 * baseRateH);
+      rateA = Math.max(rateA, 0.5 * baseRateA);
       var pr = P3(clamp(rateH, 0, 10) * R, clamp(rateA, 0, 10) * R, cH, cA);
       var pW = pr[0], pD = pr[1], pL = pr[2];
       if (isKO) return [(pW + pD / 2) * 100, (pL + pD / 2) * 100, 0];
       return [pW * 100, pL * 100, pD * 100];
     }
+    // Display honesty: a live 0.6% is a sliver reading "<1%", never a flat 0 glued to
+    // the axis — only the full-time endpoint may sit at a true 0/100.
+    function liveCl(v) { return Math.max(0.8, Math.min(99.2, v)); }
+    function fmtPct(p) { return p > 0 && p < 1 ? "<1" : p > 99 && p < 100 ? ">99" : String(Math.round(p)); }
 
     // sample every minute + a sharp kink either side of each goal minute
     var goalMins = {};
@@ -333,7 +350,7 @@
       times.push(t);
     }
     var ptsH = [], ptsA = [], ptsD = [];
-    times.forEach(function (tt) { var wp = wpAt(tt); ptsH.push([tt, wp[0]]); ptsA.push([tt, wp[1]]); ptsD.push([tt, wp[2]]); });
+    times.forEach(function (tt) { var wp = wpAt(tt); ptsH.push([tt, liveCl(wp[0])]); ptsA.push([tt, liveCl(wp[1])]); ptsD.push([tt, wp[2]]); });
 
     // force the endpoint to the true result (level KO → shootout winner)
     var finH, finA;
@@ -341,7 +358,7 @@
     if (hs != null && as != null && hs !== as) { finH = hs > as ? 100 : 0; finA = 100 - finH; }
     else if (isKO && D.home.pens != null && D.away.pens != null) { finH = D.home.pens > D.away.pens ? 100 : 0; finA = 100 - finH; }
     else { var lw = wpAt(maxMin); finH = lw[0]; finA = lw[1]; }
-    if (isKO) {
+    if (finH === 100 || finH === 0) {   // decided (on goals or pens) → snap the lines to the truth
       ptsH[ptsH.length - 1] = [maxMin, finH]; ptsA[ptsA.length - 1] = [maxMin, finA];
     }
     var finD = isKO ? 0 : ptsD[ptsD.length - 1][1];
@@ -466,7 +483,7 @@
     function crest(name, col, y, pct) {
       var ex = sx(maxMin);
       return '<image href="' + LOGO + encodeURIComponent(name) + '.png" x="' + (ex - 15).toFixed(1) + '" y="' + (y - 15).toFixed(1) + '" width="30" height="30"/>' +
-        '<text x="' + (ex + 18).toFixed(1) + '" y="' + (y + 4.5).toFixed(1) + '" text-anchor="start" font-size="13.5" font-weight="bold" fill="' + col + '">' + Math.round(pct) + '%</text>';
+        '<text x="' + (ex + 18).toFixed(1) + '" y="' + (y + 4.5).toFixed(1) + '" text-anchor="start" font-size="13.5" font-weight="bold" fill="' + col + '">' + fmtPct(pct) + '%</text>';
     }
     svg.push(crest(D.home.name, colH, yH, finH));
     svg.push(crest(D.away.name, colA, yA, finA));
@@ -480,9 +497,9 @@
     svg.push("</svg>");
 
     var legend = '<div class="mv-mom-legend">' +
-      '<span><i style="background:' + colH + '"></i>' + esc(D.home.name) + " — <b>" + Math.round(finH) + "%</b> win</span>" +
-      '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + Math.round(finA) + "%</b> win</span>" +
-      (isKO ? "" : '<span><i style="background:' + colD + '"></i>Draw — <b>' + Math.round(finD) + "%</b></span>") +
+      '<span><i style="background:' + colH + '"></i>' + esc(D.home.name) + " — <b>" + fmtPct(finH) + "%</b> win</span>" +
+      '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + fmtPct(finA) + "%</b> win</span>" +
+      (isKO ? "" : '<span><i style="background:' + colD + '"></i>Draw — <b>' + fmtPct(finD) + "%</b></span>") +
       "</div>";
     host.innerHTML = '<p class="hint">Live <b>win probability</b> — seeded at kickoff from the FIFA-ranking gap, then updated each minute by the running score and live xG. ' +
       (isKO ? "A level knockout resolves to the shootout winner. " : "The grey line is the draw chance. ") +
@@ -513,7 +530,7 @@
       return Math.round((xv - padL) / plotW * maxMin);
     }
     function rowHTML(c, nm, v) {
-      return '<div class="t-line"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + c + ';margin-right:6px;vertical-align:middle"></i>' + esc(nm) + ' <b>' + Math.round(v) + '%</b></div>';
+      return '<div class="t-line"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + c + ';margin-right:6px;vertical-align:middle"></i>' + esc(nm) + ' <b>' + fmtPct(v) + '%</b></div>';
     }
     function readoutHTML(mn) {
       return '<div class="t-team">' + mn + "′</div>" + rowHTML(colH, D.home.name, valAt(ptsH, mn)) +
@@ -541,8 +558,8 @@
       var mn = minuteAt(e);
       if (mn == null) return;
       showCross(mn);
-      tip.textContent = mn + "′ · " + D.home.name + " " + Math.round(valAt(ptsH, mn)) + "% · " +
-        D.away.name + " " + Math.round(valAt(ptsA, mn)) + "%" + (isKO ? "" : " · Draw " + Math.round(valAt(ptsD, mn)) + "%");
+      tip.textContent = mn + "′ · " + D.home.name + " " + fmtPct(valAt(ptsH, mn)) + "% · " +
+        D.away.name + " " + fmtPct(valAt(ptsA, mn)) + "%" + (isKO ? "" : " · Draw " + fmtPct(valAt(ptsD, mn)) + "%");
       tip.classList.add("show");
     });
   }
