@@ -3030,6 +3030,323 @@
     wireChartTaps("bkRiver", "bkRiverTip");
   }
 
+  /* ======================= STORY OF THE TOURNAMENT ======================= */
+  /* The post-final centrepiece, written to degrade gracefully BEFORE the final:
+     every section renders from whatever has been played so far, and the hero/roads
+     complete themselves the moment the final's data lands (renderStory is also on
+     the live-update path, so a page left open flips to "champions" by itself).
+     All client-side from D.matches + PLAYERS + SHOTS + AGG — no new data files. */
+  function stDecided(m) {
+    if (!m || !m.played || m.hs == null) return null;
+    if (m.hs !== m.as) return m.hs > m.as ? m.home : m.away;
+    if (m.hpen != null && m.apen != null && m.hpen !== m.apen) return m.hpen > m.apen ? m.home : m.away;
+    return null;
+  }
+  function stScoreStr(m) {
+    var pens = m.hs === m.as && m.hpen != null && m.apen != null;
+    return m.hs + "–" + m.as + (pens ? " (" + m.hpen + "–" + m.apen + " p)" : "");
+  }
+  function renderStory() {
+    var hero = document.getElementById("storyHero");
+    if (!hero) return;
+    var K = buildKnockout();   // fresh tree each render — respects live-updated results
+    var played = D.matches.filter(function (m) { return m.played && m.hs != null; });
+
+    // match id → round chip text ("Quarter-final" / "Group C")
+    var roundOfId = {};
+    if (K) Object.keys(K.rounds).forEach(function (rd) {
+      (K.rounds[rd] || []).forEach(function (m) { roundOfId[m.id] = rd; });
+    });
+    function stageChip(m) {
+      var rd = roundOfId[m.id];
+      if (rd) return STAGE_LABEL[rd] || rd;
+      var g = (D.teamGroup && (D.teamGroup[m.home] || D.teamGroup[m.away])) || "";
+      return g ? "Group " + g : "Group stage";
+    }
+
+    /* ---- hero ---- */
+    var fin = K && K.fin, tp = K && K.tp;
+    var champion = fin ? stDecided(fin) : null;
+    if (champion) {
+      var runnerUp = champion === fin.home ? fin.away : fin.home;
+      var third = tp ? stDecided(tp) : null;
+      hero.className = "story-hero champ";
+      hero.innerHTML =
+        logoImg(champion, "hero-flag") +
+        '<div><div class="hero-kicker">World Cup 2026</div>' +
+        '<div class="hero-title">🏆 ' + esc(champion) + " are world champions</div>" +
+        '<div class="hero-sub">Beat ' + esc(runnerUp) + " " + stScoreStr(fin) + " in the final" +
+        (third ? " · Bronze: " + esc(third) + " (" + stScoreStr(tp) + ")" : "") + "</div></div>";
+    } else if (fin) {
+      var fh = koSide(K, fin, 0), fa = koSide(K, fin, 1);
+      hero.className = "story-hero";
+      hero.innerHTML =
+        '<div class="hero-flags">' +
+          (fh.team ? logoImg(fh.team, "hero-flag") : "") +
+          (fa.team ? logoImg(fa.team, "hero-flag") : "") + "</div>" +
+        '<div><div class="hero-kicker">World Cup 2026 · Final — ' + esc(fmtDate(fin.date) || fin.date) + "</div>" +
+        '<div class="hero-title">' + esc(fh.label) + ' <span class="hero-vs">vs</span> ' + esc(fa.label) + "</div>" +
+        '<div class="hero-sub">The bracket fills this in by itself as the semi-finals are decided.</div></div>';
+    } else {
+      hero.className = "story-hero";
+      hero.innerHTML = '<div><div class="hero-title">The tournament so far</div></div>';
+    }
+
+    /* ---- headline numbers ---- */
+    var goals = 0, xgSum = 0, xgN = 0, shootouts = 0, koPlayed = 0;
+    played.forEach(function (m) {
+      goals += m.hs + m.as;
+      if (m.model_xg_home != null) { xgSum += m.model_xg_home + m.model_xg_away; xgN++; }
+      if (m.hpen != null && m.apen != null) shootouts++;
+      if (roundOfId[m.id]) koPlayed++;
+    });
+    var sWrap = document.getElementById("storyStats");
+    sWrap.innerHTML = "";
+    [["v accent", played.length, "Matches played"],
+     ["v", goals, "Goals"],
+     ["v blue", played.length ? (goals / played.length).toFixed(2) : "–", "Goals per game"],
+     ["v", xgN ? (xgSum / xgN).toFixed(2) : "–", "xG per game"],
+     ["v", koPlayed, "Knockout ties played"],
+     ["v", shootouts, "Penalty shootouts"]].forEach(function (it) {
+      var s = el("div", "stat");
+      s.innerHTML = '<div class="' + it[0] + '">' + it[1] + '</div><div class="k">' + it[2] + "</div>";
+      sWrap.appendChild(s);
+    });
+
+    /* ---- the finalists' roads ---- */
+    var roads = document.getElementById("storyRoads");
+    roads.innerHTML = "";
+    document.getElementById("storyRoadTitle").textContent =
+      champion ? "The road to the trophy" : "The road to the final";
+    function roadFor(team, crownClass) {
+      var steps = played.filter(function (m) { return m.home === team || m.away === team; })
+        .sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      var html = steps.map(function (m) {
+        var home = m.home === team;
+        var opp = home ? m.away : m.home;
+        var gf = home ? m.hs : m.as, ga = home ? m.as : m.hs;
+        var pf = home ? m.hpen : m.apen, pa = home ? m.apen : m.hpen;
+        var res = gf > ga ? "W" : gf < ga ? "L" : (pf != null && pa != null && pf !== pa) ? (pf > pa ? "W" : "L") : "D";
+        var pens = gf === ga && pf != null && pa != null;
+        return '<a class="road-step ' + res + '" href="match.html?id=' + encodeURIComponent(m.id) + '">' +
+          '<div class="rs-stage">' + esc(stageChip(m)) + "</div>" +
+          '<div class="rs-line">' + logoImg(opp) + '<span class="rs-opp">' + esc(opp) + "</span>" +
+          '<span class="rs-score">' + gf + "–" + ga + (pens ? " (" + pf + "–" + pa + ")" : "") + "</span></div></a>";
+      }).join("");
+      var road = el("div", "road" + (crownClass ? " " + crownClass : ""));
+      road.innerHTML = '<div class="road-head">' + logoImg(team) + "<span>" + esc(team) + "</span>" +
+        (crownClass === "champ-road" ? '<span class="road-tag">🏆 champions</span>' : "") + "</div>" +
+        '<div class="road-steps">' + html + "</div>";
+      roads.appendChild(road);
+    }
+    if (fin) {
+      [0, 1].forEach(function (idx) {
+        var s = koSide(K, fin, idx);
+        if (s.team) roadFor(s.team, champion === s.team ? "champ-road" : "");
+        else {
+          var pend = el("div", "road");
+          pend.innerHTML = '<div class="road-head"><span>' + esc(s.label) + "</span></div>" +
+            '<div class="road-steps"><span class="road-step pending">Decided in the semi-final — the winner\'s full road appears here.</span></div>';
+          roads.appendChild(pend);
+        }
+      });
+    }
+
+    /* ---- Golden Boot race (single-series bars; badges carry identity) ---- */
+    var sc = PLAYERS.filter(function (p) { return p.g > 0; }).sort(function (a, b) {
+      return b.g - a.g || (b.a || 0) - (a.a || 0) || (a.mins || 0) - (b.mins || 0);
+    }).slice(0, 8);
+    var gMax = sc.length ? sc[0].g : 1;
+    document.getElementById("storyScorers").innerHTML = sc.map(function (p, i) {
+      return '<div class="sc-row" title="' + esc(p.name + " (" + p.team + ") — " + p.g + " goals, " +
+          (p.a || 0) + " assists, " + (p.mins || 0) + " mins") + '">' +
+        '<span class="sc-rank">' + (i + 1) + "</span>" + logoImg(p.team) +
+        '<span class="sc-name">' + esc(p.name) + "</span>" +
+        '<span class="sc-bar-wrap"><span class="sc-bar" style="width:' + (p.g / gMax * 100).toFixed(1) + '%"></span></span>' +
+        '<span class="sc-val">' + p.g + "</span>" +
+        '<span class="sc-sub">' + (p.a || 0) + "A · " + (p.xg || 0).toFixed(1) + " xG</span></div>";
+    }).join("") || '<p class="hint">No goals yet.</p>';
+
+    /* ---- biggest upsets (pre-tournament FIFA points → Elo win prob) ---- */
+    var ups = [];
+    played.forEach(function (m) {
+      var w = stDecided(m);
+      if (!w) return;                                   // draws can't be upsets
+      var l = w === m.home ? m.away : m.home;
+      var pw = FIFA_PTS[w], pl = FIFA_PTS[l];
+      if (pw == null || pl == null || pw >= pl) return; // favourite won → not an upset
+      ups.push({ m: m, w: w, l: l, p: winProb(pw, pl), gap: Math.round(pl - pw) });
+    });
+    ups.sort(function (a, b) { return a.p - b.p; });
+    var upHost = document.getElementById("storyUpsets");
+    upHost.innerHTML = ups.slice(0, 6).map(function (u) {
+      return '<div class="up-row" data-id="' + esc(u.m.id) + '">' + logoImg(u.w) +
+        '<span class="up-txt"><b>' + esc(u.w) + "</b> beat " + esc(u.l) + " " + stScoreStr(u.m) +
+        '<span class="up-sub">' + esc(stageChip(u.m)) + " · " + esc(fmtDate(u.m.date) || u.m.date) + "</span></span>" +
+        '<span class="up-prob"><span class="p">' + Math.round(u.p * 100) + "%</span>" +
+        '<span class="sub">−' + u.gap + " FIFA pts</span></span></div>";
+    }).join("") || '<p class="hint">No upsets yet — the favourites keep winning.</p>';
+    upHost.querySelectorAll(".up-row").forEach(function (r) {
+      r.addEventListener("click", function () {
+        window.location.href = "match.html?id=" + encodeURIComponent(r.dataset.id);
+      });
+    });
+
+    /* ---- records & numbers ---- */
+    var rec = [];
+    var big = null, most = null;
+    played.forEach(function (m) {
+      if (!big || Math.abs(m.hs - m.as) > Math.abs(big.hs - big.as)) big = m;
+      if (!most || m.hs + m.as > most.hs + most.as) most = m;
+    });
+    if (big) rec.push(["v accent", Math.abs(big.hs - big.as) + "-goal win",
+      big.home + " " + big.hs + "–" + big.as + " " + big.away]);
+    if (most) rec.push(["v", (most.hs + most.as) + " goals",
+      "Highest-scoring: " + most.home + " " + most.hs + "–" + most.as + " " + most.away]);
+    var fastest = null;
+    SHOTS.forEach(function (s) { if (s.g && (fastest == null || s.m < fastest.m)) fastest = s; });
+    if (fastest) rec.push(["v blue", fastest.m + "′", "Fastest goal — " + fastest.t + " vs " + fastest.o]);
+    var clin = null, wall = null;
+    AGG.forEach(function (a) {
+      if (a.n >= 3 && (!clin || a.attDelta > clin.attDelta)) clin = a;
+      if (a.n >= 3 && (!wall || a.ga / a.n < wall.ga / wall.n)) wall = a;
+    });
+    if (clin) rec.push(["v", "+" + clin.attDelta.toFixed(1), "Most clinical: " + clin.team + " (goals − xG)"]);
+    if (wall) rec.push(["v", (wall.ga / wall.n).toFixed(2), "Best defence: " + wall.team + " (GA per game)"]);
+    var glove = PLAYERS.filter(function (p) { return p.pos === "GK" && (p.mins || 0) >= 270; })
+      .sort(function (a, b) { return (b.gPrev || 0) - (a.gPrev || 0); })[0];
+    if (glove) rec.push(["v accent", "+" + (glove.gPrev || 0).toFixed(1),
+      "Goals prevented — " + glove.name + " (" + glove.team + ")"]);
+    var rWrap = document.getElementById("storyRecords");
+    rWrap.innerHTML = "";
+    rec.forEach(function (it) {
+      var s = el("div", "stat");
+      s.innerHTML = '<div class="' + it[0] + '">' + esc(it[1]) + '</div><div class="k">' + esc(it[2]) + "</div>";
+      rWrap.appendChild(s);
+    });
+  }
+
+  /* ======================= AWARDS ======================= */
+  /* Individual honours from the players.js aggregates. Golden Glove & Golden Ball use
+     minute floors so a one-cameo wonder can't top the table; Boot/Playmaker follow the
+     FIFA tiebreak rules. Best XI is position-aware (WhoScored role codes → 4-3-3 slots). */
+  function renderAwards() {
+    var host = document.getElementById("awardCards");
+    if (!host || !PLAYERS.length) return;
+    function rows(list, valFn, subFn) {
+      if (!list.length) return '<p class="hint">Not enough data yet.</p>';
+      return list.slice(0, 5).map(function (p, i) {
+        var medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i + 1);
+        return '<div class="fin-row' + (i === 0 ? " aw-lead" : "") + '"><div class="nm">' +
+          '<span class="aw-rank">' + medal + "</span>" + logoImg(p.team) +
+          "<span>" + esc(p.name) + '</span></div><div class="fin-stat">' +
+          '<span class="sub">' + subFn(p) + '</span><span class="lb-val">' + valFn(p) + "</span></div></div>";
+      }).join("");
+    }
+    function card(icon, title, hint, body) {
+      return '<div class="card award-card"><h3>' + icon + " " + title + '</h3><p class="hint">' +
+        hint + "</p>" + body + "</div>";
+    }
+    var byRating = PLAYERS.filter(function (p) { return (p.mins || 0) >= 270 && p.rating != null; })
+      .sort(function (a, b) { return b.rating - a.rating; });
+    var boot = PLAYERS.filter(function (p) { return p.g > 0; }).sort(function (a, b) {
+      return b.g - a.g || (b.a || 0) - (a.a || 0) || (a.mins || 0) - (b.mins || 0);
+    });
+    var play = PLAYERS.filter(function (p) { return (p.a || 0) > 0; }).sort(function (a, b) {
+      return (b.a || 0) - (a.a || 0) || (b.xa || 0) - (a.xa || 0);
+    });
+    var glove = PLAYERS.filter(function (p) { return p.pos === "GK" && (p.mins || 0) >= 270; })
+      .sort(function (a, b) { return (b.gPrev || 0) - (a.gPrev || 0); });
+    // Outfielders only — a keeper's long kicks count as progressive but aren't "engine" play.
+    var engine = PLAYERS.filter(function (p) { return (p.mins || 0) >= 180 && (p.progPasses || 0) > 0 && p.pos !== "GK"; })
+      .sort(function (a, b) { return (b.progPasses || 0) - (a.progPasses || 0); });
+    var winners = PLAYERS.filter(function (p) { return (p.mins || 0) >= 180; })
+      .map(function (p) { return Object.assign({}, p, { ti: (p.tackles || 0) + (p.interceptions || 0) }); })
+      .filter(function (p) { return p.ti > 0; })
+      .sort(function (a, b) { return b.ti - a.ti; });
+    host.innerHTML =
+      card("👑", "Golden Ball", "Best player — average match rating, min 270 minutes.",
+        rows(byRating, function (p) { return p.rating.toFixed(2); },
+          function (p) { return p.g + "G " + (p.a || 0) + "A · " + p.mins + "′"; })) +
+      card("⚽", "Golden Boot", "Top scorer. Ties break by assists, then fewer minutes.",
+        rows(boot, function (p) { return p.g; },
+          function (p) { return (p.a || 0) + "A · " + (p.xg || 0).toFixed(1) + " xG"; })) +
+      card("🎯", "Playmaker", "Most assists; expected assists break ties. KP = key passes.",
+        rows(play, function (p) { return p.a; },
+          function (p) { return (p.xa || 0).toFixed(1) + " xA · " + (p.keyPasses || 0) + " KP"; })) +
+      card("🧤", "Golden Glove", "Keeper shot-stopping: goals prevented = xG faced − conceded on pitch (min 270′).",
+        rows(glove, function (p) { return "+" + (p.gPrev || 0).toFixed(1); },
+          function (p) { return (p.xga || 0).toFixed(1) + " xGF · " + (p.gConcOn != null ? p.gConcOn : "–") + " GA"; })) +
+      card("⚙️", "The engine", "Progressive passes — successful passes moving play ≥15 units toward goal (min 180′).",
+        rows(engine, function (p) { return p.progPasses; },
+          function (p) { return ((p.progPasses || 0) / (p.mins || 1) * 90).toFixed(1) + " per 90"; })) +
+      card("🛡️", "Ball winner", "Tackles + interceptions (min 180′).",
+        rows(winners, function (p) { return p.ti; },
+          function (p) { return p.tackles + "T " + p.interceptions + "I"; }));
+    renderBestXI();
+  }
+
+  function renderBestXI() {
+    var host = document.getElementById("bestXI");
+    if (!host) return;
+    var pool = PLAYERS.filter(function (p) { return (p.mins || 0) >= 180 && p.rating != null; })
+      .sort(function (a, b) { return b.rating - a.rating; });
+    var used = {};
+    function take(roles, n) {
+      var out = [];
+      for (var i = 0; i < pool.length && out.length < n; i++) {
+        var p = pool[i];
+        if (used[p.pid] || roles.indexOf((p.pos || "").toUpperCase()) < 0) continue;
+        used[p.pid] = 1; out.push(p);
+      }
+      return out;
+    }
+    var gk = take(["GK"], 1);
+    var lb = take(["DL", "DML"], 1), cbs = take(["DC"], 2), rb = take(["DR", "DMR"], 1);
+    var mid = take(["DMC", "MC", "AMC", "ML", "MR", "DML", "DMR"], 3);
+    var lw = take(["AML", "FWL", "ML"], 1), st = take(["FW", "AMC"], 1), rw = take(["AMR", "FWR", "MR"], 1);
+    // Backfill any unfilled slot with the best remaining outfielder so the XI is always 11.
+    function fill(arr, n) {
+      for (var i = 0; i < pool.length && arr.length < n; i++) {
+        var p = pool[i];
+        if (used[p.pid] || p.pos === "GK") continue;
+        used[p.pid] = 1; arr.push(p);
+      }
+      return arr;
+    }
+    var lines = [
+      fill([].concat(lw, st, rw), 3),          // front three (attacking ↑ top)
+      fill(mid, 3),
+      fill([].concat(lb, cbs, rb), 4),
+      gk,
+    ];
+    var W = 460, H = 640;
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Best XI on a pitch">'];
+    svg.push('<rect x="6" y="6" width="' + (W - 12) + '" height="' + (H - 12) + '" rx="12" fill="#10231c" stroke="#2c4a3e"/>');
+    svg.push('<line x1="6" y1="' + (H / 2) + '" x2="' + (W - 6) + '" y2="' + (H / 2) + '" stroke="#2c4a3e"/>');
+    svg.push('<circle cx="' + (W / 2) + '" cy="' + (H / 2) + '" r="52" fill="none" stroke="#2c4a3e"/>');
+    svg.push('<rect x="' + (W / 2 - 110) + '" y="6" width="220" height="72" fill="none" stroke="#2c4a3e"/>');
+    svg.push('<rect x="' + (W / 2 - 110) + '" y="' + (H - 78) + '" width="220" height="72" fill="none" stroke="#2c4a3e"/>');
+    var rowY = [120, 285, 455, 580];
+    lines.forEach(function (line, li) {
+      line.forEach(function (p, i) {
+        var x = W * (i + 1) / (line.length + 1), y = rowY[li];
+        var tip = p.name + " (" + p.team + ") · " + p.pos + " · rating " + p.rating.toFixed(2) +
+          " · " + p.g + "G " + (p.a || 0) + "A · " + p.mins + "′";
+        svg.push('<g class="axi-node"><title>' + esc(tip) + "</title>" +
+          '<circle cx="' + x + '" cy="' + y + '" r="24" fill="#1b2440" stroke="#3ddc97" stroke-width="1.4"/>' +
+          '<image href="' + LOGO + encodeURIComponent(p.team) + '.png" x="' + (x - 15) + '" y="' + (y - 15) +
+            '" width="30" height="30" preserveAspectRatio="xMidYMid meet"/>' +
+          '<text x="' + x + '" y="' + (y + 40) + '" text-anchor="middle" fill="#e8edf7" font-size="12.5" font-weight="600">' +
+            esc(p.name.split(" ").slice(-1)[0]) + "</text>" +
+          '<text x="' + x + '" y="' + (y + 54) + '" text-anchor="middle" fill="#93a0bd" font-size="10.5">' +
+            p.rating.toFixed(2) + "</text></g>");
+      });
+    });
+    svg.push("</svg>");
+    host.innerHTML = svg.join("");
+  }
+
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
@@ -3055,6 +3372,8 @@
   initBreaks();
   renderData();
   renderPower();
+  renderStory();
+  renderAwards();
   document.getElementById("footerNote").textContent =
     "Data generated " + D.generated + " · " + D.counts.played + " matches played · " +
     D.counts.with_xg + " with xG · " + PLAYERS.length + " players · built from the WC2026 pipeline.";
@@ -3083,7 +3402,7 @@
     t._h = setTimeout(function () { t.classList.remove("show"); }, 4000);
   }
   function renderResultsViews() {
-    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches].forEach(function (fn) {
+    [renderOverviewStats, renderGroups, renderThirdPlace, renderBracket, renderMatches, renderStory].forEach(function (fn) {
       try { fn(); } catch (e) { /* keep going if one view fails */ }
     });
     try {

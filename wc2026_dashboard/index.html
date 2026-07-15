@@ -16,6 +16,8 @@
     </div>
     <nav class="tabs">
       <button data-view="tables" class="active">Tables</button>
+      <button data-view="story">Story</button>
+      <button data-view="awards">Awards</button>
       <button data-view="matches">Matches</button>
       <button data-view="players">Players</button>
       <button data-view="standouts">Standouts</button>
@@ -68,6 +70,58 @@
         <div class="bk-head" id="bracketHead"></div>
         <div id="bracket"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- STORY OF THE TOURNAMENT -->
+  <section id="view-story" class="view">
+    <div class="section-head">
+      <h2 id="storyTitle">Story of the Tournament</h2>
+      <p id="storySub">The 2026 World Cup, told by the data. Every section below builds itself from the
+         matches played so far — and the hero completes itself the moment the final is scraped.</p>
+    </div>
+    <div id="storyHero"></div>
+    <div class="stats-strip" id="storyStats"></div>
+    <div class="card full-card">
+      <h3 id="storyRoadTitle">The road to the final</h3>
+      <p class="hint">Each finalist's full run, group stage to the end. <b>Click any played match</b> to open
+         its Match Centre. A side still waiting on a semi-final shows the two candidates instead.</p>
+      <div class="story-roads" id="storyRoads"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Golden Boot race</h3>
+        <p class="hint">Top scorers — ties break by assists, then fewer minutes played (the FIFA rule).
+           The bar is goals; the small print is assists and our model's xG.</p>
+        <div id="storyScorers"></div>
+      </div>
+      <div class="card">
+        <h3>Biggest upsets</h3>
+        <p class="hint">Decisive results ranked by how unlikely the winner was on <b>pre-tournament FIFA
+           ranking points</b> (Elo-style win probability — lower % = bigger shock). Click a row to open the match.</p>
+        <div id="storyUpsets"></div>
+      </div>
+    </div>
+    <div class="card full-card">
+      <h3>Records &amp; numbers</h3>
+      <p class="hint">Tournament records straight from the scraped data — they update after every match.</p>
+      <div class="stats-strip" id="storyRecords"></div>
+    </div>
+  </section>
+
+  <!-- AWARDS -->
+  <section id="view-awards" class="view">
+    <div class="section-head">
+      <h2>Awards</h2>
+      <p>The individual honours race, straight from the data: match ratings, goals, chances created and
+         keeper shot-stopping (<b>goals prevented</b> = xG faced − goals conceded while on the pitch).
+         Standings update after every match and lock in when the final is played.</p>
+    </div>
+    <div class="awards-grid" id="awardCards"></div>
+    <div class="card full-card">
+      <h3>Best XI <span class="pl-sub">4-3-3 · min 180 minutes · picked by average match rating within each role</span></h3>
+      <p class="hint">The tournament's team of the moment. Hover a shirt for the player's numbers.</p>
+      <div class="axi-wrap" id="bestXI"></div>
     </div>
   </section>
 
