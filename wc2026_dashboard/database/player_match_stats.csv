@@ -3056,71 +3056,71 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,248144,Sofyan Amrabat,Sub,0,35,0,0,0,0,6.2,0.0,0,0,27,24,1,29,1,0,0,0,0,1,0,0
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,513409,Gessime Yassine,Sub,0,23,0,0,0,0,6.0,0.0,1,0,9,8,0,13,1,0,0,0,1,0,0,0
 2026_07_09_Winner_EF_1_vs_Winner_EF_2,2026-07-09,Morocco,France,484526,Zakaria El Ouahdi,Sub,0,23,0,0,0,0,6.0,0.0,0,0,7,7,0,17,1,0,0,0,1,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,332823,Unai Simon,GK,1,97,0,0,0,0,5.8,0.0,0,0,33,24,0,44,1,0,1,0,0,1,0,1
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,362352,Pedro Porro,DR,1,97,0,0,0,0,6.8,0.04,1,0,75,66,1,101,4,1,0,2,4,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,498386,Pau Cubarsi,DC,1,97,0,0,1,0,7.1,0.03,1,1,91,89,2,106,1,2,2,0,1,5,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,122117,Aymeric Laporte,DC,1,97,0,0,1,0,6.4,0.0,0,0,67,64,0,73,1,1,1,0,1,2,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,363496,Marc Cucurella,DL,1,97,0,0,0,0,6.5,0.04,1,1,47,43,1,60,1,0,0,0,1,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,303139,Rodri,DMC,1,97,0,0,0,0,6.8,0.07,1,0,104,98,2,118,1,0,0,0,0,2,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,294193,Fabian Ruiz,DMC,1,54,1,0,0,0,7.0,0.59,2,1,40,35,1,51,2,0,0,0,0,1,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,480249,Lamine Yamal,AMR,1,97,0,0,0,0,7.3,0.38,6,2,46,39,0,81,2,0,0,4,2,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,261212,Dani Olmo,AMC,1,85,0,0,0,0,6.7,0.12,2,1,42,41,1,57,0,0,1,2,0,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,395242,Alex Baena,AML,1,54,0,0,0,0,6.2,0.09,1,0,28,22,1,41,1,0,0,0,2,0,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,298839,Mikel Oyarzabal,FW,1,78,0,0,0,0,6.8,0.05,1,1,25,22,2,33,2,1,0,0,1,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,408449,Nico Williams,Sub,0,19,0,0,0,0,6.1,0.0,0,0,7,6,0,12,0,0,0,0,0,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,402197,Pedri,Sub,0,43,0,0,0,0,6.2,0.0,0,0,43,37,1,49,2,0,1,0,0,0,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,349760,Ferran Torres,Sub,0,43,0,0,0,0,6.0,0.0,0,0,12,8,0,16,0,0,0,0,0,0,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Spain,Belgium,238916,Mikel Merino,Sub,0,12,1,0,0,0,7.1,0.56,1,1,4,4,1,8,0,0,1,0,1,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,73798,Thibaut Courtois,GK,1,70,0,0,0,0,7.2,0.0,0,0,29,22,0,38,0,0,0,0,0,1,0,4
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,141169,Timothy Castagne,DR,1,97,0,1,0,0,6.8,0.0,0,0,25,17,1,41,2,0,0,0,0,2,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,129832,Brandon Mechele,DC,1,97,0,0,0,0,6.8,0.0,0,0,36,33,0,51,3,2,3,0,1,8,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,414495,Nathan Ngoy,DC,1,97,0,0,0,0,6.7,0.0,0,0,40,38,0,56,2,1,0,0,1,9,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,392647,Maxim De Cuyper,DL,1,60,0,0,0,0,6.4,0.04,1,0,21,16,0,29,1,1,0,1,2,2,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,243567,Hans Vanaken,DMC,1,59,0,0,0,0,6.2,0.0,0,0,16,12,0,20,1,1,1,0,0,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,399999,Nicolas Raskin,DMC,1,97,0,0,0,0,6.2,0.0,0,0,39,31,0,55,2,2,0,0,5,4,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,113994,Leandro Trossard,AMR,1,59,0,0,0,0,6.0,0.0,0,0,12,12,0,22,0,0,0,0,1,2,4,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,73084,Kevin De Bruyne,AMC,1,85,0,0,1,0,6.5,0.09,2,1,24,19,0,36,1,0,1,0,2,2,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,388098,Jeremy Doku,AML,1,97,0,0,0,0,7.0,0.0,0,0,19,15,1,50,4,2,0,5,3,0,1,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,386390,Charles De Ketelaere,FW,1,97,1,0,0,0,6.9,0.41,2,1,20,10,0,32,1,0,5,0,0,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,25191,Axel Witsel,Sub,0,38,0,0,1,0,5.9,0.0,0,0,5,4,0,9,0,0,1,0,2,1,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,78498,Romelu Lukaku,Sub,0,38,0,0,0,0,5.9,0.0,0,0,4,1,0,5,0,0,1,0,1,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,402184,Senne Lammens,Sub,0,27,0,0,0,0,5.4,0.0,0,0,13,7,0,15,0,0,0,0,0,0,0,2
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,365308,Alexis Saelemaekers,Sub,0,12,0,0,0,0,6.1,0.0,0,0,2,1,0,5,0,0,0,1,0,0,0,0
-2026_07_10_Winner_EF_5_vs_Winner_EF_6,2026-07-10,Belgium,Spain,483461,Joaquin Seys,Sub,0,37,0,0,0,0,6.3,0.0,0,0,7,5,0,15,1,0,0,0,0,3,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,39187,rjan Nyland,GK,1,122,0,0,0,0,6.6,0.0,0,0,43,24,1,51,0,0,0,0,0,0,0,6
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,320436,Julian Ryerson,DR,1,59,0,0,0,0,6.9,0.0,0,0,12,11,2,24,7,0,0,0,2,4,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,321085,Kristoffer Ajer,DC,1,122,0,0,1,0,6.8,0.34,1,0,55,47,0,69,4,1,2,1,1,5,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,364336,Torbjrn Heggem,DC,1,90,0,0,0,0,6.4,0.0,0,0,42,39,0,50,2,1,0,0,0,2,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,415341,David Mller Wolfe,DL,1,89,0,0,0,0,6.2,0.0,0,0,24,18,0,38,1,0,2,0,0,3,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,247454,Martin degaard,MC,1,122,0,1,0,0,7.0,0.02,1,1,93,80,2,107,2,1,0,2,0,0,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,320986,Patrick Berg,MC,1,122,0,0,0,0,6.3,0.06,1,0,35,34,0,50,5,0,0,1,1,0,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,321020,Sander Berge,MC,1,122,0,0,0,0,6.5,0.0,0,0,107,102,2,114,0,1,1,0,4,1,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,302497,Alexander Srloth,FWR,1,67,0,0,0,0,6.4,0.16,2,0,21,17,1,30,2,0,2,1,1,1,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,315227,Erling Haaland,FW,1,105,0,0,0,0,6.5,0.1,2,1,13,5,0,21,1,0,3,0,0,1,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,424588,Andreas Schjelderup,FWL,1,67,1,0,0,0,7.7,0.03,1,1,20,14,0,30,7,1,0,0,0,0,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,303544,Fredrik Aursnes,Sub,0,63,0,0,0,0,6.7,0.03,1,0,45,40,1,60,4,1,1,0,0,3,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,333048,Jrgen Strand Larsen,Sub,0,17,0,0,0,0,6.0,0.0,0,0,3,2,0,4,0,0,0,0,0,0,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,357133,Marcus Pedersen,Sub,0,33,0,0,0,0,6.0,0.0,0,0,14,14,0,18,1,0,0,0,1,0,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,369971,Leo stigard,Sub,0,32,0,0,0,0,6.1,0.0,0,0,15,15,0,17,0,0,1,0,0,1,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,416030,Antonio Nusa,Sub,0,55,0,0,0,0,6.2,0.13,3,1,14,10,0,33,2,1,0,0,0,0,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,Norway,England,430709,Oscar Bobb,Sub,0,55,0,0,0,0,6.2,0.07,1,0,20,20,2,35,3,1,0,0,0,0,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,110189,Jordan Pickford,GK,1,122,0,0,0,0,6.6,0.0,0,0,27,18,0,43,0,0,0,0,0,3,0,3
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,301440,Ezri Konsa,DR,1,88,0,0,0,0,6.9,0.0,0,0,53,52,0,68,1,2,3,1,0,2,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,101374,John Stones,DC,1,122,0,0,0,0,6.7,0.0,0,0,83,80,1,96,0,0,1,0,0,8,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,374631,Marc Guehi,DC,1,122,0,0,0,0,6.3,0.0,0,0,86,79,0,95,0,0,1,0,0,3,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,468847,Nico O'Reilly,DL,1,85,0,0,0,0,7.0,0.0,0,0,38,36,0,54,1,2,0,2,0,1,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,332325,Declan Rice,DMC,1,45,0,0,0,0,6.3,0.0,0,0,47,45,1,50,0,0,1,0,0,0,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,402596,Elliot Anderson,DMC,1,122,0,0,0,0,6.6,0.0,0,0,93,87,0,105,3,0,0,0,1,2,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,389935,Noni Madueke,AMR,1,45,0,0,0,0,6.4,0.0,0,0,16,16,0,28,1,0,0,1,1,0,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,379868,Jude Bellingham,AMC,1,110,2,0,0,0,8.5,0.96,5,2,41,34,0,64,1,1,0,3,1,1,2,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,349669,Anthony Gordon,AML,1,70,0,1,0,0,7.0,0.0,0,0,28,23,1,53,2,0,0,4,1,0,2,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,83532,Harry Kane,FW,1,122,0,0,0,0,6.0,0.17,3,2,21,15,1,37,2,0,3,0,1,2,2,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,82277,Dan Burn,Sub,0,12,0,0,0,0,6.2,0.0,0,0,1,1,0,4,0,0,1,0,0,3,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,332403,Eberechi Eze,Sub,0,77,0,0,0,0,6.8,0.04,1,0,16,14,2,34,1,0,0,3,1,1,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,361330,Reece James,Sub,0,52,0,0,0,0,6.7,0.0,0,0,30,27,0,46,2,0,1,0,1,3,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,362219,Djed Spence,Sub,0,37,0,0,0,0,7.0,0.1,1,1,14,12,0,31,2,1,1,1,0,4,1,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,362824,Morgan Rogers,Sub,0,34,0,0,0,0,6.2,0.02,1,1,13,13,0,23,1,0,0,0,0,1,0,0
-2026_07_12_Winner_EF_3_vs_Winner_EF_4,2026-07-11,England,Norway,367185,Bukayo Saka,Sub,0,77,0,0,0,0,7.7,0.13,3,2,19,15,2,43,3,1,0,2,1,1,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,332823,Unai Simon,GK,1,97,0,0,0,0,5.8,0.0,0,0,33,24,0,44,1,0,1,0,0,1,0,1
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,362352,Pedro Porro,DR,1,97,0,0,0,0,6.8,0.04,1,0,75,66,1,101,4,1,0,2,4,1,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,498386,Pau Cubarsi,DC,1,97,0,0,1,0,7.1,0.03,1,1,91,89,2,106,1,2,2,0,1,5,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,122117,Aymeric Laporte,DC,1,97,0,0,1,0,6.4,0.0,0,0,67,64,0,73,1,1,1,0,1,2,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,363496,Marc Cucurella,DL,1,97,0,0,0,0,6.5,0.04,1,1,47,43,1,60,1,0,0,0,1,1,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,303139,Rodri,DMC,1,97,0,0,0,0,6.8,0.07,1,0,104,98,2,118,1,0,0,0,0,2,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,294193,Fabian Ruiz,DMC,1,54,1,0,0,0,7.0,0.59,2,1,40,35,1,51,2,0,0,0,0,1,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,480249,Lamine Yamal,AMR,1,97,0,0,0,0,7.3,0.38,6,2,46,39,0,81,2,0,0,4,2,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,261212,Dani Olmo,AMC,1,85,0,0,0,0,6.7,0.12,2,1,42,41,1,57,0,0,1,2,0,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,395242,Alex Baena,AML,1,54,0,0,0,0,6.2,0.09,1,0,28,22,1,41,1,0,0,0,2,0,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,298839,Mikel Oyarzabal,FW,1,78,0,0,0,0,6.8,0.05,1,1,25,22,2,33,2,1,0,0,1,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,408449,Nico Williams,Sub,0,19,0,0,0,0,6.1,0.0,0,0,7,6,0,12,0,0,0,0,0,1,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,402197,Pedri,Sub,0,43,0,0,0,0,6.2,0.0,0,0,43,37,1,49,2,0,1,0,0,0,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,349760,Ferran Torres,Sub,0,43,0,0,0,0,6.0,0.0,0,0,12,8,0,16,0,0,0,0,0,0,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Spain,Belgium,238916,Mikel Merino,Sub,0,12,1,0,0,0,7.1,0.56,1,1,4,4,1,8,0,0,1,0,1,1,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,73798,Thibaut Courtois,GK,1,70,0,0,0,0,7.2,0.0,0,0,29,22,0,38,0,0,0,0,0,1,0,4
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,141169,Timothy Castagne,DR,1,97,0,1,0,0,6.8,0.0,0,0,25,17,1,41,2,0,0,0,0,2,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,129832,Brandon Mechele,DC,1,97,0,0,0,0,6.8,0.0,0,0,36,33,0,51,3,2,3,0,1,8,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,414495,Nathan Ngoy,DC,1,97,0,0,0,0,6.7,0.0,0,0,40,38,0,56,2,1,0,0,1,9,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,392647,Maxim De Cuyper,DL,1,60,0,0,0,0,6.4,0.04,1,0,21,16,0,29,1,1,0,1,2,2,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,243567,Hans Vanaken,DMC,1,59,0,0,0,0,6.2,0.0,0,0,16,12,0,20,1,1,1,0,0,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,399999,Nicolas Raskin,DMC,1,97,0,0,0,0,6.2,0.0,0,0,39,31,0,55,2,2,0,0,5,4,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,113994,Leandro Trossard,AMR,1,59,0,0,0,0,6.0,0.0,0,0,12,12,0,22,0,0,0,0,1,2,4,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,73084,Kevin De Bruyne,AMC,1,85,0,0,1,0,6.5,0.09,2,1,24,19,0,36,1,0,1,0,2,2,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,388098,Jeremy Doku,AML,1,97,0,0,0,0,7.0,0.0,0,0,19,15,1,50,4,2,0,5,3,0,1,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,386390,Charles De Ketelaere,FW,1,97,1,0,0,0,6.9,0.41,2,1,20,10,0,32,1,0,5,0,0,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,25191,Axel Witsel,Sub,0,38,0,0,1,0,5.9,0.0,0,0,5,4,0,9,0,0,1,0,2,1,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,78498,Romelu Lukaku,Sub,0,38,0,0,0,0,5.9,0.0,0,0,4,1,0,5,0,0,1,0,1,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,402184,Senne Lammens,Sub,0,27,0,0,0,0,5.4,0.0,0,0,13,7,0,15,0,0,0,0,0,0,0,2
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,365308,Alexis Saelemaekers,Sub,0,12,0,0,0,0,6.1,0.0,0,0,2,1,0,5,0,0,0,1,0,0,0,0
+2026_07_10_Winner_EF_3_vs_Winner_EF_4,2026-07-10,Belgium,Spain,483461,Joaquin Seys,Sub,0,37,0,0,0,0,6.3,0.0,0,0,7,5,0,15,1,0,0,0,0,3,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,39187,rjan Nyland,GK,1,122,0,0,0,0,6.6,0.0,0,0,43,24,1,51,0,0,0,0,0,0,0,6
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,320436,Julian Ryerson,DR,1,59,0,0,0,0,6.9,0.0,0,0,12,11,2,24,7,0,0,0,2,4,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,321085,Kristoffer Ajer,DC,1,122,0,0,1,0,6.8,0.34,1,0,55,47,0,69,4,1,2,1,1,5,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,364336,Torbjrn Heggem,DC,1,90,0,0,0,0,6.4,0.0,0,0,42,39,0,50,2,1,0,0,0,2,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,415341,David Mller Wolfe,DL,1,89,0,0,0,0,6.2,0.0,0,0,24,18,0,38,1,0,2,0,0,3,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,247454,Martin degaard,MC,1,122,0,1,0,0,7.0,0.02,1,1,93,80,2,107,2,1,0,2,0,0,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,320986,Patrick Berg,MC,1,122,0,0,0,0,6.3,0.06,1,0,35,34,0,50,5,0,0,1,1,0,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,321020,Sander Berge,MC,1,122,0,0,0,0,6.5,0.0,0,0,107,102,2,114,0,1,1,0,4,1,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,302497,Alexander Srloth,FWR,1,67,0,0,0,0,6.4,0.16,2,0,21,17,1,30,2,0,2,1,1,1,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,315227,Erling Haaland,FW,1,105,0,0,0,0,6.5,0.1,2,1,13,5,0,21,1,0,3,0,0,1,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,424588,Andreas Schjelderup,FWL,1,67,1,0,0,0,7.7,0.03,1,1,20,14,0,30,7,1,0,0,0,0,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,303544,Fredrik Aursnes,Sub,0,63,0,0,0,0,6.7,0.03,1,0,45,40,1,60,4,1,1,0,0,3,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,333048,Jrgen Strand Larsen,Sub,0,17,0,0,0,0,6.0,0.0,0,0,3,2,0,4,0,0,0,0,0,0,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,357133,Marcus Pedersen,Sub,0,33,0,0,0,0,6.0,0.0,0,0,14,14,0,18,1,0,0,0,1,0,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,369971,Leo stigard,Sub,0,32,0,0,0,0,6.1,0.0,0,0,15,15,0,17,0,0,1,0,0,1,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,416030,Antonio Nusa,Sub,0,55,0,0,0,0,6.2,0.13,3,1,14,10,0,33,2,1,0,0,0,0,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,Norway,England,430709,Oscar Bobb,Sub,0,55,0,0,0,0,6.2,0.07,1,0,20,20,2,35,3,1,0,0,0,0,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,110189,Jordan Pickford,GK,1,122,0,0,0,0,6.6,0.0,0,0,27,18,0,43,0,0,0,0,0,3,0,3
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,301440,Ezri Konsa,DR,1,88,0,0,0,0,6.9,0.0,0,0,53,52,0,68,1,2,3,1,0,2,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,101374,John Stones,DC,1,122,0,0,0,0,6.7,0.0,0,0,83,80,1,96,0,0,1,0,0,8,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,374631,Marc Guehi,DC,1,122,0,0,0,0,6.3,0.0,0,0,86,79,0,95,0,0,1,0,0,3,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,468847,Nico O'Reilly,DL,1,85,0,0,0,0,7.0,0.0,0,0,38,36,0,54,1,2,0,2,0,1,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,332325,Declan Rice,DMC,1,45,0,0,0,0,6.3,0.0,0,0,47,45,1,50,0,0,1,0,0,0,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,402596,Elliot Anderson,DMC,1,122,0,0,0,0,6.6,0.0,0,0,93,87,0,105,3,0,0,0,1,2,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,389935,Noni Madueke,AMR,1,45,0,0,0,0,6.4,0.0,0,0,16,16,0,28,1,0,0,1,1,0,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,379868,Jude Bellingham,AMC,1,110,2,0,0,0,8.5,0.96,5,2,41,34,0,64,1,1,0,3,1,1,2,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,349669,Anthony Gordon,AML,1,70,0,1,0,0,7.0,0.0,0,0,28,23,1,53,2,0,0,4,1,0,2,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,83532,Harry Kane,FW,1,122,0,0,0,0,6.0,0.17,3,2,21,15,1,37,2,0,3,0,1,2,2,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,82277,Dan Burn,Sub,0,12,0,0,0,0,6.2,0.0,0,0,1,1,0,4,0,0,1,0,0,3,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,332403,Eberechi Eze,Sub,0,77,0,0,0,0,6.8,0.04,1,0,16,14,2,34,1,0,0,3,1,1,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,361330,Reece James,Sub,0,52,0,0,0,0,6.7,0.0,0,0,30,27,0,46,2,0,1,0,1,3,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,362219,Djed Spence,Sub,0,37,0,0,0,0,7.0,0.1,1,1,14,12,0,31,2,1,1,1,0,4,1,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,362824,Morgan Rogers,Sub,0,34,0,0,0,0,6.2,0.02,1,1,13,13,0,23,1,0,0,0,0,1,0,0
+2026_07_12_Winner_EF_5_vs_Winner_EF_6,2026-07-11,England,Norway,367185,Bukayo Saka,Sub,0,77,0,0,0,0,7.7,0.13,3,2,19,15,2,43,3,1,0,2,1,1,1,0
 2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Argentina,Switzerland,102248,Emiliano Martinez,GK,1,123,0,0,0,0,7.3,0.0,0,0,42,27,0,53,0,0,0,0,0,2,0,4
 2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Argentina,Switzerland,303728,Nahuel Molina,DR,1,84,0,0,0,0,6.5,0.03,1,0,34,29,0,47,2,2,0,0,0,2,0,0
 2026_07_12_Winner_EF_7_vs_Winner_EF_8,2026-07-12,Argentina,Switzerland,323663,Cristian Romero,DC,1,105,0,0,0,0,6.8,0.04,1,0,43,41,0,51,2,1,3,0,1,3,0,0
