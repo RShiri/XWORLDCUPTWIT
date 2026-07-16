@@ -23,6 +23,14 @@ first, then Tier 2, then Tier 3 (both appended at the bottom).
 
 ## Phase A — Historical data acquisition (2018 Russia, 2022 Qatar)
 
+> **STATUS: SHIPPED — dispatchable.** Actions → **backfill-scrape** → Run workflow.
+> Run order: `year=2022, mode=smoke` first (3 matches — proves whether WhoScored's
+> Cloudflare admits a datacenter runner); if the summary shows full scrapes, re-run
+> with `mode=full, publish=release` (~2–3 h). If smoke returns "without events", run
+> the identical `py tools/scrape_history.py 2022` on the home PC instead (resumable,
+> same files), then `--pack` and upload the zip to the `wc2022-raw` release. Repeat
+> for 2018. Raws stay git-ignored either way.
+
 **A1 · Fixture discovery.** New `tools/wc_history_fixtures.py` builds a per-edition fixture
 list `history/wc<year>/fixtures.json` (`[{fotmob_id, home, away, date, stage}]`, 64 rows each)
 from FotMob's league endpoint (World Cup = league 77; 2018/2022 seasons) with a hand-checkable
