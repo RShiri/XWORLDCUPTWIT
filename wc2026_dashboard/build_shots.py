@@ -2,11 +2,13 @@
 """Aggregate every shot in the tournament into shots.js for the dashboard's Team Lab
 (the shot map / xG heatmap and the team style fingerprints).
 
-window.WC_SHOTS = [{t,o,h,x,y,xg,g,ot,s,m}]  — one entry per shot:
+window.WC_SHOTS = [{t,o,h,x,y,xg,g,ot,s,m,gy,gz}]  — one entry per shot:
   t  team name (play-off placeholders normalised)   o  opponent name
   h  True if the team was home                       x,y WhoScored coords (attacking → x=100)
   xg shot xG (same model as the PNGs/match pages)    g  goal?    ot on target?
   s  situation (OpenPlay/Penalty/Corner/…)           m  minute
+  gy,gz goal-mouth landing spot (GoalMouthY across ~45.2/54.8, GoalMouthZ height,
+        crossbar ≈ 38) — powers the Team-Lab goal-placement map; null when absent
 
 Own goals are excluded (they sit at the conceding end and would plot a phantom shot),
 as are penalty-shootout kicks.
@@ -50,11 +52,22 @@ def main():
                 continue
             side, team, opp = info
             xg, meta = shot_xg(ev, d)
+            gy = gz = None
+            for q in ev.get("qualifiers", []):
+                dn = q.get("type", {}).get("displayName")
+                try:
+                    if dn == "GoalMouthY":
+                        gy = round(float(q.get("value")), 1)
+                    elif dn == "GoalMouthZ":
+                        gz = round(float(q.get("value")), 1)
+                except (TypeError, ValueError):
+                    pass
             shots.append({
                 "t": team, "o": opp, "h": side == "home",
                 "x": round(ev.get("x", 0), 1), "y": round(ev.get("y", 0), 1),
                 "xg": round(xg, 3), "g": tn == "Goal", "ot": tn in ("Goal", "SavedShot"),
                 "s": meta["situation"], "m": ev.get("minute", 0),
+                "gy": gy, "gz": gz,
             })
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("window.WC_SHOTS = ")

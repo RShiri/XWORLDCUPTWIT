@@ -854,3 +854,57 @@ span.road-step.pending { display: block; padding: 10px 12px; color: var(--muted)
 .axi-wrap svg { width: 100%; max-width: 500px; height: auto; }
 .axi-node { cursor: default; }
 .axi-node:hover circle { stroke: #ffd24d; }
+
+/* ===================== Final Hub (Story tab) ===================== */
+.fh-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
+  box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 18px; }
+.fh-card.champ { border-color: rgba(255,210,77,0.45); background: linear-gradient(135deg, rgba(255,210,77,0.10) 0%, var(--card) 60%); }
+.fh-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.fh-kicker { font-size: 19px; font-weight: 800; }
+.fh-date { color: var(--muted); font-size: 13px; }
+/* matchup band (both finalists known) */
+.fh-band { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 8px 0 16px; }
+.fh-band.champ { gap: 26px; }
+.fh-team { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 0 0 auto; min-width: 120px; }
+.fh-team.big { min-width: 160px; }
+img.fh-crest { width: 62px; height: 62px; object-fit: contain; }
+img.fh-crest-sm { width: 26px; height: 26px; object-fit: contain; flex: 0 0 auto; }
+.fh-tn { font-weight: 700; font-size: 15px; text-align: center; }
+.fh-pct { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.fh-mid { flex: 1 1 auto; max-width: 260px; text-align: center; }
+.fh-vs { color: var(--muted); font-weight: 700; letter-spacing: 1px; }
+.fh-pred { color: var(--muted); font-size: 12px; margin: 3px 0 8px; }
+.fh-probbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--bg-2); }
+.fh-probbar span { display: block; height: 100%; }
+.fh-probbar.sm { height: 9px; flex: 1 1 auto; }
+.fh-score { font-size: 30px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+.fh-pens { font-size: 15px; color: var(--muted); }
+.fh-champ-line { font-size: 14px; font-weight: 700; color: #ffd24d; margin-top: 4px; }
+/* one finalist locked, other pending */
+.fh-locked { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; padding-bottom: 14px; }
+.fh-locktag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: #ffd24d; font-weight: 700; }
+.fh-cands { flex: 1 1 320px; min-width: 280px; }
+.fh-cands-h { color: var(--muted); font-size: 12.5px; margin-bottom: 8px; }
+.fh-cand { display: flex; align-items: center; gap: 9px; padding: 6px 0; }
+.fh-cand-nm { flex: 0 0 88px; font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fh-cand-pct { flex: 0 0 auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+/* panels */
+.fh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+.fh-panel h4, .fh-duel h4 { margin: 0 0 6px; font-size: 14px; }
+.fh-note { color: var(--muted); font-size: 11.5px; font-weight: 400; margin-left: 6px; }
+.fh-panel svg { width: 100%; height: auto; }
+.fh-legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
+.fh-legend span { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+.fh-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+/* key-player columns */
+.fh-duel { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+.fh-pcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.fh-pcol { background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.fh-pcol-h { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 13.5px; }
+.fh-pcol-h img { width: 20px; height: 20px; object-fit: contain; }
+.fh-pcol-h .fh-dot { width: 9px; height: 9px; border-radius: 50%; margin-left: auto; flex: 0 0 auto; }
+.fh-pcol-sub { color: var(--muted); font-size: 11.5px; margin: 4px 0 8px; }
+.fh-pl { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-top: 1px solid rgba(38,48,77,0.5); }
+.fh-pl-nm { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fh-pl-st { color: var(--muted); font-size: 11.5px; white-space: nowrap; flex: 0 0 auto; }
+@media (max-width: 720px) { .fh-grid { grid-template-columns: 1fr; } }
