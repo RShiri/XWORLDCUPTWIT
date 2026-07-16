@@ -7,6 +7,11 @@
   var LOGO = "../team_logos/wc2026/";
   var PW = 100, PH = 64; // pitch SVG units (length x width)
   var tooltip = document.getElementById("tooltip");
+  // Shared soft-glow filter for chart marks — the neon-HUD signature. Duplicate <defs>
+  // with the same id across multiple SVGs on the page are harmless (identical filter).
+  var GLOW_DEFS = '<defs><filter id="wcGlow" x="-80%" y="-80%" width="260%" height="260%">' +
+    '<feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+    "</filter></defs>";
 
   function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -27,11 +32,7 @@
   // 2026 keeps today's paths; history loads from editions/<year>/.
   var ED = window.WC_EDITION || 2026;
   var ED_BASE = ED === 2026 ? "" : "editions/" + ED + "/";
-  // Which skin sent us here (?skin=classic from a link built on the classic page;
-  // futuristic is the site default — ROADMAP Phase D — so no param means futuristic).
-  var SKIN = new URLSearchParams(location.search).get("skin") === "classic" ? "classic" : "futuristic";
-  var INDEX_PAGE = SKIN === "classic" ? "index.html" : "index_futuristic.html";
-  var INDEX_URL = INDEX_PAGE + (ED === 2026 ? "" : "?edition=" + ED);
+  var INDEX_URL = "index.html" + (ED === 2026 ? "" : "?edition=" + ED);
   (function () {
     var y = document.querySelector(".brand .title .ed-year");
     if (y && ED !== 2026) { y.textContent = ED; document.title = "Match Dashboard — WC" + ED; }
@@ -115,8 +116,8 @@
     function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
     function frame() {
-      var fr = "#f4f6fb", ng = "rgba(255,255,255,0.14)", net = [];
-      net.push('<rect x="-2" y="-2" width="' + (GW + 4) + '" height="' + (GROUND + 6) + '" fill="#0d1420"/>');
+      var fr = "#eef0fb", ng = "rgba(255,255,255,0.14)", net = [];
+      net.push('<rect x="-2" y="-2" width="' + (GW + 4) + '" height="' + (GROUND + 6) + '" fill="#0b0d1f"/>');
       net.push('<rect x="' + postL.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + (postR - postL).toFixed(1) +
         '" height="' + (GROUND - barY).toFixed(1) + '" fill="rgba(255,255,255,0.04)"/>');
       for (var nx = postL; nx <= postR + 0.01; nx += 3.2)
@@ -220,13 +221,13 @@
     var SH = series("home"), SA = series("away");
     var finH = SH[SH.length - 1][1], finA = SA[SA.length - 1][1];
     var maxY = Math.max(0.5, finH, finA) * 1.08;
-    var colH = D.home.color || "#4ea1ff", colA = D.away.color || "#ff6a3d";
+    var colH = D.home.color || "#9d6bff", colA = D.away.color || "#ff6a3d";
     // if the two team colours are too close (e.g. both green), the lines blur together —
     // fall back to a clearly distinct blue/orange pair.
     function hex(c) { var m = /^#?([0-9a-f]{6})$/i.exec(c || ""); if (!m) return null; var n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
     var ch = hex(colH), ca = hex(colA);
     if (ch && ca && Math.sqrt(Math.pow(ch[0] - ca[0], 2) + Math.pow(ch[1] - ca[1], 2) + Math.pow(ch[2] - ca[2], 2)) < 90) {
-      colH = "#4ea1ff"; colA = "#ff6a3d";
+      colH = "#9d6bff"; colA = "#ff6a3d";
     }
     var W = 820, HT = 360, padL = 46, padR = 16, padT = 18, padB = 42;
     var plotW = W - padL - padR, plotH = HT - padT - padB;
@@ -241,23 +242,23 @@
       return d;
     }
     function cumAt(pts, minute) { var v = 0; for (var i = 0; i < pts.length; i++) { if (pts[i][0] <= minute + 1e-9) v = pts[i][1]; else break; } return v; }
-    var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">' + GLOW_DEFS];
     // y gridlines
     var yStep = maxY <= 1 ? 0.25 : maxY <= 2 ? 0.5 : 1;
     for (var yv = 0; yv <= maxY + 1e-9; yv += yStep) {
       var y = sy(yv);
-      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#1e2740" stroke-width="1"/>');
-      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + yv.toFixed(yStep < 1 ? 1 : 0) + "</text>");
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#14152e" stroke-width="1"/>');
+      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7a7fb0" font-size="10.5" text-anchor="end">' + yv.toFixed(yStep < 1 ? 1 : 0) + "</text>");
     }
     // x ticks every 15', plus HT line at 45
     for (var xm = 0; xm <= maxMin; xm += 15) {
-      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
+      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="#7a7fb0" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
     }
-    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#2c3656" stroke-width="1" stroke-dasharray="3 3"/>');
-    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Minute</text>');
+    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#262c52" stroke-width="1" stroke-dasharray="3 3"/>');
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#eef0fb" font-size="12" text-anchor="middle">Minute</text>');
     // step lines
-    svg.push('<path d="' + stepPath(SA) + '" fill="none" stroke="' + colA + '" stroke-width="2.4"/>');
-    svg.push('<path d="' + stepPath(SH) + '" fill="none" stroke="' + colH + '" stroke-width="2.4"/>');
+    svg.push('<path d="' + stepPath(SA) + '" fill="none" stroke="' + colA + '" stroke-width="2.4" filter="url(#wcGlow)"/>');
+    svg.push('<path d="' + stepPath(SH) + '" fill="none" stroke="' + colH + '" stroke-width="2.4" filter="url(#wcGlow)"/>');
     // goal markers
     (D.goals || []).forEach(function (g) {
       var col = g.team === "home" ? colH : colA;
@@ -265,7 +266,7 @@
       var gx = sx(g.min), gy = sy(cumAt(pts, g.min + 1e-6));
       var gName = g.team === "home" ? D.home.name : D.away.name;
       var info = g.min + "' " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + " — " + gName;
-      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.2" data-info="' + esc(info) + '"></circle>');
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#050611" stroke-width="1.2" filter="url(#wcGlow)" data-info="' + esc(info) + '"></circle>');
       svg.push('<text x="' + gx.toFixed(1) + '" y="' + (gy - 9).toFixed(1) + '" fill="' + col + '" font-size="11" text-anchor="middle">⚽</text>');
     });
     svg.push("</svg>");
@@ -393,11 +394,11 @@
     var finD = isKO ? 0 : ptsD[ptsD.length - 1][1];
 
     // ---- colours (reuse the momentum blue/orange fallback for near-identical kits) ----
-    var colH = D.home.color || "#4ea1ff", colA = D.away.color || "#ff6a3d";
+    var colH = D.home.color || "#9d6bff", colA = D.away.color || "#ff6a3d";
     function hex(c) { var m = /^#?([0-9a-f]{6})$/i.exec(c || ""); if (!m) return null; var n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
     var ch = hex(colH), ca = hex(colA);
     if (ch && ca && Math.sqrt(Math.pow(ch[0] - ca[0], 2) + Math.pow(ch[1] - ca[1], 2) + Math.pow(ch[2] - ca[2], 2)) < 90) {
-      colH = "#4ea1ff"; colA = "#ff6a3d";
+      colH = "#9d6bff"; colA = "#ff6a3d";
     }
     var colD = "#8a94ad";
 
@@ -441,7 +442,7 @@
     var baseY = sy(0);
     function areaD(pts) { return smoothD(pts) + " L " + sx(maxMin).toFixed(1) + " " + baseY.toFixed(1) + " L " + sx(0).toFixed(1) + " " + baseY.toFixed(1) + " Z"; }
 
-    var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">'];
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + HT + '" class="mv-mom-chart" preserveAspectRatio="xMidYMid meet" role="img">' + GLOW_DEFS];
     // vertical fade gradients for the area fills (opaque near the line → transparent at baseline)
     svg.push('<defs>' +
       '<linearGradient id="wpGradH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + colH + '" stop-opacity="0.30"/><stop offset="1" stop-color="' + colH + '" stop-opacity="0"/></linearGradient>' +
@@ -450,15 +451,15 @@
     // y gridlines at 0/25/50/75/100 with a brighter 50% midline
     [0, 25, 50, 75, 100].forEach(function (yv) {
       var y = sy(yv);
-      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="' + (yv === 50 ? "#33405f" : "#1e2740") + '" stroke-width="' + (yv === 50 ? 1.3 : 1) + '"/>');
-      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7c89a8" font-size="10.5" text-anchor="end">' + yv + '%</text>');
+      svg.push('<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="' + (yv === 50 ? "#33405f" : "#14152e") + '" stroke-width="' + (yv === 50 ? 1.3 : 1) + '"/>');
+      svg.push('<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" fill="#7a7fb0" font-size="10.5" text-anchor="end">' + yv + '%</text>');
     });
     // x ticks every 15' + HT dashed line at 45
     for (var xm = 0; xm <= maxMin; xm += 15) {
-      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="#7c89a8" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
+      svg.push('<text x="' + sx(xm).toFixed(1) + '" y="' + (HT - padB + 16) + '" fill="#7a7fb0" font-size="10.5" text-anchor="middle">' + xm + "'</text>");
     }
-    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#2c3656" stroke-width="1" stroke-dasharray="3 3"/>');
-    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#e8edf7" font-size="12" text-anchor="middle">Minute</text>');
+    svg.push('<line x1="' + sx(45).toFixed(1) + '" y1="' + padT + '" x2="' + sx(45).toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="#262c52" stroke-width="1" stroke-dasharray="3 3"/>');
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (HT - 4) + '" fill="#eef0fb" font-size="12" text-anchor="middle">Minute</text>');
     // area fills (behind the lines), then draw line (group only), away, home on top
     svg.push('<path d="' + areaD(ptsA) + '" fill="url(#wpGradA)" stroke="none"/>');
     svg.push('<path d="' + areaD(ptsH) + '" fill="url(#wpGradH)" stroke="none"/>');
@@ -477,7 +478,7 @@
       var gx = sx(g.min), gy = sy(valAt(pts, g.min));
       var gName = g.team === "home" ? D.home.name : D.away.name;
       var info = g.min + "' " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "") + " — " + gName;
-      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#0b0f1a" stroke-width="1.4" data-info="' + esc(info) + '"></circle>');
+      svg.push('<circle cx="' + gx.toFixed(1) + '" cy="' + gy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#050611" stroke-width="1.4" data-info="' + esc(info) + '"></circle>');
       // score chip: bold score line + "min' scorer" sub-line
       var scoreTxt = g._sh + "–" + g._sa;
       var sub = g.min + "′ " + g.scorer + (g.pen ? " (pen)" : "") + (g.own ? " (OG)" : "");
@@ -502,9 +503,9 @@
       var cx0 = chosen.x1, cy0 = chosen.y1, midX = cx0 + chipW / 2;
       var leadY = cy0 + (cy0 + chipH / 2 < gy ? chipH : 0);   // connect to the chip edge facing the dot
       svg.push('<line x1="' + gx.toFixed(1) + '" y1="' + gy.toFixed(1) + '" x2="' + midX.toFixed(1) + '" y2="' + leadY.toFixed(1) + '" stroke="' + col + '" stroke-width="1" opacity="0.55"/>');
-      svg.push('<rect x="' + cx0.toFixed(1) + '" y="' + cy0.toFixed(1) + '" width="' + chipW.toFixed(1) + '" height="' + chipH + '" rx="4" fill="#0b0f1a" fill-opacity="0.82" stroke="' + col + '" stroke-opacity="0.6"/>');
+      svg.push('<rect x="' + cx0.toFixed(1) + '" y="' + cy0.toFixed(1) + '" width="' + chipW.toFixed(1) + '" height="' + chipH + '" rx="4" fill="#050611" fill-opacity="0.82" stroke="' + col + '" stroke-opacity="0.6"/>');
       svg.push('<text x="' + midX.toFixed(1) + '" y="' + (cy0 + 12).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="bold" fill="' + col + '">' + esc(scoreTxt) + '</text>');
-      svg.push('<text x="' + midX.toFixed(1) + '" y="' + (cy0 + 23).toFixed(1) + '" text-anchor="middle" font-size="9.5" fill="#c7d0e0">' + esc(sub) + '</text>');
+      svg.push('<text x="' + midX.toFixed(1) + '" y="' + (cy0 + 23).toFixed(1) + '" text-anchor="middle" font-size="9.5" fill="#d6d9f5">' + esc(sub) + '</text>');
     });
     // crest + final-% endpoints (bigger, in the right margin; nudge apart if finals coincide)
     var yH = sy(finH), yA = sy(finA);
@@ -519,9 +520,9 @@
     // hover crosshair (scrubber) — reads the win % at any minute; moved/shown by JS below
     svg.push('<g id="wpCross" style="display:none" pointer-events="none">' +
       '<line id="wpCrossLine" x1="0" y1="' + padT + '" x2="0" y2="' + (padT + plotH) + '" stroke="#5b6a8a" stroke-width="1" stroke-dasharray="2 3"/>' +
-      '<circle id="wpCrossH" r="4.2" fill="' + colH + '" stroke="#0b0f1a" stroke-width="1.2"/>' +
-      '<circle id="wpCrossA" r="4.2" fill="' + colA + '" stroke="#0b0f1a" stroke-width="1.2"/>' +
-      (isKO ? "" : '<circle id="wpCrossD" r="3.6" fill="' + colD + '" stroke="#0b0f1a" stroke-width="1.2"/>') +
+      '<circle id="wpCrossH" r="4.2" fill="' + colH + '" stroke="#050611" stroke-width="1.2"/>' +
+      '<circle id="wpCrossA" r="4.2" fill="' + colA + '" stroke="#050611" stroke-width="1.2"/>' +
+      (isKO ? "" : '<circle id="wpCrossD" r="3.6" fill="' + colD + '" stroke="#050611" stroke-width="1.2"/>') +
       '</g>');
     svg.push("</svg>");
 
@@ -746,10 +747,10 @@
         '<g id="shotLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffd34e"></i>Goal (team colour)</span>' +
+        '<span><i class="dot" style="background:var(--c-home);border:1.5px solid #ffc857"></i>Goal (team colour)</span>' +
         '<span><i class="dot" style="background:var(--c-home)"></i>On target</span>' +
         '<span><i class="dot" style="background:transparent;border:1px solid var(--muted)"></i>Off target</span>' +
-        '<span><i class="dot" style="background:#7a869f"></i>Blocked</span>' +
+        '<span><i class="dot" style="background:#7a7fb0"></i>Blocked</span>' +
         '<span><i class="ln-swatch"></i>Shot path → goal</span>' +
         '<span>● size = xG</span>' +
       "</div>" +
@@ -778,7 +779,7 @@
           var ln = document.createElementNS(NS, "line");
           ln.setAttribute("x1", cx.toFixed(2)); ln.setAttribute("y1", cy.toFixed(2));
           ln.setAttribute("x2", lx.toFixed(2)); ln.setAttribute("y2", ly.toFixed(2));
-          ln.setAttribute("stroke", sh.goal ? "#ffd34e" : col);
+          ln.setAttribute("stroke", sh.goal ? "#ffc857" : col);
           ln.setAttribute("stroke-width", sh.goal ? "0.4" : "0.28");
           ln.setAttribute("stroke-opacity", sh.goal ? "0.9" : "0.33");
           ln.setAttribute("stroke-linecap", "round");
@@ -786,7 +787,7 @@
         }
         var fill, stroke = "none", op = 0.85;
         if (sh.goal) { fill = col; op = 1; }                        // goals = team colour
-        else if (sh.blocked) { fill = "#7a869f"; op = 0.7; }
+        else if (sh.blocked) { fill = "#7a7fb0"; op = 0.7; }
         else if (sh.onTarget) { fill = col; }
         else { fill = "none"; stroke = col; }
         // goals: a tight ring around the (same-size) dot so they read as goals
@@ -794,7 +795,7 @@
           var ring = document.createElementNS(NS, "circle");
           ring.setAttribute("cx", cx.toFixed(2)); ring.setAttribute("cy", cy.toFixed(2));
           ring.setAttribute("r", (r + 0.55).toFixed(2));
-          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffd34e");
+          ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#ffc857");
           ring.setAttribute("stroke-width", "0.45");
           layer.appendChild(ring);
         }
@@ -855,7 +856,7 @@
       host.innerHTML = '<div class="shot-detail empty">No on-target shots with goal-placement data for this match.</div>';
       return;
     }
-    var GOAL_COL = "#37c978", SAVE_COL = "#5a9bff";
+    var GOAL_COL = "#33e893", SAVE_COL = "#5a9bff";
     host.innerHTML =
       '<div class="controls-bar">' +
         '<span class="chip-toggle on home" id="otHome">' + esc(D.home.name) + "</span>" +
@@ -979,9 +980,9 @@
         '<g id="passLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:#43e8a0"></i>completed · progressive/key</span>' +
-        '<span><i class="dot" style="background:#1f9d5e"></i>completed · normal</span>' +
-        '<span><i class="dot" style="background:#ff5e7a"></i>incomplete · forward/key</span>' +
+        '<span><i class="dot" style="background:#33e893"></i>completed · progressive/key</span>' +
+        '<span><i class="dot" style="background:#22b871"></i>completed · normal</span>' +
+        '<span><i class="dot" style="background:#ff5c7a"></i>incomplete · forward/key</span>' +
         '<span><i class="dot" style="background:#a83646"></i>incomplete · normal</span>' +
         '<span>dashed = incomplete · dot = start</span>' +
       "</div>" +
@@ -1024,8 +1025,8 @@
         // two reds for incomplete (bright = forward/key attempt, dim = normal).
         var dangerous = p.prog || p.key || p.assist || p.through;
         var col = p.ok
-          ? (dangerous ? "#43e8a0" : "#1f9d5e")
-          : (dangerous ? "#ff5e7a" : "#a83646");
+          ? (dangerous ? "#33e893" : "#22b871")
+          : (dangerous ? "#ff5c7a" : "#a83646");
         var ln = document.createElementNS(SVGNS, "line");
         var cls = "pass-line" + (p.assist ? " assist" : p.key || p.prog ? " key" : "");
         ln.setAttribute("class", cls);
@@ -1113,8 +1114,8 @@
       "</div>" +
       '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
         '<defs>' +
-          '<marker id="drArrG" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#43e8a0"/></marker>' +
-          '<marker id="drArrR" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ff5e7a"/></marker>' +
+          '<marker id="drArrG" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#33e893"/></marker>' +
+          '<marker id="drArrR" markerWidth="4" markerHeight="4" refX="3.1" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 Z" fill="#ff5c7a"/></marker>' +
         "</defs>" +
         pitchMarkup() +
         '<text class="dir-label" x="3" y="' + (PH + 4) + '">◀ ' + esc(D.away.name) + "</text>" +
@@ -1122,8 +1123,8 @@
         '<g id="dribLayer"></g>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        '<span><i class="dot" style="background:#43e8a0"></i>successful</span>' +
-        '<span><i class="dot" style="background:transparent;border:1px solid #ff5e7a"></i>unsuccessful</span>' +
+        '<span><i class="dot" style="background:#33e893"></i>successful</span>' +
+        '<span><i class="dot" style="background:transparent;border:1px solid #ff5c7a"></i>unsuccessful</span>' +
         '<span>● = where the take-on happened · → carry direction (next touch)</span>' +
       "</div>" +
       '<div class="stat-note" id="drCount"></div>';
@@ -1170,7 +1171,7 @@
         if (!filt(p)) return;
         shown++; if (p.ok) ok++;
         var cx = tx(p.team, p.x), cy = ty(p.team, p.y);
-        var col = p.ok ? "#43e8a0" : "#ff5e7a";
+        var col = p.ok ? "#33e893" : "#ff5c7a";
         if (p._ex != null) {
           var ax = tx(p.team, p._ex), ay = ty(p.team, p._ey);
           var arr = document.createElementNS(SVGNS, "line");
@@ -1386,7 +1387,7 @@
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
         c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0b0f1a"); c.setAttribute("stroke-width", "0.3");
+        c.setAttribute("stroke", "#050611"); c.setAttribute("stroke-width", "0.3");
         c.addEventListener("mousemove", function (e) {
           showTip(e, "<b>" + esc(nd.name) + "</b><br>" + nd.passes + " passes involved");
         });
@@ -1503,7 +1504,7 @@
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", r.toFixed(2));
         c.setAttribute("fill", col); c.setAttribute("fill-opacity", "0.92");
-        c.setAttribute("stroke", "#0b0f1a"); c.setAttribute("stroke-width", "0.3");
+        c.setAttribute("stroke", "#050611"); c.setAttribute("stroke-width", "0.3");
         (function (pl) {
           c.addEventListener("mousemove", function (e) {
             var pi = info[state.side][pl.name] || {};
@@ -1841,8 +1842,8 @@
   function agmExportStyle() {
     var rc = getComputedStyle(document.documentElement);
     function v(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-    var TEXT = v("--text", "#e8edf7"), BAD = v("--bad", "#ff6b81"), WARN = v("--warn", "#ffb454"),
-        MUTED = v("--muted", "#93a0bd"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#0b0f1a");
+    var TEXT = v("--text", "#eef0fb"), BAD = v("--bad", "#ff5c7a"), WARN = v("--warn", "#ffc857"),
+        MUTED = v("--muted", "#8b8fb8"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#050611");
     return "<style>" +
       ".pitch-bg{fill:#14361f}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
       ".dir-label{fill:rgba(255,255,255,.5);font-size:2.4px;font-weight:700;font-family:sans-serif}" +
@@ -1852,7 +1853,7 @@
       ".agm-shotln{stroke:" + BAD + ";stroke-width:.45;fill:none}" +
       ".agm-mk{fill:" + TEXT + "}.agm-mk-shot{fill:" + BAD + "}" +
       ".agm-node{fill:" + CARD2 + ";stroke:" + TEXT + ";stroke-width:.22}" +
-      ".agm-node.start{fill:" + WARN + ";stroke:#c98a2e}.agm-node.shot{fill:" + BAD + ";stroke:#c9455a}.agm-node.save{fill:" + MUTED + ";stroke:#6b7488}" +
+      ".agm-node.start{fill:" + WARN + ";stroke:#e0a83a}.agm-node.shot{fill:" + BAD + ";stroke:#e0456f}.agm-node.save{fill:" + MUTED + ";stroke:#6b7488}" +
       ".agm-nt{font-size:1.35px;font-weight:700;fill:" + TEXT + ";text-anchor:middle;dominant-baseline:central;font-family:sans-serif}.agm-nt.dark{fill:" + BG + "}" +
       ".agm-scorelab{font-size:2px;font-weight:700;fill:" + TEXT + ";text-anchor:middle;font-family:sans-serif}" +
       ".agm-xglab{font-size:1.7px;font-weight:700;fill:" + BAD + ";text-anchor:middle;font-family:sans-serif}" +
@@ -1870,8 +1871,8 @@
     try {
       var rc = getComputedStyle(document.documentElement);
       function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
-          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var bg = cvar("--card", "#0b0d1f"), text = cvar("--text", "#eef0fb"), muted = cvar("--muted", "#8b8fb8"),
+          bad = cvar("--bad", "#ff5c7a"), line = cvar("--line", "#262c52");
       var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var clone = svgEl.cloneNode(true);
       clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2164,8 +2165,8 @@
     try {
       var rc = getComputedStyle(document.documentElement);
       function cvar(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
-      var bg = cvar("--card", "#161d31"), text = cvar("--text", "#e8edf7"), muted = cvar("--muted", "#93a0bd"),
-          bad = cvar("--bad", "#ff6b81"), line = cvar("--line", "#26304d");
+      var bg = cvar("--card", "#0b0d1f"), text = cvar("--text", "#eef0fb"), muted = cvar("--muted", "#8b8fb8"),
+          bad = cvar("--bad", "#ff5c7a"), line = cvar("--line", "#262c52");
       var F = "-apple-system,'Segoe UI',Arial,sans-serif";
       var wrap = document.createElement("div"); wrap.innerHTML = agmSeqSVG(seq, numMap, D);
       var s = wrap.firstChild; s.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -2199,7 +2200,7 @@
         }
         function drawBall(pos, trail) {
           if (trail && trail.length > 1) {
-            ctx.strokeStyle = "#fff7c2"; ctx.lineWidth = 0.7 * scale; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.globalAlpha = 0.6;
+            ctx.strokeStyle = "#fff0b3"; ctx.lineWidth = 0.7 * scale; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.globalAlpha = 0.6;
             ctx.beginPath(); trail.forEach(function (p, k) { var X = MX(p[0]), Y = MY(p[1]); if (k) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }); ctx.stroke(); ctx.globalAlpha = 1;
           }
           ctx.fillStyle = "#fff"; ctx.strokeStyle = bg; ctx.lineWidth = 0.3 * scale;
@@ -2322,13 +2323,13 @@
     function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
     function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
-    var OUT_COL = { goal: "#37c978", saved: "#ff5b5b", missed: "#ffb020", post: "#ffb020" };
+    var OUT_COL = { goal: "#33e893", saved: "#ff5c7a", missed: "#ffc857", post: "#ffc857" };
     var OUT_LBL = { goal: "Scored", saved: "Saved", missed: "Off target", post: "Hit post" };
     var OUT_ICON = { goal: "⚽", saved: "🧤", missed: "✗", post: "▮" };
 
-    var fr = "#f4f6fb", ng = "rgba(255,255,255,0.14)";
+    var fr = "#eef0fb", ng = "rgba(255,255,255,0.14)";
     var net = [];
-    net.push('<rect x="-2" y="-2" width="' + (GW + 4) + '" height="' + (GROUND + 6) + '" fill="#0d1420"/>');
+    net.push('<rect x="-2" y="-2" width="' + (GW + 4) + '" height="' + (GROUND + 6) + '" fill="#0b0d1f"/>');
     net.push('<rect x="' + postL.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + (postR - postL).toFixed(1) +
       '" height="' + (GROUND - barY).toFixed(1) + '" fill="rgba(255,255,255,0.04)"/>');
     for (var nx = postL; nx <= postR + 0.01; nx += 3.2)
@@ -2382,13 +2383,13 @@
         var c = document.createElementNS(NS, "circle");
         c.setAttribute("cx", cx.toFixed(2)); c.setAttribute("cy", cy.toFixed(2));
         c.setAttribute("r", "2.3");
-        c.setAttribute("fill", OUT_COL[k.outcome] || "#ffb020");
+        c.setAttribute("fill", OUT_COL[k.outcome] || "#ffc857");
         c.setAttribute("stroke", ring); c.setAttribute("stroke-width", "0.9");
         c.style.cursor = "pointer";
         var t = document.createElementNS(NS, "text");
         t.setAttribute("x", cx.toFixed(2)); t.setAttribute("y", (cy + 0.9).toFixed(2));
         t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "2.6");
-        t.setAttribute("font-weight", "800"); t.setAttribute("fill", "#0d1420");
+        t.setAttribute("font-weight", "800"); t.setAttribute("fill", "#0b0d1f");
         t.style.pointerEvents = "none";
         t.textContent = k.order;
         function tip(e) {
