@@ -17,6 +17,8 @@ import json
 import glob
 import os
 import sys
+import urllib.parse
+from html import escape as _hesc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -27,6 +29,9 @@ from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shoo
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT_DIR = os.path.join(HERE, "matches_detail")
+SHARE_DIR = os.path.join(HERE, "share")
+# Absolute site base for OG/Twitter tags (crawlers need absolute URLs). Override for a fork.
+SITE_BASE = os.environ.get("WC_SITE_BASE", "https://rshiri.github.io/XWORLDCUPTWIT")
 
 NAME_MAP = {
     "European Play-Off A": "Bosnia and Herzegovina",
@@ -588,6 +593,52 @@ def _match_id_from_file(path):
     return os.path.basename(path)[:-5]
 
 
+def write_share_card(match_data, match_id):
+    """Write share/<id>.html — a crawler-friendly Open-Graph shim that unfurls with the
+    match infographic and redirects real visitors to the Match Centre.
+
+    match.html sets its title/OG tags in JS, which social crawlers don't run, so a pasted
+    ``match.html?id=…`` link unfurls blank. This static page carries proper og:/twitter:
+    tags (image = the published infographic) and bounces humans to ``../match.html?id=…``.
+    The Match-Centre "Share" button hands out this URL."""
+    h = norm(match_data.get("home", {}).get("name", "Home"))
+    a = norm(match_data.get("away", {}).get("name", "Away"))
+    hs = match_data.get("home", {}).get("score")
+    as_ = match_data.get("away", {}).get("score")
+    meta = match_data.get("wc_metadata", {}) or {}
+    stage = meta.get("stage") or "Group stage"
+    date = meta.get("date") or ""
+    score = f"{hs}–{as_}" if hs is not None and as_ is not None else "vs"
+    title = f"{h} {score} {a} · World Cup 2026"
+    desc = stage + (f" · {date}" if date else "") + \
+        " — xG, shot maps, momentum, win probability and the full interactive Match Centre."
+    png_rel = find_png(match_id)                       # "../WorldCup2026/<id>.png" or None
+    og_image = SITE_BASE + (png_rel[2:] if png_rel else "/WorldCup2026/" + match_id + ".png")
+    shim_url = SITE_BASE + "/wc2026_dashboard/share/" + urllib.parse.quote(match_id) + ".html"
+    redirect = "../match.html?id=" + urllib.parse.quote(match_id)
+    t, d = _hesc(title, quote=True), _hesc(desc, quote=True)
+    html = (
+        "<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+        f"<title>{_hesc(title)}</title>\n<meta name=\"description\" content=\"{d}\">\n"
+        f"<link rel=\"canonical\" href=\"{_hesc(shim_url, quote=True)}\">\n"
+        "<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"World Cup 2026 Dashboard\">\n"
+        f"<meta property=\"og:title\" content=\"{t}\">\n<meta property=\"og:description\" content=\"{d}\">\n"
+        f"<meta property=\"og:image\" content=\"{_hesc(og_image, quote=True)}\">\n"
+        f"<meta property=\"og:url\" content=\"{_hesc(shim_url, quote=True)}\">\n"
+        "<meta name=\"twitter:card\" content=\"summary_large_image\">\n"
+        f"<meta name=\"twitter:title\" content=\"{t}\">\n<meta name=\"twitter:description\" content=\"{d}\">\n"
+        f"<meta name=\"twitter:image\" content=\"{_hesc(og_image, quote=True)}\">\n"
+        f"<meta http-equiv=\"refresh\" content=\"0; url={_hesc(redirect, quote=True)}\">\n"
+        f"<script>location.replace({json.dumps(redirect)});</script>\n</head>\n<body>\n"
+        f"<p>Redirecting to the {_hesc(h)} vs {_hesc(a)} Match Centre… "
+        f"<a href=\"{_hesc(redirect, quote=True)}\">tap here if it doesn't</a>.</p>\n</body></html>\n"
+    )
+    os.makedirs(SHARE_DIR, exist_ok=True)
+    with open(os.path.join(SHARE_DIR, match_id + ".html"), "w", encoding="utf-8") as fh:
+        fh.write(html)
+
+
 def write_detail(match_data, match_id=None):
     """Write matches_detail/<id>.js for one match. Returns the path or None."""
     if not (match_data.get("events")):
@@ -608,6 +659,10 @@ def write_detail(match_data, match_id=None):
         fh.write("window.MATCH_DETAIL = ")
         json.dump(detail, fh, ensure_ascii=False, separators=(",", ":"))
         fh.write(";\n")
+    try:
+        write_share_card(match_data, match_id)        # non-fatal: a shim failure must not block the detail
+    except Exception as exc:  # pragma: no cover
+        print(f"  (share card failed for {match_id}: {exc})")
     return out
 
 

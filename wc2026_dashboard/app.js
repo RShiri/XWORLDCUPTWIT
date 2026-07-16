@@ -2438,7 +2438,43 @@
     return { svg: svg, px: px, py: py };
   }
 
+  /* Goal-placement ("behind the net") map — every on-target shot plotted where it
+     crossed the goal line (WhoScored GoalMouthY across / GoalMouthZ height, crossbar
+     ≈ 38), goalkeeper's view. Aggregates a team's placement across the whole tournament,
+     the Team-Lab complement to the per-match on-target map on the match pages. */
+  function tlGoalMouth(shots) {
+    var GW = 100, GROUND = 50, GY0 = 43, GYR = 14, GZTOP = 48;
+    function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
+    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
+    var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
+    var svg = ['<svg viewBox="-2 -2 104 56" class="tl-goalmouth" preserveAspectRatio="xMidYMid meet" role="img">'];
+    svg.push('<rect x="-2" y="-2" width="104" height="' + (GROUND + 6) + '" fill="#0d1420"/>');
+    svg.push('<rect x="' + postL.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + (postR - postL).toFixed(1) +
+      '" height="' + (GROUND - barY).toFixed(1) + '" fill="rgba(255,255,255,0.04)"/>');
+    var ng = "rgba(255,255,255,0.13)", nx, ny;
+    for (nx = postL; nx <= postR + 0.01; nx += 3.2) svg.push('<line x1="' + nx.toFixed(1) + '" y1="' + barY.toFixed(1) + '" x2="' + nx.toFixed(1) + '" y2="' + GROUND + '" stroke="' + ng + '" stroke-width="0.18"/>');
+    for (ny = barY; ny <= GROUND + 0.01; ny += 3.0) svg.push('<line x1="' + postL.toFixed(1) + '" y1="' + ny.toFixed(1) + '" x2="' + postR.toFixed(1) + '" y2="' + ny.toFixed(1) + '" stroke="' + ng + '" stroke-width="0.18"/>');
+    svg.push('<line x1="0" y1="' + GROUND + '" x2="' + GW + '" y2="' + GROUND + '" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>');
+    var fr = "#f4f6fb";
+    svg.push('<line x1="' + postL.toFixed(1) + '" y1="' + GROUND + '" x2="' + postL.toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+    svg.push('<line x1="' + postR.toFixed(1) + '" y1="' + GROUND + '" x2="' + postR.toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+    svg.push('<line x1="' + (postL - 0.55).toFixed(1) + '" y1="' + barY.toFixed(1) + '" x2="' + (postR + 0.55).toFixed(1) + '" y2="' + barY.toFixed(1) + '" stroke="' + fr + '" stroke-width="1.1"/>');
+    var onT = shots.filter(function (s) { return s.ot && s.gy != null && s.gz != null; });
+    onT.sort(function (a, b) { return (a.g ? 1 : 0) - (b.g ? 1 : 0); }).forEach(function (s) {
+      var cx = GW - gxOf(s.gy), cy = gyOf(s.gz);   // GW − x → goalkeeper's view (matches match.js)
+      var r = 1.1 + 2.6 * Math.sqrt(Math.max(0, s.xg));
+      var fill = s.g ? "#ff3d8b" : "#4ea1ff", op = s.g ? 0.95 : 0.55;
+      var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : " (saved)") + " · " + s.s + " · " + s.m + "'";
+      svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + (s.g ? ' stroke="#0b0f1a" stroke-width="0.5"' : "") + ' data-info="' + esc(info) + '"></circle>');
+    });
+    svg.push("</svg>");
+    if (!onT.length) return '<p class="hint">No on-target shots with goal-mouth data for this selection.</p>';
+    return '<p class="hint tl-gm-note">Goalkeeper\'s view · ' + onT.length + ' on-target shots (dot size = xG) · ' +
+      '<b style="color:#ff3d8b">goals</b> / <b style="color:#4ea1ff">saved</b></p>' + svg.join("");
+  }
+
   function tlShotMap(shots) {
+    if (tlState.mode === "goal") return tlGoalMouth(shots);
     var W = 600, H = 470;
     var P = tlPitch(W, H);
     var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="tl-pitch" preserveAspectRatio="xMidYMid meet" role="img">'];
@@ -3092,6 +3128,8 @@
       hero.innerHTML = '<div><div class="hero-title">The tournament so far</div></div>';
     }
 
+    try { renderFinalHub(K); } catch (e) { /* hub is non-critical — never break the Story tab */ }
+
     /* ---- headline numbers ---- */
     var goals = 0, xgSum = 0, xgN = 0, shootouts = 0, koPlayed = 0;
     played.forEach(function (m) {
@@ -3224,6 +3262,151 @@
       s.innerHTML = '<div class="' + it[0] + '">' + esc(it[1]) + '</div><div class="k">' + esc(it[2]) + "</div>";
       rWrap.appendChild(s);
     });
+  }
+
+  /* ======================= FINAL HUB ======================= */
+  /* The Opta-style pre-final page, living at the top of the Story tab. Adaptive to the
+     bracket state: before SF2 is decided it shows the confirmed finalist vs each possible
+     opponent (win prob for each); once both finalists are known it collapses to the one
+     matchup; once the final is played it shows the result. Style radar, per-match xG-
+     dominance trend and key-player columns all render for "the teams that can still
+     contest the final" (2 when decided, 3 while a semi is open). Pure client-side, reusing
+     the Power model (powerRating/winProb/predictScore) and the Team-Lab style radar. */
+  function matchProb(tA, tB) {
+    var A = powerRating(tA), B = powerRating(tB), pA = winProb(A.rating, B.rating);
+    var favA = A.rating >= B.rating, ps = predictScore(favA ? A : B, favA ? B : A);
+    return { pA: pA, pB: 1 - pA, scoreA: favA ? ps.sf : ps.su, scoreB: favA ? ps.su : ps.sf, pens: ps.pens };
+  }
+  function fhTeamStat(team) {
+    // xG/game + top scorer, for a finalist summary line
+    var recs = R.filter(function (r) { return r.team === team; });
+    var xgpg = recs.length ? recs.reduce(function (a, r) { return a + r.xgf; }, 0) / recs.length : 0;
+    var scorer = PLAYERS.filter(function (p) { return p.team === team && p.g > 0; })
+      .sort(function (a, b) { return b.g - a.g || (b.a || 0) - (a.a || 0); })[0];
+    return { xgpg: xgpg, scorer: scorer };
+  }
+  function fhTrend(teams, colors) {
+    // one line per team: net xG (xG for − against) across their matches, in date order.
+    var series = teams.map(function (t) {
+      return {
+        team: t,
+        pts: R.filter(function (r) { return r.team === t; })
+          .slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; })
+          .map(function (r, i) { return [i + 1, r.xgf - r.xga]; })
+      };
+    }).filter(function (s) { return s.pts.length; });
+    if (!series.length) return "";
+    var maxN = Math.max.apply(null, series.map(function (s) { return s.pts.length; }));
+    var vals = series.reduce(function (a, s) { return a.concat(s.pts.map(function (p) { return p[1]; })); }, []);
+    var lo = Math.min(-0.5, Math.min.apply(null, vals)), hi = Math.max(0.5, Math.max.apply(null, vals));
+    var W = 560, H = 250, padL = 34, padR = 12, padT = 14, padB = 30;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    function sx(n) { return padL + plotW * (maxN <= 1 ? 0.5 : (n - 1) / (maxN - 1)); }
+    function sy(v) { return padT + plotH * (1 - (v - lo) / (hi - lo)); }
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" class="fh-trend-svg" preserveAspectRatio="xMidYMid meet" role="img">'];
+    var zeroY = sy(0);
+    svg.push('<line x1="' + padL + '" y1="' + zeroY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + zeroY.toFixed(1) + '" stroke="#33405f" stroke-width="1" stroke-dasharray="4 3"/>');
+    svg.push('<text x="' + (padL - 5) + '" y="' + (zeroY + 3).toFixed(1) + '" fill="#7c89a8" font-size="9.5" text-anchor="end">0</text>');
+    svg.push('<text x="' + (padL - 5) + '" y="' + (padT + 6) + '" fill="#7c89a8" font-size="9.5" text-anchor="end">+' + hi.toFixed(1) + '</text>');
+    for (var g = 1; g <= maxN; g++) svg.push('<text x="' + sx(g).toFixed(1) + '" y="' + (H - 10) + '" fill="#7c89a8" font-size="9.5" text-anchor="middle">' + g + "</text>");
+    svg.push('<text x="' + (padL + plotW / 2).toFixed(1) + '" y="' + (H - 1) + '" fill="#93a0bd" font-size="10" text-anchor="middle">Match number</text>');
+    series.forEach(function (s, si) {
+      var col = colors[si % colors.length];
+      var d = s.pts.map(function (p, i) { return (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1); }).join(" ");
+      svg.push('<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="2.4" stroke-linejoin="round"/>');
+      s.pts.forEach(function (p) { svg.push('<circle cx="' + sx(p[0]).toFixed(1) + '" cy="' + sy(p[1]).toFixed(1) + '" r="3" fill="' + col + '"/>'); });
+    });
+    svg.push("</svg>");
+    return svg.join("");
+  }
+  function fhPlayers(team) {
+    var top = PLAYERS.filter(function (p) { return p.team === team && (p.mins || 0) >= 90; })
+      .map(function (p) { return Object.assign({}, p, { ga: (p.g || 0) + (p.a || 0) }); })
+      .sort(function (a, b) { return b.ga - a.ga || (b.rating || 0) - (a.rating || 0); }).slice(0, 3);
+    return top.map(function (p) {
+      return '<div class="fh-pl"><span class="fh-pl-nm">' + esc(p.name) + "</span>" +
+        '<span class="fh-pl-st">' + p.g + "G " + (p.a || 0) + "A · " + (p.rating ? p.rating.toFixed(2) : "–") + "</span></div>";
+    }).join("") || '<div class="fh-pl"><span class="fh-pl-st">—</span></div>';
+  }
+  function renderFinalHub(K) {
+    var host = document.getElementById("finalHub");
+    if (!host) return;
+    if (!K || !K.fin) { host.innerHTML = ""; return; }
+    var fin = K.fin;
+    var h = koSide(K, fin, 0), a = koSide(K, fin, 1);
+    var hSide = h.team ? [h.team] : (h.possible || []).filter(isKnownTeam);
+    var aSide = a.team ? [a.team] : (a.possible || []).filter(isKnownTeam);
+    if (!hSide.length && !aSide.length) { host.innerHTML = ""; return; }
+    var decided = hSide.length === 1 && aSide.length === 1;
+    var hubTeams = hSide.concat(aSide).filter(function (t, i, arr) { return arr.indexOf(t) === i; });
+    if (hubTeams.length < 2) { host.innerHTML = ""; return; }
+
+    var kicker = '<span class="fh-kicker">🏆 The Final</span><span class="fh-date">' +
+      esc(fmtDate(fin.date) || fin.date || "") + "</span>";
+
+    // ---- matchup band ----
+    var band;
+    if (fin.played && fin.hs != null) {
+      var win = stDecided(fin), other = win === fin.home ? fin.away : fin.home;
+      band = '<div class="fh-band champ">' + logoImg(fin.home, "fh-crest") +
+        '<div class="fh-score">' + fin.hs + " – " + fin.as +
+        (fin.hs === fin.as && fin.hpen != null ? ' <span class="fh-pens">(' + fin.hpen + "–" + fin.apen + " p)</span>" : "") +
+        '<div class="fh-champ-line">🏆 ' + esc(win || "") + " — world champions</div></div>" +
+        logoImg(fin.away, "fh-crest") + "</div>";
+    } else if (decided) {
+      var mp = matchProb(hSide[0], aSide[0]);
+      band = '<div class="fh-band">' +
+        '<div class="fh-team"><span class="fh-pct" style="color:' + TL_COLORS[0] + '">' + Math.round(mp.pA * 100) + "%</span>" +
+          logoImg(hSide[0], "fh-crest") + '<span class="fh-tn">' + esc(hSide[0]) + "</span></div>" +
+        '<div class="fh-mid"><div class="fh-vs">vs</div><div class="fh-pred">predicted ' + mp.scoreA + "–" + mp.scoreB + (mp.pens ? " (pens)" : "") + "</div>" +
+          '<div class="fh-probbar"><span style="width:' + (mp.pA * 100).toFixed(1) + '%;background:' + TL_COLORS[0] + '"></span><span style="width:' + (mp.pB * 100).toFixed(1) + '%;background:' + TL_COLORS[1] + '"></span></div></div>' +
+        '<div class="fh-team"><span class="fh-pct" style="color:' + TL_COLORS[1] + '">' + Math.round(mp.pB * 100) + "%</span>" +
+          logoImg(aSide[0], "fh-crest") + '<span class="fh-tn">' + esc(aSide[0]) + "</span></div>" +
+        "</div>";
+    } else {
+      // one finalist locked, other still to be decided in a semi → prob vs each candidate
+      var lockSide = hSide.length === 1 ? hSide[0] : aSide[0];
+      var cands = hSide.length === 1 ? aSide : hSide;
+      var rows = cands.map(function (c) {
+        var mp = matchProb(lockSide, c);
+        return '<div class="fh-cand">' + logoImg(c, "fh-crest-sm") + '<span class="fh-cand-nm">' + esc(c) + "</span>" +
+          '<div class="fh-probbar sm"><span style="width:' + (mp.pB * 100).toFixed(1) + '%;background:#5b6a8a"></span>' +
+            '<span style="width:' + (mp.pA * 100).toFixed(1) + '%;background:' + TL_COLORS[0] + '"></span></div>' +
+          '<span class="fh-cand-pct">' + esc(lockSide) + " " + Math.round(mp.pA * 100) + "% · " + mp.scoreA + "–" + mp.scoreB + (mp.pens ? " (p)" : "") + "</span></div>";
+      }).join("");
+      band = '<div class="fh-locked">' +
+        '<div class="fh-team big"><span class="fh-locktag">Finalist</span>' + logoImg(lockSide, "fh-crest") +
+          '<span class="fh-tn">' + esc(lockSide) + "</span></div>" +
+        '<div class="fh-cands"><div class="fh-cands-h">Awaiting ' + esc(a.team ? "the other semi-final" : "Semi-final 2") + " — if they face " + esc(lockSide) + ":</div>" + rows + "</div>" +
+        "</div>";
+    }
+
+    // ---- style radar (reuse Team-Lab) + xG-dominance trend ----
+    var style = tlTeamStyle();
+    var radar = tlRadar(hubTeams, style);
+    var trend = fhTrend(hubTeams, TL_COLORS);
+    var legend = '<div class="fh-legend">' + hubTeams.map(function (t, i) {
+      return '<span><i style="background:' + TL_COLORS[i % TL_COLORS.length] + '"></i>' + esc(t) + "</span>";
+    }).join("") + "</div>";
+
+    // ---- key-player columns ----
+    var cols = hubTeams.map(function (t, i) {
+      var s = fhTeamStat(t);
+      return '<div class="fh-pcol"><div class="fh-pcol-h">' + logoImg(t) + "<span>" + esc(t) + "</span>" +
+        '<i class="fh-dot" style="background:' + TL_COLORS[i % TL_COLORS.length] + '"></i></div>' +
+        '<div class="fh-pcol-sub">' + s.xgpg.toFixed(2) + " xG/game" + (s.scorer ? " · " + esc(s.scorer.name.split(" ").slice(-1)[0]) + " " + s.scorer.g + "G" : "") + "</div>" +
+        fhPlayers(t) + "</div>";
+    }).join("");
+
+    host.innerHTML =
+      '<div class="fh-card' + (fin.played ? " champ" : "") + '">' +
+        '<div class="fh-head">' + kicker + "</div>" + band +
+        '<div class="fh-grid">' +
+          '<div class="fh-panel"><h4>Style fingerprint <span class="fh-note">percentile vs all teams</span></h4>' + radar + legend + "</div>" +
+          '<div class="fh-panel"><h4>xG dominance by match <span class="fh-note">xG for − against, per game</span></h4>' + trend + legend + "</div>" +
+        "</div>" +
+        '<div class="fh-duel"><h4>Key players <span class="fh-note">top goal contributors, 90+ min</span></h4><div class="fh-pcols">' + cols + "</div></div>" +
+      "</div>";
   }
 
   /* ======================= AWARDS ======================= */

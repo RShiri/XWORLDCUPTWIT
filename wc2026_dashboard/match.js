@@ -154,6 +154,18 @@
       // Penalty shootout (goal-mouth placement) is the last block — below all graphs.
       (hasShootout ? block("Penalty shootout", "mv-shootout") : "");
 
+    // Share button → copy the crawler-friendly OG shim URL (share/<id>.html), which
+    // unfurls with the infographic and redirects to this page. Falls back to showing the
+    // URL for manual copy where the async clipboard API is unavailable (http/file://).
+    var shareBtn = root.querySelector(".share-btn");
+    if (shareBtn) shareBtn.addEventListener("click", function () {
+      var url = new URL("share/" + D.id + ".html", location.href).href;
+      function flash(txt) { shareBtn.textContent = txt; setTimeout(function () { shareBtn.textContent = "🔗 Share"; }, 2600); }
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(url).then(function () { flash("✓ Link copied"); }, function () { window.prompt("Copy this link:", url); });
+      else window.prompt("Copy this link:", url);
+    });
+
     if (hasStats) buildMatchStats(rec, D);
     buildMomentum(D);
     buildWinProb(D);
@@ -598,7 +610,8 @@
         '☀️ Light PNG</a>'
       : "";
 
-    return '<div class="match-top">' + pngBtn + pngLightBtn + "</div>" +
+    var shareBtn = '<button class="png-btn share-btn" type="button">🔗 Share</button>';
+    return '<div class="match-top">' + pngBtn + pngLightBtn + shareBtn + "</div>" +
       '<div class="scoreboard"><div class="sb-main">' +
         '<div class="sb-team home"><span class="nm">' + esc(D.home.name) + "</span>" + logoImg(D.home.name) + "</div>" +
         '<div class="sb-score">' + (D.home.score == null ? "-" : D.home.score) + " : " +
