@@ -123,6 +123,14 @@ def main() -> int:
 
     os.makedirs(ed["match_dir"], exist_ok=True)
     os.environ.setdefault("SOFASCORE_FALLBACK", "1")
+    # wc2026.scraper reads WC2026_WHOSCORED_URLS at IMPORT time (module-level
+    # constant) and otherwise defaults to 2026's own WhoScored stage ids — a
+    # historical scrape needs its own edition's stage pages or every WhoScored
+    # search silently 404s ("match ID not found") even though the match is on
+    # the site under a different Season/Stage id. Must be set before the import
+    # below. A caller's own WC2026_WHOSCORED_URLS (if already set) always wins.
+    if ed.get("whoscored_urls"):
+        os.environ.setdefault("WC2026_WHOSCORED_URLS", ed["whoscored_urls"])
 
     # Lazy imports: everything above (dry-run/pack/resume math) works without scrape deps.
     from wc2026.scraper import fetch_and_save
