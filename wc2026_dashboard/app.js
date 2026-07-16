@@ -1385,17 +1385,16 @@
      with REAL team names in every match id, so there is no slot code to parse. Rounds are
      identified from each match's `stage` string (FotMob's round name for that match) and
      ties are linked round-to-round by which team actually WON its way into the next one. */
-  var HIST_STAGE_RE = {
-    TP: /third|bronze/i, F: /\bfinal\b(?!.*third)/i, SF: /semi/i,
-    QF: /quarter/i, R16: /round of 16|1\/8/i,
-  };
+  // Order matters: "final" as a bare substring ALSO matches inside "Semi-final",
+  // "Quarter-final" AND FotMob's own "1/8-finals" (R16) — so every more specific
+  // pattern must be checked, and excluded, before the catch-all "final" check.
   function histRoundOf(m) {
-    var s = m.stage || "";
-    if (HIST_STAGE_RE.TP.test(s)) return "TP";
-    if (HIST_STAGE_RE.F.test(s)) return "F";
-    if (HIST_STAGE_RE.SF.test(s)) return "SF";
-    if (HIST_STAGE_RE.QF.test(s)) return "QF";
-    if (HIST_STAGE_RE.R16.test(s)) return "R16";
+    var s = (m.stage || "").toLowerCase();
+    if (s.indexOf("third") >= 0 || s.indexOf("bronze") >= 0) return "TP";
+    if (s.indexOf("round of 16") >= 0 || s.indexOf("1/8") >= 0) return "R16";
+    if (s.indexOf("quarter") >= 0) return "QF";
+    if (s.indexOf("semi") >= 0) return "SF";
+    if (s.indexOf("final") >= 0) return "F";
     return null;
   }
   function buildKnockoutHistory() {
@@ -3615,7 +3614,10 @@
       if (s.s === "Penalty" && s.g) penGoals++;
       if (s.s !== "Open Play" && s.s !== "Fast Break") setPieceShots++;
     });
-    var fin = matches.find(function (m) { return /\bfinal\b/i.test(m.stage || "") && !/third|bronze/i.test(m.stage || ""); });
+    // histRoundOf (buildKnockoutHistory) already gets this right, incl. the "1/8-finals"
+    // (R16) / "Quarter-final" / "Semi-final" collisions with a bare "final" substring —
+    // reuse it instead of a second regex that would repeat the same misclassification.
+    var fin = matches.find(function (m) { return histRoundOf(m) === "F"; });
     var champion = null;
     if (fin) {
       if (fin.hs !== fin.as) champion = fin.hs > fin.as ? fin.home : fin.away;

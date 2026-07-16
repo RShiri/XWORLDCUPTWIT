@@ -140,10 +140,116 @@ def test_rounds_and_resolution() -> None:
                   f"overlap: {overlap}")
 
 
+# ── 6. Historical editions (ROADMAP Phase F) ───────────────────────────────
+# 2018/2022 have no slot-coded id / knockout_resolve.py equivalent — a backfilled
+# historical tournament arrives with real team names in every match already (see
+# build_data.py's set_edition / build_match_details.py), so there is nothing to
+# "resolve". The checks below are the closest historical analogue of the 2026 ones:
+#   * round integrity  — same idea as check 3 above, per edition.
+#   * resolver-vs-stored — has no direct equivalent (no resolver exists), so its
+#     spirit is covered instead by round-linking: every round's winner must be a
+#     participant in the next round (catches a mis-stitched stage/round classification,
+#     the historical-format version of "resolver disagrees with the stored file").
+# Editions not yet backfilled (editions/<year>/data.js absent) are SKIPPED, not
+# failed, so CI stays green until the owner runs the backfill workflows.
+_HIST_ROUND_ORDER = ["R16", "QF", "SF", "F"]
+
+
+def _load_data_js(path: Path):
+    if not path.exists():
+        return None
+    txt = path.read_text(encoding="utf-8")
+    m = re.search(r"window\.WC_DATA\s*=\s*(\{.*\});?\s*$", txt, re.S)
+    return json.loads(m.group(1)) if m else None
+
+
+def _hist_round_of(m: dict):
+    # Mirrors app.js histRoundOf EXACTLY (same bracket classification, same edge
+    # cases): "final" as a bare substring also matches inside "Semi-final",
+    # "Quarter-final" AND FotMob's own "1/8-finals" (R16) — so every more specific
+    # pattern must be checked, and excluded, before the catch-all "final" check.
+    stage = (m.get("stage") or "").lower()
+    if "third" in stage or "bronze" in stage:
+        return "TP"
+    if "round of 16" in stage or "1/8" in stage:
+        return "R16"
+    if "quarter" in stage:
+        return "QF"
+    if "semi" in stage:
+        return "SF"
+    if "final" in stage:
+        return "F"
+    return None
+
+
+def _hist_winner(m: dict):
+    if m["hs"] != m["as"]:
+        return m["home"] if m["hs"] > m["as"] else m["away"]
+    if m.get("hpen") is not None and m.get("apen") is not None and m["hpen"] != m["apen"]:
+        return m["home"] if m["hpen"] > m["apen"] else m["away"]
+    return None
+
+
+def test_historical_editions() -> None:
+    for year in (2018, 2022):
+        path = ROOT / "wc2026_dashboard" / "editions" / str(year) / "data.js"
+        data = _load_data_js(path)
+        if data is None:
+            print(f"SKIP  {year}: editions/{year}/data.js not published yet")
+            continue
+
+        matches = [m for m in data.get("matches", []) if m.get("played")]
+        rounds: dict = {rd: [] for rd in ("R16", "QF", "SF", "F", "TP")}
+        for m in matches:
+            rd = _hist_round_of(m)
+            if rd:
+                rounds[rd].append(m)
+
+        # no team appears in two different ties of the same knockout round
+        for rd, ms in rounds.items():
+            seen: dict = {}
+            dup = []
+            for m in ms:
+                for t in (m["home"], m["away"]):
+                    if t in seen and seen[t] != m["id"]:
+                        dup.append(f"{t} in both {seen[t]} and {m['id']}")
+                    seen[t] = m["id"]
+            check(not dup, f"{year} round {rd}: no team appears in two ties", "; ".join(dup))
+
+        # round-linking: every participant of round N+1 actually played in round N
+        # (the historical-format stand-in for "resolver agrees with stored result")
+        for i in range(1, len(_HIST_ROUND_ORDER)):
+            prev_teams = {t for m in rounds[_HIST_ROUND_ORDER[i - 1]] for t in (m["home"], m["away"])}
+            cur_teams = {t for m in rounds[_HIST_ROUND_ORDER[i]] for t in (m["home"], m["away"])}
+            if not cur_teams:
+                continue
+            missing = cur_teams - prev_teams
+            check(not missing, f"{year} {_HIST_ROUND_ORDER[i]}: every participant played in {_HIST_ROUND_ORDER[i - 1]}",
+                  f"not found in {_HIST_ROUND_ORDER[i - 1]}: {missing}")
+
+        # every round's winner actually shows up in the next round
+        for idx, rd in enumerate(_HIST_ROUND_ORDER[:-1]):
+            nxt = _HIST_ROUND_ORDER[idx + 1]
+            nxt_teams = {t for m in rounds[nxt] for t in (m["home"], m["away"])}
+            if not nxt_teams:
+                continue
+            for m in rounds[rd]:
+                w = _hist_winner(m)
+                if w is None:
+                    continue
+                check(w in nxt_teams, f"{year} {rd} winner {w} advances into {nxt}",
+                      f"{w} not found among {nxt} participants")
+
+        if rounds["F"]:
+            check(len(rounds["F"]) == 1, f"{year}: exactly one Final", f"found {len(rounds['F'])}")
+        check(len(rounds["TP"]) <= 1, f"{year}: at most one third-place match", f"found {len(rounds['TP'])}")
+
+
 def main() -> int:
     test_r16_order()
     test_third_alloc()
     test_rounds_and_resolution()
+    test_historical_editions()
     print()
     if FAILURES:
         print(f"{len(FAILURES)} check(s) FAILED")
