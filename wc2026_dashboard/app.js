@@ -2654,10 +2654,14 @@
   }
 
   // Per-team style aggregates (data.js team stats + the shot dataset).
-  function tlTeamStyle() {
+  // Generic version of the style-fingerprint aggregation: takes matches/shots as
+  // params instead of closing over the current page's D/SHOTS, so the SAME formula
+  // (and therefore the SAME tlRadar renderer) works for another edition's data —
+  // used by both Team Lab (current edition) and the Eras tab (every edition at once).
+  function teamStyleFrom(matches, shotsArr) {
     var T = {};
     function get(t) { return T[t] || (T[t] = { gp: 0, poss: 0, possN: 0, shots: 0, paSum: 0, paN: 0, xgf: 0, xga: 0, distSum: 0, shotN: 0, xgAll: 0, spXg: 0 }); }
-    D.matches.forEach(function (m) {
+    (matches || []).forEach(function (m) {
       if (!m.played) return;
       [["home", m.home], ["away", m.away]].forEach(function (z) {
         var side = z[0], t = get(z[1]);
@@ -2672,7 +2676,7 @@
         t.xga += side === "home" ? (m.xg_away || 0) : (m.xg_home || 0);
       });
     });
-    SHOTS.forEach(function (s) {
+    (shotsArr || []).forEach(function (s) {
       var t = T[s.t]; if (!t) return;
       t.distSum += Math.sqrt((100 - s.x) * (100 - s.x) + (50 - s.y) * (50 - s.y));
       t.shotN++; t.xgAll += s.xg;
@@ -2694,6 +2698,7 @@
     });
     return out;
   }
+  function tlTeamStyle() { return teamStyleFrom(D.matches, SHOTS); }
 
   var TL_AXES = [["poss", "Possession", 0], ["shotsPG", "Shots /game", 1], ["xgPG", "xG /game", 2],
     ["xgPerShot", "xG /shot", 2], ["spShare", "Set-piece xG %", 0], ["passAcc", "Pass accuracy", 0], ["DEF", "Defensive", 2]];
@@ -3544,6 +3549,225 @@
       "</div>";
   }
 
+  /* ======================= ERAS (cross-tournament comparison) =======================
+     ROADMAP Phase E. Loads every edition's data.js/players.js/shots.js under namespaced
+     globals (window.WC_DATA_2018, …) and compares them side by side: headline tiles,
+     an attack-vs-defence scatter with every team-tournament as a dot coloured by edition,
+     a champion style-fingerprint radar overlay (reusing teamStyleFrom/tlRadar so the
+     methodology matches Team Lab exactly), Golden Boot bars, and a goals/xG/pens trend
+     strip. Renders gracefully with only 2026 published; lights up as editions/<year>/
+     data lands (see the backfill workflows in ROADMAP.md). Simplifications vs the full
+     ROADMAP ambition: "upsets count" is dropped (it needs a cross-era ranking source
+     that doesn't exist — FIFA_PTS is a 2026-dated snapshot) and "roads side-by-side" is
+     a W/D/L + goals summary rather than a literal round-by-round bracket walk. */
+  var ERAS_YEARS = [2018, 2022, 2026];
+  var ERAS_COLORS = { 2018: TL_COLORS[0], 2022: TL_COLORS[1], 2026: TL_COLORS[2] };
+  var ERA_CACHE = {};   // year -> {data, players, shots} | null (null = confirmed unpublished)
+  var ERAS_LOADED = false;
+
+  function parseWindowAssign(text, varName) {
+    var w = {};
+    try { (new Function("window", text))(w); } catch (e) { return null; }
+    return w[varName] || null;
+  }
+  function fetchGlobal(url, varName) {
+    return fetch(url, { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (txt) { return txt ? parseWindowAssign(txt, varName) : null; })
+      .catch(function () { return null; });
+  }
+  // Load one edition's trio of generated files. 2026 (or whichever ED this page is
+  // already showing) reuses the data already in memory instead of re-fetching.
+  function loadEraYear(year) {
+    if (ERA_CACHE[year] !== undefined) return Promise.resolve(ERA_CACHE[year]);
+    if (year === ED) {
+      var self = { data: D, players: PLAYERS, shots: SHOTS };
+      ERA_CACHE[year] = self;
+      return Promise.resolve(self);
+    }
+    var base = year === 2026 ? "" : "editions/" + year + "/";
+    return Promise.all([
+      fetchGlobal(base + "data.js", "WC_DATA"),
+      fetchGlobal(base + "players.js", "WC_PLAYERS"),
+      fetchGlobal(base + "shots.js", "WC_SHOTS"),
+    ]).then(function (r) {
+      var out = r[0] ? { data: r[0], players: r[1] || [], shots: r[2] || [] } : null;
+      ERA_CACHE[year] = out;
+      return out;
+    });
+  }
+
+  // Per-edition headline stats + champion, computed straight from that edition's own
+  // data.js/players.js/shots.js — no bracket-tree reconstruction needed (see note above).
+  function eraStats(year, bundle) {
+    var data = bundle.data, shotsArr = bundle.shots || [], playersArr = bundle.players || [];
+    var matches = (data.matches || []).filter(function (m) { return m.played; });
+    if (!matches.length) return null;
+    var goals = 0, modelXg = 0, withXg = 0, shootouts = 0;
+    matches.forEach(function (m) {
+      goals += (m.hs || 0) + (m.as || 0);
+      if (m.model_xg_home != null) { modelXg += m.model_xg_home + m.model_xg_away; withXg++; }
+      if (m.hpen != null && m.apen != null) shootouts++;
+    });
+    var totalXg = 0, penGoals = 0, setPieceShots = 0;
+    shotsArr.forEach(function (s) {
+      totalXg += s.xg || 0;
+      if (s.s === "Penalty" && s.g) penGoals++;
+      if (s.s !== "Open Play" && s.s !== "Fast Break") setPieceShots++;
+    });
+    var fin = matches.find(function (m) { return /\bfinal\b/i.test(m.stage || "") && !/third|bronze/i.test(m.stage || ""); });
+    var champion = null;
+    if (fin) {
+      if (fin.hs !== fin.as) champion = fin.hs > fin.as ? fin.home : fin.away;
+      else if (fin.hpen != null && fin.apen != null && fin.hpen !== fin.apen) champion = fin.hpen > fin.apen ? fin.home : fin.away;
+    }
+    var scorers = playersArr.slice().sort(function (a, b) { return (b.g || 0) - (a.g || 0) || (b.mins || 0) - (a.mins || 0); });
+    var finishers = playersArr.filter(function (p) { return (p.mins || 0) >= 270; })
+      .sort(function (a, b) { return (b.xg_diff || 0) - (a.xg_diff || 0); });
+    var champRoad = champion ? matches.filter(function (m) { return m.home === champion || m.away === champion; }) : [];
+    var road = champRoad.reduce(function (a, m) {
+      var forT = m.home === champion ? m.hs : m.as, agT = m.home === champion ? m.as : m.hs;
+      a.gf += forT || 0; a.ga += agT || 0;
+      if (forT > agT) a.w++; else if (forT < agT) a.l++; else a.d++;
+      return a;
+    }, { w: 0, d: 0, l: 0, gf: 0, ga: 0 });
+    return {
+      year: year, label: (data.format && data.format.name) || ("World Cup " + year),
+      matches: matches.length, goalsPerGame: goals / matches.length,
+      xgPerGame: withXg ? modelXg / withXg : null,
+      xgPerShot: shotsArr.length ? totalXg / shotsArr.length : null,
+      setPieceShare: shotsArr.length ? setPieceShots / shotsArr.length : null,
+      penGoals: penGoals, shootouts: shootouts,
+      champion: champion, championGames: champRoad.length, road: road,
+      topScorer: scorers[0] || null, topFinisher: finishers[0] || null,
+      style: teamStyleFrom(data.matches, shotsArr), matches_: matches,
+    };
+  }
+
+  function erasTile(label, val, note) {
+    return '<div class="stat"><div class="v accent">' + (val == null ? "—" : val) + '</div><div class="k">' + esc(label) + (note ? '<div class="hint" style="margin-top:2px">' + esc(note) + "</div>" : "") + "</div></div>";
+  }
+
+  function renderEras() {
+    var host = document.getElementById("erasBody");
+    if (!host) return;
+    if (!ERAS_LOADED) { host.innerHTML = '<p class="footer-note">Loading every published edition…</p>'; }
+
+    Promise.all(ERAS_YEARS.map(loadEraYear)).then(function (bundles) {
+      ERAS_LOADED = true;
+      var stats = [];
+      ERAS_YEARS.forEach(function (y, i) { if (bundles[i]) { var s = eraStats(y, bundles[i]); if (s) stats.push(s); } });
+      if (!stats.length) { host.innerHTML = '<p class="hint">No edition data published yet.</p>'; return; }
+
+      // ---- headline tiles, one card per published edition ----
+      var tiles = stats.map(function (s) {
+        return '<div class="fh-card" style="border-color:' + ERAS_COLORS[s.year] + '44">' +
+          '<div class="fh-head"><b style="color:' + ERAS_COLORS[s.year] + '">' + esc(s.label) + "</b></div>" +
+          '<div class="stats-strip" style="margin-top:8px">' +
+            erasTile("Goals/game", s.goalsPerGame.toFixed(2)) +
+            erasTile("Model xG/game", s.xgPerGame != null ? s.xgPerGame.toFixed(2) : "—") +
+            erasTile("xG/shot", s.xgPerShot != null ? s.xgPerShot.toFixed(3) : "—") +
+            erasTile("Set-piece shots", s.setPieceShare != null ? Math.round(s.setPieceShare * 100) + "%" : "—") +
+            erasTile("Penalty goals", s.penGoals) +
+            erasTile("Shootouts", s.shootouts) +
+          "</div>" +
+          (s.champion
+            ? '<div class="fh-duel"><h4>Champions</h4><div class="fin-row aw-lead"><div class="nm">🏆 ' + logoImg(s.champion) + "<span>" + esc(s.champion) + '</span></div><div class="fin-stat">' +
+                s.road.w + "W " + s.road.d + "D " + s.road.l + "L · " + s.road.gf + "-" + s.road.ga + "</div></div></div>"
+            : '<p class="hint">Champion appears once the final is played.</p>') +
+          "</div>";
+      }).join("");
+
+      // ---- era scatter: every team-tournament, attack xG/g vs defence xGA/g ----
+      var scatterRows = [];
+      stats.forEach(function (s) {
+        Object.keys(s.style).forEach(function (t) {
+          var st = s.style[t];
+          scatterRows.push({ team: t + " " + s.year, x: st.xgPG, y: st.xgaPG, col: ERAS_COLORS[s.year] });
+        });
+      });
+      var scatterHost = '<div id="erasScatter"></div>';
+
+      // ---- champions' style radar overlay ----
+      var champStyle = {}, champTeams = [];
+      stats.forEach(function (s) {
+        if (!s.champion) return;
+        var key = s.champion + " '" + String(s.year).slice(2);
+        champStyle[key] = s.style[s.champion];
+        champTeams.push(key);
+      });
+      var radarLegend = chartLegend(stats.filter(function (s) { return s.champion; })
+        .map(function (s) { return [ERAS_COLORS[s.year], s.champion + " (" + s.year + ")"]; }));
+
+      // ---- Golden Boot across eras (one shared scale) ----
+      var bootMax = Math.max.apply(null, stats.map(function (s) { return (s.topScorer && s.topScorer.g) || 0; }).concat([1]));
+      var bootBars = stats.map(function (s) {
+        if (!s.topScorer) return "";
+        var pct = Math.round((s.topScorer.g / bootMax) * 100);
+        return '<div class="fin-row"><div class="nm">' + logoImg(s.topScorer.team) + "<span>" + esc(s.topScorer.name) + " (" + s.year + ")</span></div>" +
+          '<div class="fin-bar-wrap"><div class="fin-bar" style="width:' + pct + "%;background:" + ERAS_COLORS[s.year] + '"></div></div>' +
+          '<div class="fin-stat">' + s.topScorer.g + "G</div></div>";
+      }).join("");
+      var finMax = Math.max.apply(null, stats.map(function (s) { return (s.topFinisher && s.topFinisher.xg_diff) || 0; }).concat([0.1]));
+      var finBars = stats.map(function (s) {
+        if (!s.topFinisher) return "";
+        var pct = Math.max(4, Math.round((s.topFinisher.xg_diff / finMax) * 100));
+        return '<div class="fin-row"><div class="nm">' + logoImg(s.topFinisher.team) + "<span>" + esc(s.topFinisher.name) + " (" + s.year + ")</span></div>" +
+          '<div class="fin-bar-wrap"><div class="fin-bar" style="width:' + pct + "%;background:" + ERAS_COLORS[s.year] + '"></div></div>' +
+          '<div class="fin-stat">+' + s.topFinisher.xg_diff.toFixed(1) + "</div></div>";
+      }).join("");
+
+      // ---- trend strip: goals/game, model xG/game, penalty goals/game across eras ----
+      var trendHost = '<div id="erasTrend"></div>';
+
+      host.innerHTML =
+        '<div class="fh-grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">' + tiles + "</div>" +
+        '<div class="section-head" style="margin-top:28px"><h3>Attack vs defence, every team-tournament</h3>' +
+          '<p>Every team\'s xG for/against per game across all three editions — colour = edition.</p></div>' + scatterHost +
+        (champTeams.length ? '<div class="section-head" style="margin-top:28px"><h3>Champions compared</h3>' +
+          '<p>Style-fingerprint percentile vs their own edition\'s field — same methodology as Team Lab.</p></div>' +
+          '<div class="fh-panel">' + tlRadar(champTeams, champStyle) + radarLegend + "</div>" : "") +
+        '<div class="section-head" style="margin-top:28px"><h3>Golden Boot across eras</h3></div>' +
+        '<div class="fh-duel"><div class="fin-list">' + bootBars + "</div></div>" +
+        '<div class="section-head" style="margin-top:20px"><h3>Finishing (goals above xG)</h3></div>' +
+        '<div class="fh-duel"><div class="fin-list">' + finBars + "</div></div>" +
+        '<div class="section-head" style="margin-top:28px"><h3>Trend across World Cups</h3></div>' + trendHost;
+
+      teamScatter("erasScatter", scatterRows, {
+        xLabel: "xG for / game", yLabel: "xG against / game", flipY: true,
+        legend: chartLegend(stats.map(function (s) { return [ERAS_COLORS[s.year], String(s.year)]; })),
+      });
+
+      (function renderTrend() {
+        var el2 = document.getElementById("erasTrend");
+        if (!el2 || stats.length < 2) { if (el2) el2.innerHTML = '<p class="hint">Needs at least two published editions.</p>'; return; }
+        var ordered = stats.slice().sort(function (a, b) { return a.year - b.year; });
+        var W = 900, H = 260, padL = 46, padR = 20, padT = 20, padB = 34;
+        var plotW = W - padL - padR, plotH = H - padT - padB;
+        function series(fn, color, label) {
+          var pts = ordered.map(function (s, i) { return { x: padL + (i / (ordered.length - 1)) * plotW, v: fn(s) }; }).filter(function (p) { return p.v != null; });
+          if (pts.length < 2) return "";
+          var maxV = Math.max.apply(null, pts.map(function (p) { return p.v; })) * 1.2 || 1;
+          function sy(v) { return padT + plotH - (v / maxV) * plotH; }
+          var d = pts.map(function (p, i) { return (i ? "L" : "M") + p.x.toFixed(1) + "," + sy(p.v).toFixed(1); }).join(" ");
+          var dots = pts.map(function (p) { return '<circle cx="' + p.x.toFixed(1) + '" cy="' + sy(p.v).toFixed(1) + '" r="4" fill="' + color + '"/>' +
+            '<text x="' + p.x.toFixed(1) + '" y="' + (sy(p.v) - 9).toFixed(1) + '" fill="' + color + '" font-size="10" text-anchor="middle">' + p.v.toFixed(2) + "</text>"; }).join("");
+          return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2"/>' + dots;
+        }
+        var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" class="scatter-svg">'];
+        ordered.forEach(function (s, i) {
+          var x = padL + (i / (ordered.length - 1)) * plotW;
+          svg.push('<text x="' + x.toFixed(1) + '" y="' + (H - 8) + '" fill="#93a0bd" font-size="11" text-anchor="middle">' + s.year + "</text>");
+        });
+        svg.push(series(function (s) { return s.goalsPerGame; }, "#3ddc97", "Goals/game"));
+        svg.push(series(function (s) { return s.xgPerGame; }, "#4ea1ff", "xG/game"));
+        svg.push(series(function (s) { return s.matches ? s.penGoals / s.matches : null; }, "#ffd24d", "Pens/game"));
+        svg.push("</svg>");
+        el2.innerHTML = svg.join("") + chartLegend([["#3ddc97", "Goals/game"], ["#4ea1ff", "Model xG/game"], ["#ffd24d", "Penalty goals/game"]]);
+      })();
+    });
+  }
+
   /* ======================= AWARDS ======================= */
   /* Individual honours from the players.js aggregates. Golden Glove & Golden Ball use
      minute floors so a one-cameo wonder can't top the table; Boot/Playmaker follow the
@@ -4099,6 +4323,12 @@
   var _plTabBtn = document.querySelector('nav.tabs button[data-view="playerlab"]');
   if (_plTabBtn) _plTabBtn.addEventListener("click", function () {
     if (!PL._init) { PL._init = 1; plBuild(); plRender(); }
+  });
+  // Eras fetches the other two editions' data over the network — lazy on first visit.
+  var _erasInit = false;
+  var _erasTabBtn = document.querySelector('nav.tabs button[data-view="eras"]');
+  if (_erasTabBtn) _erasTabBtn.addEventListener("click", function () {
+    if (!_erasInit) { _erasInit = 1; renderEras(); }
   });
 
   var _polling = false;
