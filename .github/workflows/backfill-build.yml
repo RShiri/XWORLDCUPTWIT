@@ -1,0 +1,69 @@
+# Build one historical edition's dashboard data from its raw Release asset.
+#
+# Owner flow (ROADMAP Phase B): after backfill-scrape publishes wc<year>-raw,
+# Actions → backfill-build → year=2022 (then 2018). Downloads the zip, unpacks
+# the raws into git-ignored history/, runs every builder with --edition <year>,
+# and commits ONLY wc2026_dashboard/editions/<year>/** (+ share/<year>/) to main.
+# Raw match JSONs are NEVER committed (repo-size policy in ROADMAP.md).
+name: backfill-build
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "World Cup edition to build"
+        required: true
+        type: choice
+        options: ["2022", "2018"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backfill-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install scorer dependencies (full LR+GBM blend, not the LR fallback)
+        run: pip install --quiet lightgbm numpy
+
+      - name: Download the wc${{ inputs.year }}-raw Release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download "wc${{ inputs.year }}-raw" --pattern "*.zip" --dir /tmp/raws
+          mkdir -p history
+          unzip -q -o /tmp/raws/*.zip -d history/
+          count=$(ls history/wc${{ inputs.year }}/matches/*.json | wc -l)
+          echo "Unpacked $count raw match files."
+          if [ "$count" -lt 60 ]; then
+            echo "::warning::Only $count matches in the release (64 expected) — building anyway."
+          fi
+
+      - name: Build the ${{ inputs.year }} edition
+        run: python wc2026_dashboard/build_site.py --edition ${{ inputs.year }}
+
+      - name: Commit generated edition data (never the raws)
+        run: |
+          set -euo pipefail
+          git add -- "wc2026_dashboard/editions/${{ inputs.year }}" \
+                     "wc2026_dashboard/share/${{ inputs.year }}"
+          if git diff --cached --quiet; then
+            echo "No changes — edition data already up to date."
+            exit 0
+          fi
+          git config user.name "WC2026 Data Bot"
+          git config user.email "wc2026bot@users.noreply.github.com"
+          git commit -m "Backfill: generated dashboard data for World Cup ${{ inputs.year }}"
+          git pull --rebase origin main
+          git push

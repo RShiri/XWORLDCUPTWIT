@@ -22,6 +22,20 @@ from xg_model import (ascii_name, SHOT_TYPES, shot_xg, is_shootout,
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT = os.path.join(HERE, "players.js")
 
+EDITION = 2026
+
+
+def set_edition(year):
+    """Point this builder at one edition (2026 = today's paths, unchanged)."""
+    global EDITION, MATCH_DIR, OUT
+    from editions import edition as _edition
+    cfg = _edition(year)
+    EDITION = int(year)
+    MATCH_DIR = cfg["match_dir"]
+    OUT = (os.path.join(HERE, "players.js") if EDITION == 2026
+           else os.path.join(cfg["out_dir"], "players.js"))
+    return cfg
+
 # WhoScored per-minute stat dicts are incremental → sum the values.
 SUM_STATS = {
     "shotsTotal": "shots", "shotsOnTarget": "sot", "passesTotal": "passes",
@@ -279,14 +293,20 @@ def per_match_rows():
                 yield row
 
 
-def main():
+def main(edition=2026):
+    set_edition(edition)
     data = aggregate()
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("window.WC_PLAYERS = ")
         json.dump(data, fh, ensure_ascii=False, separators=(",", ":"))
         fh.write(";\n")
+        if EDITION != 2026:
+            fh.write(f"window.WC_PLAYERS_EDITION = {EDITION};\n")
     print(f"Wrote {OUT} — {len(data)} players")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    from editions import add_edition_arg
+    main(add_edition_arg(argparse.ArgumentParser()).parse_args().edition)

@@ -33,6 +33,26 @@ SHARE_DIR = os.path.join(HERE, "share")
 # Absolute site base for OG/Twitter tags (crawlers need absolute URLs). Override for a fork.
 SITE_BASE = os.environ.get("WC_SITE_BASE", "https://rshiri.github.io/XWORLDCUPTWIT")
 
+EDITION = 2026
+
+
+def set_edition(year):
+    """Point this module at one edition's paths. 2026 = today's paths, unchanged
+    (the renderer hook and no-arg CLI never call this, so live behavior is identical).
+    Historical editions write under editions/<year>/ and share/<year>/."""
+    global EDITION, MATCH_DIR, OUT_DIR, SHARE_DIR
+    from editions import edition as _edition
+    cfg = _edition(year)
+    EDITION = int(year)
+    MATCH_DIR = cfg["match_dir"]
+    if EDITION == 2026:
+        OUT_DIR = os.path.join(HERE, "matches_detail")
+        SHARE_DIR = os.path.join(HERE, "share")
+    else:
+        OUT_DIR = os.path.join(cfg["out_dir"], "matches_detail")
+        SHARE_DIR = os.path.join(HERE, "share", str(EDITION))
+    return cfg
+
 NAME_MAP = {
     "European Play-Off A": "Bosnia and Herzegovina",
     "European Play-Off B": "Sweden",
@@ -609,26 +629,42 @@ def write_share_card(match_data, match_id):
     stage = meta.get("stage") or "Group stage"
     date = meta.get("date") or ""
     score = f"{hs}–{as_}" if hs is not None and as_ is not None else "vs"
-    title = f"{h} {score} {a} · World Cup 2026"
+    title = f"{h} {score} {a} · World Cup {EDITION}"
     desc = stage + (f" · {date}" if date else "") + \
         " — xG, shot maps, momentum, win probability and the full interactive Match Centre."
     png_rel = find_png(match_id)                       # "../WorldCup2026/<id>.png" or None
     og_image = SITE_BASE + (png_rel[2:] if png_rel else "/WorldCup2026/" + match_id + ".png")
     shim_url = SITE_BASE + "/wc2026_dashboard/share/" + urllib.parse.quote(match_id) + ".html"
     redirect = "../match.html?id=" + urllib.parse.quote(match_id)
+    if EDITION != 2026:
+        # Historical shims live one level deeper (share/<year>/) and must send the
+        # Match Centre to the right edition's data files.
+        shim_url = (SITE_BASE + "/wc2026_dashboard/share/" + str(EDITION) + "/"
+                    + urllib.parse.quote(match_id) + ".html")
+        redirect = f"../../match.html?id={urllib.parse.quote(match_id)}&edition={EDITION}"
     t, d = _hesc(title, quote=True), _hesc(desc, quote=True)
+    # History has no rendered infographics — an og:image pointing at a 404 makes some
+    # crawlers drop the whole unfurl, so image tags are emitted only when a PNG exists.
+    # 2026 keeps its unconditional image tags (and exact tag order) byte-identical.
+    has_image = png_rel is not None or EDITION == 2026
+    og_image_tag = (f"<meta property=\"og:image\" content=\"{_hesc(og_image, quote=True)}\">\n"
+                    if has_image else "")
+    tw_card_tag = ("<meta name=\"twitter:card\" content=\"summary_large_image\">\n"
+                   if has_image else "<meta name=\"twitter:card\" content=\"summary\">\n")
+    tw_image_tag = (f"<meta name=\"twitter:image\" content=\"{_hesc(og_image, quote=True)}\">\n"
+                    if has_image else "")
     html = (
         "<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
         f"<title>{_hesc(title)}</title>\n<meta name=\"description\" content=\"{d}\">\n"
         f"<link rel=\"canonical\" href=\"{_hesc(shim_url, quote=True)}\">\n"
-        "<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"World Cup 2026 Dashboard\">\n"
+        f"<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"World Cup {EDITION} Dashboard\">\n"
         f"<meta property=\"og:title\" content=\"{t}\">\n<meta property=\"og:description\" content=\"{d}\">\n"
-        f"<meta property=\"og:image\" content=\"{_hesc(og_image, quote=True)}\">\n"
+        f"{og_image_tag}"
         f"<meta property=\"og:url\" content=\"{_hesc(shim_url, quote=True)}\">\n"
-        "<meta name=\"twitter:card\" content=\"summary_large_image\">\n"
+        f"{tw_card_tag}"
         f"<meta name=\"twitter:title\" content=\"{t}\">\n<meta name=\"twitter:description\" content=\"{d}\">\n"
-        f"<meta name=\"twitter:image\" content=\"{_hesc(og_image, quote=True)}\">\n"
+        f"{tw_image_tag}"
         f"<meta http-equiv=\"refresh\" content=\"0; url={_hesc(redirect, quote=True)}\">\n"
         f"<script>location.replace({json.dumps(redirect)});</script>\n</head>\n<body>\n"
         f"<p>Redirecting to the {_hesc(h)} vs {_hesc(a)} Match Centre… "
@@ -654,6 +690,8 @@ def write_detail(match_data, match_id=None):
     detail["id"] = match_id
     detail["png"] = find_png(match_id)
     detail["png_dark"] = find_png_dark(match_id)
+    if EDITION != 2026:
+        detail["edition"] = EDITION   # 2026 files stay byte-identical (no new key)
     out = os.path.join(OUT_DIR, match_id + ".js")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("window.MATCH_DETAIL = ")
@@ -666,7 +704,8 @@ def write_detail(match_data, match_id=None):
     return out
 
 
-def main():
+def main(edition=2026):
+    set_edition(edition)
     os.makedirs(OUT_DIR, exist_ok=True)
     built = 0
     index = []
@@ -689,4 +728,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    from editions import add_edition_arg
+    main(add_edition_arg(argparse.ArgumentParser()).parse_args().edition)

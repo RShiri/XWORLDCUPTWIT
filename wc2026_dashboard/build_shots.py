@@ -28,8 +28,23 @@ from build_match_details import norm, is_match_file
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT = os.path.join(HERE, "shots.js")
 
+EDITION = 2026
 
-def main():
+
+def set_edition(year):
+    """Point this builder at one edition (2026 = today's paths, unchanged)."""
+    global EDITION, MATCH_DIR, OUT
+    from editions import edition as _edition
+    cfg = _edition(year)
+    EDITION = int(year)
+    MATCH_DIR = cfg["match_dir"]
+    OUT = (os.path.join(HERE, "shots.js") if EDITION == 2026
+           else os.path.join(cfg["out_dir"], "shots.js"))
+    return cfg
+
+
+def main(edition=2026):
+    set_edition(edition)
     shots = []
     for f in sorted(glob.glob(os.path.join(MATCH_DIR, "*.json"))):
         if not is_match_file(f):
@@ -69,12 +84,17 @@ def main():
                 "s": meta["situation"], "m": ev.get("minute", 0),
                 "gy": gy, "gz": gz,
             })
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("window.WC_SHOTS = ")
         json.dump(shots, fh, ensure_ascii=False, separators=(",", ":"))
         fh.write(";\n")
+        if EDITION != 2026:
+            fh.write(f"window.WC_SHOTS_EDITION = {EDITION};\n")
     print(f"Wrote {OUT} — {len(shots)} shots")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    from editions import add_edition_arg
+    main(add_edition_arg(argparse.ArgumentParser()).parse_args().edition)

@@ -23,20 +23,28 @@ sys.path.insert(0, HERE)
 import build_match_details
 import build_data
 import build_players
+import build_shots
 import build_database
+import build_player_lab
 import build_breaks
+from editions import EDITIONS, DEFAULT as DEFAULT_EDITION, edition as edition_cfg
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 
 
-def build_once():
+def build_once(edition=DEFAULT_EDITION):
     t0 = time.time()
-    build_match_details.main()
-    build_data.main()
-    build_players.main()
-    build_database.main()
-    build_breaks.main()
-    print(f"Site rebuilt in {time.time() - t0:.1f}s")
+    build_match_details.main(edition)
+    build_data.main(edition)
+    build_players.main(edition)
+    build_shots.main(edition)
+    build_database.main(edition)
+    build_player_lab.main(edition)
+    if edition == 2026:
+        # 2026-only by design: cooling-break baselines are frozen on the 2026 group
+        # stage and Power-Rank inputs are a 2026-dated FIFA snapshot (see ROADMAP.md).
+        build_breaks.main()
+    print(f"Site rebuilt for {edition} in {time.time() - t0:.1f}s")
 
 
 def _snapshot():
@@ -94,12 +102,23 @@ def serve():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Build / watch / serve the WC2026 web dashboard")
+    ap = argparse.ArgumentParser(description="Build / watch / serve the WC dashboard")
     ap.add_argument("--watch", action="store_true", help="rebuild on match-file changes")
     ap.add_argument("--serve", action="store_true", help="serve the site on :8777")
+    ap.add_argument("--edition", type=int, default=DEFAULT_EDITION, choices=sorted(EDITIONS),
+                    help="World Cup edition to build (default %(default)s)")
+    ap.add_argument("--all", action="store_true",
+                    help="build every edition whose raw match dir exists")
     args = ap.parse_args()
 
-    build_once()
+    if args.all:
+        for year in sorted(EDITIONS):
+            if os.path.isdir(edition_cfg(year)["match_dir"]):
+                build_once(year)
+            else:
+                print(f"Skipping {year} — no raw matches at {edition_cfg(year)['match_dir']}")
+    else:
+        build_once(args.edition)
 
     if args.watch and args.serve:
         import threading

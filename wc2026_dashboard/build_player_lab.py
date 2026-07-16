@@ -18,9 +18,30 @@ Coords are raw WhoScored 0-100 (same as the match centre).
 """
 import glob, json, os, re
 
+import sys
+
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 DETAIL_DIR = os.path.join(HERE, "matches_detail")
 OUT_DIR = os.path.join(HERE, "player_lab")
+
+EDITION = 2026
+
+
+def set_edition(year):
+    """Point this builder at one edition's matches_detail/player_lab dirs
+    (2026 = today's paths, unchanged)."""
+    global EDITION, DETAIL_DIR, OUT_DIR
+    from editions import edition as _edition
+    cfg = _edition(year)
+    EDITION = int(year)
+    if EDITION == 2026:
+        DETAIL_DIR = os.path.join(HERE, "matches_detail")
+        OUT_DIR = os.path.join(HERE, "player_lab")
+    else:
+        DETAIL_DIR = os.path.join(cfg["out_dir"], "matches_detail")
+        OUT_DIR = os.path.join(cfg["out_dir"], "player_lab")
+    return cfg
 
 
 def slug(team):
@@ -32,7 +53,8 @@ def _read(path):
     return json.loads(m.group(1)) if m else None
 
 
-def main():
+def main(edition=2026):
+    set_edition(edition)
     os.makedirs(OUT_DIR, exist_ok=True)
     teams = {}   # team name -> {player -> {"shots":[], "dribbles":[], "passes":[]}}
 
@@ -108,4 +130,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    from editions import add_edition_arg
+    main(add_edition_arg(argparse.ArgumentParser()).parse_args().edition)

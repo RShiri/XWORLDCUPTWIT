@@ -30,11 +30,32 @@ from xg_model import team_xg_from_events
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT_DIR = os.path.join(HERE, "database")
 
+EDITION = 2026
+_DATA_JS = os.path.join(HERE, "data.js")
+_SQLITE_NAME = "wc2026.sqlite"
+
+
+def set_edition(year):
+    """Point this builder (and the player aggregation it reuses) at one edition.
+    2026 = today's paths, unchanged."""
+    global EDITION, MATCH_DIR, OUT_DIR, _DATA_JS, _SQLITE_NAME
+    cfg = build_players.set_edition(year)   # per-match player rows read the same raws
+    EDITION = int(year)
+    MATCH_DIR = cfg["match_dir"]
+    if EDITION == 2026:
+        OUT_DIR = os.path.join(HERE, "database")
+        _DATA_JS = os.path.join(HERE, "data.js")
+        _SQLITE_NAME = "wc2026.sqlite"
+    else:
+        OUT_DIR = os.path.join(cfg["out_dir"], "database")
+        _DATA_JS = os.path.join(cfg["out_dir"], "data.js")
+        _SQLITE_NAME = f"wc{EDITION}.sqlite"
+    return cfg
+
 
 def _load_data_js():
     """Reuse the already-built data.js for results + standings."""
-    path = os.path.join(HERE, "data.js")
-    txt = open(path, encoding="utf-8").read()
+    txt = open(_DATA_JS, encoding="utf-8").read()
     return json.loads(txt.split("= ", 1)[1].rstrip().rstrip(";\n").rstrip(";"))
 
 
@@ -114,7 +135,7 @@ def _write_csv(name, rows):
 
 
 def _write_sqlite(tables):
-    path = os.path.join(OUT_DIR, "wc2026.sqlite")
+    path = os.path.join(OUT_DIR, _SQLITE_NAME)
     if os.path.exists(path):
         os.remove(path)
     con = sqlite3.connect(path)
@@ -150,7 +171,8 @@ def _sql_type(rows, col):
     return "TEXT"
 
 
-def main():
+def main(edition=2026):
+    set_edition(edition)
     os.makedirs(OUT_DIR, exist_ok=True)
     data = _load_data_js()
 
@@ -195,6 +217,13 @@ def main():
         "raw_match_files": len(raw_files),
         "raw_match_dir": "../wc2026/matches/",
     }
+    if EDITION != 2026:
+        manifest["sqlite"] = _SQLITE_NAME
+        manifest["edition"] = EDITION
+        # historical raws are never committed (repo-size policy) — they live on the
+        # GitHub Release; there is no in-repo dir for the Data tab to link.
+        manifest["raw_match_dir"] = None
+        manifest["raw_release"] = f"wc{EDITION}-raw"
     with open(os.path.join(OUT_DIR, "manifest.js"), "w", encoding="utf-8") as fh:
         fh.write("window.WC_DATABASE = ")
         json.dump(manifest, fh, ensure_ascii=False)
@@ -203,8 +232,10 @@ def main():
     print("Database exported to", OUT_DIR)
     for k, v in counts.items():
         print(f"  {k}: {v} rows")
-    print(f"  wc2026.sqlite + manifest.js · {len(raw_files)} raw match files")
+    print(f"  {_SQLITE_NAME} + manifest.js · {len(raw_files)} raw match files")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    from editions import add_edition_arg
+    main(add_edition_arg(argparse.ArgumentParser()).parse_args().edition)

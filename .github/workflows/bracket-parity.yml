@@ -19,3 +19,17 @@ jobs:
           python-version: "3.11"
       - name: Run bracket parity checks
         run: python3 tests/test_bracket_parity.py
+
+  # ROADMAP ground rule #1, executable: builder/editions changes must leave every
+  # tracked 2026 output byte-identical when the builders run with no arguments.
+  identity-2026:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install scorer dependencies (full LR+GBM blend, not the LR fallback)
+        run: pip install --quiet lightgbm numpy
+      - name: Rebuild 2026 outputs and verify byte-identity
+        run: python tools/check_2026_identity.py
