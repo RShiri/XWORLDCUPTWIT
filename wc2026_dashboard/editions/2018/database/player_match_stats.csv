@@ -531,38 +531,34 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,66752,Mehdi Carcela-Gonzalez,Sub,0,21,0,0,0,0,6.2,0.0,0,0,5,4,0,14,1,0,0,1,1,0,0,0
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,105026,Faycal Fajr,Sub,0,10,0,0,0,0,6.1,0.0,0,0,11,10,0,14,0,0,0,0,1,0,0,0
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,346110,Ayoub El Kaabi,Sub,0,27,0,0,0,0,6.2,0.0,0,0,4,2,1,7,0,0,2,0,0,0,1,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,146400,Mohammed Al Owais,GK,1,98,0,0,0,0,7.5,0.0,0,0,29,10,0,42,0,0,2,0,0,2,0,9
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,457103,Saud Abdulhamid,DR,1,92,0,0,0,0,6.6,0.07,1,0,21,14,0,37,7,0,1,0,2,3,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,447660,Abdulelah Al Amri,DC,1,98,1,0,1,0,7.5,0.75,2,2,27,23,0,38,1,1,3,0,1,6,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,447676,Hassan Al Tambakti,DC,1,98,0,0,0,0,6.2,0.0,0,0,28,22,0,38,1,1,1,0,0,6,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,458371,Moteb Al Harbi,DL,1,92,0,0,0,0,6.8,0.0,0,0,27,19,0,56,0,1,1,1,0,7,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,470595,Mohammed Abu Al Shamat,MR,1,80,0,0,0,0,6.3,0.0,0,0,23,19,0,37,1,1,1,0,2,3,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,333478,Abdullah Al Khaibari,MC,1,98,0,0,0,0,6.4,0.02,1,0,26,21,0,38,2,1,0,1,0,2,1,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,358782,Mohamed Kanno,MC,1,98,0,0,0,0,7.1,0.07,2,1,37,33,0,51,1,2,4,0,0,5,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,111560,Salem Al Dawsari,ML,1,98,0,0,0,0,6.2,0.02,1,0,33,24,0,46,1,0,0,1,1,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,470590,Musab Al Juwayr,FW,1,62,0,0,0,0,6.6,0.0,0,0,31,24,1,41,2,1,0,0,1,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,447657,Feras Al Brikan,FW,1,92,0,0,0,0,6.6,0.0,0,0,22,13,0,31,1,0,6,0,0,1,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,447662,Nasser Al Dawsari,Sub,0,36,0,0,0,0,6.5,0.0,0,0,13,11,0,21,1,1,2,0,3,3,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,447663,Abdullah Al Hamddan,Sub,0,6,0,0,0,0,6.0,0.0,0,0,1,0,0,3,0,0,0,0,0,1,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,447677,Ali Lajami,Sub,0,6,0,0,0,0,6.4,0.0,0,0,0,0,0,5,0,0,1,0,0,4,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,623444,Alaa Al Hejji,Sub,0,6,0,0,0,0,6.0,0.0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,458392,Nawaf Bu Washl,Sub,0,18,0,0,0,0,6.0,0.0,0,0,4,3,0,7,0,0,0,0,1,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,30966,Fernando Muslera,GK,1,98,0,0,0,0,5.7,0.0,0,0,30,29,0,35,0,0,0,0,0,1,0,2
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,145385,Guillermo Varela,DR,1,98,0,0,0,0,7.0,0.06,2,0,51,43,2,80,0,4,3,0,1,2,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,347178,Mathias Olivera,DC,1,98,0,0,0,0,7.7,0.04,1,0,103,99,2,122,1,0,6,1,0,5,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,448735,Sebastian Caceres,DC,1,98,0,0,0,0,6.5,0.1,2,0,83,72,0,95,0,0,4,0,1,5,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,397846,Matias Vina,DL,1,45,0,0,0,0,5.9,0.0,0,0,29,21,1,41,0,0,1,0,0,0,1,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,303657,Rodrigo Bentancur,DMC,1,98,0,0,0,0,6.9,0.06,1,0,80,68,2,94,1,0,1,2,1,3,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,408962,Manuel Ugarte,DMC,1,71,0,0,0,0,6.5,0.06,2,1,63,57,0,74,1,2,0,1,0,1,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,344644,Federico Valverde,AMR,1,98,0,0,0,0,6.7,0.12,3,2,43,37,0,63,0,1,0,2,1,0,2,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,484254,Federico Vinas,AMC,1,89,0,0,0,0,6.6,0.51,5,3,17,11,0,28,2,0,4,0,0,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,460758,Maxi Araujo,AML,1,80,1,0,0,0,8.0,0.3,2,2,21,18,5,38,0,0,0,1,1,0,3,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,400828,Darwin Nunez,FW,1,45,0,0,0,0,6.2,0.07,1,0,3,3,0,7,1,1,1,0,1,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,121241,Rodrigo Aguirre,Sub,0,9,0,0,0,0,6.0,0.0,0,0,1,0,0,1,0,0,0,0,0,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,345389,Nicolas de la Cruz,Sub,0,27,0,0,0,0,6.9,0.15,2,1,24,23,4,32,0,0,0,0,0,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,382265,Brian Rodriguez,Sub,0,18,0,0,0,0,6.3,0.05,2,1,10,8,1,21,0,0,0,0,0,0,0,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,436657,Agustin Canobbio,Sub,0,53,0,0,0,0,6.7,0.04,1,0,23,20,0,37,0,2,0,1,0,0,1,0
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,403752,Juan Manuel Sanabria,Sub,0,53,0,0,0,0,6.3,0.11,3,0,31,31,2,47,0,0,0,0,0,0,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,30966,Fernando Muslera,GK,1,94,0,0,0,0,7.1,0.0,0,0,24,21,0,35,0,0,0,0,0,0,0,2
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,145385,Guillermo Varela,DR,1,94,0,0,0,0,6.8,0.0,0,0,38,34,1,62,2,0,0,0,0,2,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,26059,Diego Godin,DC,1,94,0,0,0,0,6.8,0.0,0,0,47,42,0,58,4,0,1,0,1,2,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,135914,Jose Maria Gimenez,DC,1,94,0,0,0,0,7.0,0.0,0,0,62,60,0,70,2,1,2,0,1,2,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,30635,Martin Caceres,DL,1,94,0,0,0,0,7.1,0.11,2,0,45,39,1,67,2,1,1,0,0,2,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,82423,Carlos Sanchez,MR,1,81,0,1,0,0,7.6,0.26,1,0,24,16,3,48,3,0,1,0,1,2,2,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,135625,Matias Vecino,MC,1,58,0,0,0,0,6.7,0.0,0,0,65,55,0,73,2,0,0,1,2,0,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,303657,Rodrigo Bentancur,MC,1,94,0,0,0,0,7.0,0.0,0,0,78,69,0,94,9,2,0,0,0,1,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,19361,Cristian Rodriguez,ML,1,58,0,0,0,0,6.5,0.0,0,0,20,11,1,30,2,2,0,0,1,0,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,22221,Luis Suarez,FW,1,94,1,0,0,0,7.6,0.55,5,2,26,18,2,49,1,0,1,1,3,1,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,24328,Edinson Cavani,FW,1,94,0,0,0,0,7.1,0.65,4,1,25,19,1,47,1,1,1,2,1,1,2,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,135584,Diego Laxalt,Sub,0,36,0,0,0,0,6.2,0.0,0,0,14,11,1,17,0,0,1,0,0,0,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,248109,Lucas Torreira,Sub,0,36,0,0,0,0,6.8,0.03,1,0,19,17,1,29,4,2,1,1,0,1,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,280928,Nahitan Nandez,Sub,0,13,0,0,0,0,6.2,0.0,0,0,12,11,0,13,0,0,0,1,0,0,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,146400,Mohammed Al Owais,GK,1,94,0,0,0,0,5.6,0.0,0,0,24,14,0,33,0,0,0,0,0,1,0,2
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,262315,Mohammed Al Burayk,DR,1,94,0,0,0,0,6.5,0.05,1,0,62,55,0,98,3,2,0,0,0,1,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,96083,Osama Hawsawi,DC,1,94,0,0,0,0,6.3,0.0,0,0,35,29,0,48,1,1,0,0,1,3,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,293721,Ali Al Bulayhi,DC,1,94,0,0,0,0,6.0,0.0,0,0,43,37,0,54,1,0,1,0,0,4,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,119927,Yasser Al Shahrani,DL,1,94,0,0,0,0,6.3,0.06,2,0,43,39,1,68,2,0,0,0,3,3,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,262233,Abdullah Otayf,DMC,1,94,0,0,0,0,7.3,0.0,0,0,89,82,0,108,5,2,0,2,1,3,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,107840,Hatan Bahbri,MR,1,74,0,0,0,0,6.1,0.41,2,1,34,29,0,48,0,0,0,2,0,0,2,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,86269,Salman Al Faraj,MC,1,94,0,0,0,0,6.4,0.0,0,0,80,71,3,97,3,1,2,0,1,0,2,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,96143,Taiseer Al Jassam,MC,1,43,0,0,0,0,5.8,0.0,0,0,30,27,0,35,0,0,0,0,0,0,0,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,111560,Salem Al Dawsari,ML,1,94,0,0,0,0,6.8,0.02,1,0,61,54,2,78,1,0,1,4,4,0,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,119936,Fahad Al Muwallad,FW,1,77,0,0,0,0,5.8,0.03,1,0,3,3,0,15,0,0,0,1,1,0,3,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,98300,Mohammad Al Sahlawi,Sub,0,17,0,0,0,0,6.1,0.0,0,0,4,3,1,9,1,0,0,1,0,0,2,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,142917,Hussain Al Moqahwi,Sub,0,51,0,0,0,0,6.5,0.0,0,0,33,31,0,41,4,1,0,0,1,0,1,0
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,358782,Mohamed Kanno,Sub,0,20,0,0,0,0,6.3,0.02,1,1,6,4,0,9,2,0,1,0,1,0,0,0
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,34749,Willy Caballero,GK,1,94,0,0,0,0,4.8,0.0,0,0,37,16,0,43,0,0,0,0,0,1,0,2
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,35689,Gabriel Mercado,DC,1,94,0,0,1,0,6.4,0.0,0,0,42,33,0,64,4,2,4,0,3,5,0,0
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,75691,Nicolas Otamendi,DC,1,94,0,0,1,0,6.7,0.03,1,0,68,63,0,88,4,3,4,0,2,6,0,0
@@ -1230,34 +1226,32 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,20968,Randall Azofeifa,Sub,0,5,0,0,0,0,6.1,0.0,0,0,2,1,0,2,0,0,0,0,0,0,0,0
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,72784,Rodney Wallace,Sub,0,15,0,0,0,0,6.0,0.0,0,0,4,3,0,5,0,0,0,0,1,0,0,0
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,329911,Ian Smith,Sub,0,3,0,0,0,0,6.1,0.0,0,0,1,1,0,1,0,0,0,0,0,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,73798,Thibaut Courtois,GK,1,93,0,0,0,0,7.6,0.0,0,0,24,16,0,47,0,0,0,0,0,0,0,5
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,10136,Vincent Kompany,DC,1,93,0,0,0,0,7.1,0.0,0,0,39,36,0,52,1,1,0,0,2,9,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,21778,Jan Vertonghen,DC,1,93,0,0,0,0,7.2,0.0,0,0,41,36,0,62,1,3,1,0,0,6,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,69933,Toby Alderweireld,DC,1,93,0,0,0,0,7.5,0.1,1,0,63,57,0,73,1,1,0,0,0,4,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,104376,Thomas Meunier,MR,1,93,1,0,0,0,7.8,0.52,2,2,33,28,0,43,1,1,1,1,0,2,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,25191,Axel Witsel,MC,1,93,0,0,1,0,7.0,0.0,0,0,52,51,0,59,3,1,0,1,2,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,136345,Youri Tielemans,MC,1,77,0,0,0,0,7.2,0.08,2,0,46,42,2,60,4,3,0,1,2,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,34302,Nacer Chadli,ML,1,38,0,1,0,0,7.2,0.0,0,0,9,9,1,17,1,0,1,0,0,1,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,73084,Kevin De Bruyne,AMC,1,93,0,1,0,0,7.3,0.22,3,1,62,52,4,77,1,0,0,0,0,0,2,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,78498,Romelu Lukaku,FW,1,59,0,0,0,0,6.1,0.12,1,0,12,10,0,20,0,0,1,0,1,0,3,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,33404,Eden Hazard,FW,1,93,1,0,0,0,8.4,0.64,2,1,56,44,3,78,1,0,0,6,0,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,23100,Dries Mertens,Sub,0,34,0,0,0,0,6.3,0.09,1,0,13,13,1,16,0,0,0,0,1,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,12187,Mousa Dembele,Sub,0,16,0,0,0,0,6.2,0.0,0,0,9,9,0,11,0,0,0,0,1,1,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,10209,Thomas Vermaelen,Sub,0,55,0,0,0,0,6.3,0.0,0,0,20,18,0,25,1,1,0,0,2,1,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,110189,Jordan Pickford,GK,1,93,0,0,0,0,6.5,0.0,0,0,18,14,0,27,0,0,0,0,0,1,0,2
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,81726,Phil Jones,DC,1,93,0,0,0,0,6.0,0.0,0,0,69,64,0,82,2,0,1,0,0,4,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,99487,Harry Maguire,DC,1,93,0,0,1,0,6.3,0.11,3,1,59,56,0,69,1,2,3,0,1,2,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,101374,John Stones,DC,1,93,0,0,1,0,6.5,0.0,0,0,86,84,0,99,4,1,0,0,1,3,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,83078,Kieran Trippier,DMR,1,93,0,0,0,0,7.4,0.0,0,0,83,70,8,113,1,2,2,0,1,2,1,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,24711,Danny Rose,DML,1,45,0,0,0,0,6.1,0.0,0,0,26,23,1,34,2,0,0,0,0,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,117973,Eric Dier,MC,1,93,0,0,0,0,6.8,0.46,3,2,85,81,0,99,3,2,1,1,1,1,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,255777,Ruben Loftus-Cheek,MC,1,83,0,0,0,0,6.3,0.04,1,1,45,39,1,60,2,0,1,2,0,0,2,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,27213,Fabian Delph,MC,1,93,0,0,0,0,7.2,0.03,1,1,79,75,2,93,5,3,1,1,0,1,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,97692,Raheem Sterling,AMC,1,45,0,0,0,0,6.3,0.1,2,0,25,23,1,41,1,0,0,2,0,0,3,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,83532,Harry Kane,FW,1,93,0,0,0,0,6.1,0.13,2,0,21,21,0,29,0,0,1,0,0,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,109000,Jesse Lingard,Sub,0,48,0,0,0,0,6.2,0.07,2,0,35,32,1,45,1,1,0,0,0,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,300299,Marcus Rashford,Sub,0,48,0,0,0,0,6.4,0.03,1,1,21,20,1,28,0,0,0,0,0,0,0,0
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,131519,Dele Alli,Sub,0,10,0,0,0,0,6.0,0.0,0,0,5,5,0,7,0,0,0,0,0,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,110189,Jordan Pickford,GK,1,93,0,0,0,0,6.4,0.0,0,0,25,19,0,37,0,0,0,0,0,0,0,2
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,318871,Trent Alexander-Arnold,DR,1,78,0,0,0,0,6.9,0.07,1,0,48,43,2,74,1,2,2,1,0,1,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,11981,Gary Cahill,DC,1,93,0,0,0,0,7.0,0.0,0,0,44,41,0,50,0,0,3,0,1,2,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,81726,Phil Jones,DC,1,93,0,0,0,0,6.5,0.0,0,0,71,68,0,84,1,1,3,0,2,5,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,101374,John Stones,DC,1,45,0,0,0,0,6.7,0.0,0,0,26,26,0,31,2,0,2,0,0,2,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,24711,Danny Rose,DL,1,93,0,0,0,0,6.6,0.0,0,0,27,23,1,61,6,0,0,2,1,1,1,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,27213,Fabian Delph,MC,1,93,0,0,0,0,6.4,0.08,2,0,41,33,1,60,4,0,0,2,1,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,117973,Eric Dier,MC,1,93,0,0,0,0,6.0,0.0,0,0,61,55,0,66,1,0,1,0,3,1,1,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,255777,Ruben Loftus-Cheek,MC,1,93,0,0,0,0,6.5,0.07,1,0,33,29,1,52,1,0,2,2,0,0,4,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,106981,Jamie Vardy,FW,1,93,0,0,0,0,6.5,0.06,1,0,12,7,1,23,1,0,3,0,1,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,300299,Marcus Rashford,FW,1,93,0,0,0,0,6.5,0.5,4,1,30,24,0,51,2,0,1,3,2,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,39308,Danny Welbeck,Sub,0,15,0,0,0,0,6.0,0.27,2,1,1,1,0,3,0,0,0,0,0,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,99487,Harry Maguire,Sub,0,48,0,0,0,0,6.2,0.0,0,0,31,28,0,34,0,0,1,0,0,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,73798,Thibaut Courtois,GK,1,93,0,0,0,0,7.3,0.0,0,0,31,20,0,47,0,0,2,0,0,3,0,1
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,10209,Thomas Vermaelen,DC,1,74,0,0,0,0,6.9,0.0,0,0,52,45,0,65,2,0,1,0,1,3,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,83032,Dedryck Boyata,DC,1,93,0,0,0,0,7.1,0.0,0,0,70,69,0,83,1,0,2,0,2,8,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,124106,Leander Dendoncker,DC,1,93,0,0,1,0,6.6,0.0,0,0,68,63,0,76,3,0,0,0,2,3,1,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,34302,Nacer Chadli,DMR,1,93,0,0,0,0,7.0,0.0,0,0,44,38,3,57,3,0,2,0,0,4,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,101537,Thorgan Hazard,DML,1,93,0,0,0,0,7.7,0.12,3,0,43,35,3,64,3,1,1,1,0,5,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,12187,Mousa Dembele,MC,1,93,0,0,0,0,7.0,0.0,0,0,61,60,0,73,4,1,0,0,0,1,2,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,136345,Youri Tielemans,MC,1,93,0,1,1,0,7.5,0.05,2,1,59,51,2,74,6,0,1,1,3,1,1,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,22738,Marouane Fellaini,AMC,1,93,0,0,0,0,8.8,0.15,2,0,36,28,2,58,3,0,6,4,3,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,130334,Adnan Januzaj,AMC,1,85,1,0,0,0,7.4,0.2,4,1,17,14,1,36,1,1,0,1,1,0,2,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,97803,Michy Batshuayi,FW,1,93,0,0,0,0,6.8,0.83,2,1,17,11,1,30,0,0,2,3,0,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,10136,Vincent Kompany,Sub,0,19,0,0,0,0,6.0,0.0,0,0,17,17,0,17,0,0,0,0,1,0,0,0
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,23100,Dries Mertens,Sub,0,8,0,0,0,0,6.1,0.07,1,1,4,3,0,8,1,0,0,0,1,0,0,0
 2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,37379,Eiji Kawashima,GK,1,93,0,0,0,0,6.5,0.0,0,0,20,11,0,28,0,0,0,0,0,0,0,2
 2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,62108,Hiroki Sakai,DR,1,93,0,0,0,0,7.1,0.0,0,0,41,29,0,68,4,2,3,1,0,5,0,0
 2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,37204,Maya Yoshida,DC,1,93,0,0,0,0,6.7,0.06,1,0,78,76,0,90,1,0,3,0,0,7,0,0
@@ -1708,38 +1702,36 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,23100,Dries Mertens,Sub,0,37,0,0,0,0,6.2,0.0,0,0,12,10,1,22,0,0,0,0,1,0,0,0
 2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,97803,Michy Batshuayi,Sub,0,6,0,0,0,0,6.0,0.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,115472,Yannick Carrasco,Sub,0,17,0,0,0,0,6.3,0.0,0,0,3,3,0,8,1,0,0,1,0,0,1,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,110189,Jordan Pickford,GK,1,96,0,0,0,0,6.9,0.0,0,0,55,43,0,72,0,0,0,0,0,3,0,3
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,361330,Reece James,DR,1,96,0,0,0,0,6.5,0.04,1,0,43,36,0,57,0,1,2,0,1,3,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,101374,John Stones,DC,1,86,0,0,0,0,6.3,0.0,0,0,65,62,0,71,2,0,2,0,1,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,301440,Ezri Konsa,DC,1,96,0,0,0,0,6.0,0.81,2,1,71,67,0,79,0,0,1,0,1,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,468847,Nico O'Reilly,DL,1,96,0,0,0,0,6.8,0.27,2,1,43,36,2,65,2,0,1,3,1,1,1,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,402596,Elliot Anderson,DMC,1,96,0,1,0,0,7.6,0.04,1,0,55,47,1,70,2,4,2,0,3,2,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,332325,Declan Rice,DMC,1,71,0,1,0,0,7.6,0.07,1,1,37,32,4,52,0,0,1,1,1,0,1,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,389935,Noni Madueke,AMR,1,71,0,0,0,0,7.4,0.05,1,0,18,17,2,27,1,1,0,1,0,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,379868,Jude Bellingham,AMC,1,79,1,0,0,0,7.7,0.83,3,2,24,18,1,42,3,1,0,1,0,1,1,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,349669,Anthony Gordon,AML,1,71,0,0,0,0,6.2,0.42,2,1,11,9,0,17,0,0,0,0,0,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,83532,Harry Kane,FW,1,96,2,0,0,0,8.7,1.09,7,3,21,14,2,35,1,0,2,0,2,1,1,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,374631,Marc Guehi,Sub,0,10,0,0,0,0,6.0,0.0,0,0,7,7,0,7,0,0,0,0,0,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,362824,Morgan Rogers,Sub,0,25,0,0,0,0,6.8,0.0,0,0,7,5,2,11,1,0,1,0,0,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,300299,Marcus Rashford,Sub,0,25,1,0,0,0,7.0,0.09,1,1,5,3,0,12,1,0,0,0,0,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,362219,Djed Spence,Sub,0,17,0,0,0,0,6.2,0.41,1,1,6,5,0,11,1,0,0,0,0,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,367185,Bukayo Saka,Sub,0,25,0,1,0,0,6.9,0.0,0,0,6,5,1,13,0,0,0,1,0,2,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,119120,Dominik Livakovic,GK,1,96,0,0,0,0,7.5,0.0,0,0,35,24,0,49,1,0,1,0,0,1,0,7
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,533010,Luka Vuskovic,DC,1,65,0,0,0,0,6.2,0.0,0,0,42,37,0,54,0,1,0,1,1,5,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,402666,Josip Sutalo,DC,1,96,0,0,0,0,6.3,0.06,1,0,70,63,0,82,1,2,4,1,0,4,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,402664,Josko Gvardiol,DC,1,96,0,0,0,0,5.7,0.34,1,0,47,43,0,58,2,0,1,0,0,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,413272,Josip Stanisic,DMR,1,96,0,0,0,0,6.7,0.0,0,0,34,30,1,55,3,1,0,1,0,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,70524,Ivan Perisic,DML,1,96,0,1,0,0,7.3,0.0,0,0,29,25,4,47,1,2,4,0,2,2,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,129903,Mario Pasalic,MC,1,77,0,0,0,0,6.5,0.03,1,0,22,21,0,28,2,0,0,0,1,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,20874,Luka Modric,MC,1,57,0,0,0,0,5.7,0.0,0,0,27,27,0,34,0,1,0,0,1,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,407944,Martin Baturina,AMC,1,77,1,0,0,0,7.5,0.05,1,1,32,25,1,41,1,0,2,1,0,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,439534,Petar Sucic,AMC,1,96,0,1,0,0,6.7,0.02,1,0,42,35,1,52,4,0,0,1,2,0,2,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,404198,Petar Musa,FW,1,65,1,0,0,0,7.2,0.32,1,1,8,3,0,17,1,0,3,0,1,1,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,75217,Andrej Kramaric,Sub,0,19,0,0,0,0,5.9,0.02,1,0,10,10,0,14,0,0,0,0,0,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,93894,Mateo Kovacic,Sub,0,39,0,0,0,0,6.4,0.04,1,1,30,30,0,37,1,1,0,0,1,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,407222,Igor Matanovic,Sub,0,31,0,0,0,0,6.1,0.02,1,1,1,0,0,6,0,0,1,0,2,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,343975,Nikola Vlasic,Sub,0,19,0,0,0,0,6.0,0.0,0,0,4,2,0,6,0,1,0,0,1,0,0,0
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,423157,Marco Pasalic,Sub,0,31,0,0,0,0,6.1,0.04,1,1,10,6,0,18,1,0,0,0,0,1,2,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,29214,Danijel Subasic,GK,1,124,0,0,0,0,6.5,0.0,0,0,28,20,0,49,0,0,1,0,0,1,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,77059,Sime Vrsaljko,DR,1,124,0,1,0,0,7.4,0.02,1,0,60,45,1,97,1,3,0,0,4,3,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,29106,Dejan Lovren,DC,1,124,0,0,0,0,7.4,0.02,1,0,48,45,0,70,2,0,5,0,3,13,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,29239,Domagoj Vida,DC,1,124,0,0,0,0,7.0,0.0,0,0,42,38,0,62,2,4,1,0,1,9,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,40966,Ivan Strinic,DL,1,94,0,0,0,0,6.3,0.0,0,0,53,35,0,85,3,0,0,0,1,6,2,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,87449,Marcelo Brozovic,DMC,1,124,0,0,0,0,7.2,0.09,3,1,87,76,4,97,5,0,2,0,0,2,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,101735,Ante Rebic,MR,1,100,0,0,1,0,6.6,0.49,3,2,20,11,0,43,3,2,0,1,6,1,2,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,20874,Luka Modric,MC,1,118,0,0,0,0,6.7,0.04,1,0,71,62,2,86,2,1,1,0,2,0,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,22732,Ivan Rakitic,MC,1,124,0,0,0,0,6.6,0.06,2,0,82,68,1,98,1,0,1,0,2,2,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,70524,Ivan Perisic,ML,1,124,1,1,0,0,8.6,0.3,7,1,28,20,3,57,2,0,2,0,1,1,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,24088,Mario Mandzukic,FW,1,114,1,0,1,0,7.5,0.86,3,3,26,16,1,41,1,0,2,0,2,1,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,22040,Vedran Corluka,Sub,0,10,0,0,0,0,6.3,0.0,0,0,1,1,0,4,0,0,0,1,0,2,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,42435,Milan Badelj,Sub,0,6,0,0,0,0,6.0,0.0,0,0,0,0,0,1,0,0,0,0,1,1,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,75217,Andrej Kramaric,Sub,0,24,0,0,0,0,6.2,0.18,3,0,13,13,1,17,0,0,0,0,0,0,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,77061,Josip Pivaric,Sub,0,30,0,0,0,0,6.4,0.0,0,0,10,8,1,19,0,0,0,1,0,1,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,110189,Jordan Pickford,GK,1,124,0,0,0,0,7.0,0.0,0,0,51,24,0,68,0,0,3,0,0,2,0,5
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,69778,Kyle Walker,DC,1,111,0,0,1,0,7.2,0.0,0,0,60,53,0,82,2,0,4,0,1,15,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,99487,Harry Maguire,DC,1,124,0,0,0,0,6.0,0.03,1,0,51,45,0,67,0,0,4,0,0,6,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,101374,John Stones,DC,1,124,0,0,0,0,7.0,0.03,1,1,51,48,0,71,1,0,4,0,0,11,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,68659,Jordan Henderson,DMC,1,96,0,0,0,0,6.6,0.02,1,0,50,37,0,61,3,1,2,0,2,1,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,83078,Kieran Trippier,MR,1,124,1,0,0,0,8.3,0.09,1,1,44,27,4,85,3,2,3,0,2,2,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,109000,Jesse Lingard,MC,1,124,0,0,0,0,6.0,0.16,3,0,35,32,2,55,1,0,0,0,2,0,3,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,131519,Dele Alli,MC,1,124,0,0,0,0,6.5,0.0,0,0,43,34,1,65,1,1,3,0,1,2,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,8166,Ashley Young,ML,1,90,0,0,0,0,6.2,0.0,0,0,19,13,0,43,2,1,0,0,0,1,2,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,83532,Harry Kane,FW,1,124,0,0,0,0,6.8,0.07,2,0,34,19,1,49,0,1,10,0,1,0,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,97692,Raheem Sterling,FW,1,73,0,0,0,0,6.5,0.06,1,0,10,8,1,23,0,0,0,2,2,0,1,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,24711,Danny Rose,Sub,0,34,0,0,0,0,6.2,0.0,0,0,7,6,0,20,0,1,0,1,0,0,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,106981,Jamie Vardy,Sub,0,13,0,0,0,0,6.0,0.0,0,0,0,0,0,1,0,0,0,0,1,0,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,117973,Eric Dier,Sub,0,28,0,0,0,0,6.2,0.03,1,0,20,18,0,24,2,0,1,0,0,0,0,0
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,300299,Marcus Rashford,Sub,0,51,0,0,0,0,5.9,0.0,0,0,10,8,0,33,0,0,1,2,2,0,1,0
 2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,73798,Thibaut Courtois,GK,1,93,0,0,0,0,7.6,0.0,0,0,24,16,0,47,0,0,0,0,0,0,0,5
 2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,10136,Vincent Kompany,DC,1,93,0,0,0,0,7.1,0.0,0,0,39,36,0,52,1,1,0,0,2,9,0,0
 2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,21778,Jan Vertonghen,DC,1,93,0,0,0,0,7.2,0.0,0,0,41,36,0,62,1,3,1,0,0,6,0,0

@@ -37,8 +37,8 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2018_06_20_Iran_vs_Spain,2018-06-20,Spain,Iran,away,1,0,78,16,12,816,91,1,1,0,14,50,1.78
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Portugal,Morocco,home,1,0,45,11,6,407,73,2,1,6,19,49,1.33
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,away,0,1,55,15,6,507,78,1,1,5,22,51,0.89
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,1,1,48,13,4,499,85,3,2,15,11,55,0.94
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,1,1,52,27,17,681,87,2,1,3,13,45,1.66
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,1,0,48,13,7,540,85,3,2,4,10,55,1.6
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,0,1,52,8,4,594,87,1,1,5,13,45,0.6
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,home,0,3,57,10,7,528,79,3,3,6,16,50,1.37
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Croatia,Argentina,away,3,0,43,15,9,403,74,3,1,7,22,50,1.63
 2018_06_21_Denmark_vs_Australia,2018-06-21,Denmark,Australia,home,1,1,47,9,4,480,87,2,1,7,7,48,1.11
@@ -87,8 +87,8 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2018_06_27_South_Korea_vs_Germany,2018-06-27,Germany,South Korea,away,0,2,75,25,14,755,90,4,4,4,7,63,2.53
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Switzerland,Costa Rica,home,2,2,62,13,8,601,88,3,1,7,9,56,1.59
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,away,2,2,38,14,8,368,79,3,2,5,14,44,1.76
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,2,0,47,12,9,513,88,2,2,8,11,48,1.78
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,0,2,53,15,8,699,90,1,1,7,14,52,0.97
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,0,1,47,11,5,500,88,2,2,9,11,48,1.04
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,1,0,53,14,11,547,87,1,1,5,14,52,1.41
 2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,home,0,1,54,10,6,572,86,0,0,6,11,51,0.57
 2018_06_28_Japan_vs_Poland,2018-06-28,Poland,Japan,away,1,0,46,11,6,493,85,2,1,6,8,49,1.07
 2018_06_28_Panama_vs_Tunisia,2018-06-28,Panama,Tunisia,home,1,2,31,9,5,300,73,1,1,9,19,44,0.79
@@ -121,8 +121,8 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2018_07_07_Sweden_vs_England,2018-07-07,England,Sweden,away,2,0,58,12,8,538,81,1,0,4,7,51,1.0
 2018_07_10_France_vs_Belgium,2018-07-10,France,Belgium,home,1,0,36,20,11,356,86,5,4,4,6,60,2.46
 2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,away,0,1,64,9,4,638,92,0,0,10,16,40,0.39
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,4,2,55,24,16,569,85,7,5,5,23,40,4.12
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,2,4,45,11,7,485,84,2,1,13,14,60,0.96
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,2,1,55,24,13,656,80,3,2,4,23,40,2.07
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,1,2,45,11,5,545,77,0,0,11,14,60,0.51
 2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,home,2,0,42,12,9,513,88,2,0,8,11,41,1.78
 2018_07_14_Belgium_vs_England,2018-07-14,England,Belgium,away,0,2,58,15,8,699,92,1,1,7,4,59,0.97
 2018_07_15_France_vs_Croatia,2018-07-15,France,Croatia,home,4,2,34,8,8,300,72,3,2,2,13,50,1.32

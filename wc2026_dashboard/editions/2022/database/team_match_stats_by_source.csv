@@ -39,10 +39,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,away,fotmob,2,1,26,12,4,269,71,3,1,8,14,52,1.46,6
 2022_11_23_Germany_vs_Japan,2022-11-23,Germany,Japan,home,whoscored,1,2,74,26,15,832,87,5,4,6,6,51,,
 2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,away,whoscored,2,1,26,12,8,294,69,3,1,14,14,49,,
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,home,fotmob,2,1,35,8,2,348,78,0,0,1,16,49,0.37,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,away,fotmob,1,2,65,5,2,642,86,1,1,2,11,51,0.52,5
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,home,whoscored,2,1,50,12,7,519,83,1,1,3,13,53,,
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,away,whoscored,1,2,50,9,4,512,83,2,1,4,11,47,,
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,home,fotmob,0,0,35,8,2,348,78,0,0,1,16,49,0.37,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,away,fotmob,0,0,65,5,2,642,86,1,1,2,11,51,0.52,5
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,home,whoscored,0,0,36,8,8,384,78,0,0,3,16,49,,
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,away,whoscored,0,0,64,5,3,692,84,1,1,8,11,51,,
 2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,home,fotmob,7,0,82,17,8,1045,94,5,1,0,8,47,3.53,5
 2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Costa Rica,Spain,away,fotmob,0,7,18,0,0,230,72,0,0,1,12,53,0.0,0
 2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,home,whoscored,7,0,81,17,10,1090,93,5,1,0,8,40,,
