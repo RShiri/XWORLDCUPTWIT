@@ -43,6 +43,23 @@ EDITIONS = {
         "fair_play_tiebreak": False,
         "date_range": ("2022-11-20", "2022-12-18"),
         "expected_matches": 64,
+        # WhoScored competition-page URLs for THIS edition (Season 8213) — the live
+        # 2026 pipeline's default WC2026_WHOSCORED_URLS hardcodes 2026's own stage
+        # ids, so a historical scrape needs its own override or every WhoScored
+        # search 404s ("match ID not found") even though the match is on the site.
+        # Found via whoscored.com's own season/stage picker; 2022's whole knockout
+        # (R16→Final) lives on ONE combined "Final Stage" page, unlike 2018.
+        "whoscored_urls": "|".join([
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18657/Fixtures/International-FIFA-World-Cup-2022",  # knockout: R16-QF-SF-3rd-F
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18649/Fixtures/International-FIFA-World-Cup-2022",  # Group A
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18650/Fixtures/International-FIFA-World-Cup-2022",  # Group B
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18651/Fixtures/International-FIFA-World-Cup-2022",  # Group C
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18652/Fixtures/International-FIFA-World-Cup-2022",  # Group D
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18653/Fixtures/International-FIFA-World-Cup-2022",  # Group E
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18656/Fixtures/International-FIFA-World-Cup-2022",  # Group F
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18655/Fixtures/International-FIFA-World-Cup-2022",  # Group G
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/8213/Stages/18654/Fixtures/International-FIFA-World-Cup-2022",  # Group H
+        ]),
         # Official group draw (FotMob team-name spellings). Historical raws carry only
         # the generic "Group Stage" stage string, and 2026's group source (the schedule
         # JSON) doesn't exist for history — so the draw itself is the group source.
@@ -68,6 +85,23 @@ EDITIONS = {
         "fair_play_tiebreak": True,     # Japan over Senegal, Group H
         "date_range": ("2018-06-14", "2018-07-15"),
         "expected_matches": 64,
+        # Same override as 2022 (see its comment) — 2018's knockout is FIVE separate
+        # WhoScored stage pages (Season 5967), not one combined "Final Stage".
+        "whoscored_urls": "|".join([
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12759/Fixtures/International-FIFA-World-Cup-2018",  # 1/8-finals (R16)
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12760/Fixtures/International-FIFA-World-Cup-2018",  # Quarter-finals
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12761/Fixtures/International-FIFA-World-Cup-2018",  # Semi-finals
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12762/Fixtures/International-FIFA-World-Cup-2018",  # Bronze match
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12763/Fixtures/International-FIFA-World-Cup-2018",  # Final
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12751/Fixtures/International-FIFA-World-Cup-2018",  # Group A
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12752/Fixtures/International-FIFA-World-Cup-2018",  # Group B
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12753/Fixtures/International-FIFA-World-Cup-2018",  # Group C
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12754/Fixtures/International-FIFA-World-Cup-2018",  # Group D
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12755/Fixtures/International-FIFA-World-Cup-2018",  # Group E
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12756/Fixtures/International-FIFA-World-Cup-2018",  # Group F
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12757/Fixtures/International-FIFA-World-Cup-2018",  # Group G
+            "https://www.whoscored.com/Regions/247/Tournaments/36/Seasons/5967/Stages/12758/Fixtures/International-FIFA-World-Cup-2018",  # Group H
+        ]),
         "group_teams": {
             "A": ["Russia", "Saudi Arabia", "Egypt", "Uruguay"],
             "B": ["Portugal", "Spain", "Morocco", "Iran"],
