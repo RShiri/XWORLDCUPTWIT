@@ -1,0 +1,129 @@
+match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass_acc,big_chances,big_missed,saves,fouls,duels_won,xg
+2018_06_14_Russia_vs_Saudi_Arabia,2018-06-14,Russia,Saudi Arabia,home,5,0,38,14,11,382,72,3,0,3,22,56,1.61
+2018_06_14_Russia_vs_Saudi_Arabia,2018-06-14,Saudi Arabia,Russia,away,0,5,62,6,3,597,81,0,0,6,10,44,0.2
+2018_06_15_Egypt_vs_Uruguay,2018-06-15,Egypt,Uruguay,home,0,1,41,8,5,460,74,0,0,7,12,41,0.44
+2018_06_15_Egypt_vs_Uruguay,2018-06-15,Uruguay,Egypt,away,1,0,59,15,8,639,84,3,3,5,6,59,1.64
+2018_06_15_Morocco_vs_Iran,2018-06-15,Morocco,Iran,home,0,1,67,15,9,486,83,0,0,3,22,51,0.67
+2018_06_15_Morocco_vs_Iran,2018-06-15,Iran,Morocco,away,1,0,33,8,3,256,59,2,2,8,14,49,0.91
+2018_06_15_Portugal_vs_Spain,2018-06-15,Portugal,Spain,home,3,3,34,8,5,411,84,2,1,5,12,52,1.49
+2018_06_15_Portugal_vs_Spain,2018-06-15,Spain,Portugal,away,3,3,66,12,8,786,93,1,0,2,10,48,1.66
+2018_06_16_Argentina_vs_Iceland,2018-06-16,Argentina,Iceland,home,1,1,78,29,18,791,89,1,1,3,10,54,2.0
+2018_06_16_Argentina_vs_Iceland,2018-06-16,Iceland,Argentina,away,1,1,22,9,4,224,64,2,1,16,15,46,1.14
+2018_06_16_Croatia_vs_Nigeria,2018-06-16,Croatia,Nigeria,home,2,0,55,11,4,505,81,3,2,7,20,48,1.89
+2018_06_16_Croatia_vs_Nigeria,2018-06-16,Nigeria,Croatia,away,0,2,45,15,8,428,79,0,0,3,16,52,0.63
+2018_06_16_France_vs_Australia,2018-06-16,France,Australia,home,2,1,55,12,7,557,84,1,0,2,16,52,1.33
+2018_06_16_France_vs_Australia,2018-06-16,Australia,France,away,1,2,45,5,3,442,79,1,0,6,19,48,0.92
+2018_06_16_Peru_vs_Denmark,2018-06-16,Peru,Denmark,home,0,1,53,16,8,433,82,2,2,4,10,52,1.86
+2018_06_16_Peru_vs_Denmark,2018-06-16,Denmark,Peru,away,1,0,47,10,5,386,79,2,1,8,18,48,1.1
+2018_06_17_Brazil_vs_Switzerland,2018-06-17,Brazil,Switzerland,home,1,1,55,21,9,573,88,5,5,1,11,52,2.0
+2018_06_17_Brazil_vs_Switzerland,2018-06-17,Switzerland,Brazil,away,1,1,45,7,2,475,80,1,0,7,19,48,0.82
+2018_06_17_Costa_Rica_vs_Serbia,2018-06-17,Costa Rica,Serbia,home,0,1,53,10,7,481,81,2,2,4,18,46,0.94
+2018_06_17_Costa_Rica_vs_Serbia,2018-06-17,Serbia,Costa Rica,away,1,0,47,10,5,438,80,1,1,7,14,54,1.1
+2018_06_17_Germany_vs_Mexico,2018-06-17,Germany,Mexico,home,0,1,67,27,18,633,87,2,2,5,10,47,2.19
+2018_06_17_Germany_vs_Mexico,2018-06-17,Mexico,Germany,away,1,0,33,13,6,330,77,1,0,17,15,53,1.16
+2018_06_18_Belgium_vs_Panama,2018-06-18,Belgium,Panama,home,3,0,62,15,8,609,86,2,0,2,17,55,1.41
+2018_06_18_Belgium_vs_Panama,2018-06-18,Panama,Belgium,away,0,3,38,6,2,364,80,1,1,5,18,45,0.57
+2018_06_18_Sweden_vs_South_Korea,2018-06-18,Sweden,South Korea,home,1,0,55,15,10,479,82,3,2,3,20,54,2.02
+2018_06_18_Sweden_vs_South_Korea,2018-06-18,South Korea,Sweden,away,0,1,45,5,3,388,78,0,0,9,23,46,0.22
+2018_06_18_Tunisia_vs_England,2018-06-18,Tunisia,England,home,1,2,39,6,3,362,79,1,0,9,14,38,0.97
+2018_06_18_Tunisia_vs_England,2018-06-18,England,Tunisia,away,2,1,61,16,11,572,86,5,3,2,8,62,2.0
+2018_06_19_Colombia_vs_Japan,2018-06-19,Colombia,Japan,home,1,2,38,9,8,410,77,3,3,6,15,43,1.29
+2018_06_19_Colombia_vs_Japan,2018-06-19,Japan,Colombia,away,2,1,62,14,8,626,87,6,4,7,9,57,2.91
+2018_06_19_Poland_vs_Senegal,2018-06-19,Poland,Senegal,home,1,2,61,12,6,590,84,2,1,3,8,52,1.07
+2018_06_19_Poland_vs_Senegal,2018-06-19,Senegal,Poland,away,2,1,39,8,4,376,78,2,1,4,15,48,1.34
+2018_06_19_Russia_vs_Egypt,2018-06-19,Russia,Egypt,home,3,1,48,12,6,468,72,2,0,3,11,55,1.18
+2018_06_19_Russia_vs_Egypt,2018-06-19,Egypt,Russia,away,1,3,52,16,6,497,77,1,0,4,10,45,1.49
+2018_06_20_Iran_vs_Spain,2018-06-20,Iran,Spain,home,0,1,22,7,0,242,66,1,1,10,14,50,0.71
+2018_06_20_Iran_vs_Spain,2018-06-20,Spain,Iran,away,1,0,78,16,12,816,91,1,1,0,14,50,1.78
+2018_06_20_Portugal_vs_Morocco,2018-06-20,Portugal,Morocco,home,1,0,45,11,6,407,73,2,1,6,19,49,1.33
+2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,away,0,1,55,15,6,507,78,1,1,5,22,51,0.89
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,1,1,48,13,4,499,85,3,2,15,11,55,0.94
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,1,1,52,27,17,681,87,2,1,3,13,45,1.66
+2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,home,0,3,57,10,7,528,79,3,3,6,16,50,1.37
+2018_06_21_Argentina_vs_Croatia,2018-06-21,Croatia,Argentina,away,3,0,43,15,9,403,74,3,1,7,22,50,1.63
+2018_06_21_Denmark_vs_Australia,2018-06-21,Denmark,Australia,home,1,1,47,9,4,480,87,2,1,7,7,48,1.11
+2018_06_21_Denmark_vs_Australia,2018-06-21,Australia,Denmark,away,1,1,53,14,9,542,85,1,0,4,5,52,1.45
+2018_06_21_France_vs_Peru,2018-06-21,France,Peru,home,1,0,44,12,6,428,78,3,2,4,11,56,2.18
+2018_06_21_France_vs_Peru,2018-06-21,Peru,France,away,0,1,56,11,4,551,81,1,1,4,15,44,0.74
+2018_06_22_Brazil_vs_Costa_Rica,2018-06-22,Brazil,Costa Rica,home,2,0,73,23,13,752,92,5,3,0,11,53,3.01
+2018_06_22_Brazil_vs_Costa_Rica,2018-06-22,Costa Rica,Brazil,away,0,2,27,3,0,290,71,0,0,11,11,47,0.14
+2018_06_22_Nigeria_vs_Iceland,2018-06-22,Nigeria,Iceland,home,2,0,61,16,10,509,82,2,0,4,9,59,1.81
+2018_06_22_Nigeria_vs_Iceland,2018-06-22,Iceland,Nigeria,away,0,2,39,10,4,335,71,2,2,8,10,41,1.46
+2018_06_22_Serbia_vs_Switzerland,2018-06-22,Serbia,Switzerland,home,1,2,37,13,5,346,76,2,1,10,17,54,1.22
+2018_06_22_Serbia_vs_Switzerland,2018-06-22,Switzerland,Serbia,away,2,1,63,20,13,559,85,3,2,4,13,46,2.24
+2018_06_23_Belgium_vs_Tunisia,2018-06-23,Belgium,Tunisia,home,5,2,50,23,15,473,85,7,3,6,12,55,4.23
+2018_06_23_Belgium_vs_Tunisia,2018-06-23,Tunisia,Belgium,away,2,5,50,14,8,477,83,1,0,10,13,45,1.03
+2018_06_23_Germany_vs_Sweden,2018-06-23,Germany,Sweden,home,2,1,76,17,12,734,89,2,2,7,12,59,1.29
+2018_06_23_Germany_vs_Sweden,2018-06-23,Sweden,Germany,away,1,2,24,8,7,245,71,2,1,10,14,41,1.14
+2018_06_23_South_Korea_vs_Mexico,2018-06-23,South Korea,Mexico,home,1,2,42,16,13,368,82,0,0,4,24,41,0.94
+2018_06_23_South_Korea_vs_Mexico,2018-06-23,Mexico,South Korea,away,2,1,58,13,6,499,89,3,1,13,7,59,2.16
+2018_06_24_England_vs_Panama,2018-06-24,England,Panama,home,6,1,60,11,9,611,93,5,1,2,13,56,2.84
+2018_06_24_England_vs_Panama,2018-06-24,Panama,England,away,1,6,40,9,3,409,89,3,2,2,13,44,1.23
+2018_06_24_Japan_vs_Senegal,2018-06-24,Japan,Senegal,home,2,2,57,7,5,474,81,2,1,8,9,48,0.72
+2018_06_24_Japan_vs_Senegal,2018-06-24,Senegal,Japan,away,2,2,43,16,10,375,76,2,0,2,13,52,1.64
+2018_06_24_Poland_vs_Colombia,2018-06-24,Poland,Colombia,home,0,3,45,10,8,444,78,2,2,4,15,50,1.01
+2018_06_24_Poland_vs_Colombia,2018-06-24,Colombia,Poland,away,3,0,55,13,8,536,84,4,1,8,10,50,1.7
+2018_06_25_Iran_vs_Portugal,2018-06-25,Iran,Portugal,home,1,1,26,8,3,234,64,2,1,6,16,47,1.46
+2018_06_25_Iran_vs_Portugal,2018-06-25,Portugal,Iran,away,1,1,74,13,7,643,88,1,1,2,11,53,1.28
+2018_06_25_Saudi_Arabia_vs_Egypt,2018-06-25,Saudi Arabia,Egypt,home,2,1,64,23,13,679,90,3,2,1,7,51,2.68
+2018_06_25_Saudi_Arabia_vs_Egypt,2018-06-25,Egypt,Saudi Arabia,away,1,2,36,7,2,387,80,2,1,11,16,49,1.06
+2018_06_25_Spain_vs_Morocco,2018-06-25,Spain,Morocco,home,2,2,75,18,6,779,92,4,2,2,5,56,2.68
+2018_06_25_Spain_vs_Morocco,2018-06-25,Morocco,Spain,away,2,2,25,6,4,263,77,2,1,4,17,44,0.96
+2018_06_25_Uruguay_vs_Russia,2018-06-25,Uruguay,Russia,home,3,0,58,14,10,528,85,4,3,2,17,44,2.66
+2018_06_25_Uruguay_vs_Russia,2018-06-25,Russia,Uruguay,away,0,3,42,4,3,387,80,0,0,8,18,56,0.19
+2018_06_26_Australia_vs_Peru,2018-06-26,Australia,Peru,home,0,2,57,13,7,580,87,0,0,1,13,47,0.74
+2018_06_26_Australia_vs_Peru,2018-06-26,Peru,Australia,away,2,0,43,4,3,429,80,0,0,7,12,53,0.18
+2018_06_26_Denmark_vs_France,2018-06-26,Denmark,France,home,0,0,32,7,5,331,71,1,1,5,10,50,0.61
+2018_06_26_Denmark_vs_France,2018-06-26,France,Denmark,away,0,0,68,11,4,684,88,0,0,4,11,50,0.4
+2018_06_26_Iceland_vs_Croatia,2018-06-26,Iceland,Croatia,home,1,2,38,16,8,337,72,4,3,4,10,53,2.51
+2018_06_26_Iceland_vs_Croatia,2018-06-26,Croatia,Iceland,away,2,1,62,14,6,545,87,2,0,7,11,47,1.28
+2018_06_26_Nigeria_vs_Argentina,2018-06-26,Nigeria,Argentina,home,1,2,32,9,4,298,69,3,2,3,20,49,1.69
+2018_06_26_Nigeria_vs_Argentina,2018-06-26,Argentina,Nigeria,away,2,1,68,8,5,609,83,2,1,3,15,51,1.11
+2018_06_27_Mexico_vs_Sweden,2018-06-27,Mexico,Sweden,home,0,3,68,22,12,527,81,1,1,4,14,49,1.4
+2018_06_27_Mexico_vs_Sweden,2018-06-27,Sweden,Mexico,away,3,0,32,15,7,252,60,5,3,11,11,51,2.88
+2018_06_27_Serbia_vs_Brazil,2018-06-27,Serbia,Brazil,home,0,2,42,11,6,473,80,2,2,8,13,55,1.14
+2018_06_27_Serbia_vs_Brazil,2018-06-27,Brazil,Serbia,away,2,0,58,14,10,660,87,4,2,6,7,45,1.87
+2018_06_27_South_Korea_vs_Germany,2018-06-27,South Korea,Germany,home,2,0,25,12,6,253,71,3,1,14,16,37,1.53
+2018_06_27_South_Korea_vs_Germany,2018-06-27,Germany,South Korea,away,0,2,75,25,14,755,90,4,4,4,7,63,2.53
+2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Switzerland,Costa Rica,home,2,2,62,13,8,601,88,3,1,7,9,56,1.59
+2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,away,2,2,38,14,8,368,79,3,2,5,14,44,1.76
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,2,0,47,12,9,513,88,2,2,8,11,48,1.78
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,0,2,53,15,8,699,90,1,1,7,14,52,0.97
+2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,home,0,1,54,10,6,572,86,0,0,6,11,51,0.57
+2018_06_28_Japan_vs_Poland,2018-06-28,Poland,Japan,away,1,0,46,11,6,493,85,2,1,6,8,49,1.07
+2018_06_28_Panama_vs_Tunisia,2018-06-28,Panama,Tunisia,home,1,2,31,9,5,300,73,1,1,9,19,44,0.79
+2018_06_28_Panama_vs_Tunisia,2018-06-28,Tunisia,Panama,away,2,1,69,16,12,644,86,3,1,5,19,56,1.98
+2018_06_28_Senegal_vs_Colombia,2018-06-28,Senegal,Colombia,home,0,1,40,9,4,313,74,0,0,2,15,54,0.35
+2018_06_28_Senegal_vs_Colombia,2018-06-28,Colombia,Senegal,away,1,0,60,4,3,466,81,0,0,5,15,46,0.18
+2018_06_30_France_vs_Argentina,2018-06-30,France,Argentina,home,4,3,40,9,5,355,80,3,1,7,21,44,2.05
+2018_06_30_France_vs_Argentina,2018-06-30,Argentina,France,away,3,4,60,12,11,543,88,1,0,1,15,56,0.87
+2018_06_30_Uruguay_vs_Portugal,2018-06-30,Uruguay,Portugal,home,2,1,33,6,4,295,68,1,0,11,13,46,0.43
+2018_06_30_Uruguay_vs_Portugal,2018-06-30,Portugal,Uruguay,away,1,2,67,20,12,593,87,2,1,2,13,54,1.35
+2018_07_01_Croatia_vs_Denmark,2018-07-01,Croatia,Denmark,home,1,1,54,20,13,661,81,3,2,4,5,53,2.34
+2018_07_01_Croatia_vs_Denmark,2018-07-01,Denmark,Croatia,away,1,1,46,14,5,578,79,1,1,12,19,47,0.97
+2018_07_01_Spain_vs_Russia,2018-07-01,Spain,Russia,home,1,1,79,24,17,1160,91,1,1,1,5,53,1.5
+2018_07_01_Spain_vs_Russia,2018-07-01,Russia,Spain,away,1,1,21,9,4,321,66,1,0,17,19,47,1.08
+2018_07_02_Belgium_vs_Japan,2018-07-02,Belgium,Japan,home,3,2,57,24,15,651,87,5,3,5,13,51,3.17
+2018_07_02_Belgium_vs_Japan,2018-07-02,Japan,Belgium,away,2,3,43,11,6,473,82,2,2,12,9,49,1.19
+2018_07_02_Brazil_vs_Mexico,2018-07-02,Brazil,Mexico,home,2,0,48,22,14,410,84,3,1,9,6,57,3.34
+2018_07_02_Brazil_vs_Mexico,2018-07-02,Mexico,Brazil,away,0,2,52,14,9,443,86,0,0,12,17,43,0.61
+2018_07_03_Colombia_vs_England,2018-07-03,Colombia,England,home,1,1,48,14,7,559,79,0,0,5,23,41,0.51
+2018_07_03_Colombia_vs_England,2018-07-03,England,Colombia,away,1,1,52,15,6,600,82,4,3,5,13,59,2.32
+2018_07_03_Sweden_vs_Switzerland,2018-07-03,Sweden,Switzerland,home,1,0,32,12,6,299,70,3,3,14,11,54,1.7
+2018_07_03_Sweden_vs_Switzerland,2018-07-03,Switzerland,Sweden,away,0,1,68,18,14,619,87,0,0,5,13,46,0.64
+2018_07_06_Brazil_vs_Belgium,2018-07-06,Brazil,Belgium,home,1,2,60,27,20,557,91,6,5,4,14,45,3.33
+2018_07_06_Brazil_vs_Belgium,2018-07-06,Belgium,Brazil,away,2,1,40,8,5,385,82,0,0,19,16,55,0.41
+2018_07_06_Uruguay_vs_France,2018-07-06,Uruguay,France,home,0,2,39,11,5,364,64,1,1,1,17,45,0.81
+2018_07_06_Uruguay_vs_France,2018-07-06,France,Uruguay,away,2,0,61,10,3,549,81,1,1,5,15,55,0.68
+2018_07_07_Russia_vs_Croatia,2018-07-07,Russia,Croatia,home,2,2,36,13,9,439,66,1,0,6,25,45,0.79
+2018_07_07_Russia_vs_Croatia,2018-07-07,Croatia,Russia,away,2,2,64,18,8,790,81,2,1,7,18,55,1.52
+2018_07_07_Sweden_vs_England,2018-07-07,Sweden,England,home,0,2,42,7,4,402,72,1,1,6,10,49,0.79
+2018_07_07_Sweden_vs_England,2018-07-07,England,Sweden,away,2,0,58,12,8,538,81,1,0,4,7,51,1.0
+2018_07_10_France_vs_Belgium,2018-07-10,France,Belgium,home,1,0,36,20,11,356,86,5,4,4,6,60,2.46
+2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,away,0,1,64,9,4,638,92,0,0,10,16,40,0.39
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,4,2,55,24,16,569,85,7,5,5,23,40,4.12
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,2,4,45,11,7,485,84,2,1,13,14,60,0.96
+2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,home,2,0,42,12,9,513,88,2,0,8,11,41,1.78
+2018_07_14_Belgium_vs_England,2018-07-14,England,Belgium,away,0,2,58,15,8,699,92,1,1,7,4,59,0.97
+2018_07_15_France_vs_Croatia,2018-07-15,France,Croatia,home,4,2,34,8,8,300,72,3,2,2,13,50,1.32
+2018_07_15_France_vs_Croatia,2018-07-15,Croatia,France,away,2,4,66,15,6,571,85,1,0,5,13,50,1.24
