@@ -24,9 +24,17 @@
   var LOGO = "../team_logos/wc2026/";
   var tooltip = document.getElementById("tooltip");
 
-  // URL to a Match Centre page, carrying the edition along (2026 URLs unchanged).
+  // Which skin is rendering this page (futuristic is the site default — ROADMAP
+  // Phase D — so only the classic page needs to mark itself explicitly).
+  var SKIN = (location.pathname.split("/").pop() || "").indexOf("futuristic") >= 0 ? "futuristic" : "classic";
+
+  // URL to a Match Centre page, carrying the edition + skin along (2026/futuristic
+  // URLs unchanged — that's the default on both ends).
   function matchUrl(id) {
-    return "match.html?id=" + encodeURIComponent(id) + (ED === 2026 ? "" : "&edition=" + ED);
+    var q = "id=" + encodeURIComponent(id);
+    if (ED !== 2026) q += "&edition=" + ED;
+    if (SKIN === "classic") q += "&skin=classic";
+    return "match.html?" + q;
   }
 
   /* ---------------- Edition chrome ----------------
