@@ -306,37 +306,36 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,262838,Takumi Minamino,Sub,0,25,0,0,0,0,6.5,0.04,1,1,3,1,0,8,1,0,0,0,1,1,0,0
 2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,425142,Kaoru Mitoma,Sub,0,42,0,0,0,0,6.9,0.0,0,0,11,9,1,24,4,0,1,0,0,3,0,0
 2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,377283,Takehiro Tomiyasu,Sub,0,53,0,0,0,0,6.4,0.0,0,0,20,18,1,22,0,0,0,0,0,2,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,119120,Dominik Livakovic,GK,1,96,0,0,0,0,6.4,0.0,0,0,29,26,0,36,0,0,0,0,0,0,0,1
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,413272,Josip Stanisic,DR,1,96,0,0,0,0,6.7,0.04,1,0,41,30,0,58,3,1,1,0,1,0,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,402664,Josko Gvardiol,DC,1,96,1,0,0,0,7.4,0.03,1,1,66,60,0,78,0,3,0,0,3,4,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,402666,Josip Sutalo,DC,1,96,0,0,0,0,6.4,0.0,0,0,66,62,0,73,0,0,0,0,0,5,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,70524,Ivan Perisic,DL,1,96,0,1,0,0,7.6,0.0,0,0,38,32,3,63,2,1,2,1,0,6,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,20874,Luka Modric,DMC,1,96,0,0,0,0,6.9,0.05,1,1,67,62,0,85,4,2,0,1,0,1,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,93894,Mateo Kovacic,DMC,1,96,0,0,0,0,7.3,0.3,1,0,69,62,1,84,6,0,0,3,0,1,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,369887,Lovro Majer,AMR,1,66,0,0,0,0,6.4,0.0,0,0,28,21,2,44,1,0,0,0,3,1,2,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,75217,Andrej Kramaric,AMC,1,60,0,0,0,0,6.6,0.04,1,1,16,13,1,23,1,0,0,0,0,0,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,141670,Mislav Orsic,AML,1,94,1,0,0,0,7.5,0.23,5,1,25,19,1,44,6,0,0,0,2,1,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,87310,Marko Livaja,FW,1,65,0,1,0,0,7.0,0.03,1,0,13,9,2,20,0,0,1,0,1,0,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,124271,Bruno Petkovic,Sub,0,31,0,0,0,0,6.3,0.0,0,0,12,4,0,22,2,0,2,0,2,0,2,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,129903,Mario Pasalic,Sub,0,30,0,0,0,0,6.1,0.0,0,0,10,7,0,13,1,0,0,0,1,0,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,343975,Nikola Vlasic,Sub,0,36,0,0,0,0,6.2,0.03,1,0,7,4,0,13,1,1,0,1,0,0,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,402665,Kristijan Jakic,Sub,0,2,0,0,0,0,6.0,0.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,136220,Yassine Bounou,GK,1,96,0,0,0,0,6.3,0.0,0,0,42,37,0,50,0,0,0,0,0,2,0,2
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,320834,Achraf Hakimi,DR,1,96,0,0,0,0,6.6,0.0,0,0,55,46,3,85,4,1,0,0,1,1,2,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,328643,Jawad El Yamiq,DC,1,66,0,0,0,0,6.0,0.06,1,0,35,31,0,42,0,1,1,0,1,1,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,444743,Achraf Dari,DC,1,63,1,0,0,0,7.3,0.47,1,1,31,29,0,44,0,2,1,0,0,6,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,447645,Yahya Attiat Allah,DL,1,96,0,0,0,0,6.0,0.0,0,0,42,34,1,58,1,0,0,0,2,2,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,248144,Sofyan Amrabat,MC,1,96,0,0,0,0,6.0,0.0,0,0,49,44,0,54,1,0,0,0,1,0,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,333255,Abdelhamid Sabiri,MC,1,45,0,0,0,0,5.9,0.0,0,0,10,9,0,19,3,0,0,0,0,0,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,433572,Bilal El Khannouss,MC,1,55,0,0,0,0,5.9,0.0,0,0,24,20,0,31,1,0,0,0,0,2,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,115868,Hakim Ziyech,FWR,1,96,0,0,0,0,7.3,0.05,2,0,64,51,1,90,0,3,0,5,1,0,2,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,323547,Youssef En-Nesyri,FW,1,96,0,0,0,0,6.5,0.35,4,1,16,10,0,23,0,0,6,0,1,1,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,234363,Sofiane Boufal,FWL,1,63,0,0,0,0,6.3,0.05,1,0,20,16,0,32,2,0,0,1,1,1,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,261181,Badr Benoun,Sub,0,33,0,0,0,0,6.1,0.0,0,0,21,21,0,24,0,1,0,0,1,0,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,342901,Ilias Chair,Sub,0,51,0,0,0,0,6.0,0.0,0,0,13,13,0,18,2,0,0,0,0,0,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,384578,Selim Amallah,Sub,0,30,0,0,1,0,6.4,0.0,0,0,15,11,0,25,2,2,0,0,2,1,0,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,392361,Azzedine Ounahi,Sub,0,41,0,0,1,0,6.1,0.0,0,0,25,23,1,31,0,0,0,0,0,0,1,0
-2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,420145,Anass Zaroury,Sub,0,33,0,0,0,0,6.2,0.0,0,0,10,8,0,17,0,0,0,1,0,0,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,136220,Yassine Bounou,GK,1,96,0,0,0,0,7.0,0.0,0,0,21,15,0,33,0,0,0,0,0,2,0,1
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,320834,Achraf Hakimi,DR,1,96,0,0,0,0,7.5,0.02,1,1,36,31,0,76,4,3,2,1,0,1,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,236519,Romain Saiss,DC,1,96,0,0,0,0,6.9,0.0,0,0,49,41,0,57,3,2,1,0,0,4,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,362434,Nayef Aguerd,DC,1,96,0,0,0,0,7.0,0.0,0,0,47,41,0,55,1,1,3,0,0,3,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,349932,Noussair Mazraoui,DL,1,59,0,0,0,0,7.0,0.06,2,1,19,15,0,39,4,0,0,0,1,4,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,248144,Sofyan Amrabat,MC,1,96,0,0,1,0,7.0,0.0,0,0,45,39,0,56,1,1,0,0,3,1,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,384578,Selim Amallah,MC,1,96,0,0,0,0,6.5,0.0,0,0,13,10,1,30,4,1,0,0,2,0,2,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,392361,Azzedine Ounahi,MC,1,81,0,0,0,0,6.8,0.0,0,0,30,22,1,40,2,1,1,1,0,0,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,115868,Hakim Ziyech,FWR,1,96,0,0,0,0,6.5,0.16,2,0,31,19,2,52,4,1,1,0,4,0,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,323547,Youssef En-Nesyri,FW,1,80,0,0,0,0,6.7,0.04,1,0,15,8,0,21,0,0,5,0,0,2,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,234363,Sofiane Boufal,FWL,1,64,0,0,0,0,6.1,0.08,2,0,17,13,0,32,2,1,0,0,2,0,2,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,123632,Abderrazzaq Hamed-Allah,Sub,0,16,0,0,0,0,6.0,0.0,0,0,0,0,0,2,0,0,0,0,0,1,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,333255,Abdelhamid Sabiri,Sub,0,15,0,0,0,0,6.3,0.0,0,0,11,7,0,15,0,2,1,0,0,0,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,427283,Abde Ezzalzouli,Sub,0,32,0,0,0,0,6.0,0.0,0,0,0,0,0,9,1,0,0,0,3,1,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,447645,Yahya Attiat Allah,Sub,0,37,0,0,0,0,6.1,0.0,0,0,14,12,0,21,0,0,0,0,1,1,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,119120,Dominik Livakovic,GK,1,96,0,0,0,0,6.9,0.0,0,0,21,21,0,30,0,0,0,0,0,0,0,2
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,271603,Josip Juranovic,DR,1,96,0,0,0,0,6.8,0.0,0,0,43,33,0,68,2,0,2,1,0,0,2,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,29106,Dejan Lovren,DC,1,96,0,0,0,0,7.8,0.11,1,1,90,81,0,108,4,1,3,0,0,5,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,402664,Josko Gvardiol,DC,1,96,0,0,0,0,6.9,0.0,0,0,115,102,0,124,0,3,0,0,1,0,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,270829,Borna Sosa,DL,1,96,0,0,0,0,7.2,0.0,0,0,55,44,1,80,3,0,1,1,1,4,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,20874,Luka Modric,MC,1,96,0,0,0,0,6.8,0.08,1,0,86,77,0,109,1,2,1,0,4,0,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,87449,Marcelo Brozovic,MC,1,96,0,0,0,0,6.9,0.0,0,0,89,77,0,104,3,0,0,2,3,1,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,93894,Mateo Kovacic,MC,1,78,0,0,0,0,6.6,0.0,0,0,53,46,0,68,3,1,2,0,0,0,2,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,343975,Nikola Vlasic,FWR,1,45,0,0,0,0,6.0,0.46,2,1,9,7,0,20,0,0,0,0,1,0,2,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,75217,Andrej Kramaric,FW,1,70,0,0,0,0,6.0,0.0,0,0,12,11,0,22,0,0,0,1,0,0,2,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,70524,Ivan Perisic,FWL,1,89,0,0,0,0,6.7,0.02,1,0,35,26,0,52,2,2,3,0,1,0,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,87310,Marko Livaja,Sub,0,26,0,0,0,0,6.1,0.0,0,0,8,3,0,13,1,0,0,0,0,0,1,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,129903,Mario Pasalic,Sub,0,51,0,0,0,0,6.2,0.0,0,0,14,13,0,20,0,1,0,0,0,0,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,141670,Mislav Orsic,Sub,0,7,0,0,0,0,6.0,0.0,0,0,1,1,0,2,0,0,0,0,0,0,0,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,369887,Lovro Majer,Sub,0,18,0,0,0,0,6.0,0.0,0,0,11,9,0,13,0,0,0,0,0,0,0,0
 2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,332823,Unai Simon,GK,1,98,0,0,0,0,6.9,0.0,0,0,31,28,0,38,0,0,0,0,0,0,0,0
 2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,25931,Cesar Azpilicueta,DR,1,98,0,0,0,0,7.5,0.0,0,0,95,90,3,113,0,1,1,0,2,0,0,0
 2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,122117,Aymeric Laporte,DC,1,98,0,0,0,0,7.5,0.0,0,0,149,143,1,158,2,0,2,0,2,1,0,0

@@ -75,10 +75,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,away,fotmob,0,1,55,15,4,440,78,1,1,1,22,51,,7
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Portugal,Morocco,home,whoscored,1,0,45,11,6,407,72,2,1,6,19,49,,
 2018_06_20_Portugal_vs_Morocco,2018-06-20,Morocco,Portugal,away,whoscored,0,1,55,15,6,507,76,1,1,5,22,51,,
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,fotmob,1,1,48,13,3,499,85,3,2,2,10,55,,3
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,fotmob,1,1,52,8,2,547,87,1,1,2,13,45,,4
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,whoscored,1,1,34,7,4,347,72,1,0,15,11,51,,
-2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,whoscored,1,1,66,27,17,681,85,2,1,3,6,49,,
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,fotmob,1,0,48,13,3,499,85,3,2,2,10,55,,3
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,fotmob,0,1,52,8,2,547,87,1,1,2,13,45,,4
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Uruguay,Saudi Arabia,home,whoscored,1,0,48,13,7,540,84,3,2,4,10,51,,
+2018_06_20_Uruguay_vs_Saudi_Arabia,2018-06-20,Saudi Arabia,Uruguay,away,whoscored,0,1,52,8,4,594,86,1,1,5,13,49,,
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,home,fotmob,0,3,57,10,3,486,79,3,3,2,16,50,,5
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Croatia,Argentina,away,fotmob,3,0,43,15,5,364,74,3,1,3,22,50,,2
 2018_06_21_Argentina_vs_Croatia,2018-06-21,Argentina,Croatia,home,whoscored,0,3,57,10,7,528,78,2,2,6,16,44,,
@@ -175,10 +175,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,away,fotmob,2,2,38,14,6,329,79,3,2,1,14,44,,5
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Switzerland,Costa Rica,home,whoscored,2,2,62,13,8,601,86,3,1,7,9,53,,
 2018_06_27_Switzerland_vs_Costa_Rica,2018-06-27,Costa Rica,Switzerland,away,whoscored,2,2,38,14,8,368,78,3,2,5,14,47,,
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,fotmob,2,0,47,11,2,450,88,2,2,2,11,48,,7
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,fotmob,0,2,53,14,4,519,87,1,1,1,14,52,,2
-2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,whoscored,2,0,42,12,9,513,87,2,0,8,11,46,,
-2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,whoscored,0,2,58,15,8,699,90,1,1,7,4,54,,
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,fotmob,0,1,47,11,2,450,88,2,2,2,11,48,,7
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,fotmob,1,0,53,14,4,519,87,1,1,1,14,52,,2
+2018_06_28_England_vs_Belgium,2018-06-28,England,Belgium,home,whoscored,0,1,48,11,5,500,85,2,2,9,11,46,,
+2018_06_28_England_vs_Belgium,2018-06-28,Belgium,England,away,whoscored,1,0,52,14,11,547,87,1,1,5,14,54,,
 2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,home,fotmob,0,1,54,10,3,532,86,0,0,2,11,51,,5
 2018_06_28_Japan_vs_Poland,2018-06-28,Poland,Japan,away,fotmob,1,0,46,11,2,444,85,2,1,3,8,49,,7
 2018_06_28_Japan_vs_Poland,2018-06-28,Japan,Poland,home,whoscored,0,1,54,10,6,572,85,0,0,6,11,55,,
@@ -243,10 +243,10 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,away,fotmob,0,1,64,9,3,587,92,0,0,4,16,40,,5
 2018_07_10_France_vs_Belgium,2018-07-10,France,Belgium,home,whoscored,1,0,36,20,11,356,85,5,4,4,6,53,,
 2018_07_10_France_vs_Belgium,2018-07-10,Belgium,France,away,whoscored,0,1,64,9,4,638,88,0,0,10,16,47,,
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,fotmob,4,2,55,24,7,569,80,3,2,0,23,40,,8
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,fotmob,2,4,45,11,2,485,77,0,0,5,14,60,,4
-2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,whoscored,4,2,52,22,16,508,85,7,5,5,10,47,,
-2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,whoscored,2,4,48,10,7,478,84,2,1,13,12,53,,
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,fotmob,2,1,55,24,7,569,80,3,2,0,23,40,,8
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,fotmob,1,2,45,11,2,485,77,0,0,5,14,60,,4
+2018_07_11_Croatia_vs_England,2018-07-11,Croatia,England,home,whoscored,2,1,55,24,13,656,77,3,2,4,23,38,,
+2018_07_11_Croatia_vs_England,2018-07-11,England,Croatia,away,whoscored,1,2,45,11,5,545,77,0,0,11,14,62,,
 2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,home,fotmob,2,0,42,12,4,479,88,2,0,5,11,41,,4
 2018_07_14_Belgium_vs_England,2018-07-14,England,Belgium,away,fotmob,0,2,58,15,6,657,92,1,1,2,4,59,,5
 2018_07_14_Belgium_vs_England,2018-07-14,Belgium,England,home,whoscored,2,0,42,12,9,513,87,2,0,8,11,46,,

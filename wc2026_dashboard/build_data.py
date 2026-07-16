@@ -252,8 +252,14 @@ def compute_standings(matches, team_group, fair_play=None):
             continue
         h, a = m["home"], m["away"]
         gh, ga = team_group.get(h), team_group.get(a)
-        # Only count matches where both teams are in the SAME group (group stage).
+        # Only count matches where both teams are in the SAME group AND the match
+        # itself is a group-stage fixture — two teams drawn from the same group can
+        # meet again in the knockout stage (e.g. a 3rd-place playoff), and without
+        # the stage check that rematch was double-counted into the group table.
         if gh is None or gh != ga:
+            continue
+        stage_l = (m.get("stage") or "").lower()
+        if "grp" not in stage_l and "group" not in stage_l:
             continue
         grp = groups.setdefault(gh, {})
         for t in (h, a):
