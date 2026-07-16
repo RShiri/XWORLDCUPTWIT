@@ -1,0 +1,257 @@
+match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,passes,pass_acc,big_chances,big_missed,saves,fouls,duels_won,xg,corners
+2022_11_20_Qatar_vs_Ecuador,2022-11-20,Qatar,Ecuador,home,fotmob,0,2,47,5,0,434,81,1,1,1,15,49,0.32,1
+2022_11_20_Qatar_vs_Ecuador,2022-11-20,Ecuador,Qatar,away,fotmob,2,0,53,6,3,486,85,1,0,0,15,51,1.18,3
+2022_11_20_Qatar_vs_Ecuador,2022-11-20,Qatar,Ecuador,home,whoscored,0,2,47,5,0,466,81,1,1,1,15,52,,
+2022_11_20_Qatar_vs_Ecuador,2022-11-20,Ecuador,Qatar,away,whoscored,2,0,53,6,3,518,83,1,0,0,15,48,,
+2022_11_21_England_vs_Iran,2022-11-21,England,Iran,home,fotmob,6,2,78,13,7,797,90,3,0,1,9,60,2.11,8
+2022_11_21_England_vs_Iran,2022-11-21,Iran,England,away,fotmob,2,6,22,8,3,215,66,2,1,1,14,40,1.75,0
+2022_11_21_England_vs_Iran,2022-11-21,England,Iran,home,whoscored,6,2,77,13,11,836,89,3,0,2,9,62,,
+2022_11_21_England_vs_Iran,2022-11-21,Iran,England,away,whoscored,2,6,23,8,4,246,66,2,1,5,14,38,,
+2022_11_21_Senegal_vs_Netherlands,2022-11-21,Senegal,Netherlands,home,fotmob,0,2,47,15,4,385,80,0,0,1,13,54,0.89,6
+2022_11_21_Senegal_vs_Netherlands,2022-11-21,Netherlands,Senegal,away,fotmob,2,0,53,10,3,436,81,2,0,4,13,46,0.67,7
+2022_11_21_Senegal_vs_Netherlands,2022-11-21,Senegal,Netherlands,home,whoscored,0,2,46,15,8,425,78,0,0,4,13,56,,
+2022_11_21_Senegal_vs_Netherlands,2022-11-21,Netherlands,Senegal,away,whoscored,2,0,54,10,6,493,78,2,0,8,13,44,,
+2022_11_21_USA_vs_Wales,2022-11-21,USA,Wales,home,fotmob,1,1,59,6,1,567,87,2,1,2,15,47,0.79,5
+2022_11_21_USA_vs_Wales,2022-11-21,Wales,USA,away,fotmob,1,1,41,7,3,403,76,3,2,1,10,53,1.55,3
+2022_11_21_USA_vs_Wales,2022-11-21,USA,Wales,home,whoscored,1,1,58,6,2,623,84,2,1,3,15,50,,
+2022_11_21_USA_vs_Wales,2022-11-21,Wales,USA,away,whoscored,1,1,42,7,4,445,75,3,2,2,10,50,,
+2022_11_22_Argentina_vs_Saudi_Arabia,2022-11-22,Argentina,Saudi Arabia,home,fotmob,1,2,69,15,6,596,85,2,1,0,7,64,2.26,9
+2022_11_22_Argentina_vs_Saudi_Arabia,2022-11-22,Saudi Arabia,Argentina,away,fotmob,2,1,31,3,2,266,68,0,0,5,21,36,0.15,2
+2022_11_22_Argentina_vs_Saudi_Arabia,2022-11-22,Argentina,Saudi Arabia,home,whoscored,1,2,69,15,9,649,84,2,1,1,7,63,,
+2022_11_22_Argentina_vs_Saudi_Arabia,2022-11-22,Saudi Arabia,Argentina,away,whoscored,2,1,31,3,3,293,67,0,0,7,21,37,,
+2022_11_22_Denmark_vs_Tunisia,2022-11-22,Denmark,Tunisia,home,fotmob,0,0,61,11,5,595,84,1,1,1,9,44,1.6,11
+2022_11_22_Denmark_vs_Tunisia,2022-11-22,Tunisia,Denmark,away,fotmob,0,0,39,13,1,374,75,1,1,5,10,56,0.92,9
+2022_11_22_Denmark_vs_Tunisia,2022-11-22,Denmark,Tunisia,home,whoscored,0,0,61,11,8,648,82,1,1,8,9,43,,
+2022_11_22_Denmark_vs_Tunisia,2022-11-22,Tunisia,Denmark,away,whoscored,0,0,39,13,8,418,74,1,1,8,10,57,,
+2022_11_22_France_vs_Australia,2022-11-22,France,Australia,home,fotmob,4,1,62,23,7,723,89,8,4,0,5,65,4.21,8
+2022_11_22_France_vs_Australia,2022-11-22,Australia,France,away,fotmob,1,4,38,4,1,440,84,1,0,2,11,35,0.52,1
+2022_11_22_France_vs_Australia,2022-11-22,France,Australia,home,whoscored,4,1,62,23,13,768,88,7,3,0,5,68,,
+2022_11_22_France_vs_Australia,2022-11-22,Australia,France,away,whoscored,1,4,38,4,1,473,83,1,0,9,11,32,,
+2022_11_22_Mexico_vs_Poland,2022-11-22,Mexico,Poland,home,fotmob,0,0,61,11,4,487,84,1,1,2,14,50,0.72,6
+2022_11_22_Mexico_vs_Poland,2022-11-22,Poland,Mexico,away,fotmob,0,0,39,6,2,322,71,1,1,4,15,50,0.94,5
+2022_11_22_Mexico_vs_Poland,2022-11-22,Mexico,Poland,home,whoscored,0,0,60,11,7,544,80,1,1,3,14,52,,
+2022_11_22_Mexico_vs_Poland,2022-11-22,Poland,Mexico,away,whoscored,0,0,40,6,3,363,70,1,1,7,15,48,,
+2022_11_23_Belgium_vs_Canada,2022-11-23,Belgium,Canada,home,fotmob,1,0,54,9,3,520,83,1,0,3,11,57,0.77,4
+2022_11_23_Belgium_vs_Canada,2022-11-23,Canada,Belgium,away,fotmob,0,1,46,22,3,429,82,3,3,2,14,43,2.63,4
+2022_11_23_Belgium_vs_Canada,2022-11-23,Belgium,Canada,home,whoscored,1,0,53,9,6,546,83,1,0,10,11,59,,
+2022_11_23_Belgium_vs_Canada,2022-11-23,Canada,Belgium,away,whoscored,0,1,47,22,11,484,81,3,3,5,14,41,,
+2022_11_23_Germany_vs_Japan,2022-11-23,Germany,Japan,home,fotmob,1,2,74,26,9,771,89,5,4,2,6,48,3.09,6
+2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,away,fotmob,2,1,26,12,4,269,71,3,1,8,14,52,1.46,6
+2022_11_23_Germany_vs_Japan,2022-11-23,Germany,Japan,home,whoscored,1,2,74,26,15,832,87,5,4,6,6,51,,
+2022_11_23_Germany_vs_Japan,2022-11-23,Japan,Germany,away,whoscored,2,1,26,12,8,294,69,3,1,14,14,49,,
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,home,fotmob,2,1,35,8,2,348,78,0,0,1,16,49,0.37,0
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,away,fotmob,1,2,65,5,2,642,86,1,1,2,11,51,0.52,5
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Morocco,Croatia,home,whoscored,2,1,50,12,7,519,83,1,1,3,13,53,,
+2022_11_23_Morocco_vs_Croatia,2022-11-23,Croatia,Morocco,away,whoscored,1,2,50,9,4,512,83,2,1,4,11,47,,
+2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,home,fotmob,7,0,82,17,8,1045,94,5,1,0,8,47,3.53,5
+2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Costa Rica,Spain,away,fotmob,0,7,18,0,0,230,72,0,0,1,12,53,0.0,0
+2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Spain,Costa Rica,home,whoscored,7,0,81,17,10,1090,93,5,1,0,8,40,,
+2022_11_23_Spain_vs_Costa_Rica,2022-11-23,Costa Rica,Spain,away,whoscored,0,7,19,0,0,249,71,0,0,3,12,60,,
+2022_11_24_Brazil_vs_Serbia,2022-11-24,Brazil,Serbia,home,fotmob,2,0,59,23,9,581,87,2,1,0,7,49,2.43,6
+2022_11_24_Brazil_vs_Serbia,2022-11-24,Serbia,Brazil,away,fotmob,0,2,41,5,0,406,80,0,0,7,12,51,0.18,4
+2022_11_24_Brazil_vs_Serbia,2022-11-24,Brazil,Serbia,home,whoscored,2,0,59,23,14,627,85,2,1,2,7,49,,
+2022_11_24_Brazil_vs_Serbia,2022-11-24,Serbia,Brazil,away,whoscored,0,2,41,5,2,439,78,0,0,12,12,51,,
+2022_11_24_Portugal_vs_Ghana,2022-11-24,Portugal,Ghana,home,fotmob,3,2,62,11,5,622,89,5,2,1,14,57,2.0,3
+2022_11_24_Portugal_vs_Ghana,2022-11-24,Ghana,Portugal,away,fotmob,2,3,38,9,3,387,81,2,0,2,19,43,0.93,3
+2022_11_24_Portugal_vs_Ghana,2022-11-24,Portugal,Ghana,home,whoscored,3,2,62,11,8,659,87,5,2,2,14,62,,
+2022_11_24_Portugal_vs_Ghana,2022-11-24,Ghana,Portugal,away,whoscored,2,3,38,9,4,412,80,2,0,5,19,38,,
+2022_11_24_Switzerland_vs_Cameroon,2022-11-24,Switzerland,Cameroon,home,fotmob,1,0,51,7,3,514,84,3,2,5,12,49,1.44,11
+2022_11_24_Switzerland_vs_Cameroon,2022-11-24,Cameroon,Switzerland,away,fotmob,0,1,49,8,5,494,85,1,1,2,10,51,0.74,5
+2022_11_24_Switzerland_vs_Cameroon,2022-11-24,Switzerland,Cameroon,home,whoscored,1,0,51,7,4,556,82,3,2,6,12,44,,
+2022_11_24_Switzerland_vs_Cameroon,2022-11-24,Cameroon,Switzerland,away,whoscored,0,1,49,8,6,535,83,1,1,3,10,56,,
+2022_11_24_Uruguay_vs_South_Korea,2022-11-24,Uruguay,South Korea,home,fotmob,0,0,56,10,1,548,82,1,1,0,7,56,0.59,4
+2022_11_24_Uruguay_vs_South_Korea,2022-11-24,South Korea,Uruguay,away,fotmob,0,0,44,7,0,418,78,1,1,1,10,44,0.64,3
+2022_11_24_Uruguay_vs_South_Korea,2022-11-24,Uruguay,South Korea,home,whoscored,0,0,56,10,3,584,81,0,0,1,7,55,,
+2022_11_24_Uruguay_vs_South_Korea,2022-11-24,South Korea,Uruguay,away,whoscored,0,0,44,7,1,467,75,1,1,3,10,45,,
+2022_11_25_England_vs_USA,2022-11-25,England,USA,home,fotmob,0,0,56,8,3,541,87,1,1,1,9,52,0.77,3
+2022_11_25_England_vs_USA,2022-11-25,USA,England,away,fotmob,0,0,44,10,1,421,84,1,1,3,15,48,0.63,7
+2022_11_25_England_vs_USA,2022-11-25,England,USA,home,whoscored,0,0,55,8,4,576,86,1,1,5,9,50,,
+2022_11_25_England_vs_USA,2022-11-25,USA,England,away,whoscored,0,0,45,10,5,463,82,1,1,4,15,50,,
+2022_11_25_Netherlands_vs_Ecuador,2022-11-25,Netherlands,Ecuador,home,fotmob,1,1,54,2,1,506,83,0,0,3,15,55,0.1,2
+2022_11_25_Netherlands_vs_Ecuador,2022-11-25,Ecuador,Netherlands,away,fotmob,1,1,46,15,4,413,79,1,0,0,12,45,1.68,5
+2022_11_25_Netherlands_vs_Ecuador,2022-11-25,Netherlands,Ecuador,home,whoscored,1,1,54,2,1,541,82,0,0,8,15,58,,
+2022_11_25_Netherlands_vs_Ecuador,2022-11-25,Ecuador,Netherlands,away,whoscored,1,1,46,15,11,465,77,1,0,0,12,42,,
+2022_11_25_Qatar_vs_Senegal,2022-11-25,Qatar,Senegal,home,fotmob,1,3,45,10,3,406,81,1,1,2,7,54,0.96,6
+2022_11_25_Qatar_vs_Senegal,2022-11-25,Senegal,Qatar,away,fotmob,3,1,55,13,5,502,86,2,0,2,12,46,0.75,6
+2022_11_25_Qatar_vs_Senegal,2022-11-25,Qatar,Senegal,home,whoscored,1,3,45,10,5,453,80,1,1,4,7,43,,
+2022_11_25_Qatar_vs_Senegal,2022-11-25,Senegal,Qatar,away,whoscored,3,1,55,13,7,545,84,2,0,3,12,57,,
+2022_11_25_Wales_vs_Iran,2022-11-25,Wales,Iran,home,fotmob,0,2,62,10,3,501,78,1,1,4,9,49,0.89,2
+2022_11_25_Wales_vs_Iran,2022-11-25,Iran,Wales,away,fotmob,2,0,38,21,6,298,66,2,1,3,10,51,1.47,7
+2022_11_25_Wales_vs_Iran,2022-11-25,Wales,Iran,home,whoscored,0,2,62,10,5,566,77,1,1,13,9,54,,
+2022_11_25_Wales_vs_Iran,2022-11-25,Iran,Wales,away,whoscored,2,0,38,21,15,348,64,2,1,5,10,46,,
+2022_11_26_Argentina_vs_Mexico,2022-11-26,Argentina,Mexico,home,fotmob,2,0,58,5,2,528,84,0,0,1,15,54,0.32,4
+2022_11_26_Argentina_vs_Mexico,2022-11-26,Mexico,Argentina,away,fotmob,0,2,42,4,1,370,77,0,0,0,19,46,0.27,2
+2022_11_26_Argentina_vs_Mexico,2022-11-26,Argentina,Mexico,home,whoscored,2,0,58,5,2,566,83,0,0,2,15,53,,
+2022_11_26_Argentina_vs_Mexico,2022-11-26,Mexico,Argentina,away,whoscored,0,2,42,4,2,405,75,0,0,0,19,47,,
+2022_11_26_France_vs_Denmark,2022-11-26,France,Denmark,home,fotmob,2,1,48,21,7,491,86,4,3,1,4,53,2.42,6
+2022_11_26_France_vs_Denmark,2022-11-26,Denmark,France,away,fotmob,1,2,52,10,2,528,86,1,0,4,9,47,0.64,4
+2022_11_26_France_vs_Denmark,2022-11-26,France,Denmark,home,whoscored,2,1,49,21,15,538,85,4,3,3,4,50,,
+2022_11_26_France_vs_Denmark,2022-11-26,Denmark,France,away,whoscored,1,2,51,10,4,571,85,1,0,12,9,50,,
+2022_11_26_Poland_vs_Saudi_Arabia,2022-11-26,Poland,Saudi Arabia,home,fotmob,2,0,36,9,3,297,77,5,3,5,18,45,1.56,4
+2022_11_26_Poland_vs_Saudi_Arabia,2022-11-26,Saudi Arabia,Poland,away,fotmob,0,2,64,16,5,537,85,3,3,1,15,55,1.73,5
+2022_11_26_Poland_vs_Saudi_Arabia,2022-11-26,Poland,Saudi Arabia,home,whoscored,2,0,37,9,5,337,74,5,3,8,18,41,,
+2022_11_26_Poland_vs_Saudi_Arabia,2022-11-26,Saudi Arabia,Poland,away,whoscored,0,2,63,16,8,582,83,3,3,3,15,59,,
+2022_11_26_Tunisia_vs_Australia,2022-11-26,Tunisia,Australia,home,fotmob,0,1,58,14,4,497,76,1,1,1,16,53,0.94,5
+2022_11_26_Tunisia_vs_Australia,2022-11-26,Australia,Tunisia,away,fotmob,1,0,42,9,2,351,68,1,1,4,15,47,0.61,2
+2022_11_26_Tunisia_vs_Australia,2022-11-26,Tunisia,Australia,home,whoscored,0,1,59,14,10,562,74,1,1,3,16,51,,
+2022_11_26_Tunisia_vs_Australia,2022-11-26,Australia,Tunisia,away,whoscored,1,0,41,9,4,398,66,0,0,10,15,49,,
+2022_11_27_Belgium_vs_Morocco,2022-11-27,Belgium,Morocco,home,fotmob,0,2,67,10,3,652,88,2,2,2,10,51,0.96,9
+2022_11_27_Belgium_vs_Morocco,2022-11-27,Morocco,Belgium,away,fotmob,2,0,33,10,4,328,84,1,0,3,14,49,1.48,1
+2022_11_27_Belgium_vs_Morocco,2022-11-27,Belgium,Morocco,home,whoscored,0,2,67,10,5,698,86,2,2,2,10,48,,
+2022_11_27_Belgium_vs_Morocco,2022-11-27,Morocco,Belgium,away,whoscored,2,0,33,10,4,348,82,1,0,6,14,52,,
+2022_11_27_Croatia_vs_Canada,2022-11-27,Croatia,Canada,home,fotmob,4,1,48,13,10,443,84,6,4,1,13,44,2.33,5
+2022_11_27_Croatia_vs_Canada,2022-11-27,Canada,Croatia,away,fotmob,1,4,52,8,2,473,84,1,0,6,5,56,0.39,2
+2022_11_27_Croatia_vs_Canada,2022-11-27,Croatia,Canada,home,whoscored,4,1,49,13,10,497,81,6,4,4,13,41,,
+2022_11_27_Croatia_vs_Canada,2022-11-27,Canada,Croatia,away,whoscored,1,4,51,8,5,525,83,1,0,6,5,59,,
+2022_11_27_Japan_vs_Costa_Rica,2022-11-27,Japan,Costa Rica,home,fotmob,0,1,57,13,3,582,87,0,0,0,22,43,0.88,5
+2022_11_27_Japan_vs_Costa_Rica,2022-11-27,Costa Rica,Japan,away,fotmob,1,0,43,4,1,443,80,0,0,3,9,57,0.11,0
+2022_11_27_Japan_vs_Costa_Rica,2022-11-27,Japan,Costa Rica,home,whoscored,0,1,57,13,10,619,85,0,0,1,22,51,,
+2022_11_27_Japan_vs_Costa_Rica,2022-11-27,Costa Rica,Japan,away,whoscored,1,0,43,4,2,471,79,0,0,9,9,49,,
+2022_11_27_Spain_vs_Germany,2022-11-27,Spain,Germany,home,fotmob,1,1,64,7,3,634,85,1,0,3,13,43,0.57,6
+2022_11_27_Spain_vs_Germany,2022-11-27,Germany,Spain,away,fotmob,1,1,36,11,4,343,79,2,1,2,11,57,1.22,5
+2022_11_27_Spain_vs_Germany,2022-11-27,Spain,Germany,home,whoscored,1,1,64,7,5,668,85,1,0,6,13,45,,
+2022_11_27_Spain_vs_Germany,2022-11-27,Germany,Spain,away,whoscored,1,1,36,11,7,375,76,2,1,4,11,55,,
+2022_11_28_Brazil_vs_Switzerland,2022-11-28,Brazil,Switzerland,home,fotmob,1,0,54,13,5,550,88,2,2,0,10,59,1.02,8
+2022_11_28_Brazil_vs_Switzerland,2022-11-28,Switzerland,Brazil,away,fotmob,0,1,46,6,0,482,84,0,0,4,17,41,0.3,3
+2022_11_28_Brazil_vs_Switzerland,2022-11-28,Brazil,Switzerland,home,whoscored,1,0,54,13,10,601,85,2,2,4,10,56,,
+2022_11_28_Brazil_vs_Switzerland,2022-11-28,Switzerland,Brazil,away,whoscored,0,1,46,6,4,516,82,0,0,9,17,44,,
+2022_11_28_Cameroon_vs_Serbia,2022-11-28,Cameroon,Serbia,home,fotmob,3,3,41,13,8,340,72,3,0,2,8,52,2.29,4
+2022_11_28_Cameroon_vs_Serbia,2022-11-28,Serbia,Cameroon,away,fotmob,3,3,59,15,5,503,81,4,2,5,13,48,1.88,3
+2022_11_28_Cameroon_vs_Serbia,2022-11-28,Cameroon,Serbia,home,whoscored,3,3,41,13,11,390,69,3,0,4,8,52,,
+2022_11_28_Cameroon_vs_Serbia,2022-11-28,Serbia,Cameroon,away,whoscored,3,3,59,15,7,552,79,4,2,7,13,48,,
+2022_11_28_Portugal_vs_Uruguay,2022-11-28,Portugal,Uruguay,home,fotmob,2,0,60,15,3,603,83,1,0,3,10,58,1.33,6
+2022_11_28_Portugal_vs_Uruguay,2022-11-28,Uruguay,Portugal,away,fotmob,0,2,40,11,3,403,73,2,2,1,16,42,1.27,2
+2022_11_28_Portugal_vs_Uruguay,2022-11-28,Portugal,Uruguay,home,whoscored,2,0,59,15,9,640,82,1,0,4,10,56,,
+2022_11_28_Portugal_vs_Uruguay,2022-11-28,Uruguay,Portugal,away,whoscored,0,2,41,11,5,438,72,2,2,5,16,44,,
+2022_11_28_South_Korea_vs_Ghana,2022-11-28,South Korea,Ghana,home,fotmob,2,3,63,22,7,528,86,3,1,0,13,47,1.8,12
+2022_11_28_South_Korea_vs_Ghana,2022-11-28,Ghana,South Korea,away,fotmob,3,2,37,7,3,320,79,2,0,4,9,53,1.68,5
+2022_11_28_South_Korea_vs_Ghana,2022-11-28,South Korea,Ghana,home,whoscored,2,3,63,22,17,600,82,3,1,0,13,47,,
+2022_11_28_South_Korea_vs_Ghana,2022-11-28,Ghana,South Korea,away,whoscored,3,2,37,7,3,350,77,2,0,14,9,53,,
+2022_11_29_Ecuador_vs_Senegal,2022-11-29,Ecuador,Senegal,home,fotmob,1,2,61,9,4,434,77,1,0,1,23,44,0.93,3
+2022_11_29_Ecuador_vs_Senegal,2022-11-29,Senegal,Ecuador,away,fotmob,2,1,39,14,3,267,68,3,1,3,11,56,2.14,6
+2022_11_29_Ecuador_vs_Senegal,2022-11-29,Ecuador,Senegal,home,whoscored,1,2,61,9,6,482,76,1,0,5,23,53,,
+2022_11_29_Ecuador_vs_Senegal,2022-11-29,Senegal,Ecuador,away,whoscored,2,1,39,14,7,309,66,3,1,5,11,47,,
+2022_11_29_Iran_vs_USA,2022-11-29,Iran,USA,home,fotmob,0,1,49,4,1,466,77,1,1,4,14,49,0.42,1
+2022_11_29_Iran_vs_USA,2022-11-29,USA,Iran,away,fotmob,1,0,51,12,5,474,84,2,1,0,10,51,1.18,5
+2022_11_29_Iran_vs_USA,2022-11-29,Iran,USA,home,whoscored,0,1,49,4,1,506,76,1,1,7,14,46,,
+2022_11_29_Iran_vs_USA,2022-11-29,USA,Iran,away,whoscored,1,0,51,12,8,523,80,2,1,1,10,54,,
+2022_11_29_Netherlands_vs_Qatar,2022-11-29,Netherlands,Qatar,home,fotmob,2,0,63,13,4,783,92,2,1,3,19,47,1.61,4
+2022_11_29_Netherlands_vs_Qatar,2022-11-29,Qatar,Netherlands,away,fotmob,0,2,37,5,3,452,82,0,0,2,9,53,0.14,2
+2022_11_29_Netherlands_vs_Qatar,2022-11-29,Netherlands,Qatar,home,whoscored,2,0,63,13,7,809,91,2,1,3,19,50,,
+2022_11_29_Netherlands_vs_Qatar,2022-11-29,Qatar,Netherlands,away,whoscored,0,2,37,5,3,481,81,0,0,4,9,50,,
+2022_11_29_Wales_vs_England,2022-11-29,Wales,England,home,fotmob,0,3,35,7,1,329,78,0,0,4,16,43,0.35,1
+2022_11_29_Wales_vs_England,2022-11-29,England,Wales,away,fotmob,3,0,65,18,7,594,88,4,3,1,9,57,2.46,6
+2022_11_29_Wales_vs_England,2022-11-29,Wales,England,home,whoscored,0,3,36,7,4,351,77,0,0,9,16,39,,
+2022_11_29_Wales_vs_England,2022-11-29,England,Wales,away,whoscored,3,0,64,18,12,625,87,4,3,4,9,61,,
+2022_11_30_Australia_vs_Denmark,2022-11-30,Australia,Denmark,home,fotmob,1,0,31,8,4,304,64,0,0,3,11,56,0.59,2
+2022_11_30_Australia_vs_Denmark,2022-11-30,Denmark,Australia,away,fotmob,0,1,69,13,3,664,83,0,0,3,10,44,0.65,6
+2022_11_30_Australia_vs_Denmark,2022-11-30,Australia,Denmark,home,whoscored,1,0,33,8,6,347,62,0,0,8,11,55,,
+2022_11_30_Australia_vs_Denmark,2022-11-30,Denmark,Australia,away,whoscored,0,1,67,13,8,720,81,0,0,4,10,45,,
+2022_11_30_Poland_vs_Argentina,2022-11-30,Poland,Argentina,home,fotmob,0,2,27,4,0,317,77,0,0,9,6,49,0.32,1
+2022_11_30_Poland_vs_Argentina,2022-11-30,Argentina,Poland,away,fotmob,2,0,73,23,12,868,92,6,6,0,11,51,3.69,9
+2022_11_30_Poland_vs_Argentina,2022-11-30,Poland,Argentina,home,whoscored,0,2,27,4,2,341,77,0,0,13,6,34,,
+2022_11_30_Poland_vs_Argentina,2022-11-30,Argentina,Poland,away,whoscored,2,0,73,23,16,910,91,6,6,2,11,66,,
+2022_11_30_Saudi_Arabia_vs_Mexico,2022-11-30,Saudi Arabia,Mexico,home,fotmob,1,2,39,10,2,287,58,1,0,8,20,45,1.11,1
+2022_11_30_Saudi_Arabia_vs_Mexico,2022-11-30,Mexico,Saudi Arabia,away,fotmob,2,1,61,26,11,426,75,4,3,1,18,55,2.3,8
+2022_11_30_Saudi_Arabia_vs_Mexico,2022-11-30,Saudi Arabia,Mexico,home,whoscored,1,2,40,10,3,327,59,1,0,17,20,45,,
+2022_11_30_Saudi_Arabia_vs_Mexico,2022-11-30,Mexico,Saudi Arabia,away,whoscored,2,1,60,26,19,488,73,4,3,2,18,55,,
+2022_11_30_Tunisia_vs_France,2022-11-30,Tunisia,France,home,fotmob,1,0,34,5,3,312,78,0,0,3,14,36,0.46,7
+2022_11_30_Tunisia_vs_France,2022-11-30,France,Tunisia,away,fotmob,0,1,66,10,3,621,86,0,0,2,6,64,0.76,8
+2022_11_30_Tunisia_vs_France,2022-11-30,Tunisia,France,home,whoscored,1,0,35,5,3,365,75,0,0,7,14,41,,
+2022_11_30_Tunisia_vs_France,2022-11-30,France,Tunisia,away,whoscored,0,1,65,10,7,673,85,0,0,2,6,59,,
+2022_12_01_Canada_vs_Morocco,2022-12-01,Canada,Morocco,home,fotmob,1,2,59,5,0,524,86,1,1,0,14,49,1.35,6
+2022_12_01_Canada_vs_Morocco,2022-12-01,Morocco,Canada,away,fotmob,2,1,41,6,2,373,79,1,0,0,14,51,0.53,2
+2022_12_01_Canada_vs_Morocco,2022-12-01,Canada,Morocco,home,whoscored,1,2,59,5,1,569,84,1,1,2,14,50,,
+2022_12_01_Canada_vs_Morocco,2022-12-01,Morocco,Canada,away,whoscored,2,1,41,7,5,403,77,1,0,1,14,50,,
+2022_12_01_Costa_Rica_vs_Germany,2022-12-01,Costa Rica,Germany,home,fotmob,2,4,32,8,6,337,75,3,2,7,3,56,1.33,1
+2022_12_01_Costa_Rica_vs_Germany,2022-12-01,Germany,Costa Rica,away,fotmob,4,2,68,32,11,713,89,10,6,4,9,44,5.77,14
+2022_12_01_Costa_Rica_vs_Germany,2022-12-01,Costa Rica,Germany,home,whoscored,2,4,32,8,7,368,74,3,2,13,3,51,,
+2022_12_01_Costa_Rica_vs_Germany,2022-12-01,Germany,Costa Rica,away,whoscored,4,2,68,32,17,770,87,10,6,5,9,49,,
+2022_12_01_Croatia_vs_Belgium,2022-12-01,Croatia,Belgium,home,fotmob,0,0,48,11,4,554,85,0,0,3,7,45,0.7,2
+2022_12_01_Croatia_vs_Belgium,2022-12-01,Belgium,Croatia,away,fotmob,0,0,52,16,3,593,88,5,5,4,9,55,3.07,4
+2022_12_01_Croatia_vs_Belgium,2022-12-01,Croatia,Belgium,home,whoscored,0,0,49,11,5,612,83,0,0,8,7,37,,
+2022_12_01_Croatia_vs_Belgium,2022-12-01,Belgium,Croatia,away,whoscored,0,0,51,16,8,638,85,5,5,5,9,63,,
+2022_12_01_Japan_vs_Spain,2022-12-01,Japan,Spain,home,fotmob,2,1,18,6,3,228,67,1,0,4,9,44,1.45,0
+2022_12_01_Japan_vs_Spain,2022-12-01,Spain,Japan,away,fotmob,1,2,82,12,5,1058,92,2,1,1,6,56,1.04,2
+2022_12_01_Japan_vs_Spain,2022-12-01,Japan,Spain,home,whoscored,2,1,18,6,4,243,68,1,0,9,9,41,,
+2022_12_01_Japan_vs_Spain,2022-12-01,Spain,Japan,away,whoscored,1,2,82,12,10,1104,90,2,1,2,6,59,,
+2022_12_02_Cameroon_vs_Brazil,2022-12-02,Cameroon,Brazil,home,fotmob,1,0,35,7,3,299,77,2,1,7,14,55,0.47,3
+2022_12_02_Cameroon_vs_Brazil,2022-12-02,Brazil,Cameroon,away,fotmob,0,1,65,21,7,541,88,4,4,2,14,45,2.48,11
+2022_12_02_Cameroon_vs_Brazil,2022-12-02,Cameroon,Brazil,home,whoscored,1,0,35,7,4,325,76,2,1,11,14,54,,
+2022_12_02_Cameroon_vs_Brazil,2022-12-02,Brazil,Cameroon,away,whoscored,0,1,65,21,10,593,85,4,4,3,14,46,,
+2022_12_02_Ghana_vs_Uruguay,2022-12-02,Ghana,Uruguay,home,fotmob,0,2,50,10,4,432,80,1,1,4,18,49,1.61,5
+2022_12_02_Ghana_vs_Uruguay,2022-12-02,Uruguay,Ghana,away,fotmob,2,0,50,12,7,433,77,3,2,4,11,51,1.81,2
+2022_12_02_Ghana_vs_Uruguay,2022-12-02,Ghana,Uruguay,home,whoscored,0,2,51,10,7,490,76,1,1,5,18,53,,
+2022_12_02_Ghana_vs_Uruguay,2022-12-02,Uruguay,Ghana,away,whoscored,2,0,49,12,7,473,77,3,2,7,11,47,,
+2022_12_02_Serbia_vs_Switzerland,2022-12-02,Serbia,Switzerland,home,fotmob,2,3,54,12,4,466,78,1,1,4,18,52,1.32,2
+2022_12_02_Serbia_vs_Switzerland,2022-12-02,Switzerland,Serbia,away,fotmob,3,2,46,14,7,415,77,6,4,2,14,48,2.8,0
+2022_12_02_Serbia_vs_Switzerland,2022-12-02,Serbia,Switzerland,home,whoscored,2,3,54,12,6,519,77,1,1,7,18,52,,
+2022_12_02_Serbia_vs_Switzerland,2022-12-02,Switzerland,Serbia,away,whoscored,3,2,46,14,10,451,76,6,4,4,14,48,,
+2022_12_02_South_Korea_vs_Portugal,2022-12-02,South Korea,Portugal,home,fotmob,2,1,38,13,6,357,79,2,0,5,9,52,1.71,5
+2022_12_02_South_Korea_vs_Portugal,2022-12-02,Portugal,South Korea,away,fotmob,1,2,62,13,6,574,88,2,1,4,10,48,1.29,4
+2022_12_02_South_Korea_vs_Portugal,2022-12-02,South Korea,Portugal,home,whoscored,2,1,39,13,11,390,77,2,0,9,9,52,,
+2022_12_02_South_Korea_vs_Portugal,2022-12-02,Portugal,South Korea,away,whoscored,1,2,61,13,10,618,86,2,1,9,10,48,,
+2022_12_03_Argentina_vs_Australia,2022-12-03,Argentina,Australia,home,fotmob,2,1,61,14,5,695,88,4,3,1,8,56,2.98,1
+2022_12_03_Argentina_vs_Australia,2022-12-03,Australia,Argentina,away,fotmob,1,2,39,5,1,435,83,1,1,3,15,44,0.64,3
+2022_12_03_Argentina_vs_Australia,2022-12-03,Argentina,Australia,home,whoscored,2,1,60,15,8,726,87,4,3,3,8,52,,
+2022_12_03_Argentina_vs_Australia,2022-12-03,Australia,Argentina,away,whoscored,1,2,40,5,3,477,81,1,1,5,15,48,,
+2022_12_03_Netherlands_vs_USA,2022-12-03,Netherlands,USA,home,fotmob,3,1,42,11,6,414,76,3,2,5,10,52,1.67,4
+2022_12_03_Netherlands_vs_USA,2022-12-03,USA,Netherlands,away,fotmob,1,3,58,17,8,569,83,3,3,4,5,48,1.49,5
+2022_12_03_Netherlands_vs_USA,2022-12-03,Netherlands,USA,home,whoscored,3,1,42,11,7,442,75,3,2,11,10,55,,
+2022_12_03_Netherlands_vs_USA,2022-12-03,USA,Netherlands,away,whoscored,1,3,58,17,12,620,80,3,3,5,5,45,,
+2022_12_04_England_vs_Senegal,2022-12-04,England,Senegal,home,fotmob,3,0,61,8,4,589,86,3,0,1,16,51,1.02,3
+2022_12_04_England_vs_Senegal,2022-12-04,Senegal,England,away,fotmob,0,3,39,10,1,368,80,1,1,1,12,49,0.8,3
+2022_12_04_England_vs_Senegal,2022-12-04,England,Senegal,home,whoscored,3,0,61,8,4,627,85,3,0,5,16,52,,
+2022_12_04_England_vs_Senegal,2022-12-04,Senegal,England,away,whoscored,0,3,39,10,5,400,79,1,1,1,12,48,,
+2022_12_04_France_vs_Poland,2022-12-04,France,Poland,home,fotmob,3,1,55,16,8,551,86,1,0,1,10,49,1.37,7
+2022_12_04_France_vs_Poland,2022-12-04,Poland,France,away,fotmob,1,3,45,12,3,456,83,2,1,5,8,51,1.75,1
+2022_12_04_France_vs_Poland,2022-12-04,France,Poland,home,whoscored,3,1,55,16,11,598,84,1,0,7,10,52,,
+2022_12_04_France_vs_Poland,2022-12-04,Poland,France,away,whoscored,1,3,45,12,8,489,82,2,1,8,8,48,,
+2022_12_05_Brazil_vs_South_Korea,2022-12-05,Brazil,South Korea,home,fotmob,4,1,53,18,9,609,89,7,5,5,8,46,3.6,5
+2022_12_05_Brazil_vs_South_Korea,2022-12-05,South Korea,Brazil,away,fotmob,1,4,47,8,6,529,87,1,1,5,13,54,0.48,4
+2022_12_05_Brazil_vs_South_Korea,2022-12-05,Brazil,South Korea,home,whoscored,4,1,53,18,11,639,88,7,5,5,8,41,,
+2022_12_05_Brazil_vs_South_Korea,2022-12-05,South Korea,Brazil,away,whoscored,1,4,47,8,6,558,85,1,1,7,13,59,,
+2022_12_05_Japan_vs_Croatia,2022-12-05,Japan,Croatia,home,fotmob,1,1,42,13,4,524,75,3,2,3,13,48,1.21,8
+2022_12_05_Japan_vs_Croatia,2022-12-05,Croatia,Japan,away,fotmob,1,1,58,17,4,725,84,2,2,3,16,52,1.45,5
+2022_12_05_Japan_vs_Croatia,2022-12-05,Japan,Croatia,home,whoscored,1,1,42,13,8,585,73,3,2,10,13,44,,
+2022_12_05_Japan_vs_Croatia,2022-12-05,Croatia,Japan,away,whoscored,1,1,58,17,11,801,81,2,2,7,16,56,,
+2022_12_06_Morocco_vs_Spain,2022-12-06,Morocco,Spain,home,fotmob,0,0,23,6,2,305,71,1,1,1,15,55,0.72,0
+2022_12_06_Morocco_vs_Spain,2022-12-06,Spain,Morocco,away,fotmob,0,0,77,13,1,1019,91,3,3,2,14,45,1.01,8
+2022_12_06_Morocco_vs_Spain,2022-12-06,Morocco,Spain,home,whoscored,0,0,24,6,2,347,69,1,1,6,15,56,,
+2022_12_06_Morocco_vs_Spain,2022-12-06,Spain,Morocco,away,whoscored,0,0,76,13,6,1084,89,3,3,2,14,44,,
+2022_12_06_Portugal_vs_Switzerland,2022-12-06,Portugal,Switzerland,home,fotmob,6,1,48,15,9,449,83,5,1,1,12,57,2.36,6
+2022_12_06_Portugal_vs_Switzerland,2022-12-06,Switzerland,Portugal,away,fotmob,1,6,52,10,3,488,84,2,1,3,10,43,1.07,6
+2022_12_06_Portugal_vs_Switzerland,2022-12-06,Portugal,Switzerland,home,whoscored,6,1,47,15,12,482,82,5,1,6,12,60,,
+2022_12_06_Portugal_vs_Switzerland,2022-12-06,Switzerland,Portugal,away,whoscored,1,6,53,10,7,534,83,2,1,6,10,40,,
+2022_12_09_Croatia_vs_Brazil,2022-12-09,Croatia,Brazil,home,fotmob,1,1,50,9,1,694,88,0,0,11,22,55,0.63,3
+2022_12_09_Croatia_vs_Brazil,2022-12-09,Brazil,Croatia,away,fotmob,1,1,50,21,11,684,89,4,3,0,24,45,2.55,7
+2022_12_09_Croatia_vs_Brazil,2022-12-09,Croatia,Brazil,home,whoscored,1,1,50,9,4,738,86,0,0,18,22,55,,
+2022_12_09_Croatia_vs_Brazil,2022-12-09,Brazil,Croatia,away,whoscored,1,1,50,21,18,735,87,4,3,3,24,45,,
+2022_12_09_Netherlands_vs_Argentina,2022-12-09,Netherlands,Argentina,home,fotmob,2,2,52,6,2,634,83,0,0,3,30,45,0.55,2
+2022_12_09_Netherlands_vs_Argentina,2022-12-09,Argentina,Netherlands,away,fotmob,2,2,48,14,5,602,83,2,0,0,18,55,1.92,8
+2022_12_09_Netherlands_vs_Argentina,2022-12-09,Netherlands,Argentina,home,whoscored,2,2,52,6,5,700,82,0,0,6,30,48,,
+2022_12_09_Netherlands_vs_Argentina,2022-12-09,Argentina,Netherlands,away,whoscored,2,2,48,14,9,640,82,2,0,3,18,52,,
+2022_12_10_England_vs_France,2022-12-10,England,France,home,fotmob,1,2,57,16,8,503,88,3,2,3,10,55,2.41,5
+2022_12_10_England_vs_France,2022-12-10,France,England,away,fotmob,2,1,43,8,5,377,81,2,1,6,14,45,1.01,2
+2022_12_10_England_vs_France,2022-12-10,England,France,home,whoscored,1,2,57,16,12,542,85,3,2,4,10,52,,
+2022_12_10_England_vs_France,2022-12-10,France,England,away,whoscored,2,1,43,8,6,407,80,2,1,11,14,48,,
+2022_12_10_Morocco_vs_Portugal,2022-12-10,Morocco,Portugal,home,fotmob,1,0,27,9,3,247,71,2,1,3,15,48,1.4,3
+2022_12_10_Morocco_vs_Portugal,2022-12-10,Portugal,Morocco,away,fotmob,0,1,73,12,3,663,86,3,3,2,9,52,0.92,9
+2022_12_10_Morocco_vs_Portugal,2022-12-10,Morocco,Portugal,home,whoscored,1,0,27,9,3,267,70,2,1,6,15,50,,
+2022_12_10_Morocco_vs_Portugal,2022-12-10,Portugal,Morocco,away,whoscored,0,1,73,12,6,729,83,3,3,2,9,50,,
+2022_12_13_Argentina_vs_Croatia,2022-12-13,Argentina,Croatia,home,fotmob,3,0,39,9,7,399,83,6,3,3,15,43,2.34,2
+2022_12_13_Argentina_vs_Croatia,2022-12-13,Croatia,Argentina,away,fotmob,0,3,61,12,2,607,87,0,0,4,8,57,0.52,4
+2022_12_13_Argentina_vs_Croatia,2022-12-13,Argentina,Croatia,home,whoscored,3,0,39,9,8,426,83,6,3,6,15,36,,
+2022_12_13_Argentina_vs_Croatia,2022-12-13,Croatia,Argentina,away,whoscored,0,3,61,12,5,653,85,0,0,5,8,64,,
+2022_12_14_France_vs_Morocco,2022-12-14,France,Morocco,home,fotmob,2,0,39,14,3,363,81,3,2,2,11,58,2.1,2
+2022_12_14_France_vs_Morocco,2022-12-14,Morocco,France,away,fotmob,0,2,61,13,3,576,87,1,1,0,11,42,1.0,3
+2022_12_14_France_vs_Morocco,2022-12-14,France,Morocco,home,whoscored,2,0,39,14,8,386,80,3,2,8,11,62,,
+2022_12_14_France_vs_Morocco,2022-12-14,Morocco,France,away,whoscored,0,2,61,13,8,609,85,1,1,5,11,38,,
+2022_12_17_Croatia_vs_Morocco,2022-12-17,Croatia,Morocco,home,fotmob,2,1,51,12,4,487,84,1,1,1,13,53,0.66,6
+2022_12_17_Croatia_vs_Morocco,2022-12-17,Morocco,Croatia,away,fotmob,1,2,49,9,2,472,85,2,1,2,11,47,1.19,3
+2022_12_17_Croatia_vs_Morocco,2022-12-17,Croatia,Morocco,home,whoscored,2,1,50,12,7,519,83,1,1,3,13,53,,
+2022_12_17_Croatia_vs_Morocco,2022-12-17,Morocco,Croatia,away,whoscored,1,2,50,9,4,512,83,2,1,4,11,47,,
+2022_12_18_Argentina_vs_France,2022-12-18,Argentina,France,home,fotmob,3,3,54,20,10,635,83,5,2,2,26,40,3.23,6
+2022_12_18_Argentina_vs_France,2022-12-18,France,Argentina,away,fotmob,3,3,46,10,5,532,77,3,1,7,19,60,2.27,5
+2022_12_18_Argentina_vs_France,2022-12-18,Argentina,France,home,whoscored,3,3,54,20,13,685,81,5,2,4,26,39,,
+2022_12_18_Argentina_vs_France,2022-12-18,France,Argentina,away,whoscored,3,3,46,10,8,582,75,3,1,10,19,61,,
