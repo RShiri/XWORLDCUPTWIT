@@ -26,6 +26,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 
 from xg_model import (SHOT_TYPES, shot_xg, player_full_name, ascii_name, is_shootout)
+from editions import resolve_stage
 
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 OUT_DIR = os.path.join(HERE, "matches_detail")
@@ -596,7 +597,7 @@ def extract(match_data):
                  "color": _team_color(away.get("name", ""))},
         "date": mid_date,
         "venue": meta.get("venue", ""),
-        "stage": meta.get("stage", ""),
+        "stage": resolve_stage(EDITION, meta.get("stage", ""), mid_date),
         "fotXg": fot_xg,
         "maxMin": max_min,
         "shots": shots,
@@ -626,8 +627,8 @@ def write_share_card(match_data, match_id):
     hs = match_data.get("home", {}).get("score")
     as_ = match_data.get("away", {}).get("score")
     meta = match_data.get("wc_metadata", {}) or {}
-    stage = meta.get("stage") or "Group stage"
     date = meta.get("date") or ""
+    stage = resolve_stage(EDITION, meta.get("stage") or "", date) or "Group stage"
     score = f"{hs}–{as_}" if hs is not None and as_ is not None else "vs"
     title = f"{h} {score} {a} · World Cup {EDITION}"
     desc = stage + (f" · {date}" if date else "") + \

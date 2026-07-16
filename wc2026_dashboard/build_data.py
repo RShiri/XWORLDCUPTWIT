@@ -14,6 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from xg_model import team_xg_from_events
 from build_match_details import find_png, find_png_dark, is_match_file
+from editions import resolve_stage
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
@@ -196,7 +197,7 @@ def load_matches():
             "id": mid,
             "date": date,
             "venue": meta.get("venue", ""),
-            "stage": meta.get("stage", ""),
+            "stage": resolve_stage(EDITION, meta.get("stage", ""), date),
             "home": home,
             "away": away,
             "hs": hs,
