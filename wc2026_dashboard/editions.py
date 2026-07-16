@@ -43,6 +43,20 @@ EDITIONS = {
         "fair_play_tiebreak": False,
         "date_range": ("2022-11-20", "2022-12-18"),
         "expected_matches": 64,
+        # Official group draw (FotMob team-name spellings). Historical raws carry only
+        # the generic "Group Stage" stage string, and 2026's group source (the schedule
+        # JSON) doesn't exist for history — so the draw itself is the group source.
+        # Plain data, hand-checkable, same class of curated fact as app.js FIFA tables.
+        "group_teams": {
+            "A": ["Qatar", "Ecuador", "Senegal", "Netherlands"],
+            "B": ["England", "Iran", "USA", "Wales"],
+            "C": ["Argentina", "Saudi Arabia", "Mexico", "Poland"],
+            "D": ["France", "Australia", "Denmark", "Tunisia"],
+            "E": ["Spain", "Costa Rica", "Germany", "Japan"],
+            "F": ["Belgium", "Canada", "Morocco", "Croatia"],
+            "G": ["Brazil", "Serbia", "Switzerland", "Cameroon"],
+            "H": ["Portugal", "Ghana", "Uruguay", "South Korea"],
+        },
     },
     2018: {
         "name": "FIFA World Cup 2018 (Russia)",
@@ -54,8 +68,21 @@ EDITIONS = {
         "fair_play_tiebreak": True,     # Japan over Senegal, Group H
         "date_range": ("2018-06-14", "2018-07-15"),
         "expected_matches": 64,
+        "group_teams": {
+            "A": ["Russia", "Saudi Arabia", "Egypt", "Uruguay"],
+            "B": ["Portugal", "Spain", "Morocco", "Iran"],
+            "C": ["France", "Australia", "Peru", "Denmark"],
+            "D": ["Argentina", "Iceland", "Croatia", "Nigeria"],
+            "E": ["Brazil", "Switzerland", "Costa Rica", "Serbia"],
+            "F": ["Germany", "Mexico", "Sweden", "South Korea"],
+            "G": ["Belgium", "Panama", "Tunisia", "England"],
+            "H": ["Poland", "Senegal", "Colombia", "Japan"],
+        },
     },
 }
+
+
+DEFAULT = 2026
 
 
 def edition(year) -> dict:
@@ -63,6 +90,26 @@ def edition(year) -> dict:
     if y not in EDITIONS:
         raise SystemExit(f"Unknown edition {year!r} — known: {sorted(EDITIONS)}")
     return EDITIONS[y]
+
+
+def add_edition_arg(parser):
+    """Attach the shared ``--edition`` CLI flag (default 2026 = today's behavior)."""
+    parser.add_argument("--edition", type=int, default=DEFAULT, choices=sorted(EDITIONS),
+                        help="World Cup edition to build (default %(default)s)")
+    return parser
+
+
+def format_payload(year) -> dict:
+    """The format flags a historical data.js embeds so the frontend renders the right
+    tournament shape without hardcoding per-year rules client-side."""
+    ed = edition(year)
+    return {
+        "groups": ed["groups"],
+        "koEntry": ed["ko_entry"],
+        "thirds": ed["thirds"],
+        "fairPlay": ed["fair_play_tiebreak"],
+        "name": ed["name"],
+    }
 
 
 def date_strings(year) -> list:

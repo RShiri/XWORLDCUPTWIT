@@ -20,6 +20,24 @@ MATCH_DIR = os.path.join(ROOT, "wc2026", "matches")
 SCHEDULE = os.path.join(ROOT, "wc2026", "REMAINING_SCHEDULE.json")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.js")
 
+EDITION = 2026
+_CFG = None  # editions.py config for the active edition (None = 2026 defaults)
+
+
+def set_edition(year):
+    """Point this builder at one edition. 2026 = today's paths/behavior, unchanged.
+    Historical editions read history/wc<year>/matches and write editions/<year>/data.js."""
+    global EDITION, _CFG, MATCH_DIR, OUT
+    from editions import edition as _edition
+    _CFG = _edition(year)
+    EDITION = int(year)
+    MATCH_DIR = _CFG["match_dir"]
+    if EDITION == 2026:
+        OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.js")
+    else:
+        OUT = os.path.join(_CFG["out_dir"], "data.js")
+    return _CFG
+
 # FotMob ships group-stage fixtures with play-off placeholder names. Map them to
 # the real qualified nations (see memory: playoff_slot_names).
 NAME_MAP = {
@@ -64,7 +82,13 @@ def _stat_line(ms):
 
 
 def build_groups():
-    """team -> group letter, from the remaining schedule (covers all 48 teams)."""
+    """team -> group letter. 2026: from the remaining schedule (covers all 48 teams).
+    Historical editions: from the official draw in editions.py (the raws only carry a
+    generic "Group Stage" stage string, and no schedule file exists for history)."""
+    if EDITION != 2026 and _CFG and _CFG.get("group_teams"):
+        return {norm(team): letter
+                for letter, teams in _CFG["group_teams"].items()
+                for team in teams}
     sched = json.load(open(SCHEDULE, encoding="utf-8"))
     team_group = {}
     for m in sched:
@@ -74,6 +98,47 @@ def build_groups():
         for side in ("home", "away"):
             team_group[norm(m[side])] = grp
     return team_group
+
+
+def compute_fair_play(team_group):
+    """team -> FIFA fair-play points (negative), group-stage matches only. The 2018
+    group tiebreak (Japan over Senegal): yellow −1, second-yellow red −3, straight
+    red −4, yellow then straight red −5, summed per player per match."""
+    fp = {}
+    for f in sorted(glob.glob(os.path.join(MATCH_DIR, "*.json"))):
+        if not is_match_file(f):
+            continue
+        d = json.load(open(f, encoding="utf-8"))
+        home, away = norm(d["home"]["name"]), norm(d["away"]["name"])
+        gh, ga = team_group.get(home), team_group.get(away)
+        if gh is None or gh != ga:
+            continue  # knockout / unknown — the tiebreak only counts group games
+        side_of = {d["home"].get("teamId"): home, d["away"].get("teamId"): away}
+        cards = {}  # (team, playerId) -> {"y": yellows, "sy": bool, "r": straight red}
+        for e in d.get("events", []):
+            t = e.get("type", {})
+            if (t.get("displayName") if isinstance(t, dict) else "") != "Card":
+                continue
+            team, pid = side_of.get(e.get("teamId")), e.get("playerId")
+            if team is None or pid is None:
+                continue
+            quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
+            c = cards.setdefault((team, pid), {"y": 0, "sy": False, "r": False})
+            if "SecondYellow" in quals:
+                c["sy"] = True
+            elif "Red" in quals:
+                c["r"] = True
+            elif "Yellow" in quals:
+                c["y"] += 1
+        for (team, _pid), c in cards.items():
+            if c["sy"]:
+                pts = -3
+            elif c["r"]:
+                pts = -5 if c["y"] else -4
+            else:
+                pts = -c["y"]
+            fp[team] = fp.get(team, 0) + pts
+    return fp
 
 
 def load_matches():
@@ -179,7 +244,7 @@ def _dedupe(matches):
     return out
 
 
-def compute_standings(matches, team_group):
+def compute_standings(matches, team_group, fair_play=None):
     groups = {}  # letter -> { team -> stats }
     for m in matches:
         if not m["played"]:
@@ -214,7 +279,13 @@ def compute_standings(matches, team_group):
         rows = list(teams.values())
         for r in rows:
             r["GD"] = r["GF"] - r["GA"]
-        rows.sort(key=lambda r: (-r["Pts"], -r["GD"], -r["GF"], r["team"]))
+        if fair_play is None:
+            rows.sort(key=lambda r: (-r["Pts"], -r["GD"], -r["GF"], r["team"]))
+        else:
+            # fair-play editions (2018): fewer card points ranks higher after Pts/GD/GF
+            for r in rows:
+                r["FP"] = fair_play.get(r["team"], 0)
+            rows.sort(key=lambda r: (-r["Pts"], -r["GD"], -r["GF"], -r["FP"], r["team"]))
         out[letter] = rows
     return dict(sorted(out.items()))
 
@@ -234,10 +305,13 @@ def build_xg_records(matches):
     return recs
 
 
-def main():
+def main(edition=2026):
+    set_edition(edition)
     team_group = build_groups()
     matches = load_matches()
-    standings = compute_standings(matches, team_group)
+    fair_play = (compute_fair_play(team_group)
+                 if EDITION != 2026 and _CFG and _CFG.get("fair_play_tiebreak") else None)
+    standings = compute_standings(matches, team_group, fair_play)
     xg_records = build_xg_records(matches)
 
     played = [m for m in matches if m["played"]]
@@ -257,7 +331,14 @@ def main():
         "matches": matches,
         "xgRecords": xg_records,
     }
+    if EDITION != 2026:
+        # Historical payloads self-describe (the frontend shim reads the format from
+        # the data, not per-year rules). 2026 stays byte-identical (no new keys).
+        from editions import format_payload
+        data["edition"] = EDITION
+        data["format"] = format_payload(EDITION)
 
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("// AUTO-GENERATED by build_data.py — do not edit by hand.\n")
         fh.write("window.WC_DATA = ")
@@ -269,4 +350,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    from editions import add_edition_arg
+    main(add_edition_arg(argparse.ArgumentParser()).parse_args().edition)
