@@ -1,0 +1,107 @@
+# Backfill a historical World Cup (2018 / 2022) on demand — Actions → "backfill-scrape"
+# → Run workflow. START WITH mode=smoke (3 matches): it proves whether WhoScored's
+# Cloudflare lets a datacenter runner through before you commit to a ~3 h full run.
+# If smoke comes back "without events", run the SAME command from a home PC instead
+# (the runner is resumable) and publish the zip with --pack; everything downstream is
+# identical. Raw JSONs are never committed (repo-size policy in ROADMAP.md) — they
+# leave the job only as an Actions artifact and, optionally, a GitHub Release asset.
+name: backfill-scrape
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "World Cup edition to scrape"
+        required: true
+        type: choice
+        options: ["2022", "2018"]
+      mode:
+        description: "smoke = 3 matches (Cloudflare check) · full = everything missing · fotmob-only = no event stream"
+        required: true
+        type: choice
+        default: smoke
+        options: [smoke, full, fotmob-only]
+      publish:
+        description: "Where the raw zip goes (artifact always; release also tags wc<year>-raw)"
+        required: true
+        type: choice
+        default: artifact-only
+        options: [artifact-only, release]
+
+permissions:
+  contents: write   # release upload (publish=release); nothing is ever committed
+
+concurrency:
+  group: backfill-${{ inputs.year }}
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install scrape dependencies
+        run: pip install undetected-chromedriver selenium cloudscraper requests "curl_cffi>=0.7" python-dotenv
+
+      - name: Chrome version (runners ship stable Chrome; uc retries unpinned on mismatch)
+        run: google-chrome --version || true
+
+      - name: Discover fixtures
+        run: python tools/wc_history_fixtures.py ${{ inputs.year }}
+
+      - name: Scrape
+        run: |
+          ARGS=""
+          [ "${{ inputs.mode }}" = "smoke" ] && ARGS="--max 3"
+          [ "${{ inputs.mode }}" = "fotmob-only" ] && ARGS="--fotmob-only"
+          python tools/scrape_history.py ${{ inputs.year }} $ARGS
+
+      - name: Pack raws
+        if: always()
+        run: python tools/scrape_history.py ${{ inputs.year }} --pack
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## Backfill ${{ inputs.year }} (${{ inputs.mode }})" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "history/wc${{ inputs.year }}/scrape_report.json" ]; then
+            python - >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json
+          r = json.load(open("history/wc${{ inputs.year }}/scrape_report.json"))
+          print(f"- full scrapes: **{len(r['ok'])}**")
+          print(f"- without events (WhoScored blocked/miss — retryable): **{len(r['no_events'])}**")
+          print(f"- failed: **{len(r['failed'])}**")
+          for line in (r["no_events"] + r["failed"])[:15]:
+              print(f"  - {line}")
+          PY
+          else
+            echo "- no scrape report produced" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload artifact (raw zip + fixtures + report)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wc${{ inputs.year }}-raw
+          path: |
+            history/wc${{ inputs.year }}/wc${{ inputs.year }}-raw.zip
+            history/wc${{ inputs.year }}/fixtures.json
+            history/wc${{ inputs.year }}/scrape_report.json
+          retention-days: 90
+
+      - name: Publish release asset
+        if: inputs.publish == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="wc${{ inputs.year }}-raw"
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --title "WC ${{ inputs.year }} raw match data" \
+              --notes "Raw scraped match JSONs for the ${{ inputs.year }} World Cup (git-ignored by policy — see ROADMAP.md). Re-runs replace the zip."
+          gh release upload "$TAG" "history/wc${{ inputs.year }}/wc${{ inputs.year }}-raw.zip" --clobber
