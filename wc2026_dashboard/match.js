@@ -23,9 +23,21 @@
   var id = qid();
   if (!id) { fail("No match id in the URL. Open this page from the dashboard."); return; }
 
+  // Which edition this page shows (set by match.html's loader from ?edition=).
+  // 2026 keeps today's paths; history loads from editions/<year>/.
+  var ED = window.WC_EDITION || 2026;
+  var ED_BASE = ED === 2026 ? "" : "editions/" + ED + "/";
+  var INDEX_URL = "index.html" + (ED === 2026 ? "" : "?edition=" + ED);
+  (function () {
+    var y = document.querySelector(".brand .title .ed-year");
+    if (y && ED !== 2026) { y.textContent = ED; document.title = "Match Dashboard — WC" + ED; }
+    var back = document.getElementById("backLink");
+    if (back) back.href = INDEX_URL;
+  })();
+
   // Inject the match data file.
   var s = document.createElement("script");
-  s.src = "matches_detail/" + encodeURIComponent(id) + ".js?v=" + Date.now();
+  s.src = ED_BASE + "matches_detail/" + encodeURIComponent(id) + ".js?v=" + Date.now();
   s.onload = function () {
     if (window.MATCH_DETAIL) boot(window.MATCH_DETAIL);
     else fail("Match data loaded but was empty.");
@@ -36,7 +48,7 @@
   function fail(msg) {
     document.getElementById("matchRoot").innerHTML =
       '<div class="card" style="text-align:center;padding:40px">' + esc(msg) +
-      '<br><br><a class="back-link" href="index.html">← Back to all matches</a></div>';
+      '<br><br><a class="back-link" href="' + INDEX_URL + '">← Back to all matches</a></div>';
   }
 
   /* ---- coordinate transforms (WhoScored 0-100 → pitch units) ---- */
@@ -119,7 +131,7 @@
 
   /* ================= BOOT ================= */
   function boot(D) {
-    document.title = D.home.name + " " + D.home.score + "-" + D.away.score + " " + D.away.name + " · WC2026";
+    document.title = D.home.name + " " + D.home.score + "-" + D.away.score + " " + D.away.name + " · WC" + ED;
     document.documentElement.style.setProperty("--c-home", D.home.color);
     document.documentElement.style.setProperty("--c-away", D.away.color);
 
@@ -159,7 +171,8 @@
     // URL for manual copy where the async clipboard API is unavailable (http/file://).
     var shareBtn = root.querySelector(".share-btn");
     if (shareBtn) shareBtn.addEventListener("click", function () {
-      var url = new URL("share/" + D.id + ".html", location.href).href;
+      // historical shims live one level deeper: share/<edition>/<id>.html
+      var url = new URL("share/" + (ED === 2026 ? "" : ED + "/") + D.id + ".html", location.href).href;
       function flash(txt) { shareBtn.textContent = txt; setTimeout(function () { shareBtn.textContent = "🔗 Share"; }, 2600); }
       if (navigator.clipboard && navigator.clipboard.writeText)
         navigator.clipboard.writeText(url).then(function () { flash("✓ Link copied"); }, function () { window.prompt("Copy this link:", url); });

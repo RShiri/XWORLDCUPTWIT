@@ -3,10 +3,60 @@
 (function () {
   "use strict";
   var D = window.WC_DATA;
-  if (!D) { document.body.innerHTML = "<p style='padding:40px'>data.js failed to load.</p>"; return; }
+  // Which edition this page shows (?edition=2018|2022, set by the HTML loader).
+  // 2026 = the live tournament, today's behavior. Historical editions load
+  // editions/<year>/ data whose payload self-describes its format (D.format).
+  var ED = window.WC_EDITION || 2026;
+  var ED_BASE = ED === 2026 ? "" : "editions/" + ED + "/";
+  if (!D) {
+    document.body.innerHTML = ED === 2026
+      ? "<p style='padding:40px'>data.js failed to load.</p>"
+      : "<p style='padding:40px'>No data published for the " + ED + " World Cup yet — " +
+        "the owner lights it up via the backfill workflows (see ROADMAP.md). " +
+        "<a href='" + location.pathname.split("/").pop() + "'>Back to 2026</a></p>";
+    return;
+  }
+  // Tournament format, from the data itself (historical payloads embed it; the 2026
+  // payload predates the field, so its shape is the default).
+  var FMT = D.format || { groups: "ABCDEFGHIJKL", koEntry: "R32", thirds: true, fairPlay: false };
+  var ED_LABEL = "World Cup " + ED;
 
   var LOGO = "../team_logos/wc2026/";
   var tooltip = document.getElementById("tooltip");
+
+  // URL to a Match Centre page, carrying the edition along (2026 URLs unchanged).
+  function matchUrl(id) {
+    return "match.html?id=" + encodeURIComponent(id) + (ED === 2026 ? "" : "&edition=" + ED);
+  }
+
+  /* ---------------- Edition chrome ----------------
+     Header pills (2018 · 2022 · 2026) on both skins, the brand-year swap, and the
+     2026-only tabs (Breaks, Power Rank) hidden for historical editions. */
+  (function initEditionChrome() {
+    var pills = document.getElementById("editionPills");
+    if (pills) {
+      var page = location.pathname.split("/").pop() || "index.html";
+      pills.innerHTML = [2018, 2022, 2026].map(function (y) {
+        var href = page + (y === 2026 ? "" : "?edition=" + y);
+        return '<a class="ed-pill' + (y === ED ? " active" : "") + '" href="' + href + '">' + y + "</a>";
+      }).join("");
+    }
+    // The classic ↔ futuristic skin toggle must carry the current edition along.
+    var skinToggle = document.querySelector("a.skin-toggle");
+    if (skinToggle && ED !== 2026) {
+      skinToggle.href = skinToggle.getAttribute("href").split("?")[0] + "?edition=" + ED;
+    }
+    if (ED !== 2026) {
+      var yr = document.querySelector(".brand .title .ed-year");
+      if (yr) yr.textContent = ED;
+      document.title = document.title.replace(/2026/, String(ED));
+      // Breaks (cooling-break study) and Power Rank (FIFA-2026 inputs) are 2026-only.
+      ["breaks", "predict"].forEach(function (v) {
+        var b = document.querySelector('nav.tabs button[data-view="' + v + '"]');
+        if (b) b.remove();
+      });
+    }
+  })();
 
   function el(tag, cls, html) {
     var e = document.createElement(tag);
@@ -392,7 +442,7 @@
         if (toCentre) {
           row.querySelector(".db-match-head").addEventListener("click", function (e) {
             if (e.target.closest("a.open-match")) return;   // let explicit links handle themselves
-            window.location.href = "match.html?id=" + encodeURIComponent(m.id);
+            window.location.href = matchUrl(m.id);
           });
         } else if (expandable) {
           row.querySelector(".db-match-head").addEventListener("click", function (e) {
@@ -1190,16 +1240,21 @@
     var wrap = document.getElementById("dataDownloads");
     if (!db) { wrap.innerHTML = '<p class="footer-note">Run build_database.py to generate the downloads.</p>'; return; }
     wrap.innerHTML = db.tables.map(function (t) {
-      return '<a class="data-card" href="database/' + esc(t.file) + '" download>' +
+      return '<a class="data-card" href="' + ED_BASE + 'database/' + esc(t.file) + '" download>' +
         '<div class="dc-name">' + esc(t.label) + "</div>" +
         '<div class="dc-meta">' + t.rows + " rows · " + esc(t.file) + " · CSV</div>" +
         '<div class="dc-dl">⬇ Download</div></a>';
     }).join("");
-    document.getElementById("sqliteLink").setAttribute("href", "database/" + db.sqlite);
-    if (db.raw_match_files) {
+    document.getElementById("sqliteLink").setAttribute("href", ED_BASE + "database/" + db.sqlite);
+    if (db.raw_match_dir) {
       document.getElementById("rawNote").innerHTML =
         "All <b>" + db.raw_match_files + "</b> scraped match JSON files (FotMob + WhoScored merged, with the full " +
         "event stream) live in <code>wc2026/matches/</code> in the repository.";
+    } else if (db.raw_release) {
+      document.getElementById("rawNote").innerHTML =
+        "The <b>" + db.raw_match_files + "</b> raw scraped match files for " + esc(ED_LABEL) +
+        " aren't committed to the repo (repo-size policy) — they're archived as the " +
+        "<code>" + esc(db.raw_release) + "</code> GitHub Release asset.";
     }
   }
 
@@ -1258,6 +1313,17 @@
   function renderThirdPlace() {
     var host = document.getElementById("thirdTable");
     if (!host) return;
+    // Best-thirds only exists for the 12-group/R32 format (2026); 8-group editions go
+    // straight from groups to R16, so the whole section is hidden, not just emptied.
+    var heading = document.getElementById("thirdSectionHead");
+    if (!FMT.thirds) {
+      host.innerHTML = "";
+      if (heading) heading.style.display = "none";
+      host.style.display = "none";
+      return;
+    }
+    if (heading) heading.style.display = "";
+    host.style.display = "";
     var info = computeThirds();
     if (!info || !info.ranking.length) {
       host.innerHTML = '<p class="hint">The third-placed ranking appears once groups finish their matches.</p>';
@@ -1305,7 +1371,65 @@
      third-place play-off, and a `resolveSlot` that turns a slot code into a team once known.
      Returns null until the fixtures are loaded. Consumed by both `renderBracket` and the
      Power-Rank predictions, so the projected and actual brackets always share one shape. */
+  /* Historical-edition bracket builder (8 groups, knockout enters at R16, no best-thirds).
+     Unlike 2026 — which schedules knockout ties before the teams are known, hence the
+     slot-code id parsing above — a backfilled historical tournament is 100% already played
+     with REAL team names in every match id, so there is no slot code to parse. Rounds are
+     identified from each match's `stage` string (FotMob's round name for that match) and
+     ties are linked round-to-round by which team actually WON its way into the next one. */
+  var HIST_STAGE_RE = {
+    TP: /third|bronze/i, F: /\bfinal\b(?!.*third)/i, SF: /semi/i,
+    QF: /quarter/i, R16: /round of 16|1\/8/i,
+  };
+  function histRoundOf(m) {
+    var s = m.stage || "";
+    if (HIST_STAGE_RE.TP.test(s)) return "TP";
+    if (HIST_STAGE_RE.F.test(s)) return "F";
+    if (HIST_STAGE_RE.SF.test(s)) return "SF";
+    if (HIST_STAGE_RE.QF.test(s)) return "QF";
+    if (HIST_STAGE_RE.R16.test(s)) return "R16";
+    return null;
+  }
+  function buildKnockoutHistory() {
+    if (!D.matches) return null;
+    function byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a._ix - b._ix; }
+    var rounds = { R16: [], QF: [], SF: [], F: [], TP: [] };
+    D.matches.forEach(function (m, i) {
+      var r = histRoundOf(m);
+      if (r) { m._ix = i; rounds[r].push(m); }
+    });
+    if (!rounds.F.length) return null;
+    Object.keys(rounds).forEach(function (k) { rounds[k].sort(byDate); });
+    // Link each tie to its two feeders in the previous round: the feeder is whichever
+    // earlier-round match that team actually won (or reached via a shootout).
+    var ORDER = ["R16", "QF", "SF", "F"];
+    for (var i = 1; i < ORDER.length; i++) {
+      var prevRound = rounds[ORDER[i - 1]];
+      rounds[ORDER[i]].forEach(function (m) {
+        m._kids = [m.home, m.away].map(function (team) {
+          return prevRound.find(function (p) {
+            if (p.home !== team && p.away !== team) return false;
+            if (!p.played || p.hs == null) return false;
+            var pens = p.hs === p.as && p.hpen != null && p.apen != null;
+            var winner = p.hs > p.as ? p.home : p.as > p.hs ? p.away
+                       : pens ? (p.hpen > p.apen ? p.home : p.away) : null;
+            return winner === team;
+          }) || null;
+        });
+      });
+    }
+    var fin = rounds.F[0];
+    var tp = rounds.TP[0];
+    if (tp) {
+      // Third place feeds the LOSERS of the two semis, not the winners — pair by date order.
+      tp._kids = rounds.SF.slice(0, 2);
+    }
+    function strip(id) { return id.replace(/^\d{4}_\d{2}_\d{2}_/, ""); }
+    return { rounds: rounds, fin: fin, tp: tp, strip: strip,
+             resolveSlot: function (raw) { return { text: String(raw) }; }, historical: true };
+  }
   function buildKnockout() {
+    if (FMT.koEntry !== "R32") return buildKnockoutHistory();
     if (!D.matches) return null;
     function strip(id) { return id.replace(/^\d{4}_\d{2}_\d{2}_/, ""); }
     function isSlotExpr(t) { return /^[123][0-9A-L]*$/.test(t); }
@@ -1470,12 +1594,15 @@
     }
     host.innerHTML = '<div class="bracket-tree lr">' + node(fin) + "</div>" +
       (tp ? '<div class="bk-third"><div class="bk-third-h">Third-place play-off</div>' + box(tp) + "</div>" : "");
-    // Header columns aligned to the left-to-right layout (R32 → Final).
+    // Header columns aligned to the left-to-right layout (R32 → Final for 2026,
+    // R16 → Final for the 8-group/no-thirds historical format).
     var head = document.getElementById("bracketHead");
     if (head) {
       var MW = "var(--bk-mw)", MID = "calc(var(--bk-mw) + var(--bk-edge))";
-      var cells = [["Round of 32", MW], ["Round of 16", MID], ["Quarter-finals", MID],
-        ["Semi-finals", MID], ["Final", MID]];
+      var cells = K.historical
+        ? [["Round of 16", MW], ["Quarter-finals", MID], ["Semi-finals", MID], ["Final", MID]]
+        : [["Round of 32", MW], ["Round of 16", MID], ["Quarter-finals", MID],
+           ["Semi-finals", MID], ["Final", MID]];
       head.innerHTML = cells.map(function (c) { return '<span class="bk-hcell" style="width:' + c[1] + '">' + c[0] + "</span>"; }).join("");
     }
   }
@@ -3109,7 +3236,7 @@
       hero.className = "story-hero champ";
       hero.innerHTML =
         logoImg(champion, "hero-flag") +
-        '<div><div class="hero-kicker">World Cup 2026</div>' +
+        '<div><div class="hero-kicker">' + esc(ED_LABEL) + '</div>' +
         '<div class="hero-title">🏆 ' + esc(champion) + " are world champions</div>" +
         '<div class="hero-sub">Beat ' + esc(runnerUp) + " " + stScoreStr(fin) + " in the final" +
         (third ? " · Bronze: " + esc(third) + " (" + stScoreStr(tp) + ")" : "") + "</div></div>";
@@ -3120,7 +3247,7 @@
         '<div class="hero-flags">' +
           (fh.team ? logoImg(fh.team, "hero-flag") : "") +
           (fa.team ? logoImg(fa.team, "hero-flag") : "") + "</div>" +
-        '<div><div class="hero-kicker">World Cup 2026 · Final — ' + esc(fmtDate(fin.date) || fin.date) + "</div>" +
+        '<div><div class="hero-kicker">' + esc(ED_LABEL) + ' · Final — ' + esc(fmtDate(fin.date) || fin.date) + "</div>" +
         '<div class="hero-title">' + esc(fh.label) + ' <span class="hero-vs">vs</span> ' + esc(fa.label) + "</div>" +
         '<div class="hero-sub">The bracket fills this in by itself as the semi-finals are decided.</div></div>';
     } else {
@@ -3166,7 +3293,7 @@
         var pf = home ? m.hpen : m.apen, pa = home ? m.apen : m.hpen;
         var res = gf > ga ? "W" : gf < ga ? "L" : (pf != null && pa != null && pf !== pa) ? (pf > pa ? "W" : "L") : "D";
         var pens = gf === ga && pf != null && pa != null;
-        return '<a class="road-step ' + res + '" href="match.html?id=' + encodeURIComponent(m.id) + '">' +
+        return '<a class="road-step ' + res + '" href="' + matchUrl(m.id) + '">' +
           '<div class="rs-stage">' + esc(stageChip(m)) + "</div>" +
           '<div class="rs-line">' + logoImg(opp) + '<span class="rs-opp">' + esc(opp) + "</span>" +
           '<span class="rs-score">' + gf + "–" + ga + (pens ? " (" + pf + "–" + pa + ")" : "") + "</span></div></a>";
@@ -3226,7 +3353,7 @@
     }).join("") || '<p class="hint">No upsets yet — the favourites keep winning.</p>';
     upHost.querySelectorAll(".up-row").forEach(function (r) {
       r.addEventListener("click", function () {
-        window.location.href = "match.html?id=" + encodeURIComponent(r.dataset.id);
+        window.location.href = matchUrl(r.dataset.id);
       });
     });
 
@@ -3583,9 +3710,11 @@
   renderUnlucky();
   initStandouts();
   initTeamLab();
-  initBreaks();
+  // Cooling-break analysis and Power Rank predictions are 2026-only by design (frozen
+  // baselines / a 2026-dated FIFA snapshot — see ROADMAP.md); their tab buttons are
+  // already removed above, and their data files aren't even loaded for history.
+  if (ED === 2026) { initBreaks(); renderPower(); }
   renderData();
-  renderPower();
   renderStory();
   renderAwards();
   document.getElementById("footerNote").textContent =
@@ -3800,7 +3929,7 @@
   function plLoadTeam(team, cb) {
     if ((window.WC_PLAYERLAB || {})[team]) { cb(); return; }
     var sc = document.createElement("script");
-    sc.src = "player_lab/" + plSlug(team) + ".js";
+    sc.src = ED_BASE + "player_lab/" + plSlug(team) + ".js";
     sc.onload = cb; sc.onerror = function () { cb(); };
     document.head.appendChild(sc);
   }
@@ -3966,7 +4095,8 @@
 
   var _polling = false;
   function refreshData() {
-    if (_polling || document.hidden) return;
+    // Historical editions are static (backfilled once, never re-scraped) — no point polling.
+    if (ED !== 2026 || _polling || document.hidden) return;
     _polling = true;
     fetch("data.js?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.text() : null; })

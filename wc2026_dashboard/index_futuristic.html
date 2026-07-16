@@ -12,8 +12,9 @@
 <header class="site">
   <div class="header-inner">
     <div class="brand">
-      <div class="title">World Cup <span>2026</span> · Stats Lab</div>
+      <div class="title">World Cup <span class="ed-year">2026</span> · Stats Lab</div>
       <div class="sub">Futuristic concept skin — same live data as the original dashboard</div>
+      <nav class="edition-pills" id="editionPills" aria-label="World Cup edition"></nav>
     </div>
     <nav class="tabs">
       <button data-view="tables" class="active">Tables</button>
@@ -48,7 +49,7 @@
       <span>3rd place may advance as one of the best third-placed teams</span>
     </div>
 
-    <div class="section-head" style="margin-top:34px">
+    <div class="section-head" style="margin-top:34px" id="thirdSectionHead">
       <h2>Best third-placed teams</h2>
       <p>The 12 group third-placed teams ranked by points, then goal difference, then goals for.
          The top <b>8</b> advance to the Round of 32; the last column shows the group winner each
@@ -705,13 +706,20 @@
 <script>
   // Cache-bust the generated data + app so a refresh after an auto-update always
   // shows the latest results (the local dev server sends no-cache too).
+  // ?edition=2018|2022 loads that edition's generated data from editions/<year>/
+  // (default 2026 = today's files, same URLs). breaks.js is 2026-only by design.
   (function () {
     var v = Date.now();
-    document.write('<scr' + 'ipt src="data.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="players.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="shots.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="breaks.js?v=' + v + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt src="database/manifest.js?v=' + v + '"></scr' + 'ipt>');
+    var ed = new URLSearchParams(location.search).get("edition");
+    ed = (ed === "2018" || ed === "2022") ? +ed : 2026;
+    window.WC_EDITION = ed;
+    var base = ed === 2026 ? "" : "editions/" + ed + "/";
+    document.write('<scr' + 'ipt src="ratings.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="' + base + 'data.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="' + base + 'players.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="' + base + 'shots.js?v=' + v + '"></scr' + 'ipt>');
+    if (ed === 2026) document.write('<scr' + 'ipt src="breaks.js?v=' + v + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="' + base + 'database/manifest.js?v=' + v + '"></scr' + 'ipt>');
     document.write('<scr' + 'ipt src="app.js?v=' + v + '"></scr' + 'ipt>');
   })();
 </script>

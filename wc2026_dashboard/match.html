@@ -11,11 +11,11 @@
 <header class="site">
   <div class="header-inner">
     <div class="brand">
-      <div class="title">FIFA World Cup <span>2026</span> · Match Centre</div>
+      <div class="title">FIFA World Cup <span class="ed-year">2026</span> · Match Centre</div>
       <div class="sub">Interactive shot &amp; pass explorer</div>
     </div>
     <nav class="tabs">
-      <a class="back-link" href="index.html">← All matches</a>
+      <a class="back-link" id="backLink" href="index.html">← All matches</a>
     </nav>
   </div>
 </header>
@@ -29,10 +29,17 @@
 <div class="tooltip" id="tooltip"></div>
 
 <!-- data.js gives match.js the head-to-head team stats; the match-specific
-     event file is injected by match.js based on ?id= -->
+     event file is injected by match.js based on ?id= (and ?edition= picks which
+     edition's generated data both come from — default 2026, today's paths) -->
 <script>var _mv=Date.now();
-  document.write('<scr'+'ipt src="ratings.js?v='+_mv+'"></scr'+'ipt>');
-  document.write('<scr'+'ipt src="data.js?v='+_mv+'"></scr'+'ipt>');
-  document.write('<scr'+'ipt src="match.js?v='+_mv+'"></scr'+'ipt>');</script>
+  (function(){
+    var ed = new URLSearchParams(location.search).get("edition");
+    ed = (ed === "2018" || ed === "2022") ? +ed : 2026;
+    window.WC_EDITION = ed;
+    var base = ed === 2026 ? "" : "editions/" + ed + "/";
+    document.write('<scr'+'ipt src="ratings.js?v='+_mv+'"></scr'+'ipt>');
+    document.write('<scr'+'ipt src="'+base+'data.js?v='+_mv+'"></scr'+'ipt>');
+    document.write('<scr'+'ipt src="match.js?v='+_mv+'"></scr'+'ipt>');
+  })();</script>
 </body>
 </html>
