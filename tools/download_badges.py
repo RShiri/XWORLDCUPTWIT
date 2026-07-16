@@ -1,10 +1,15 @@
 """
-Download flag PNG images for all 48 FIFA World Cup 2026 nations.
-Source: flagcdn.com (free, no auth required)
+Download flag PNG images for FIFA World Cup nations — 2026's 48, plus the nations
+from 2018/2022 not already in that set (ROADMAP.md Phase C). Flags are edition-
+agnostic (a country's crest doesn't change year to year), so every edition shares
+this one output directory — no wc2018/wc2022 subfolders needed.
+Source: HatScripts circle-flags (SVG, converted to PNG via cairosvg)
 Output: team_logos/wc2026/<Team Name>.png
 
 Usage:
-    python wc2026/download_badges.py
+    python tools/download_badges.py            # 2026 nations (unchanged default)
+    python tools/download_badges.py --history   # also fetch 2018/2022-only nations
+Needs network egress — run in a workflow / on the owner's machine, not the dev container.
 """
 
 from __future__ import annotations
@@ -83,13 +88,37 @@ WC2026_NATIONS: list[tuple[str, str]] = [
     ("Ghana",               "gh"),
 ]
 
+# ── Nations that played 2018 (Russia) or 2022 (Qatar) but never qualified for the
+# 48-team 2026 field, so they're missing from WC2026_NATIONS above. Team names match
+# editions.py's group_teams spelling exactly (that's the join key app.js's logoImg uses).
+HISTORY_ONLY_NATIONS: list[tuple[str, str]] = [
+    ("Russia",     "ru"),
+    ("Peru",       "pe"),
+    ("Denmark",    "dk"),
+    ("Iceland",    "is"),
+    ("Serbia",     "rs"),
+    ("Sweden",     "se"),
+    ("Tunisia",    "tn"),
+    ("Poland",     "pl"),
+    ("Wales",      "gb-wls"),
+    ("Ecuador",    "ec"),
+    ("Cameroon",   "cm"),
+    ("Costa Rica", "cr"),
+]
+
+
+def _dedupe(rows):
+    seen, out = set(), []
+    for name, iso in rows:
+        if name not in seen:
+            seen.add(name)
+            out.append((name, iso))
+    return out
+
+
 # De-duplicate while preserving order
-seen: set[str] = set()
-UNIQUE_NATIONS: list[tuple[str, str]] = []
-for name, iso in WC2026_NATIONS:
-    if name not in seen:
-        seen.add(name)
-        UNIQUE_NATIONS.append((name, iso))
+UNIQUE_NATIONS: list[tuple[str, str]] = _dedupe(WC2026_NATIONS)
+UNIQUE_HISTORY_NATIONS: list[tuple[str, str]] = _dedupe(HISTORY_ONLY_NATIONS)
 
 # ── Downloader ─────────────────────────────────────────────────────────────
 
@@ -138,10 +167,14 @@ def download_flag(name: str, iso: str, out_dir: Path) -> bool:
 
 
 def main() -> None:
+    import sys
+    history = "--history" in sys.argv
+    nations = UNIQUE_NATIONS + (UNIQUE_HISTORY_NATIONS if history else [])
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading {len(UNIQUE_NATIONS)} WC2026 nation flags → {OUT_DIR}\n")
+    label = "WC2026" + (" + 2018/2022-only" if history else "")
+    print(f"Downloading {len(nations)} {label} nation flags → {OUT_DIR}\n")
     ok = fail = 0
-    for name, iso in UNIQUE_NATIONS:
+    for name, iso in nations:
         success = download_flag(name, iso, OUT_DIR)
         if success:
             ok += 1
