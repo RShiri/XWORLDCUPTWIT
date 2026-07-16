@@ -977,6 +977,23 @@ def _ws_slug_key(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", lower).strip("-")
 
 
+def _ws_slug_candidates(name: str) -> list[str]:
+    """All slug fragments WhoScored might use for a team.
+
+    WhoScored isn't consistent: the 2022 World Cup group page uses
+    "south-korea" (bare slugify), but a 2026 friendly cached in
+    whoscored_ids.json used "republic-of-korea" (the alias). Return both
+    so live-search matching isn't tied to picking the one true slug.
+    """
+    lower = name.lower().strip()
+    bare = re.sub(r"[^a-z0-9]+", "-", lower).strip("-")
+    candidates = [bare]
+    alias = _WS_NAME_ALIASES.get(lower)
+    if alias and alias != bare:
+        candidates.append(alias)
+    return candidates
+
+
 def _ws_cache_lookup(home_name: str, away_name: str) -> int | None:
     """Check whoscored_ids.json for a pre-known match ID."""
     cache_path = Path(__file__).parent / "whoscored_ids.json"
@@ -1043,13 +1060,18 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
 
     log.info("WhoScored: searching for %s vs %s …", home_name, away_name)
     try:
-        # Normalise through _ws_slug_key so alias teams match WhoScored's slug:
-        # WhoScored calls Cape Verde "cabo-verde", South Korea "republic-of-korea",
-        # etc. Without the alias map the raw name ("capeverde") never matches the
-        # href ("cabo-verde") — group games only worked because they had a cache
-        # entry; uncached knockout ties (Argentina vs Cape Verde) fell through here.
-        h_key = re.sub(r"[^a-z0-9]", "", _ws_slug_key(home_name))
-        a_key = re.sub(r"[^a-z0-9]", "", _ws_slug_key(away_name))
+        # Try every slug candidate (bare slugify + alias) so alias teams match
+        # WhoScored's slug whichever variant this particular page uses:
+        # WhoScored isn't consistent — Cape Verde is always "cabo-verde", but
+        # South Korea is "south-korea" on the 2022 World Cup group page and
+        # "republic-of-korea" on a cached 2026 friendly. Without candidates for
+        # BOTH, either the raw name ("capeverde") never matches "cabo-verde",
+        # or the alias ("republicofkorea") never matches "southkorea" — group
+        # games only worked when they happened to have a cache entry; uncached
+        # ties (Argentina vs Cape Verde, South Korea's 2022 group games) fell
+        # through here.
+        h_keys = [re.sub(r"[^a-z0-9]", "", c) for c in _ws_slug_candidates(home_name)]
+        a_keys = [re.sub(r"[^a-z0-9]", "", c) for c in _ws_slug_candidates(away_name)]
         for base in WC2026_WS_BASES:
             try:
                 driver.get(base)
@@ -1062,7 +1084,7 @@ def whoscored_search_match_id(home_name: str, away_name: str) -> int | None:
             for el in driver.find_elements("css selector", "a[href*='/matches/']"):
                 href = el.get_attribute("href") or ""
                 combined = re.sub(r"[^a-z0-9]", "", href.lower())
-                if h_key in combined and a_key in combined:
+                if any(hk in combined for hk in h_keys) and any(ak in combined for ak in a_keys):
                     m = re.search(r"/matches/(\d+)/", href)
                     if m:
                         mid = int(m.group(1))
