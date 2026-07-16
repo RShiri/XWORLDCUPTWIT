@@ -74,6 +74,26 @@ EDITIONS = {
             "G": ["Brazil", "Serbia", "Switzerland", "Cameroon"],
             "H": ["Portugal", "Ghana", "Uruguay", "South Korea"],
         },
+        # FotMob's OWN round label for a 2022 knockout match is USELESS: verified live
+        # (fotmob_fetch_match_details) that every R16/QF/SF/3rd-place game reports the
+        # identical generic leagueName "World Cup Final Stage", and the FINAL itself
+        # reports just "World Cup" — no round word at all. 2022's whole knockout bracket
+        # sits on ONE combined WhoScored page too (see whoscored_urls above), unlike
+        # 2018 where FotMob gives each round a distinct, correctly-classifiable label
+        # ("World Cup 1/8 Finals", "World Cup Quarter Finals", …) — so only 2022 needs
+        # this override. The real 2022 schedule has a hard date gap between every round,
+        # so a date range is an unambiguous, curated substitute (same class of hand-
+        # checkable fact as group_teams). Labels match STAGE_LABEL in app.js exactly so
+        # histRoundOf's substring checks (round of 16/quarter/semi/third/final) resolve
+        # each one correctly. build_data.py applies this by match date, group stage
+        # matches are untouched (FotMob's per-group label there is already specific).
+        "ko_round_dates": [
+            ("2022-12-03", "2022-12-06", "Round of 16"),
+            ("2022-12-09", "2022-12-10", "Quarter-final"),
+            ("2022-12-13", "2022-12-14", "Semi-final"),
+            ("2022-12-17", "2022-12-17", "Third place"),
+            ("2022-12-18", "2022-12-18", "Final"),
+        ],
     },
     2018: {
         "name": "FIFA World Cup 2018 (Russia)",
@@ -144,6 +164,23 @@ def format_payload(year) -> dict:
         "fairPlay": ed["fair_play_tiebreak"],
         "name": ed["name"],
     }
+
+
+def resolve_stage(year, raw_stage, date):
+    """Override a knockout match's raw stage label with the edition's curated
+    ko_round_dates fact when the match's date falls in a known knockout window —
+    see the long comment on 2022's ko_round_dates for why this exists (FotMob's own
+    label is generic/wrong there). Group-stage matches (no date match, or an edition
+    with no ko_round_dates at all) keep whatever label the raw file carries. Shared
+    by build_data.py and build_match_details.py so data.js and matches_detail/<id>.js
+    can never disagree on a match's round."""
+    if int(year) == 2026 or not date:
+        return raw_stage
+    ed = edition(year)
+    for start, end, label in ed.get("ko_round_dates", []):
+        if start <= date <= end:
+            return label
+    return raw_stage
 
 
 def date_strings(year) -> list:

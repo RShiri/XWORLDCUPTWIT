@@ -34,5 +34,7 @@ team_logos/laliga/
 .claude/
 
 # Historical WC raw scrapes — never committed (repo-size policy in ROADMAP.md);
-# published as zipped Actions artifacts / GitHub Release assets instead.
-history/
+# published as zipped Actions artifacts / GitHub Release assets instead. The
+# README documenting the raw file structure is the one tracked exception.
+history/*
+!history/README.md
