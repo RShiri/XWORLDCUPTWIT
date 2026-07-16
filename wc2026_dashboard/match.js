@@ -27,7 +27,11 @@
   // 2026 keeps today's paths; history loads from editions/<year>/.
   var ED = window.WC_EDITION || 2026;
   var ED_BASE = ED === 2026 ? "" : "editions/" + ED + "/";
-  var INDEX_URL = "index.html" + (ED === 2026 ? "" : "?edition=" + ED);
+  // Which skin sent us here (?skin=classic from a link built on the classic page;
+  // futuristic is the site default — ROADMAP Phase D — so no param means futuristic).
+  var SKIN = new URLSearchParams(location.search).get("skin") === "classic" ? "classic" : "futuristic";
+  var INDEX_PAGE = SKIN === "classic" ? "index.html" : "index_futuristic.html";
+  var INDEX_URL = INDEX_PAGE + (ED === 2026 ? "" : "?edition=" + ED);
   (function () {
     var y = document.querySelector(".brand .title .ed-year");
     if (y && ED !== 2026) { y.textContent = ED; document.title = "Match Dashboard — WC" + ED; }
