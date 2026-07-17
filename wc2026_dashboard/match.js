@@ -1843,9 +1843,10 @@
     var rc = getComputedStyle(document.documentElement);
     function v(n, d) { var x = rc.getPropertyValue(n).trim(); return x || d; }
     var TEXT = v("--text", "#eef0fb"), BAD = v("--bad", "#ff5c7a"), WARN = v("--warn", "#ffc857"),
-        MUTED = v("--muted", "#8b8fb8"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#050611");
+        MUTED = v("--muted", "#8b8fb8"), CARD2 = v("--card-2", "#1b2440"), BG = v("--bg", "#050611"),
+        BG2 = v("--bg-2", "#0b0d1f");
     return "<style>" +
-      ".pitch-bg{fill:#14361f}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
+      ".pitch-bg{fill:" + BG2 + "}.pitch-line{fill:none;stroke:rgba(255,255,255,.28);stroke-width:.3}" +
       ".dir-label{fill:rgba(255,255,255,.5);font-size:2.4px;font-weight:700;font-family:sans-serif}" +
       ".agm-pass{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +
       ".agm-cross{stroke:" + TEXT + ";stroke-width:.5;fill:none;stroke-linecap:round;stroke-dasharray:.15 1.05}" +

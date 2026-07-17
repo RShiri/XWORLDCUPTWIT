@@ -42,7 +42,7 @@
 .pitch-wrap { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 14px; box-shadow: var(--shadow); }
 .pitch-svg { width: 100%; height: auto; display: block; border-radius: 8px; touch-action: manipulation; }
-.pitch-bg { fill: #14361f; }
+.pitch-bg { fill: var(--bg-2); }
 .pitch-line { stroke: rgba(255,255,255,0.28); stroke-width: 0.3; fill: none; }
 .pitch-goal { stroke: rgba(255,255,255,0.45); stroke-width: 0.3; fill: rgba(255,255,255,0.06); }
 .pitch-net { stroke: rgba(255,255,255,0.22); stroke-width: 0.2; }
