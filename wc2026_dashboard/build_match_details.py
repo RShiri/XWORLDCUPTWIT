@@ -342,6 +342,89 @@ _BUILDUP_CAP = 120  # seconds; sane ceiling on how far back a reconstructed buil
 _REGAIN_GAP = 2.0  # seconds; how quickly the scoring team must win a loose ball back for an
                     # opponent touch to be treated as noise rather than a real turnover
 
+# Loose-ball events that can hand the ball to the OTHER side with no pass of their own —
+# whoever picks it up next may run it forward a few steps before their first logged action
+# (a pass/shot), and WhoScored never emits an event for that run unless it's a contested
+# take-on. _infer_carries() bridges exactly that gap.
+_CARRY_SOURCE_TYPES = {"Clearance", "Interception", "BallRecovery", "Tackle", "Error", "Dispossessed"}
+_CARRY_MAX_GAP = 10.0   # seconds; how long a run to the next touch can plausibly take
+_CARRY_MIN_DIST = 4.0   # pitch units; skip a "carry" that's really just a touch on the spot
+_CARRY_MAX_DIST = 45.0  # pitch units; beyond this the implied run is more likely bad source
+                         # coordinates (WhoScored's Clearance end-point is notably imprecise)
+                         # than a real sprint, so it's dropped rather than drawn
+
+
+def _infer_carries(events, side_of, match_data):
+    """Synthesize 'carry' entries for uncontested ball-carries the WhoScored feed never logs
+    as their own event: a player runs onto a loose ball (a clearance, an interception, a
+    recovery) and carries it forward before their first logged touch (a pass or shot). Since
+    WhoScored only emits an event for a CONTESTED take-on, that run is otherwise invisible —
+    the build-up diagrams jump straight from the loose ball to wherever the carrier eventually
+    played it.
+
+    A loose-ball event's own x/y are in the LOSING team's attacking-direction frame, while the
+    next touch is in the WINNING team's frame (WhoScored/Opta normalizes each team's
+    coordinates 0-100 toward their own attacking goal — the same reason own goals need a 180°
+    mirror in extract() below). So the loose-ball landing spot is mirrored into the receiving
+    team's frame before measuring the gap to their first touch.
+
+    Returns (carries, bridged): `carries` is a list of carry entries in the same shape as a
+    dribble ({team,x,y,min,sec,player,ok,carry:true}); `bridged` is the set of loose-ball event
+    indices a carry was hung off of, so _buildup_window() can see that the loose ball never
+    really left play and keep walking the build-up further back instead of treating it as a
+    clean turnover boundary."""
+    carries = []
+    bridged = set()
+    for i, e in enumerate(events):
+        t = e.get("type", {})
+        t = t.get("displayName") if isinstance(t, dict) else ""
+        if t not in _CARRY_SOURCE_TYPES:
+            continue
+        if e.get("outcomeType", {}).get("displayName") != "Successful":
+            continue
+        loose_tid = e.get("teamId")
+        if loose_tid is None or i + 1 >= len(events):
+            continue
+        p0 = e.get("period", {})
+        p0 = p0.get("value") if isinstance(p0, dict) else p0
+        nxt = events[i + 1]
+        p1 = nxt.get("period", {})
+        p1 = p1.get("value") if isinstance(p1, dict) else p1
+        if p1 != p0:
+            continue
+        ntid = nxt.get("teamId")
+        if ntid is None or ntid == loose_tid or nxt.get("x") is None:
+            continue
+        side = side_of.get(ntid)
+        if side is None:
+            continue
+        nt = nxt.get("type", {})
+        nt = nt.get("displayName") if isinstance(nt, dict) else ""
+        if nt not in _TOUCH_TYPES:
+            continue
+        t0 = (e.get("minute") or 0) * 60 + (e.get("second") or 0)
+        t1 = (nxt.get("minute") or 0) * 60 + (nxt.get("second") or 0)
+        gap = t1 - t0
+        if gap <= 0 or gap > _CARRY_MAX_GAP:
+            continue
+        lx = e.get("endX") if e.get("endX") is not None else e.get("x", 0)
+        ly = e.get("endY") if e.get("endY") is not None else e.get("y", 0)
+        mx, my = 100 - lx, 100 - ly  # mirror into the receiving team's own attacking frame
+        nx, ny = nxt.get("x", 0), nxt.get("y", 0)
+        dist = ((nx - mx) ** 2 + (ny - my) ** 2) ** 0.5
+        if dist < _CARRY_MIN_DIST or dist > _CARRY_MAX_DIST:
+            continue
+        carries.append({
+            "team": side,
+            "x": round(mx, 1), "y": round(my, 1),
+            "min": e.get("minute", 0), "sec": e.get("second", 0),
+            "player": player_full_name(match_data, nxt.get("playerId")),
+            "ok": True,
+            "carry": True,
+        })
+        bridged.add(i)
+    return carries, bridged
+
 
 def _regained_quickly(events, k, scorer_tid, p0, goal_idx):
     """True if the scoring team touches the ball again within _REGAIN_GAP seconds after
@@ -373,13 +456,21 @@ def _regained_quickly(events, k, scorer_tid, p0, goal_idx):
     return False
 
 
-def _buildup_window(events, goal_idx, scorer_tid):
+def _buildup_window(events, goal_idx, scorer_tid, bridged=frozenset()):
     """Seconds to look back from the goal for the scoring team's passing build-up, bounded
     by the last time the opponent actually touched the ball (not a fixed clock) — so a
     patient, unbroken keep-ball move isn't truncated mid-sequence just because it ran past
     an arbitrary lookback window, while a quick turnover doesn't drag in unrelated earlier
     play. Stops at the start of the period (half-time is always a hard boundary) and is
-    capped at _BUILDUP_CAP so an exceptionally long spell still renders a bounded diagram."""
+    capped at _BUILDUP_CAP so an exceptionally long spell still renders a bounded diagram.
+
+    `bridged` is the set of loose-ball event indices _infer_carries() found a same-team carry
+    running through — a Clearance/BallTouch there is proven NOT a clean turnover (we can see
+    the scoring side collecting it and running on), so it's skipped like a quickly-regained
+    loose ball even when the gap to the next touch is too long for _regained_quickly's
+    default tolerance. This is what lets a goal like a scramble off a saved shot → half
+    clearance → carried forward → cross keep the original shot in the reconstructed build-up
+    instead of the diagram starting cold at the carry."""
     g = events[goal_idx]
     t0 = (g.get("minute") or 0) * 60 + (g.get("second") or 0)
     p0 = g.get("period", {})
@@ -399,7 +490,7 @@ def _buildup_window(events, goal_idx, scorer_tid):
             continue
         if tn in _DUEL_TYPES and e.get("outcomeType", {}).get("displayName") != "Successful":
             continue
-        if tn in _LOOSE_BALL_TYPES and _regained_quickly(events, k, scorer_tid, pk, goal_idx):
+        if tn in _LOOSE_BALL_TYPES and (k in bridged or _regained_quickly(events, k, scorer_tid, pk, goal_idx)):
             continue
         return round(t0 - tk, 1)
     return _BUILDUP_CAP
@@ -431,6 +522,8 @@ def extract(match_data):
                     and nxt.get("playerId") is not None:
                 receiver[i] = player_full_name(match_data, nxt.get("playerId"))
                 break
+
+    carries, bridged = _infer_carries(events, side_of, match_data)
 
     shots, passes, goals, dribbles, saves = [], [], [], [], []
     max_min = 0
@@ -504,7 +597,7 @@ def extract(match_data):
             # Give a turnover / defensive-error goal (no passing build-up) a visible origin:
             # where the scoring team won the ball. Skipped for penalties (no run of play).
             if tname == "Goal" and not meta["penalty"]:
-                shot_row["buildupWindow"] = _buildup_window(events, _i, tid)
+                shot_row["buildupWindow"] = _buildup_window(events, _i, tid, bridged)
                 won = _ball_won_origin(events, _i, tid, match_data)
                 if won:
                     shot_row["won"] = won
@@ -603,6 +696,7 @@ def extract(match_data):
         "shots": shots,
         "passes": passes,
         "dribbles": dribbles,
+        "carries": carries,
         "saves": saves,
         "goals": sorted(goals, key=lambda g: g["min"]),
         "shootout": _shootout(match_data, side_of),
