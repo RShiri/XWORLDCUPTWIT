@@ -1723,8 +1723,10 @@
         // The save belongs to the OPPONENT keeper, stored in THEIR OWN attacking-direction
         // frame (same convention as the own-goal mirroring above) — mirror it into the
         // scoring team's frame so it lands next to the shot it actually stopped instead of
-        // clear across the pitch.
-        if (sv) reboundNodes.push({ k: "save", t: sb, opp: true, team: sv.team, x: 100 - sv.x, y: 100 - sv.y, player: sv.player });  // graceful: omitted if no saves[]
+        // clear across the pitch. `team` must switch to the SCORING side too — the mirrored
+        // x/y are only correct when read through that side's tx()/ty(), otherwise the node
+        // renders at the scoring team's attacking end instead of their own goal.
+        if (sv) reboundNodes.push({ k: "save", t: sb, opp: true, team: shot.team, x: 100 - sv.x, y: 100 - sv.y, player: sv.player });  // graceful: omitted if no saves[]
         // Splice in chronological order — the prior effort may predate the reconstructed
         // build-up chain (e.g. saved shot → half-cleared → carried → crossed in several
         // seconds later) rather than always sitting immediately before the goal.
