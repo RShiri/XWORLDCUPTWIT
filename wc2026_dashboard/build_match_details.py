@@ -665,14 +665,19 @@ def extract(match_data):
                     break
             dribbles.append(d_entry)
 
-        elif tname == "Save":     # goalkeeper save (point event) — powers the All Goals Map
-            saves.append({        # rebound chain's grey keeper-save node
+        elif tname == "Save":     # keeper save OR outfield block (point event) — powers the All Goals Map
+            save_quals = {q.get("type", {}).get("displayName", "") for q in ev.get("qualifiers", [])}
+            saves.append({        # rebound chain's grey save/block node
                 "team": side,
                 "x": round(ev.get("x", 0), 1),
                 "y": round(ev.get("y", 0), 1),
                 "min": minute,
                 "sec": ev.get("second", 0),
                 "player": player_full_name(match_data, ev.get("playerId")),
+                # WhoScored tags a shot stopped by an outfield player's body (not the keeper)
+                # with OutfielderBlock — same "Save" event type either way, so without this
+                # flag the map mislabels a defender's goal-line block as a "Goalkeeper save".
+                "block": "OutfielderBlock" in save_quals,
             })
 
     meta = match_data.get("wc_metadata", {})
