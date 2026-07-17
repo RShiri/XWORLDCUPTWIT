@@ -966,9 +966,19 @@
           '<option value="assist">Assists</option><option value="cross">Crosses</option>' +
           '<option value="through">Through balls</option></select></span>' +
         '<span class="chip-toggle" id="paThird">Final third</span>' +
-        '<span class="chip-toggle" id="paWindow">5-min window</span>' +
+        '<span class="chip-toggle" id="paWindow">Window</span>' +
+        '<span class="grp">Window size <select id="paWindowSize">' +
+          '<option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option>' +
+          "</select></span>" +
+        '<span class="chip-toggle" id="paCustom">Custom range</span>' +
+        '<span class="grp" id="paCustomRange" style="display:none">' +
+          '<input type="number" id="paFromMin" min="0" max="' + (D.maxMin || 90) + '" value="0" style="width:3.5em">' +
+          "–" +
+          '<input type="number" id="paToMin" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '" style="width:3.5em">' +
+          "'" +
+        "</span>" +
       "</div>" +
-      '<div class="timeline-scrub">' +
+      '<div class="timeline-scrub" id="paScrub">' +
         '<button class="play-btn" id="paPlay">▶</button>' +
         '<input type="range" id="paRange" min="0" max="' + (D.maxMin || 90) + '" value="' + (D.maxMin || 90) + '">' +
         '<span class="minlab" id="paMinLab"></span>' +
@@ -988,10 +998,14 @@
       "</div>" +
       '<div class="stat-note" id="paCount"></div>';
 
-    var state = { home: true, away: true, player: "", type: "all", third: false, windowMode: false, upper: D.maxMin || 90 };
+    var state = { home: true, away: true, player: "", type: "all", third: false,
+      windowMode: false, windowSize: 5, custom: false, customFrom: 0, customTo: D.maxMin || 90,
+      upper: D.maxMin || 90 };
     var layer = document.getElementById("passLayer");
     var minLab = document.getElementById("paMinLab");
     var countEl = document.getElementById("paCount");
+    var scrub = document.getElementById("paScrub");
+    var customRangeEl = document.getElementById("paCustomRange");
     var SVGNS = "http://www.w3.org/2000/svg";
 
     function pass_passes_filter(p) {
@@ -1007,8 +1021,12 @@
       if (t === "through" && !p.through) return false;
       // Final third = pass that ENDS in the attacking third (WhoScored x ≥ 66.7).
       if (state.third && p.ex < 200 / 3) return false;
-      if (p.min > state.upper) return false;
-      if (state.windowMode && p.min < state.upper - 5) return false;
+      if (state.custom) {
+        if (p.min < state.customFrom || p.min > state.customTo) return false;
+      } else {
+        if (p.min > state.upper) return false;
+        if (state.windowMode && p.min < state.upper - state.windowSize) return false;
+      }
       return true;
     }
 
@@ -1049,11 +1067,25 @@
         frag.appendChild(d0);
       });
       layer.appendChild(frag);
-      countEl.textContent = shown + " passes shown" + (state.windowMode ? " (minutes " + Math.max(0, state.upper - 5) + "–" + state.upper + ")" : " (up to " + state.upper + "')");
+      var rangeLabel = state.custom
+        ? " (minutes " + state.customFrom + "–" + state.customTo + ")"
+        : state.windowMode
+          ? " (minutes " + Math.max(0, state.upper - state.windowSize) + "–" + state.upper + ")"
+          : " (up to " + state.upper + "')";
+      countEl.textContent = shown + " passes shown" + rangeLabel;
     }
     function setUpper(v) {
       state.upper = v;
-      minLab.textContent = (state.windowMode ? Math.max(0, v - 5) + "–" + v : "0–" + v) + "'";
+      minLab.textContent = (state.windowMode ? Math.max(0, v - state.windowSize) + "–" + v : "0–" + v) + "'";
+      draw();
+    }
+    function setCustom(on) {
+      state.custom = on;
+      customRangeEl.style.display = on ? "" : "none";
+      scrub.style.opacity = on ? "0.4" : "";
+      range.disabled = on;
+      playBtn.disabled = on;
+      if (on) stopPlay();
       draw();
     }
 
@@ -1063,6 +1095,19 @@
     document.getElementById("paType").addEventListener("change", function () { state.type = this.value; draw(); });
     document.getElementById("paThird").addEventListener("click", function () { state.third = !state.third; this.classList.toggle("on"); draw(); });
     document.getElementById("paWindow").addEventListener("click", function () { state.windowMode = !state.windowMode; this.classList.toggle("on"); setUpper(state.upper); });
+    document.getElementById("paWindowSize").addEventListener("change", function () { state.windowSize = parseInt(this.value, 10); setUpper(state.upper); });
+    document.getElementById("paCustom").addEventListener("click", function () { this.classList.toggle("on"); setCustom(!state.custom); });
+    var fromMinEl = document.getElementById("paFromMin");
+    var toMinEl = document.getElementById("paToMin");
+    function applyCustomRange() {
+      var from = Math.max(0, parseInt(fromMinEl.value, 10) || 0);
+      var to = Math.min(D.maxMin || 90, parseInt(toMinEl.value, 10) || 0);
+      if (to < from) to = from;
+      state.customFrom = from; state.customTo = to;
+      draw();
+    }
+    fromMinEl.addEventListener("input", applyCustomRange);
+    toMinEl.addEventListener("input", applyCustomRange);
     var range = document.getElementById("paRange");
     range.addEventListener("input", function () { stopPlay(); setUpper(parseInt(this.value, 10)); });
 
