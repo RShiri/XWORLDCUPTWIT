@@ -1626,7 +1626,12 @@
       (D.passes || []).filter(function (p) { return p.ok; })
         .map(function (p) { return { k: "pass", t: agmT(p), team: p.team, x: p.x, y: p.y, ex: p.ex, ey: p.ey, player: p.player, cross: !!p.cross, key: !!p.key, through: !!p.through }; }),
       (D.dribbles || []).filter(function (d) { return d.ok; })
-        .map(function (d) { return { k: "dribble", t: agmT(d), team: d.team, x: d.x, y: d.y, player: d.player }; })
+        .map(function (d) { return { k: "dribble", t: agmT(d), team: d.team, x: d.x, y: d.y, player: d.player }; }),
+      // Inferred carries (build_match_details `_infer_carries`): uncontested runs onto a loose
+      // ball that WhoScored never logs as their own event. Rendered the same as a real take-on
+      // (same node/line style) but tagged `carry` so the tooltip can say so.
+      (D.carries || [])
+        .map(function (c) { return { k: "dribble", t: agmT(c), team: c.team, x: c.x, y: c.y, player: c.player, carry: true }; })
     ).sort(function (a, b) { return a.t - b.t; });
     var saves = D.saves || [];
     function assistFor(shot) {
@@ -1652,16 +1657,24 @@
       // was won (build_match_details `won`) as the move origin so the map isn't a lone node.
       if (!seq.length && shot.won) seq.push({ k: "won", team: shot.team, x: shot.won.x, y: shot.won.y, player: null, kind: shot.won.kind, by: shot.won.by });
       var rebound = false;
-      // Rebound: a same-team shot saved/blocked in the ~4s before the goal → splice in
-      // the original effort + keeper save, in time order, before the goal node. Runs
-      // whether or not passes preceded, so rebounds show even with a build-up chain.
+      // Rebound: a same-team shot saved/blocked before the goal → splice in the original
+      // effort + keeper save, in time order, before the goal node. Runs whether or not
+      // passes preceded, so rebounds show even with a build-up chain. Lookback matches the
+      // build-up window (capped) rather than a fixed 4s, so a prior effort that's part of the
+      // SAME reconstructed passage (e.g. a saved shot whose rebound is half-cleared, carried,
+      // and crossed in for the goal) still gets pulled in even when that scramble runs longer
+      // than a typical instant rebound.
+      var priorLookback = Math.max(4, Math.min(win, 20));
       var prior = null, best = -1;
-      (D.shots || []).forEach(function (s2) { var tt = agmT(s2); if (s2.team === shot.team && !s2.goal && tt < T && T - tt <= 4 && tt > best) { best = tt; prior = s2; } });
+      (D.shots || []).forEach(function (s2) { var tt = agmT(s2); if (s2.team === shot.team && !s2.goal && tt < T && T - tt <= priorLookback && tt > best) { best = tt; prior = s2; } });
       if (prior) {
         rebound = true;
         seq.push({ k: "shot_eff", team: prior.team, x: prior.x, y: prior.y, player: prior.player, xg: prior.xg });
         var sv = null, sb = -1;
-        saves.forEach(function (v) { var tt = agmT(v); if (v.team !== shot.team && Math.abs(tt - T) <= 2 && tt > sb) { sb = tt; sv = v; } });
+        // Anchored on the PRIOR SHOT's own time (a save happens the instant the shot is
+        // stopped), not the eventual goal's time — otherwise a save several seconds before a
+        // goal reached via a longer scramble never matches.
+        saves.forEach(function (v) { var tt = agmT(v); if (v.team !== shot.team && Math.abs(tt - best) <= 3 && tt > sb) { sb = tt; sv = v; } });
         if (sv) seq.push({ k: "save", opp: true, team: sv.team, x: sv.x, y: sv.y, player: sv.player });  // graceful: omitted if no saves[]
       }
       seq.push({ k: "shot", team: shot.team, x: shot.x, y: shot.y, player: shot.player, xg: shot.xg });
@@ -1725,7 +1738,7 @@
     if (pt.k === "save") return "<b>" + who + "</b><br>Goalkeeper save";
     if (pt.k === "shot") return "<b>" + who + "</b><br>⚽ Goal" + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "") + mm;
     if (pt.k === "shot_eff") return "<b>" + who + "</b><br>Shot saved" + (pt.xg != null ? " · xG " + pt.xg.toFixed(2) : "");
-    if (pt.k === "dribble") return "<b>" + who + "</b><br>Take-on / dribble";
+    if (pt.k === "dribble") return "<b>" + who + "</b><br>" + (pt.carry ? "Carried the ball forward" : "Take-on / dribble");
     if (i === 0) return "<b>" + who + "</b><br>Move start" + mm;
     return "<b>" + who + "</b><br>On the ball";
   }
