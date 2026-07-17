@@ -1669,13 +1669,23 @@
       (D.shots || []).forEach(function (s2) { var tt = agmT(s2); if (s2.team === shot.team && !s2.goal && tt < T && T - tt <= priorLookback && tt > best) { best = tt; prior = s2; } });
       if (prior) {
         rebound = true;
-        seq.push({ k: "shot_eff", team: prior.team, x: prior.x, y: prior.y, player: prior.player, xg: prior.xg });
+        var reboundNodes = [{ k: "shot_eff", t: best, team: prior.team, x: prior.x, y: prior.y, player: prior.player, xg: prior.xg }];
         var sv = null, sb = -1;
         // Anchored on the PRIOR SHOT's own time (a save happens the instant the shot is
         // stopped), not the eventual goal's time — otherwise a save several seconds before a
         // goal reached via a longer scramble never matches.
         saves.forEach(function (v) { var tt = agmT(v); if (v.team !== shot.team && Math.abs(tt - best) <= 3 && tt > sb) { sb = tt; sv = v; } });
-        if (sv) seq.push({ k: "save", opp: true, team: sv.team, x: sv.x, y: sv.y, player: sv.player });  // graceful: omitted if no saves[]
+        // The save belongs to the OPPONENT keeper, stored in THEIR OWN attacking-direction
+        // frame (same convention as the own-goal mirroring above) — mirror it into the
+        // scoring team's frame so it lands next to the shot it actually stopped instead of
+        // clear across the pitch.
+        if (sv) reboundNodes.push({ k: "save", t: sb, opp: true, team: sv.team, x: 100 - sv.x, y: 100 - sv.y, player: sv.player });  // graceful: omitted if no saves[]
+        // Splice in chronological order — the prior effort may predate the reconstructed
+        // build-up chain (e.g. saved shot → half-cleared → carried → crossed in several
+        // seconds later) rather than always sitting immediately before the goal.
+        var insertAt = seq.length;
+        for (var ri = 0; ri < seq.length; ri++) { if (seq[ri].t > best) { insertAt = ri; break; } }
+        seq.splice.apply(seq, [insertAt, 0].concat(reboundNodes));
       }
       seq.push({ k: "shot", team: shot.team, x: shot.x, y: shot.y, player: shot.player, xg: shot.xg });
       var ppl = {}; seq.forEach(function (s) { if (s.k !== "save" && s.player) ppl[agmNorm(s.player)] = 1; });
