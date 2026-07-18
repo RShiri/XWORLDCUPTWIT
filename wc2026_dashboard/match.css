@@ -122,6 +122,19 @@
 
 .stat-note { color: var(--muted); font-size: 12px; margin-top: 8px; }
 
+/* Player trail — a smoothed curve, styled like a drawn/sketched line rather than a plotted graph */
+.pt-route { fill: none; stroke-width: 0.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.2; }
+.pt-trail { fill: none; stroke-width: 0.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.92; }
+.pt-node { fill: var(--bg-2); stroke: #fff; stroke-width: 0.3; cursor: pointer; }
+.pt-node.start { fill: var(--warn); stroke: #e0a83a; }
+.pt-node.end { fill: var(--bad); stroke: #e0456f; }
+.pt-ball { fill: #fff; stroke: var(--bg); stroke-width: 0.3; }
+.timeline-scrub .spd { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.timeline-scrub .spd input { width: 90px; }
+.timeline-scrub .spd b { color: var(--text); min-width: 24px; display: inline-block; }
+.legend-row .pt-lg { width: 11px; height: 11px; border-radius: 50%; display: inline-block; background: var(--warn); border: 2px solid #e0a83a; }
+.legend-row .pt-lg.end { background: var(--bad); border-color: #e0456f; }
+
 @media (max-width: 720px) {
   .side-panels, .lineups-grid { grid-template-columns: 1fr; }
   .sb-team .nm { font-size: 15px; }

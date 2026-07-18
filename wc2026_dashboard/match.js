@@ -163,6 +163,7 @@
       (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
       block("Pass network", "mv-network") +
       block("Average position", "mv-avgpos") +
+      block("Player trail", "mv-trail") +
       block("Line-ups", "mv-lineups") +
       // All Goals Map sits below every stats section.
       (hasGoals ? block("All goals map", "mv-goals") : "") +
@@ -193,6 +194,7 @@
     if (hasDribbles) buildDribbles(D);
     buildNetwork(D);
     buildAvgPos(D);
+    buildPlayerTrail(D);
     buildLineups(D);
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
@@ -1608,6 +1610,232 @@
     });
 
     setUpper(state.upper);
+  }
+
+  /* ================= PLAYER TRAIL ================= */
+  // Traces one player's estimated position once per MINUTE they were on the pitch — not once
+  // per action. There's no continuous positional/GPS tracking feed behind this dashboard, only
+  // discrete touch coordinates (pass origins/receptions, dribble/carry starts, shots, keeper
+  // saves), so each minute's point is linearly interpolated between the nearest recorded
+  // touches before/after that minute (held at the first/last touch outside that range). That
+  // gives an evenly-paced trail — one step per real minute — instead of a path that jumps
+  // touch-to-touch with wildly uneven gaps. Play button walks a dot along it with the trail
+  // drawing in behind, minute readout ticking up — a sped-up replay built from real data.
+  function ptRoster(D) {
+    var maxMin = D.maxMin || 90, out = [];
+    ["home", "away"].forEach(function (sd) {
+      var lu = D.lineups[sd];
+      lu.starters.concat(lu.subs).forEach(function (p) {
+        if (p && p.name) out.push({ side: sd, name: p.name, num: p.num, on: p.on != null ? p.on : 0, off: p.off != null ? p.off : maxMin });
+      });
+    });
+    return out;
+  }
+  // Position at real match-time `t` (seconds), linearly interpolated between the anchors
+  // (sorted touches) either side of it; clamped to the first/last anchor outside their range.
+  function ptInterp(anchors, t) {
+    var n = anchors.length;
+    if (!n) return null;
+    if (t <= anchors[0].t) return { x: anchors[0].x, y: anchors[0].y, t: t };
+    if (t >= anchors[n - 1].t) return { x: anchors[n - 1].x, y: anchors[n - 1].y, t: t };
+    for (var i = 0; i < n - 1; i++) {
+      var a = anchors[i], b = anchors[i + 1];
+      if (t >= a.t && t <= b.t) {
+        var f = (b.t - a.t) > 1e-6 ? (t - a.t) / (b.t - a.t) : 0;
+        return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, t: t };
+      }
+    }
+    return { x: anchors[n - 1].x, y: anchors[n - 1].y, t: t };
+  }
+  function ptCatmull(p0, p1, p2, p3, u) {
+    var u2 = u * u, u3 = u2 * u;
+    return {
+      x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * u + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * u2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * u3),
+      y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * u + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * u2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * u3)
+    };
+  }
+  // Densify the per-minute knots into a Catmull-Rom spline through every one of them, so the
+  // trail reads as one continuous drawn line instead of a polygon with a sharp corner on every
+  // whole minute. Time is still interpolated linearly within each knot-to-knot span (we have no
+  // finer real timing than the minute grid) — only the on-pitch curve is smoothed.
+  function ptSmooth(knots, steps) {
+    var n = knots.length;
+    if (n < 3) return knots.slice();
+    var out = [];
+    for (var i = 0; i < n - 1; i++) {
+      var p0 = knots[i - 1] || knots[i], p1 = knots[i], p2 = knots[i + 1], p3 = knots[i + 2] || knots[i + 1];
+      for (var s = (i === 0 ? 0 : 1); s <= steps; s++) {
+        var u = s / steps, pos = ptCatmull(p0, p1, p2, p3, u);
+        out.push({ x: pos.x, y: pos.y, t: p1.t + (p2.t - p1.t) * u });
+      }
+    }
+    return out;
+  }
+  function ptTouches(D, side, name) {
+    function T(min, sec) { return (min || 0) * 60 + (sec || 0); }
+    var t = [];
+    (D.passes || []).forEach(function (p) {
+      if (p.team !== side) return;
+      if (p.player === name) t.push({ t: T(p.min, p.sec), x: p.x, y: p.y, k: "pass" });
+      if (p.ok && p.recv === name) t.push({ t: T(p.min, p.sec) + 0.4, x: p.ex, y: p.ey, k: "recv" });
+    });
+    (D.dribbles || []).forEach(function (d) { if (d.team === side && d.player === name) t.push({ t: T(d.min, d.sec), x: d.x, y: d.y, k: "dribble" }); });
+    (D.carries || []).forEach(function (c) { if (c.team === side && c.player === name) t.push({ t: T(c.min, c.sec), x: c.x, y: c.y, k: "carry" }); });
+    (D.shots || []).forEach(function (s) { if (s.team === side && s.player === name) t.push({ t: T(s.min, s.sec), x: s.x, y: s.y, k: "shot" }); });
+    (D.saves || []).forEach(function (v) { if (v.team === side && v.player === name) t.push({ t: T(v.min, v.sec), x: v.x, y: v.y, k: "save" }); });
+    t.sort(function (a, b) { return a.t - b.t; });
+    // collapse near-duplicate touches (e.g. a dribble start and an inferred carry logging
+    // the same instant) so the line doesn't jitter on top of itself
+    var out = [];
+    t.forEach(function (p) {
+      var last = out[out.length - 1];
+      if (last && Math.abs(last.t - p.t) < 0.05 && Math.hypot(last.x - p.x, last.y - p.y) < 0.6) return;
+      out.push(p);
+    });
+    return out;
+  }
+  function buildPlayerTrail(D) {
+    var host = document.getElementById("mv-trail");
+    if (!host) return;
+    var rosterList = ptRoster(D);
+    if (!rosterList.length) { if (host.parentNode) host.parentNode.style.display = "none"; return; }
+    var counts = rosterList.map(function (p) { return ptTouches(D, p.side, p.name).length; });
+
+    function optionsFor(side) {
+      var teamName = side === "home" ? D.home.name : D.away.name;
+      var out = '<optgroup label="' + esc(teamName) + '">';
+      rosterList.forEach(function (p, i) {
+        if (p.side !== side) return;
+        out += '<option value="' + i + '">' + (p.num != null ? "#" + p.num + " " : "") + esc(p.name) + " (" + counts[i] + " touches)</option>";
+      });
+      return out + "</optgroup>";
+    }
+    host.innerHTML =
+      '<p class="hint">Estimated player position, once per minute on the pitch — interpolated between recorded touches (pass origins/receptions, dribbles/carries, shots, saves) and drawn as a smoothed line. Not continuous GPS tracking, just the closest real-data approximation.</p>' +
+      '<div class="controls-bar"><span class="grp">Player <select id="ptPlayer">' + optionsFor("home") + optionsFor("away") + "</select></span></div>" +
+      '<div class="timeline-scrub">' +
+        '<button class="play-btn" id="ptPlay">▶</button>' +
+        '<input type="range" id="ptRange" min="0" max="1" step="0.01" value="1">' +
+        '<span class="minlab" id="ptMinLab"></span>' +
+        '<span class="spd">Speed <input type="range" id="ptSpd" min="0.5" max="3" step="0.5" value="1"><b id="ptSpdV">1×</b></span>' +
+      "</div>" +
+      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
+        pitchMarkup() +
+        '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle" id="ptDir">attacking →</text>' +
+        '<path id="ptRoute" class="pt-route"/>' +
+        '<path id="ptTrail" class="pt-trail"/>' +
+        '<g id="ptNodes"></g>' +
+        '<circle id="ptBall" class="pt-ball" r="1.6" cx="-10" cy="-10"/>' +
+      "</svg></div>" +
+      '<div class="legend-row">' +
+        "<span>line = smoothed path through the player's per-minute positions</span>" +
+        '<span><i class="pt-lg start"></i>first minute on pitch</span><span><i class="pt-lg end"></i>last minute on pitch</span>' +
+        "<span>scrub or press ▶ to watch the trail build</span>" +
+      "</div>" +
+      '<div class="stat-note" id="ptNote"></div>';
+
+    var routeEl = document.getElementById("ptRoute"), trailEl = document.getElementById("ptTrail");
+    var nodesEl = document.getElementById("ptNodes"), ballEl = document.getElementById("ptBall");
+    var range = document.getElementById("ptRange"), minLab = document.getElementById("ptMinLab");
+    var note = document.getElementById("ptNote"), dirLab = document.getElementById("ptDir");
+    var NS = "http://www.w3.org/2000/svg";
+    var state = { side: null, name: null, P: [], cum: [], total: 0 };
+
+    function pointAt(v) {
+      var P = state.P, n = P.length - 1;
+      if (n <= 0) return { x: P[0].x, y: P[0].y, t: P[0].t, len: 0 };
+      var i = Math.max(0, Math.min(n - 1, Math.floor(v))), lf = v - i;
+      var a = P[i], b = P[i + 1];
+      return { x: a.x + (b.x - a.x) * lf, y: a.y + (b.y - a.y) * lf, t: a.t + (b.t - a.t) * lf,
+               len: state.cum[i] + (state.cum[i + 1] - state.cum[i]) * lf };
+    }
+    function setIdx(v) {
+      var P = state.P;
+      if (P.length < 2) return;
+      var pos = pointAt(v);
+      ballEl.style.opacity = "1";
+      ballEl.setAttribute("cx", pos.x.toFixed(2)); ballEl.setAttribute("cy", pos.y.toFixed(2));
+      trailEl.setAttribute("stroke-dasharray", state.total.toFixed(2));
+      trailEl.setAttribute("stroke-dashoffset", (state.total - pos.len).toFixed(2));
+      minLab.textContent = Math.floor(pos.t / 60) + "'";
+      var teamName = state.side === "home" ? D.home.name : D.away.name;
+      var shownMin = Math.floor(pos.t / 60);
+      note.textContent = esc(state.name) + " (" + teamName + ") · minute-by-minute position, " + state.onMin + "–" + state.offMin +
+        "' · interpolated from " + state.touchCount + " recorded touches · now showing " + shownMin + "'";
+    }
+    function loadPlayer(idx) {
+      var rp = rosterList[idx];
+      state.side = rp.side; state.name = rp.name;
+      var maxMin = D.maxMin || 90;
+      var onMin = Math.max(0, Math.floor(rp.on)), offMin = Math.min(maxMin, Math.ceil(rp.off));
+      state.onMin = onMin; state.offMin = offMin;
+      var touches = ptTouches(D, rp.side, rp.name);
+      var anchors = touches.map(function (p) { return { x: tx(rp.side, p.x), y: ty(rp.side, p.y), t: p.t }; });
+      state.touchCount = anchors.length;
+      var knots = [];
+      for (var m = onMin; m <= offMin; m++) { var pt = ptInterp(anchors, m * 60); if (pt) knots.push(pt); }
+      var teamName = rp.side === "home" ? D.home.name : D.away.name;
+      var col = rp.side === "home" ? D.home.color : D.away.color;
+      dirLab.textContent = rp.side === "home" ? teamName + " attacking →" : "← " + teamName + " attacking";
+      nodesEl.innerHTML = "";
+      if (knots.length < 2) {
+        state.P = knots; state.cum = [0]; state.total = 0;
+        routeEl.setAttribute("d", ""); trailEl.setAttribute("d", ""); ballEl.style.opacity = "0";
+        note.textContent = esc(rp.name) + " · not enough recorded touches to draw a trail (" + anchors.length + ").";
+        return;
+      }
+      var P = ptSmooth(knots, 8);   // dense curve samples, drawn/animated; knots stay the "true" per-minute data
+      state.P = P;
+      var cum = [0];
+      for (var i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i].x - P[i - 1].x, P[i].y - P[i - 1].y));
+      state.cum = cum; state.total = cum.length ? cum[cum.length - 1] : 0;
+      var d = "M" + P.map(function (p) { return p.x.toFixed(2) + "," + p.y.toFixed(2); }).join(" L");
+      routeEl.setAttribute("d", d); routeEl.setAttribute("stroke", col);
+      trailEl.setAttribute("d", d); trailEl.setAttribute("stroke", col);
+      ballEl.setAttribute("fill", col);
+      function mark(pt, cls) {
+        var c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", pt.x.toFixed(2)); c.setAttribute("cy", pt.y.toFixed(2));
+        c.setAttribute("r", "1.9");
+        c.setAttribute("class", "pt-node " + cls);
+        c.addEventListener("mousemove", function (e) { showTip(e, "<b>" + Math.floor(pt.t / 60) + "'</b>"); });
+        c.addEventListener("mouseleave", hideTip);
+        nodesEl.appendChild(c);
+      }
+      mark(knots[0], "start"); mark(knots[knots.length - 1], "end");
+      range.min = 0; range.max = P.length - 1; range.step = 0.01; range.value = P.length - 1;
+      setIdx(P.length - 1);
+    }
+
+    range.addEventListener("input", function () { stopPlay(); setIdx(parseFloat(range.value)); });
+    document.getElementById("ptPlayer").addEventListener("change", function () { stopPlay(); loadPlayer(+this.value); });
+    var spd = document.getElementById("ptSpd"), spdv = document.getElementById("ptSpdV"), speed = 1;
+    spd.addEventListener("input", function () { speed = parseFloat(spd.value); spdv.textContent = speed + "×"; });
+
+    var raf = null, playBtn = document.getElementById("ptPlay");
+    function stopPlay() { if (raf) { cancelAnimationFrame(raf); raf = null; } playBtn.classList.remove("playing"); playBtn.textContent = "▶"; }
+    playBtn.addEventListener("click", function () {
+      if (raf) { stopPlay(); return; }
+      var n = state.P.length - 1;
+      if (n <= 0) return;
+      if (parseFloat(range.value) >= n - 1e-6) { range.value = 0; setIdx(0); }
+      playBtn.classList.add("playing"); playBtn.textContent = "❚❚";
+      var startV = parseFloat(range.value), t0 = null;
+      var baseMs = 60000; // ~60s to walk the full trail at 1× — "a match in a minute", like a sped-up replay
+      function frame(now) {
+        if (t0 == null) t0 = now;
+        var v = startV + ((now - t0) * speed / baseMs) * n;
+        if (v >= n) { range.value = n; setIdx(n); stopPlay(); return; }
+        range.value = v; setIdx(v);
+        raf = requestAnimationFrame(frame);
+      }
+      raf = requestAnimationFrame(frame);
+    });
+
+    var defIdx = 0, defCount = -1;
+    counts.forEach(function (c, i) { if (c > defCount) { defCount = c; defIdx = i; } });
+    document.getElementById("ptPlayer").value = defIdx;
+    loadPlayer(defIdx);
   }
 
   /* ================= LINE-UPS ================= */
