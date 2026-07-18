@@ -1613,22 +1613,39 @@
   }
 
   /* ================= PLAYER TRAIL ================= */
-  // Traces one player's on-ball actions — pass origins/receptions, dribble/carry starts,
-  // shots, keeper saves — connected in chronological order. This is the closest thing our
-  // event-based sources (FotMob/WhoScored/SofaScore) support to a "movement trail": there's
-  // no continuous positional/GPS tracking feed behind this dashboard, only discrete touch
-  // coordinates, so the line is straight segments between real recorded actions, not an
-  // actual running path. Play button walks a dot along it with the trail drawing in behind,
-  // minute readout ticking up — same idea as a sped-up match replay, built from real data.
+  // Traces one player's estimated position once per MINUTE they were on the pitch — not once
+  // per action. There's no continuous positional/GPS tracking feed behind this dashboard, only
+  // discrete touch coordinates (pass origins/receptions, dribble/carry starts, shots, keeper
+  // saves), so each minute's point is linearly interpolated between the nearest recorded
+  // touches before/after that minute (held at the first/last touch outside that range). That
+  // gives an evenly-paced trail — one step per real minute — instead of a path that jumps
+  // touch-to-touch with wildly uneven gaps. Play button walks a dot along it with the trail
+  // drawing in behind, minute readout ticking up — a sped-up replay built from real data.
   function ptRoster(D) {
     var maxMin = D.maxMin || 90, out = [];
     ["home", "away"].forEach(function (sd) {
       var lu = D.lineups[sd];
       lu.starters.concat(lu.subs).forEach(function (p) {
-        if (p && p.name) out.push({ side: sd, name: p.name, num: p.num });
+        if (p && p.name) out.push({ side: sd, name: p.name, num: p.num, on: p.on != null ? p.on : 0, off: p.off != null ? p.off : maxMin });
       });
     });
     return out;
+  }
+  // Position at real match-time `t` (seconds), linearly interpolated between the anchors
+  // (sorted touches) either side of it; clamped to the first/last anchor outside their range.
+  function ptInterp(anchors, t) {
+    var n = anchors.length;
+    if (!n) return null;
+    if (t <= anchors[0].t) return { x: anchors[0].x, y: anchors[0].y, t: t };
+    if (t >= anchors[n - 1].t) return { x: anchors[n - 1].x, y: anchors[n - 1].y, t: t };
+    for (var i = 0; i < n - 1; i++) {
+      var a = anchors[i], b = anchors[i + 1];
+      if (t >= a.t && t <= b.t) {
+        var f = (b.t - a.t) > 1e-6 ? (t - a.t) / (b.t - a.t) : 0;
+        return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, t: t };
+      }
+    }
+    return { x: anchors[n - 1].x, y: anchors[n - 1].y, t: t };
   }
   function ptTouches(D, side, name) {
     function T(min, sec) { return (min || 0) * 60 + (sec || 0); }
@@ -1653,7 +1670,6 @@
     });
     return out;
   }
-  function ptLabel(k) { return { pass: "Pass", recv: "Received", dribble: "Dribble / take-on", carry: "Carry", shot: "Shot", save: "Save" }[k] || "Touch"; }
   function buildPlayerTrail(D) {
     var host = document.getElementById("mv-trail");
     if (!host) return;
@@ -1671,7 +1687,7 @@
       return out + "</optgroup>";
     }
     host.innerHTML =
-      '<p class="hint">Follows one player’s on-ball actions — pass origins/receptions, dribbles/carries, shots, saves — connected in chronological order. Built from recorded touches, not continuous GPS tracking.</p>' +
+      '<p class="hint">Estimated player position, once per minute on the pitch — interpolated between recorded touches (pass origins/receptions, dribbles/carries, shots, saves). Not continuous GPS tracking, just the closest real-data approximation.</p>' +
       '<div class="controls-bar"><span class="grp">Player <select id="ptPlayer">' + optionsFor("home") + optionsFor("away") + "</select></span></div>" +
       '<div class="timeline-scrub">' +
         '<button class="play-btn" id="ptPlay">▶</button>' +
@@ -1688,8 +1704,8 @@
         '<circle id="ptBall" class="pt-ball" r="1.6" cx="-10" cy="-10"/>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        "<span>● numbered dot = a recorded touch, in order</span>" +
-        '<span><i class="pt-lg start"></i>first touch</span><span><i class="pt-lg end"></i>last touch</span>' +
+        "<span>● dot = estimated position for that minute</span>" +
+        '<span><i class="pt-lg start"></i>first minute on pitch</span><span><i class="pt-lg end"></i>last minute on pitch</span>' +
         "<span>scrub or press ▶ to watch the trail build</span>" +
       "</div>" +
       '<div class="stat-note" id="ptNote"></div>';
@@ -1719,14 +1735,21 @@
       trailEl.setAttribute("stroke-dashoffset", (state.total - pos.len).toFixed(2));
       minLab.textContent = Math.floor(pos.t / 60) + "'";
       var teamName = state.side === "home" ? D.home.name : D.away.name;
-      var shown = Math.min(P.length, Math.floor(v) + 2);
-      note.textContent = esc(state.name) + " (" + teamName + ") · " + P.length + " recorded touches · showing 1–" + shown + " of " + P.length;
+      var shownMin = Math.floor(pos.t / 60);
+      note.textContent = esc(state.name) + " (" + teamName + ") · minute-by-minute position, " + state.onMin + "–" + state.offMin +
+        "' · interpolated from " + state.touchCount + " recorded touches · now showing " + shownMin + "'";
     }
     function loadPlayer(idx) {
       var rp = rosterList[idx];
       state.side = rp.side; state.name = rp.name;
+      var maxMin = D.maxMin || 90;
+      var onMin = Math.max(0, Math.floor(rp.on)), offMin = Math.min(maxMin, Math.ceil(rp.off));
+      state.onMin = onMin; state.offMin = offMin;
       var touches = ptTouches(D, rp.side, rp.name);
-      var P = touches.map(function (p) { return { x: tx(rp.side, p.x), y: ty(rp.side, p.y), t: p.t, k: p.k }; });
+      var anchors = touches.map(function (p) { return { x: tx(rp.side, p.x), y: ty(rp.side, p.y), t: p.t }; });
+      state.touchCount = anchors.length;
+      var P = [];
+      for (var m = onMin; m <= offMin; m++) { var pt = ptInterp(anchors, m * 60); if (pt) P.push(pt); }
       state.P = P;
       var cum = [0];
       for (var i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i].x - P[i - 1].x, P[i].y - P[i - 1].y));
@@ -1737,7 +1760,7 @@
       nodesEl.innerHTML = "";
       if (P.length < 2) {
         routeEl.setAttribute("d", ""); trailEl.setAttribute("d", ""); ballEl.style.opacity = "0";
-        note.textContent = esc(rp.name) + " · not enough recorded touches to draw a trail (" + P.length + ").";
+        note.textContent = esc(rp.name) + " · not enough recorded touches to draw a trail (" + anchors.length + ").";
         return;
       }
       var d = "M" + P.map(function (p) { return p.x.toFixed(2) + "," + p.y.toFixed(2); }).join(" L");
@@ -1748,14 +1771,12 @@
         var c = document.createElementNS(NS, "circle");
         var end = (i === 0 || i === P.length - 1);
         c.setAttribute("cx", p.x.toFixed(2)); c.setAttribute("cy", p.y.toFixed(2));
-        c.setAttribute("r", end ? "1.9" : "1.1");
+        c.setAttribute("r", end ? "1.9" : "0.85");
         c.setAttribute("class", "pt-node" + (i === 0 ? " start" : i === P.length - 1 ? " end" : ""));
-        (function (pt, ord) {
-          c.addEventListener("mousemove", function (e) {
-            showTip(e, "<b>#" + (ord + 1) + " " + esc(ptLabel(pt.k)) + "</b><br>" + Math.floor(pt.t / 60) + "' " + Math.round(pt.t % 60) + "s");
-          });
+        (function (pt) {
+          c.addEventListener("mousemove", function (e) { showTip(e, "<b>" + Math.floor(pt.t / 60) + "'</b>"); });
           c.addEventListener("mouseleave", hideTip);
-        })(p, i);
+        })(p);
         nodesEl.appendChild(c);
       });
       range.min = 0; range.max = P.length - 1; range.step = 0.01; range.value = P.length - 1;
