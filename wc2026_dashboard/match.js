@@ -1647,17 +1647,31 @@
     }
     return { x: anchors[n - 1].x, y: anchors[n - 1].y, t: t };
   }
-  function ptCatmull(p0, p1, p2, p3, u) {
-    var u2 = u * u, u3 = u2 * u;
-    return {
-      x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * u + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * u2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * u3),
-      y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * u + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * u2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * u3)
-    };
+  function ptLerpT(P, Q, t0, t1, t) {
+    if (Math.abs(t1 - t0) < 1e-6) return P;
+    var f = (t - t0) / (t1 - t0);
+    return { x: P.x + (Q.x - P.x) * f, y: P.y + (Q.y - P.y) * f };
   }
-  // Densify the per-minute knots into a Catmull-Rom spline through every one of them, so the
-  // trail reads as one continuous drawn line instead of a polygon with a sharp corner on every
-  // whole minute. Time is still interpolated linearly within each knot-to-knot span (we have no
-  // finer real timing than the minute grid) — only the on-pitch curve is smoothed.
+  // Centripetal Catmull-Rom (Barry–Goldman), not the plain uniform kind: a player often "holds"
+  // the same interpolated spot for several consecutive minutes (no touch nearby) before a sharp
+  // change of direction on the next knot. Uniform Catmull-Rom overshoots badly at exactly that
+  // pattern — equally-spaced-in-index but unevenly-spaced-in-distance points — producing loops
+  // and spikes that look like the trail forking off in several directions from one spot.
+  // Centripetal parameterization (knot spacing by sqrt(distance) instead of a flat 1 per point)
+  // is the standard fix and stays well-behaved through duplicate/near-duplicate points.
+  function ptCatmull(p0, p1, p2, p3, u) {
+    var alpha = 0.5;
+    function d(a, b) { return Math.pow(Math.hypot(b.x - a.x, b.y - a.y), alpha) || 1e-4; }
+    var t0 = 0, t1 = t0 + d(p0, p1), t2 = t1 + d(p1, p2), t3 = t2 + d(p2, p3);
+    var t = t1 + (t2 - t1) * u;
+    var A1 = ptLerpT(p0, p1, t0, t1, t), A2 = ptLerpT(p1, p2, t1, t2, t), A3 = ptLerpT(p2, p3, t2, t3, t);
+    var B1 = ptLerpT(A1, A2, t0, t2, t), B2 = ptLerpT(A2, A3, t1, t3, t);
+    return ptLerpT(B1, B2, t1, t2, t);
+  }
+  // Densify the per-minute knots into a spline through every one of them, so the trail reads as
+  // one continuous drawn line instead of a polygon with a sharp corner on every whole minute.
+  // Time is still interpolated linearly within each knot-to-knot span (we have no finer real
+  // timing than the minute grid) — only the on-pitch curve is smoothed.
   function ptSmooth(knots, steps) {
     var n = knots.length;
     if (n < 3) return knots.slice();
