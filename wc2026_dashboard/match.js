@@ -163,6 +163,7 @@
       (hasDribbles ? block("Dribbles", "mv-dribbles") : "") +
       block("Pass network", "mv-network") +
       block("Average position", "mv-avgpos") +
+      block("Player trail", "mv-trail") +
       block("Line-ups", "mv-lineups") +
       // All Goals Map sits below every stats section.
       (hasGoals ? block("All goals map", "mv-goals") : "") +
@@ -193,6 +194,7 @@
     if (hasDribbles) buildDribbles(D);
     buildNetwork(D);
     buildAvgPos(D);
+    buildPlayerTrail(D);
     buildLineups(D);
     if (hasGoals) buildAllGoals(D);
     if (hasGoals) buildGoalReplays(D);
@@ -1608,6 +1610,187 @@
     });
 
     setUpper(state.upper);
+  }
+
+  /* ================= PLAYER TRAIL ================= */
+  // Traces one player's on-ball actions — pass origins/receptions, dribble/carry starts,
+  // shots, keeper saves — connected in chronological order. This is the closest thing our
+  // event-based sources (FotMob/WhoScored/SofaScore) support to a "movement trail": there's
+  // no continuous positional/GPS tracking feed behind this dashboard, only discrete touch
+  // coordinates, so the line is straight segments between real recorded actions, not an
+  // actual running path. Play button walks a dot along it with the trail drawing in behind,
+  // minute readout ticking up — same idea as a sped-up match replay, built from real data.
+  function ptRoster(D) {
+    var maxMin = D.maxMin || 90, out = [];
+    ["home", "away"].forEach(function (sd) {
+      var lu = D.lineups[sd];
+      lu.starters.concat(lu.subs).forEach(function (p) {
+        if (p && p.name) out.push({ side: sd, name: p.name, num: p.num });
+      });
+    });
+    return out;
+  }
+  function ptTouches(D, side, name) {
+    function T(min, sec) { return (min || 0) * 60 + (sec || 0); }
+    var t = [];
+    (D.passes || []).forEach(function (p) {
+      if (p.team !== side) return;
+      if (p.player === name) t.push({ t: T(p.min, p.sec), x: p.x, y: p.y, k: "pass" });
+      if (p.ok && p.recv === name) t.push({ t: T(p.min, p.sec) + 0.4, x: p.ex, y: p.ey, k: "recv" });
+    });
+    (D.dribbles || []).forEach(function (d) { if (d.team === side && d.player === name) t.push({ t: T(d.min, d.sec), x: d.x, y: d.y, k: "dribble" }); });
+    (D.carries || []).forEach(function (c) { if (c.team === side && c.player === name) t.push({ t: T(c.min, c.sec), x: c.x, y: c.y, k: "carry" }); });
+    (D.shots || []).forEach(function (s) { if (s.team === side && s.player === name) t.push({ t: T(s.min, s.sec), x: s.x, y: s.y, k: "shot" }); });
+    (D.saves || []).forEach(function (v) { if (v.team === side && v.player === name) t.push({ t: T(v.min, v.sec), x: v.x, y: v.y, k: "save" }); });
+    t.sort(function (a, b) { return a.t - b.t; });
+    // collapse near-duplicate touches (e.g. a dribble start and an inferred carry logging
+    // the same instant) so the line doesn't jitter on top of itself
+    var out = [];
+    t.forEach(function (p) {
+      var last = out[out.length - 1];
+      if (last && Math.abs(last.t - p.t) < 0.05 && Math.hypot(last.x - p.x, last.y - p.y) < 0.6) return;
+      out.push(p);
+    });
+    return out;
+  }
+  function ptLabel(k) { return { pass: "Pass", recv: "Received", dribble: "Dribble / take-on", carry: "Carry", shot: "Shot", save: "Save" }[k] || "Touch"; }
+  function buildPlayerTrail(D) {
+    var host = document.getElementById("mv-trail");
+    if (!host) return;
+    var rosterList = ptRoster(D);
+    if (!rosterList.length) { if (host.parentNode) host.parentNode.style.display = "none"; return; }
+    var counts = rosterList.map(function (p) { return ptTouches(D, p.side, p.name).length; });
+
+    function optionsFor(side) {
+      var teamName = side === "home" ? D.home.name : D.away.name;
+      var out = '<optgroup label="' + esc(teamName) + '">';
+      rosterList.forEach(function (p, i) {
+        if (p.side !== side) return;
+        out += '<option value="' + i + '">' + (p.num != null ? "#" + p.num + " " : "") + esc(p.name) + " (" + counts[i] + " touches)</option>";
+      });
+      return out + "</optgroup>";
+    }
+    host.innerHTML =
+      '<p class="hint">Follows one player’s on-ball actions — pass origins/receptions, dribbles/carries, shots, saves — connected in chronological order. Built from recorded touches, not continuous GPS tracking.</p>' +
+      '<div class="controls-bar"><span class="grp">Player <select id="ptPlayer">' + optionsFor("home") + optionsFor("away") + "</select></span></div>" +
+      '<div class="timeline-scrub">' +
+        '<button class="play-btn" id="ptPlay">▶</button>' +
+        '<input type="range" id="ptRange" min="0" max="1" step="0.01" value="1">' +
+        '<span class="minlab" id="ptMinLab"></span>' +
+        '<span class="spd">Speed <input type="range" id="ptSpd" min="0.5" max="3" step="0.5" value="1"><b id="ptSpdV">1×</b></span>' +
+      "</div>" +
+      '<div class="pitch-wrap"><svg class="pitch-svg" viewBox="-2 -2 ' + (PW + 4) + " " + (PH + 8) + '">' +
+        pitchMarkup() +
+        '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle" id="ptDir">attacking →</text>' +
+        '<path id="ptRoute" class="pt-route"/>' +
+        '<path id="ptTrail" class="pt-trail"/>' +
+        '<g id="ptNodes"></g>' +
+        '<circle id="ptBall" class="pt-ball" r="1.6" cx="-10" cy="-10"/>' +
+      "</svg></div>" +
+      '<div class="legend-row">' +
+        "<span>● numbered dot = a recorded touch, in order</span>" +
+        '<span><i class="pt-lg start"></i>first touch</span><span><i class="pt-lg end"></i>last touch</span>' +
+        "<span>scrub or press ▶ to watch the trail build</span>" +
+      "</div>" +
+      '<div class="stat-note" id="ptNote"></div>';
+
+    var routeEl = document.getElementById("ptRoute"), trailEl = document.getElementById("ptTrail");
+    var nodesEl = document.getElementById("ptNodes"), ballEl = document.getElementById("ptBall");
+    var range = document.getElementById("ptRange"), minLab = document.getElementById("ptMinLab");
+    var note = document.getElementById("ptNote"), dirLab = document.getElementById("ptDir");
+    var NS = "http://www.w3.org/2000/svg";
+    var state = { side: null, name: null, P: [], cum: [], total: 0 };
+
+    function pointAt(v) {
+      var P = state.P, n = P.length - 1;
+      if (n <= 0) return { x: P[0].x, y: P[0].y, t: P[0].t, len: 0 };
+      var i = Math.max(0, Math.min(n - 1, Math.floor(v))), lf = v - i;
+      var a = P[i], b = P[i + 1];
+      return { x: a.x + (b.x - a.x) * lf, y: a.y + (b.y - a.y) * lf, t: a.t + (b.t - a.t) * lf,
+               len: state.cum[i] + (state.cum[i + 1] - state.cum[i]) * lf };
+    }
+    function setIdx(v) {
+      var P = state.P;
+      if (P.length < 2) return;
+      var pos = pointAt(v);
+      ballEl.style.opacity = "1";
+      ballEl.setAttribute("cx", pos.x.toFixed(2)); ballEl.setAttribute("cy", pos.y.toFixed(2));
+      trailEl.setAttribute("stroke-dasharray", state.total.toFixed(2));
+      trailEl.setAttribute("stroke-dashoffset", (state.total - pos.len).toFixed(2));
+      minLab.textContent = Math.floor(pos.t / 60) + "'";
+      var teamName = state.side === "home" ? D.home.name : D.away.name;
+      var shown = Math.min(P.length, Math.floor(v) + 2);
+      note.textContent = esc(state.name) + " (" + teamName + ") · " + P.length + " recorded touches · showing 1–" + shown + " of " + P.length;
+    }
+    function loadPlayer(idx) {
+      var rp = rosterList[idx];
+      state.side = rp.side; state.name = rp.name;
+      var touches = ptTouches(D, rp.side, rp.name);
+      var P = touches.map(function (p) { return { x: tx(rp.side, p.x), y: ty(rp.side, p.y), t: p.t, k: p.k }; });
+      state.P = P;
+      var cum = [0];
+      for (var i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i].x - P[i - 1].x, P[i].y - P[i - 1].y));
+      state.cum = cum; state.total = cum.length ? cum[cum.length - 1] : 0;
+      var teamName = rp.side === "home" ? D.home.name : D.away.name;
+      var col = rp.side === "home" ? D.home.color : D.away.color;
+      dirLab.textContent = rp.side === "home" ? teamName + " attacking →" : "← " + teamName + " attacking";
+      nodesEl.innerHTML = "";
+      if (P.length < 2) {
+        routeEl.setAttribute("d", ""); trailEl.setAttribute("d", ""); ballEl.style.opacity = "0";
+        note.textContent = esc(rp.name) + " · not enough recorded touches to draw a trail (" + P.length + ").";
+        return;
+      }
+      var d = "M" + P.map(function (p) { return p.x.toFixed(2) + "," + p.y.toFixed(2); }).join(" L");
+      routeEl.setAttribute("d", d); routeEl.setAttribute("stroke", col);
+      trailEl.setAttribute("d", d); trailEl.setAttribute("stroke", col);
+      ballEl.setAttribute("fill", col);
+      P.forEach(function (p, i) {
+        var c = document.createElementNS(NS, "circle");
+        var end = (i === 0 || i === P.length - 1);
+        c.setAttribute("cx", p.x.toFixed(2)); c.setAttribute("cy", p.y.toFixed(2));
+        c.setAttribute("r", end ? "1.9" : "1.1");
+        c.setAttribute("class", "pt-node" + (i === 0 ? " start" : i === P.length - 1 ? " end" : ""));
+        (function (pt, ord) {
+          c.addEventListener("mousemove", function (e) {
+            showTip(e, "<b>#" + (ord + 1) + " " + esc(ptLabel(pt.k)) + "</b><br>" + Math.floor(pt.t / 60) + "' " + Math.round(pt.t % 60) + "s");
+          });
+          c.addEventListener("mouseleave", hideTip);
+        })(p, i);
+        nodesEl.appendChild(c);
+      });
+      range.min = 0; range.max = P.length - 1; range.step = 0.01; range.value = P.length - 1;
+      setIdx(P.length - 1);
+    }
+
+    range.addEventListener("input", function () { stopPlay(); setIdx(parseFloat(range.value)); });
+    document.getElementById("ptPlayer").addEventListener("change", function () { stopPlay(); loadPlayer(+this.value); });
+    var spd = document.getElementById("ptSpd"), spdv = document.getElementById("ptSpdV"), speed = 1;
+    spd.addEventListener("input", function () { speed = parseFloat(spd.value); spdv.textContent = speed + "×"; });
+
+    var raf = null, playBtn = document.getElementById("ptPlay");
+    function stopPlay() { if (raf) { cancelAnimationFrame(raf); raf = null; } playBtn.classList.remove("playing"); playBtn.textContent = "▶"; }
+    playBtn.addEventListener("click", function () {
+      if (raf) { stopPlay(); return; }
+      var n = state.P.length - 1;
+      if (n <= 0) return;
+      if (parseFloat(range.value) >= n - 1e-6) { range.value = 0; setIdx(0); }
+      playBtn.classList.add("playing"); playBtn.textContent = "❚❚";
+      var startV = parseFloat(range.value), t0 = null;
+      var baseMs = 60000; // ~60s to walk the full trail at 1× — "a match in a minute", like a sped-up replay
+      function frame(now) {
+        if (t0 == null) t0 = now;
+        var v = startV + ((now - t0) * speed / baseMs) * n;
+        if (v >= n) { range.value = n; setIdx(n); stopPlay(); return; }
+        range.value = v; setIdx(v);
+        raf = requestAnimationFrame(frame);
+      }
+      raf = requestAnimationFrame(frame);
+    });
+
+    var defIdx = 0, defCount = -1;
+    counts.forEach(function (c, i) { if (c > defCount) { defCount = c; defIdx = i; } });
+    document.getElementById("ptPlayer").value = defIdx;
+    loadPlayer(defIdx);
   }
 
   /* ================= LINE-UPS ================= */
