@@ -119,3 +119,7 @@ match_id,date,team,opponent,side,source,goals,conceded,possession,shots,sot,pass
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,England,France,away,fotmob,6,4,54,19,11,517,91,8,5,5,8,62,2.89,4
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,France,England,home,whoscored,4,6,46,19,13,458,90,6,2,11,14,41,,
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,England,France,away,whoscored,6,4,54,19,17,539,89,7,4,9,8,59,,
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,home,fotmob,1,0,65,20,12,841,90,4,3,0,19,52,1.94,9
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,away,fotmob,0,1,35,2,0,458,77,0,0,11,25,48,0.22,4
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,home,whoscored,1,0,65,20,15,894,88,4,3,1,19,49,,
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,away,whoscored,0,1,35,2,1,484,76,0,0,14,24,51,,

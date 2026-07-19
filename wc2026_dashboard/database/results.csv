@@ -102,3 +102,4 @@ match_id,date,stage,venue,home,away,home_score,away_score,home_xg,away_xg,xg_sou
 2026_07_14_Winner_QF_1_vs_Winner_QF_2,2026-07-14,Semifinal,Dallas Stadium,France,Spain,0,2,0.35,1.8,avg,0.4,1.97,0.31,1.63
 2026_07_15_Winner_QF_3_vs_Winner_QF_4,2026-07-15,Semifinal,Atlanta Stadium,England,Argentina,1,2,0.57,1.79,avg,0.62,1.75,0.53,1.84
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,Third Place,Miami Stadium,France,England,4,6,3.16,3.41,avg,3.52,3.92,2.8,2.89
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Final,New York New Jersey Stadium,Spain,Argentina,1,0,2.04,0.18,avg,2.13,0.14,1.94,0.22

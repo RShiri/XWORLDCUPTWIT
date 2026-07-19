@@ -205,3 +205,5 @@ match_id,date,team,opponent,side,goals,conceded,possession,shots,sot,passes,pass
 2026_07_15_Winner_QF_3_vs_Winner_QF_4,2026-07-15,Argentina,England,away,2,1,64,15,8,632,91,3,2,3,15,52,1.79
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,France,England,home,4,6,46,19,13,458,91,6,2,11,14,38,3.16
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,England,France,away,6,4,54,19,17,539,91,8,5,9,8,62,3.41
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,home,1,0,65,20,15,894,90,4,3,1,19,52,2.04
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,away,0,1,35,2,1,484,77,0,0,14,25,48,0.18

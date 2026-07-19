@@ -3251,3 +3251,37 @@ match_id,date,team,opponent,player_id,player,position,started,minutes,goals,assi
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,England,France,361330,Reece James,Sub,0,16,0,0,0,0,6.5,0.0,0,0,3,2,0,7,1,0,0,1,0,1,0,0
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,England,France,379868,Jude Bellingham,Sub,0,20,1,0,0,0,7.7,0.98,2,2,9,6,0,20,1,0,0,5,0,0,1,0
 2026_07_19_Loser_SF_1_vs_Loser_SF_2,2026-07-18,England,France,402596,Elliot Anderson,Sub,0,20,0,0,0,0,6.2,0.0,0,0,11,11,0,14,1,0,0,0,0,0,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,332823,Unai Simon,GK,1,121,0,0,0,0,6.6,0.0,0,0,36,27,0,46,0,0,1,0,0,3,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,362352,Pedro Porro,DR,1,121,0,0,0,0,7.3,0.0,0,0,98,89,1,128,4,2,1,0,3,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,122117,Aymeric Laporte,DC,1,98,0,0,0,0,7.0,0.05,1,1,92,85,0,103,0,2,1,0,1,3,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,498386,Pau Cubarsi,DC,1,121,0,0,0,0,7.6,0.03,1,1,126,121,1,138,3,0,2,0,0,6,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,363496,Marc Cucurella,DL,1,121,0,0,0,0,6.7,0.02,1,0,77,67,0,95,2,2,0,0,0,0,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,294193,Fabian Ruiz,DMC,1,61,0,0,0,0,6.6,0.0,0,0,50,45,2,53,0,1,1,0,0,0,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,303139,Rodri,DMC,1,98,0,0,0,0,7.4,0.02,1,0,106,101,2,116,4,0,0,1,2,0,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,480249,Lamine Yamal,AMR,1,121,0,0,0,0,7.7,0.21,4,2,51,44,1,86,4,0,0,5,2,0,2,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,261212,Dani Olmo,AMC,1,74,0,0,0,0,7.1,0.12,2,1,25,21,1,36,0,0,1,3,1,0,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,395242,Alex Baena,AML,1,74,0,0,0,0,6.4,0.07,1,1,21,15,0,39,1,0,0,1,4,0,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,298839,Mikel Oyarzabal,FW,1,61,0,0,0,0,6.3,0.07,1,1,14,11,0,25,2,0,0,1,1,1,2,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,238916,Mikel Merino,Sub,0,47,0,0,0,0,6.6,0.34,1,0,21,16,1,30,0,0,3,0,1,1,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,349760,Ferran Torres,Sub,0,60,1,0,0,0,7.0,0.71,3,2,8,6,0,20,0,0,0,0,1,1,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,368091,Eric Garcia,Sub,0,23,0,0,0,0,6.2,0.0,0,0,10,9,0,12,1,0,0,0,0,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,372424,Martin Zubimendi,Sub,0,23,0,0,0,0,6.5,0.0,0,0,24,21,0,26,1,1,2,0,0,0,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,402197,Pedri,Sub,0,60,0,0,0,0,7.3,0.07,1,1,61,57,4,70,3,1,0,0,1,1,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Spain,Argentina,408449,Nico Williams,Sub,0,47,0,1,0,0,7.3,0.42,3,2,21,20,2,40,0,1,0,1,2,0,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,102248,Emiliano Martinez,GK,1,121,0,0,0,0,8.9,0.0,0,0,51,31,0,67,0,0,0,0,0,1,0,11
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,316883,Gonzalo Montiel,DR,1,57,0,0,0,0,6.8,0.0,0,0,13,8,0,25,2,2,0,0,1,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,323663,Cristian Romero,DC,1,69,0,0,1,0,6.4,0.0,0,0,40,36,0,45,1,0,0,0,0,1,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,340105,Lisandro Martinez,DC,1,43,0,0,1,0,6.6,0.0,0,0,29,22,0,33,3,1,1,0,1,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,83809,Nicolas Tagliafico,DL,1,121,0,0,0,0,7.0,0.0,0,0,33,24,0,55,3,3,1,1,4,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,125547,Rodrigo De Paul,MR,1,69,0,0,0,0,6.2,0.0,0,0,29,24,0,37,1,0,0,0,0,0,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,345319,Alexis Mac Allister,MC,1,121,0,0,1,0,6.4,0.0,0,0,29,24,0,42,6,1,2,1,3,2,2,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,369430,Enzo Fernandez,MC,1,121,0,0,2,1,5.5,0.0,0,0,36,32,0,50,2,2,1,1,3,1,2,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,345322,Nico Gonzalez,ML,1,45,0,0,0,0,6.3,0.0,0,0,9,5,0,17,0,0,2,1,0,0,2,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,11119,Lionel Messi,FW,1,121,0,0,0,0,6.7,0.04,1,0,32,26,0,52,1,0,1,3,1,0,2,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,365409,Julian Alvarez,FW,1,101,0,0,0,0,6.3,0.0,0,0,16,12,0,29,2,1,1,0,3,1,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,75691,Nicolas Otamendi,Sub,0,78,0,0,0,0,6.4,0.0,0,0,29,23,0,40,0,1,1,0,1,4,1,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,93700,Leandro Paredes,Sub,0,76,0,0,1,0,5.9,0.0,0,0,39,32,0,50,1,2,0,1,4,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,303728,Nahuel Molina,Sub,0,64,0,0,0,0,6.5,0.0,0,0,25,17,0,35,4,1,0,0,0,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,328330,Marcos Senesi,Sub,0,20,0,0,0,0,5.9,0.0,0,0,7,5,0,8,0,0,0,0,0,0,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,330672,Facundo Medina,Sub,0,52,0,0,0,0,6.4,0.0,0,0,17,15,0,28,1,1,1,0,0,2,0,0
+2026_07_19_Winner_SF_1_vs_Winner_SF_2,2026-07-19,Argentina,Spain,422918,Giuliano Simeone,Sub,0,52,0,0,0,0,6.1,0.1,1,0,17,12,1,27,2,0,1,0,3,0,2,0
