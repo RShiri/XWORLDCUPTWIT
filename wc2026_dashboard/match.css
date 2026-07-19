@@ -124,6 +124,7 @@
 
 /* Player trail — a smoothed curve, styled like a drawn/sketched line rather than a plotted graph */
 .pt-route { fill: none; stroke-width: 0.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.2; }
+.pt-trail-old { fill: none; stroke-width: 0.45; stroke-linecap: round; stroke-linejoin: round; opacity: 0.38; }
 .pt-trail { fill: none; stroke-width: 0.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.92; }
 .pt-node { fill: var(--bg-2); stroke: #fff; stroke-width: 0.3; cursor: pointer; }
 .pt-node.start { fill: var(--warn); stroke: #e0a83a; }

@@ -1708,6 +1708,31 @@
     });
     return out;
   }
+  // Drop physically impossible one-touch excursions before interpolating: WhoScored
+  // restart/dead-ball events sometimes log coordinates across the pitch seconds after
+  // open play (e.g. a reception and a "save" 50+ units apart in the same second), and
+  // one bad anchor whips the whole spline across the pitch and back — the trail reads
+  // as lines starting from several different locations. An interior anchor is rejected
+  // when reaching it AND leaving it both require more than sprint speed (~8 SVG
+  // units/s ≈ 8 m/s) while its two neighbours sit within that limit of each other —
+  // i.e. the trail is plausible without the anchor and impossible with it. Genuine
+  // excursions (corner-taking, a sprint onto a long ball) keep at least one plausible
+  // leg and survive.
+  function ptRejectOutliers(anchors) {
+    var SPRINT = 8;
+    function v(a, b) { return Math.hypot(b.x - a.x, b.y - a.y) / Math.max(Math.abs(b.t - a.t), 1); }
+    var changed = true, guard = 0;
+    while (changed && guard++ < 4) {
+      changed = false;
+      for (var i = 1; i < anchors.length - 1; i++) {
+        var p = anchors[i - 1], c = anchors[i], n = anchors[i + 1];
+        if (v(p, c) > SPRINT && v(c, n) > SPRINT && v(p, n) <= SPRINT) {
+          anchors.splice(i, 1); changed = true; i--;
+        }
+      }
+    }
+    return anchors;
+  }
   function buildPlayerTrail(D) {
     var host = document.getElementById("mv-trail");
     if (!host) return;
@@ -1737,18 +1762,20 @@
         pitchMarkup() +
         '<text class="dir-label" x="' + (PW / 2) + '" y="' + (PH + 4) + '" text-anchor="middle" id="ptDir">attacking →</text>' +
         '<path id="ptRoute" class="pt-route"/>' +
+        '<path id="ptTrailOld" class="pt-trail-old"/>' +
         '<path id="ptTrail" class="pt-trail"/>' +
         '<g id="ptNodes"></g>' +
         '<circle id="ptBall" class="pt-ball" r="1.6" cx="-10" cy="-10"/>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        "<span>line = smoothed path through the player's per-minute positions</span>" +
+        "<span>bright line = last 10 minutes of movement · dim line = earlier path</span>" +
         '<span><i class="pt-lg start"></i>first minute on pitch</span><span><i class="pt-lg end"></i>last minute on pitch</span>' +
         "<span>scrub or press ▶ to watch the trail build</span>" +
       "</div>" +
       '<div class="stat-note" id="ptNote"></div>';
 
     var routeEl = document.getElementById("ptRoute"), trailEl = document.getElementById("ptTrail");
+    var trailOldEl = document.getElementById("ptTrailOld");
     var nodesEl = document.getElementById("ptNodes"), ballEl = document.getElementById("ptBall");
     var range = document.getElementById("ptRange"), minLab = document.getElementById("ptMinLab");
     var note = document.getElementById("ptNote"), dirLab = document.getElementById("ptDir");
@@ -1763,14 +1790,37 @@
       return { x: a.x + (b.x - a.x) * lf, y: a.y + (b.y - a.y) * lf, t: a.t + (b.t - a.t) * lf,
                len: state.cum[i] + (state.cum[i + 1] - state.cum[i]) * lf };
     }
+    // Comet rendering: 98 minutes of self-crossing trail drawn at one full-strength
+    // weight reads as a tangle of lines starting from several different places. So
+    // only the most recent TAIL seconds behind the ball draw bright; everything older
+    // stays as a dimmer, thinner tail (ptTrailOld) that joins it seamlessly — still
+    // ONE continuous line, but with an unambiguous "now" end to follow during play.
+    var TAIL = 600; // seconds of trail kept bright behind the ball
     function setIdx(v) {
       var P = state.P;
       if (P.length < 2) return;
       var pos = pointAt(v);
       ballEl.style.opacity = "1";
       ballEl.setAttribute("cx", pos.x.toFixed(2)); ballEl.setAttribute("cy", pos.y.toFixed(2));
-      trailEl.setAttribute("stroke-dasharray", state.total.toFixed(2));
-      trailEl.setAttribute("stroke-dashoffset", (state.total - pos.len).toFixed(2));
+      // path length at the moment TAIL seconds before the ball (0 if the whole
+      // drawn trail is younger); bright window = [lenOld, pos.len]
+      var cutT = pos.t - TAIL, j = 0, lenOld = 0;
+      if (P[0].t < cutT) {
+        // last sample at-or-before the cut, then interpolate into the next span.
+        // NOTE: the sample grid hits exact knot times, and cutT lands exactly on a
+        // knot whenever pos.t is a whole minute — so this must include equality
+        // (f = 0), not skip it, or the dim tail vanishes at whole-minute positions.
+        while (j < P.length - 1 && P[j + 1].t <= cutT) j++;
+        var a = P[j], b = P[j + 1];
+        var f = (b.t - a.t) > 1e-6 ? (cutT - a.t) / (b.t - a.t) : 0;
+        lenOld = state.cum[j] + (state.cum[j + 1] - state.cum[j]) * Math.max(0, Math.min(1, f));
+      }
+      lenOld = Math.min(lenOld, pos.len);
+      var tail = pos.len - lenOld;
+      trailEl.setAttribute("stroke-dasharray", tail.toFixed(2) + " " + state.total.toFixed(2));
+      trailEl.setAttribute("stroke-dashoffset", (tail - pos.len).toFixed(2));
+      trailOldEl.setAttribute("stroke-dasharray", lenOld.toFixed(2) + " " + state.total.toFixed(2));
+      trailOldEl.setAttribute("stroke-dashoffset", "0");
       minLab.textContent = Math.floor(pos.t / 60) + "'";
       var teamName = state.side === "home" ? D.home.name : D.away.name;
       var shownMin = Math.floor(pos.t / 60);
@@ -1784,7 +1834,8 @@
       var onMin = Math.max(0, Math.floor(rp.on)), offMin = Math.min(maxMin, Math.ceil(rp.off));
       state.onMin = onMin; state.offMin = offMin;
       var touches = ptTouches(D, rp.side, rp.name);
-      var anchors = touches.map(function (p) { return { x: tx(rp.side, p.x), y: ty(rp.side, p.y), t: p.t }; });
+      var anchors = ptRejectOutliers(
+        touches.map(function (p) { return { x: tx(rp.side, p.x), y: ty(rp.side, p.y), t: p.t }; }));
       state.touchCount = anchors.length;
       var knots = [];
       for (var m = onMin; m <= offMin; m++) { var pt = ptInterp(anchors, m * 60); if (pt) knots.push(pt); }
@@ -1794,7 +1845,7 @@
       nodesEl.innerHTML = "";
       if (knots.length < 2) {
         state.P = knots; state.cum = [0]; state.total = 0;
-        routeEl.setAttribute("d", ""); trailEl.setAttribute("d", ""); ballEl.style.opacity = "0";
+        routeEl.setAttribute("d", ""); trailEl.setAttribute("d", ""); trailOldEl.setAttribute("d", ""); ballEl.style.opacity = "0";
         note.textContent = esc(rp.name) + " · not enough recorded touches to draw a trail (" + anchors.length + ").";
         return;
       }
@@ -1806,6 +1857,7 @@
       var d = "M" + P.map(function (p) { return p.x.toFixed(2) + "," + p.y.toFixed(2); }).join(" L");
       routeEl.setAttribute("d", d); routeEl.setAttribute("stroke", col);
       trailEl.setAttribute("d", d); trailEl.setAttribute("stroke", col);
+      trailOldEl.setAttribute("d", d); trailOldEl.setAttribute("stroke", col);
       ballEl.setAttribute("fill", col);
       function mark(pt, cls) {
         var c = document.createElementNS(NS, "circle");

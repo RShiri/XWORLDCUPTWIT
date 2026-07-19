@@ -58,9 +58,15 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   `py -m wc2026.knockout_resolve <placeholder_id>` to preview a fixture's resolved teams.
 
 ## Auto-deploy (how the live site stays current)
-- `run_match` step 4 → `git_ops.push_match_update()`: clones the repo to a temp dir and,
-  in ONE commit, pushes the PNG **+** regenerated `wc2026_dashboard/{data.js,players.js,
-  shots.js,breaks.js,matches_detail/,database/}` **+** the raw match JSON. Needs `GIT_TOKEN` env var.
+- `run_match` step 4 → `git_ops.push_match_update()`: clones the repo to a temp dir,
+  copies in the raw match JSON, then **rebuilds ALL dashboard outputs inside the clone
+  with the clone's own committed builders** (`_rebuild_dashboard_in_clone` — data.js,
+  players.js, shots.js, breaks.js, matches_detail/, database/, player_lab/, share/) and
+  pushes everything + the PNG in ONE commit. Needs `GIT_TOKEN` env var. **Don't revert to
+  copying the local working tree's outputs** — that's only the fallback when a builder
+  fails in the clone: a scrape PC whose checkout lags origin/main would deploy regressed
+  data, turning bracket-parity's `identity-2026` red and forcing a regen flip-back commit
+  on every match (the pre-2026-07-19 failure mode).
 - It only auto-pushes **generated** files. Edits to dashboard **source**
   (`app.js`, `match.js`, `styles.css`, `match.css`, `*.html`) need a **manual** `git push`.
 - `run_match` step 4b → `git_ops.push_argentina_portfolio()`: keeps the personal
