@@ -1807,30 +1807,20 @@
       var pos = pointAt(v);
       ballEl.style.opacity = "1";
       ballEl.setAttribute("cx", pos.x.toFixed(2)); ballEl.setAttribute("cy", pos.y.toFixed(2));
-      // path length at the moment TAIL seconds before the ball (0 if the whole
-      // drawn trail is younger); bright window = [lenOld, pos.len]
-      var cutT = pos.t - TAIL, j = 0, lenOld = 0;
-      if (P[0].t < cutT) {
-        // last sample at-or-before the cut, then interpolate into the next span.
-        // NOTE: the sample grid hits exact knot times, and cutT lands exactly on a
-        // knot whenever pos.t is a whole minute — so this must include equality
-        // (f = 0), not skip it, or the dim tail vanishes at whole-minute positions.
-        while (j < P.length - 1 && P[j + 1].t <= cutT) j++;
-        var a = P[j], b = P[j + 1];
-        var f = (b.t - a.t) > 1e-6 ? (cutT - a.t) / (b.t - a.t) : 0;
-        lenOld = state.cum[j] + (state.cum[j + 1] - state.cum[j]) * Math.max(0, Math.min(1, f));
-      }
-      lenOld = Math.min(lenOld, pos.len);
-      if (pos.len - lenOld > TAIL_LEN) lenOld = pos.len - TAIL_LEN;
-      var tail = pos.len - lenOld;
-      // Bright window [lenOld, pos.len] via dash=tail, gap=total. The naive offset
-      // (tail - pos.len) is negative, which some WebKit/iOS versions mis-render as
-      // repeated dash fragments — shift by one full period (tail + total) to get the
-      // same window with a strictly positive offset.
-      trailEl.setAttribute("stroke-dasharray", tail.toFixed(2) + " " + state.total.toFixed(2));
-      trailEl.setAttribute("stroke-dashoffset", (tail + state.total - lenOld).toFixed(2));
-      trailOldEl.setAttribute("stroke-dasharray", lenOld.toFixed(2) + " " + state.total.toFixed(2));
-      trailOldEl.setAttribute("stroke-dashoffset", "0");
+      // Bright head = samples inside BOTH the TAIL time window and the TAIL_LEN
+      // length budget, dim tail = everything before it. Both are drawn as REAL
+      // sub-paths (d rebuilt from the pre-cached per-sample strings), NOT with
+      // stroke-dasharray reveal tricks: iOS WebKit mis-renders large dash
+      // array/offset values as repeated fragments scattered along the path —
+      // the "player in several places at once" report — regardless of offset
+      // sign. Plain sub-paths have no such failure mode on any engine.
+      var iEnd = Math.max(0, Math.min(P.length - 2, Math.floor(v)));
+      var cutT = pos.t - TAIL, minLen = pos.len - TAIL_LEN, hs = iEnd;
+      while (hs > 0 && P[hs - 1].t >= cutT && state.cum[hs - 1] >= minLen) hs--;
+      var headPts = state.S.slice(hs, iEnd + 1);
+      headPts.push(pos.x.toFixed(2) + "," + pos.y.toFixed(2));
+      trailEl.setAttribute("d", "M" + headPts.join(" L"));
+      trailOldEl.setAttribute("d", hs > 0 ? "M" + state.S.slice(0, hs + 1).join(" L") : "");
       minLab.textContent = Math.floor(pos.t / 60) + "'";
       var teamName = state.side === "home" ? D.home.name : D.away.name;
       var shownMin = Math.floor(pos.t / 60);
@@ -1864,10 +1854,11 @@
       var cum = [0];
       for (var i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i].x - P[i - 1].x, P[i].y - P[i - 1].y));
       state.cum = cum; state.total = cum.length ? cum[cum.length - 1] : 0;
-      var d = "M" + P.map(function (p) { return p.x.toFixed(2) + "," + p.y.toFixed(2); }).join(" L");
-      routeEl.setAttribute("d", d); routeEl.setAttribute("stroke", col);
-      trailEl.setAttribute("d", d); trailEl.setAttribute("stroke", col);
-      trailOldEl.setAttribute("d", d); trailOldEl.setAttribute("stroke", col);
+      state.S = P.map(function (p) { return p.x.toFixed(2) + "," + p.y.toFixed(2); });
+      routeEl.setAttribute("d", "M" + state.S.join(" L")); routeEl.setAttribute("stroke", col);
+      // trail/trailOld get their d (head/tail sub-paths) from setIdx below
+      trailEl.setAttribute("stroke", col);
+      trailOldEl.setAttribute("stroke", col);
       ballEl.setAttribute("fill", col);
       function mark(pt, cls) {
         var c = document.createElementNS(NS, "circle");
