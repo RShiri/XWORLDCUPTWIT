@@ -1768,7 +1768,7 @@
         '<circle id="ptBall" class="pt-ball" r="1.6" cx="-10" cy="-10"/>' +
       "</svg></div>" +
       '<div class="legend-row">' +
-        "<span>bright line = last 10 minutes of movement · dim line = earlier path</span>" +
+        "<span>bright streak = most recent movement · dim line = earlier path</span>" +
         '<span><i class="pt-lg start"></i>first minute on pitch</span><span><i class="pt-lg end"></i>last minute on pitch</span>' +
         "<span>scrub or press ▶ to watch the trail build</span>" +
       "</div>" +
@@ -1795,7 +1795,12 @@
     // only the most recent TAIL seconds behind the ball draw bright; everything older
     // stays as a dimmer, thinner tail (ptTrailOld) that joins it seamlessly — still
     // ONE continuous line, but with an unambiguous "now" end to follow during play.
-    var TAIL = 600; // seconds of trail kept bright behind the ball
+    // TAIL_LEN additionally caps the bright head by PATH LENGTH: in a busy spell a
+    // few minutes can cover half the pitch, and a long bright snake weaving through
+    // the dim web reads (especially on small screens) as several lines drawing at
+    // once. A short streak is unambiguous whatever the player's work rate.
+    var TAIL = 240;    // seconds of trail kept bright behind the ball
+    var TAIL_LEN = 28; // max bright path length (SVG units; ~quarter pitch)
     function setIdx(v) {
       var P = state.P;
       if (P.length < 2) return;
@@ -1816,9 +1821,14 @@
         lenOld = state.cum[j] + (state.cum[j + 1] - state.cum[j]) * Math.max(0, Math.min(1, f));
       }
       lenOld = Math.min(lenOld, pos.len);
+      if (pos.len - lenOld > TAIL_LEN) lenOld = pos.len - TAIL_LEN;
       var tail = pos.len - lenOld;
+      // Bright window [lenOld, pos.len] via dash=tail, gap=total. The naive offset
+      // (tail - pos.len) is negative, which some WebKit/iOS versions mis-render as
+      // repeated dash fragments — shift by one full period (tail + total) to get the
+      // same window with a strictly positive offset.
       trailEl.setAttribute("stroke-dasharray", tail.toFixed(2) + " " + state.total.toFixed(2));
-      trailEl.setAttribute("stroke-dashoffset", (tail - pos.len).toFixed(2));
+      trailEl.setAttribute("stroke-dashoffset", (tail + state.total - lenOld).toFixed(2));
       trailOldEl.setAttribute("stroke-dasharray", lenOld.toFixed(2) + " " + state.total.toFixed(2));
       trailOldEl.setAttribute("stroke-dashoffset", "0");
       minLab.textContent = Math.floor(pos.t / 60) + "'";
