@@ -67,7 +67,8 @@ jobs:
             wc2026_dashboard/shots.js \
             wc2026_dashboard/matches_detail \
             wc2026_dashboard/database \
-            wc2026_dashboard/player_lab
+            wc2026_dashboard/player_lab \
+            wc2026_dashboard/share
 
           # Decide whether regeneration changed anything beyond the wall-clock build
           # stamp. data.js and database/manifest.js embed a "generated" timestamp that
