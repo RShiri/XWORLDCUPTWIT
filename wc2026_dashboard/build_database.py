@@ -182,6 +182,9 @@ def main(edition=2026):
     standings = list(standings_rows(data))
     player_match = list(build_players.per_match_rows())
     players = build_players.aggregate()
+    for r in players:  # CSV/sqlite cell, not a JSON array
+        if isinstance(r.get("posList"), list):
+            r["posList"] = "/".join(r["posList"])
 
     counts = {
         "results.csv": _write_csv("results.csv", results),

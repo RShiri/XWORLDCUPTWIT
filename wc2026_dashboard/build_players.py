@@ -55,7 +55,7 @@ def _sum_stat(stats, key):
 
 
 def _new_player(pid, name, team, pos):
-    rec = dict(pid=pid, name=name, team=team, pos=pos,
+    rec = dict(pid=pid, name=name, team=team, pos=pos, _posCounts={},
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
                progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0, blocks=0, clrBox=0)
@@ -205,6 +205,12 @@ def aggregate():
                 rec = players.get(pid)
                 if rec is None:
                     rec = players[pid] = _new_player(pid, ascii_name(p.get("name", "")), team, p.get("position", ""))
+                # Position history: count every REAL position played (lineup slot says
+                # "Sub" for bench appearances — that's not a position). The modal one
+                # becomes `pos`; the full list ships as `posList` for the Best XI.
+                _pm = (p.get("position") or "").strip()
+                if _pm and _pm != "Sub":
+                    rec["_posCounts"][_pm] = rec["_posCounts"].get(_pm, 0) + 1
                 # on-pitch window: [start, end] in minutes
                 start = 0 if started else on_m
                 end = ex["off_min"].get(pid) if ex["off_min"].get(pid) is not None else ex["end_min"]
@@ -243,6 +249,13 @@ def aggregate():
     out = []
     for rec in players.values():
         r = dict(rec)
+        pc = r.pop("_posCounts", None) or {}
+        if pc:
+            ordered = sorted(pc.items(), key=lambda kv: (-kv[1], kv[0]))
+            r["pos"] = ordered[0][0]                 # most-played real position
+            r["posList"] = [k for k, _ in ordered]   # every position played, most-used first
+        else:
+            r["posList"] = [r["pos"]] if r.get("pos") else []
         r["ga"] = r["g"] + r["a"]
         r["rating"] = round(r["rating_sum"] / r["rating_n"], 2) if r["rating_n"] else None
         r["rating_best"] = round(r["rating_best"], 2) if r["rating_best"] else None

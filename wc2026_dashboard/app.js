@@ -3806,7 +3806,8 @@
   /* ======================= AWARDS ======================= */
   /* Individual honours from the players.js aggregates. Golden Glove & Golden Ball use
      minute floors so a one-cameo wonder can't top the table; Boot/Playmaker follow the
-     FIFA tiebreak rules. Best XI is position-aware (WhoScored role codes → 4-3-3 slots). */
+     FIFA tiebreak rules. Best XI is position-aware (WhoScored role codes → 4-3-3 slots,
+     using every position a player occupied this tournament + realistic stretches). */
   function renderAwards() {
     var host = document.getElementById("awardCards");
     if (!host || !PLAYERS.length) return;
@@ -3898,20 +3899,55 @@
                ((b.rating_best || 0) - (a.rating_best || 0)) ||
                ((b.mins || 0) - (a.mins || 0));
       });
-    var used = {};
-    function take(roles, n) {
-      var out = [];
-      for (var i = 0; i < pool.length && out.length < n; i++) {
-        var p = pool[i];
-        if (used[p.pid] || roles.indexOf((p.pos || "").toUpperCase()) < 0) continue;
-        used[p.pid] = 1; out.push(p);
+    // Slot model. Each 4-3-3 slot lists the role codes that natively play there
+    // ("primary") plus the stretches a coach would actually make ("alt") — a second
+    // striker shifted wide, wingers swapping flanks, a wing-back covering full-back.
+    // Players are placed best-score-first into the most natural free slot, considering
+    // EVERY position they occupied this tournament (posList, most-played first), so
+    // e.g. Mbappe/Haaland (both FW) join Messi in the front line instead of being
+    // locked out of the XI by the single ST slot.
+    // Defensive slots take natural defenders only (no attacker may cascade into the
+    // back line), and one midfield seat is reserved for a holding player so three
+    // attacking mids cannot squeeze the pivot out of the XI.
+    var SLOTS = [
+      { id: "gk", primary: ["GK"], alt: [] },
+      { id: "lb", primary: ["DL", "DML"], alt: [] },
+      { id: "cb", primary: ["DC"], alt: [] },
+      { id: "rb", primary: ["DR", "DMR"], alt: [] },
+      { id: "dm", primary: ["DMC"], alt: ["MC", "DML", "DMR"] },
+      { id: "cm", primary: ["MC", "AMC"], alt: ["DMC", "ML", "MR"] },
+      { id: "lw", primary: ["AML", "FWL"], alt: ["FW", "AMR", "FWR", "ML"] },
+      { id: "st", primary: ["FW"], alt: ["AMC", "AML", "AMR", "FWL", "FWR"] },
+      { id: "rw", primary: ["AMR", "FWR"], alt: ["FW", "AML", "FWL", "MR"] },
+    ];
+    var CAP = { gk: 1, lb: 1, cb: 2, rb: 1, dm: 1, cm: 2, lw: 1, st: 1, rw: 1 };
+    var used = {}, placed = {}, total = 0;
+    SLOTS.forEach(function (s) { placed[s.id] = []; });
+    pool.forEach(function (p) {
+      if (total >= 11) return;
+      var roles = (p.posList && p.posList.length ? p.posList : [p.pos || ""])
+        .map(function (r) { return String(r).toUpperCase(); });
+      // Slot preference: for each role in most-played order, its primary slots first;
+      // then the alt stretches, again in most-played role order.
+      var pref = [];
+      ["primary", "alt"].forEach(function (tier) {
+        roles.forEach(function (r) {
+          SLOTS.forEach(function (s) {
+            if (s[tier].indexOf(r) >= 0 && pref.indexOf(s.id) < 0) pref.push(s.id);
+          });
+        });
+      });
+      for (var j = 0; j < pref.length; j++) {
+        var sid = pref[j];
+        if (placed[sid].length < CAP[sid]) {
+          placed[sid].push(p); used[p.pid] = 1; total++; break;
+        }
       }
-      return out;
-    }
-    var gk = take(["GK"], 1);
-    var lb = take(["DL", "DML"], 1), cbs = take(["DC"], 2), rb = take(["DR", "DMR"], 1);
-    var mid = take(["DMC", "MC", "AMC", "ML", "MR", "DML", "DMR"], 3);
-    var lw = take(["AML", "FWL", "ML"], 1), st = take(["FW", "AMC"], 1), rw = take(["AMR", "FWR", "MR"], 1);
+    });
+    var gk = placed.gk, lb = placed.lb, cbs = placed.cb, rb = placed.rb,
+        lw = placed.lw, st = placed.st, rw = placed.rw,
+        // middle row: the holding player sits between the two CMs
+        mid = [placed.cm[0], placed.dm[0], placed.cm[1]].filter(Boolean);
     // Backfill any unfilled slot with the best remaining outfielder so the XI is always 11.
     function fill(arr, n) {
       for (var i = 0; i < pool.length && arr.length < n; i++) {
@@ -3938,7 +3974,9 @@
     lines.forEach(function (line, li) {
       line.forEach(function (p, i) {
         var x = W * (i + 1) / (line.length + 1), y = rowY[li];
-        var tip = p.name + " (" + p.team + ") · " + p.pos + " · rating " + p.rating.toFixed(2) +
+        var tip = p.name + " (" + p.team + ") · " +
+          ((p.posList && p.posList.length ? p.posList.slice(0, 3).join("/") : p.pos) || "?") +
+          " · rating " + p.rating.toFixed(2) +
           " · " + p.g + "G " + (p.a || 0) + "A · " + p.mins + "′ · run: " +
           (deep[p.team] ? runName[deep[p.team]] : "Group stage");
         svg.push('<g class="axi-node"><title>' + esc(tip) + "</title>" +
