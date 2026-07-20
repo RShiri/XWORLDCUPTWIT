@@ -1137,6 +1137,19 @@
   var playerSort = { key: "ga", dir: -1 };
   var playerPreset = "ga";
 
+  // Counting stats that make sense normalised per 90 minutes (averages/percentages don't).
+  var PER90_KEYS = { g: 1, a: 1, ga: 1, xg: 1, xg_diff: 1, shots: 1, sot: 1,
+    keyPasses: 1, passes: 1, tackles: 1, interceptions: 1 };
+
+  // WhoScored position codes → coarse groups (DMC/DML/DMR are midfielders, not defenders).
+  function posGroup(pos) {
+    if (!pos) return "";
+    if (pos === "GK" || pos === "Sub") return pos;
+    if (/^D[CLR]/.test(pos)) return "DF";
+    if (/^(DM|M|AM)/.test(pos)) return "MF";
+    return "FW";
+  }
+
   function renderPlayerLeaders() {
     function top(key, label, fmt) {
       var arr = PLAYERS.filter(function (p) { return p[key] != null; })
@@ -1157,6 +1170,16 @@
   function renderPlayersTable() {
     var q = (document.getElementById("playerSearch").value || "").toLowerCase().trim();
     var team = document.getElementById("playerTeam").value;
+    var pos = (document.getElementById("playerPos") || {}).value || "";
+    var minMins = +((document.getElementById("playerMin") || {}).value || 0);
+    var per90 = !!(document.getElementById("playerPer90") || {}).checked;
+    // Effective value of a stat: per-90 normalised when the toggle is on and the
+    // stat is a counting stat (null when the player has no minutes to divide by).
+    function pval(p, k) {
+      var v = p[k];
+      if (v == null || !per90 || !PER90_KEYS[k]) return v;
+      return p.mins > 0 ? v * 90 / p.mins : null;
+    }
     var cols = [
       ["name", "Player", "t"], ["team", "Team", "tm"], ["pos", "Pos", "s"],
       ["mp", "MP", "i"], ["mins", "Min", "i"], ["g", "G", "i"], ["a", "A", "i"], ["ga", "G+A", "i"],
@@ -1165,34 +1188,43 @@
       ["tackles", "Tkl", "i"], ["interceptions", "Int", "i"], ["yc", "Y", "i"], ["rc", "R", "i"],
       ["rating", "Rt", "f"],
     ];
-    var rows = PLAYERS.filter(function (p) {
+    var filtered = PLAYERS.filter(function (p) {
       if (team && p.team !== team) return false;
+      if (pos && posGroup(p.pos) !== pos) return false;
+      if (minMins && (p.mins || 0) < minMins) return false;
       if (q && p.name.toLowerCase().indexOf(q) < 0) return false;
       return true;
-    }).sort(function (a, b) {
+    });
+    var rows = filtered.sort(function (a, b) {
       var k = playerSort.key;
       if (k === "name" || k === "team" || k === "pos")
         return playerSort.dir * String(a[k]).localeCompare(String(b[k]));
-      return playerSort.dir * ((a[k] || 0) - (b[k] || 0));
+      return playerSort.dir * ((pval(a, k) || 0) - (pval(b, k) || 0));
     }).slice(0, 300);
+    var cnt = document.getElementById("playerCount");
+    if (cnt) cnt.textContent = filtered.length + " of " + PLAYERS.length + " players" +
+      (rows.length < filtered.length ? " · top " + rows.length + " shown" : "");
 
     function cell(p, c) {
-      var k = c[0], v = p[k];
+      var k = c[0];
       if (k === "name") return '<td class="team"><span class="nm">' + esc(p.name) + "</span></td>";
       if (k === "team") return '<td class="team"><div class="team-cell">' + logoImg(p.team) +
         '<span class="nm">' + esc(p.team) + "</span></div></td>";
       if (k === "pos") return "<td>" + esc(p.pos || "") + "</td>";
+      var v = pval(p, k);
       if (v == null) return "<td>–</td>";
-      if (c[2] === "f") v = (+v).toFixed(2);
+      var n = +v;
+      if (c[2] === "f" || (per90 && PER90_KEYS[k])) v = n.toFixed(2);
       else if (c[2] === "pc") v = v + "%";
-      var cls = (k === "xg_diff") ? (p.xg_diff > 0.05 ? "delta pos" : p.xg_diff < -0.05 ? "delta neg" : "") : "";
-      var disp = (k === "xg_diff" && p.xg_diff > 0 ? "+" : "") + v;
+      var cls = (k === "xg_diff") ? (n > 0.05 ? "delta pos" : n < -0.05 ? "delta neg" : "") : "";
+      var disp = (k === "xg_diff" && n > 0 ? "+" : "") + v;
       return "<td>" + (cls ? '<span class="' + cls + '">' + disp + "</span>" : disp) + "</td>";
     }
     var head = cols.map(function (c) {
       var arr = playerSort.key === c[0] ? (playerSort.dir < 0 ? " ▼" : " ▲") : "";
+      var lbl = c[1] + (per90 && PER90_KEYS[c[0]] ? "/90" : "");
       return '<th class="' + (c[2] === "t" || c[2] === "tm" ? "team" : "") + '" data-k="' + c[0] + '">' +
-        c[1] + '<span class="arr">' + arr + "</span></th>";
+        lbl + '<span class="arr">' + arr + "</span></th>";
     }).join("");
     var body = rows.map(function (p) {
       return "<tr>" + cols.map(function (c) { return cell(p, c); }).join("") + "</tr>";
@@ -1223,6 +1255,10 @@
     });
     sel.addEventListener("change", renderPlayersTable);
     document.getElementById("playerSearch").addEventListener("input", renderPlayersTable);
+    ["playerPos", "playerMin", "playerPer90"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("change", renderPlayersTable);
+    });
     document.querySelectorAll("#playerPresets .seg-btn").forEach(function (b) {
       b.addEventListener("click", function () {
         document.querySelectorAll("#playerPresets .seg-btn").forEach(function (x) { x.classList.remove("active"); });
