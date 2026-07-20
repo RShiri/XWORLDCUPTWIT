@@ -30,6 +30,12 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 - Data sources merge per match JSON in `wc2026/matches/<id>.json`: FotMob = match
   stats/xG/venue; WhoScored = event stream (shots/passes/dribbles) + player ratings;
   SofaScore = stats/xG/lineups (no token).
+- **WhoScored extras** (since 2026-07-20): `build_match_json` also keeps formations
+  (slimmed to name/captain/minute window per side), `manager` per side and
+  `wc_metadata.referee`; the Match Centre shows them (formation chip + manager in
+  lineups, referee in the scoreboard meta) and hides them when absent. Matches scraped
+  earlier lack the fields — backfill with `py tools/backfill_ws_extras.py` on the
+  scrape PC (WhoScored is unreachable from cloud hosts).
 - **⚠️ OWNER REQUIREMENT — multi-source averaging (see [`DATA_SOURCES.md`](DATA_SOURCES.md)):**
   every match must be scraped from **all three** (FotMob + WhoScored + SofaScore) and the
   **overlapping numeric stats averaged** into the canonical "ultimate" value shown on the

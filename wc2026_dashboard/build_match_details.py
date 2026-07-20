@@ -175,6 +175,7 @@ def _lineup(side, ex):
         else:
             mins = 0
         entry = {
+            "pid": pid,
             "num": p.get("shirtNo"),
             "name": ascii_name(p.get("name", "")),
             "pos": p.get("position", ""),
@@ -696,6 +697,11 @@ def extract(match_data):
         "date": mid_date,
         "venue": meta.get("venue", ""),
         "stage": resolve_stage(EDITION, meta.get("stage", ""), mid_date),
+        # WhoScored extras — present only on matches scraped after 2026-07-20 (or
+        # backfilled with tools/backfill_ws_extras.py); the page hides them if empty.
+        "referee": meta.get("referee", ""),
+        "managers": {"home": home.get("manager", ""), "away": away.get("manager", "")},
+        "formations": {"home": home.get("formations") or [], "away": away.get("formations") or []},
         "fotXg": fot_xg,
         "maxMin": max_min,
         "shots": shots,

@@ -3888,7 +3888,14 @@
       });
     });
     var DEEP_BONUS = 0.15;   // per knockout round reached
-    function xiScore(p) { return p.rating + DEEP_BONUS * (deep[p.team] || 0); }
+    // Keepers: average match rating rewards SAVE VOLUME, so keepers of dominant
+    // deep-run sides (little to do) rate below busy keepers on eliminated teams.
+    // Counting the run double for the GK slot corrects that skew — a Team of the
+    // Tournament keeper should have survived deep, not just faced many shots.
+    function xiScore(p) {
+      var w = p.pos === "GK" ? 2 : 1;
+      return p.rating + w * DEEP_BONUS * (deep[p.team] || 0);
+    }
     // Equal scores are common (same avg rating, same team run — e.g. two team-mates at
     // 7.16). Don't let players.js array order decide the shirt: break ties on tournament
     // peak rating, then on minutes played — at the same average, the bigger body of

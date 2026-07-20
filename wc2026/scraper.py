@@ -1183,6 +1183,33 @@ def has_whoscored_stream(match_json: dict) -> bool:
 # BUILD WC2026 MATCH JSON
 # ══════════════════════════════════════════════════════════════════════════
 
+def extract_ws_extras(ws_data: dict) -> dict:
+    """Pull the extra WhoScored fields the match schema keeps beyond the event
+    stream and players: formations (slimmed to shape name, captain and minute
+    window — full slot/jersey maps stay dropped), manager names and the referee.
+    Shared by build_match_json and tools/backfill_ws_extras.py."""
+    def _slim_formations(side_obj):
+        out = []
+        for f in (side_obj or {}).get("formations", []) or []:
+            out.append({
+                "name":    f.get("formationName", ""),
+                "captain": f.get("captainPlayerId"),
+                "start":   f.get("startMinuteExpanded", 0),
+                "end":     f.get("endMinuteExpanded"),
+            })
+        return out
+    ref = (ws_data or {}).get("referee") or {}
+    return {
+        "home_formations": _slim_formations((ws_data or {}).get("home")),
+        "away_formations": _slim_formations((ws_data or {}).get("away")),
+        "home_manager": ((ws_data or {}).get("home", {}) or {}).get("managerName", "") or "",
+        "away_manager": ((ws_data or {}).get("away", {}) or {}).get("managerName", "") or "",
+        "referee": (ref.get("name")
+                    or " ".join(x for x in (ref.get("firstName"), ref.get("lastName")) if x)
+                    or "").strip(),
+    }
+
+
 def build_match_json(fm_data: dict, ws_data: dict | None,
                      xml_match: dict | None = None) -> dict:
     """
@@ -1350,6 +1377,16 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
         if pid:
             pid_name[str(pid)] = p.get("name", "")
 
+    # ── WhoScored extras: formations / managers / referee ────────────────────
+    # Carried through since 2026-07 (older files lack them — tools/backfill_ws_extras.py
+    # patches history).
+    extras = extract_ws_extras(ws_data) if (ws_data and ws_data.get("events")) else {}
+    home_formations = extras.get("home_formations", [])
+    away_formations = extras.get("away_formations", [])
+    home_manager    = extras.get("home_manager", "")
+    away_manager    = extras.get("away_manager", "")
+    referee_name    = extras.get("referee", "")
+
     return {
         "matchId":  general.get("matchId", 0),
         "wc_metadata": {
@@ -1360,6 +1397,7 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             "country":    venue_info.get("country", "United States"),
             "date":       date_str,
             "attendance": general.get("attendance"),
+            "referee":    referee_name,
         },
         "home": {
             "teamId":  home_tid,
@@ -1369,6 +1407,8 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             "players": home_players,
             "stats":   {},
             "field":   "home",
+            "manager":    home_manager,
+            "formations": home_formations,
         },
         "away": {
             "teamId":  away_tid,
@@ -1378,6 +1418,8 @@ def build_match_json(fm_data: dict, ws_data: dict | None,
             "players": away_players,
             "stats":   {},
             "field":   "away",
+            "manager":    away_manager,
+            "formations": away_formations,
         },
         "events":      events,
         "match_stats": match_stats,

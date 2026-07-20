@@ -642,7 +642,8 @@
         '<div class="sb-team away">' + logoImg(D.away.name) + '<span class="nm">' + esc(D.away.name) + "</span></div>" +
       "</div>" + xgTxt +
       '<div class="sb-meta">' + esc(D.stage || "") + (D.venue ? " · " + esc(D.venue) : "") +
-        (D.date ? " · " + esc(D.date) : "") + "</div>" +
+        (D.date ? " · " + esc(D.date) : "") +
+        (D.referee ? " · Referee: " + esc(D.referee) : "") + "</div>" +
       (goals ? '<div class="timeline">' + goals + "</div>" : "") +
       "</div>";
   }
@@ -1918,22 +1919,34 @@
       if (p.rc) b += ' <span class="cardm rc"></span>';
       return b;
     }
-    function li(p) {
+    function li(p, capPid) {
       var rt = p.rating != null
         ? '<span class="rt" style="background:' + ratingColor(p.rating) + '">' + p.rating.toFixed(1) + "</span>"
         : '<span class="rt none">–</span>';
       var mins = p.mins != null ? '<span class="mins">' + p.mins + "'</span>" : "";
+      var cap = capPid != null && p.pid === capPid ? ' <span class="cap">©</span>' : "";
       return "<li><span class='no'>" + (p.num == null ? "" : p.num) + "</span>" +
-        "<span class='pname'>" + (p.motm ? "<span class='star'>★</span> " : "") + esc(p.name) +
+        "<span class='pname'>" + (p.motm ? "<span class='star'>★</span> " : "") + esc(p.name) + cap +
         "<span class='pos'>" + esc(p.pos) + "</span></span>" +
         "<span class='badges'>" + badges(p) + "</span>" + mins + rt + "</li>";
     }
     function card(side, data) {
       var name = side === "home" ? D.home.name : D.away.name;
+      // WhoScored extras (present on matches scraped after 2026-07-20 / backfilled):
+      // formation + in-match shape changes, manager, captain armband.
+      var fs = (D.formations && D.formations[side]) || [];
+      var shape = fs.map(function (f, i) {
+        return i ? esc(f.name) + " (" + (f.start || 0) + "′)" : esc(f.name);
+      }).join(" → ");
+      var man = (D.managers && D.managers[side]) || "";
+      var capPid = fs.length ? fs[0].captain : null;
+      function row(p) { return li(p, capPid); }
       return '<div class="lineup-card"><h4>' + esc(name) +
-        '<span class="lh">Min · G/A · Rating</span></h4><ul>' +
-        data.starters.map(li).join("") +
-        (data.subs.length ? '<li class="subhdr">Substitutes used</li>' + data.subs.map(li).join("") : "") +
+        (shape ? ' <span class="frm">' + shape + "</span>" : "") +
+        '<span class="lh">Min · G/A · Rating</span></h4>' +
+        (man ? '<div class="mgr">Manager: ' + esc(man) + "</div>" : "") + "<ul>" +
+        data.starters.map(row).join("") +
+        (data.subs.length ? '<li class="subhdr">Substitutes used</li>' + data.subs.map(row).join("") : "") +
         "</ul></div>";
     }
     document.getElementById("mv-lineups").innerHTML =
