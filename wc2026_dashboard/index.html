@@ -221,7 +221,7 @@
       <select id="playerNorm" title="Normalise counting stats by minutes played">
         <option value="0">Totals</option>
         <option value="90">Per 90 mins</option>
-        <option value="95">Per avg game (95′)</option>
+        <option value="97">Per avg game (97′)</option>
       </select>
       <button id="playerColsBtn" class="ctl-chk" type="button"
               title="Choose which stat columns to show">⚙ Columns</button>
@@ -233,8 +233,10 @@
     </div>
     <p class="hint" style="margin-top:10px">Min. = minutes · Rt = average match rating · xG±= goals minus xG (finishing).
        Use the minutes filter to drop small-sample players, the normaliser to show counting stats
-       <b>per 90′</b> or <b>per average game (95′)</b>, and <b>⚙ Columns</b> to enable extra stats —
-       keeper saves &amp; goals prevented, xA, progressive passes, dribbles, aerials, blocks and more
+       <b>per 90′</b> or <b>per average game (97′</b> — the measured median of this tournament's
+       regulation games incl. stoppage<b>)</b>, and <b>⚙ Columns</b> to enable extra stats —
+       keeper saves, goals prevented &amp; high claims, xA, progressive passes, dribble/tackle/aerial
+       volumes and success rates, recoveries, blocks, errors, woodwork hits and more
        (hover a column header for its meaning). Only games with player-level data are counted.</p>
 
     <h2 style="margin:30px 0 4px;font-size:20px">Leaderboards</h2>

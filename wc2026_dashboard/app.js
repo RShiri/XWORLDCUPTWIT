@@ -1148,19 +1148,34 @@
       ["ga", "G+A", "i", 1, 1, "Goals + assists"], ["xg", "xG", "f", 1, 1, "Expected goals"],
       ["xg_diff", "xG±", "f", 1, 1, "Finishing (goals − xG)"], ["xa", "xA", "f", 1, 0, "Expected assists"],
       ["shots", "Sh", "i", 1, 1, "Shots"], ["sot", "SoT", "i", 1, 1, "Shots on target"],
-      ["dribbles", "Drb", "i", 1, 0, "Dribbles completed"] ] },
+      ["post", "Post", "i", 1, 0, "Shots off the woodwork"],
+      ["dribbles", "Drb", "i", 1, 0, "Dribbles completed"],
+      ["drbAtt", "DrbA", "i", 1, 0, "Dribbles attempted"],
+      ["drb_pct", "Drb%", "pc", 0, 0, "Dribble success rate"],
+      ["offsides", "Off", "i", 1, 0, "Offsides"] ] },
     { name: "Passing", cols: [
       ["keyPasses", "KP", "i", 1, 1, "Key passes"], ["passes", "Pass", "i", 1, 1, "Passes"],
       ["pass_pct", "Pass%", "pc", 0, 1, "Pass accuracy"],
       ["progPasses", "PrgP", "i", 1, 0, "Progressive passes"],
+      ["corners", "Cor", "i", 1, 0, "Corners taken"],
       ["touches", "Tch", "i", 1, 0, "Touches"] ] },
     { name: "Defending", cols: [
-      ["tackles", "Tkl", "i", 1, 1, "Tackles"], ["interceptions", "Int", "i", 1, 1, "Interceptions"],
+      ["tackles", "Tkl", "i", 1, 1, "Tackles"],
+      ["tklWon", "TklW", "i", 1, 0, "Tackles won"],
+      ["tkl_pct", "Tkl%", "pc", 0, 0, "Tackle success rate"],
+      ["interceptions", "Int", "i", 1, 1, "Interceptions"],
+      ["recoveries", "Rec", "i", 1, 0, "Loose-ball recoveries"],
       ["clearances", "Clr", "i", 1, 0, "Clearances"], ["clrBox", "BoxClr", "i", 1, 0, "Clearances in own box"],
-      ["blocks", "Blk", "i", 1, 0, "Shots blocked"], ["aerials", "AerW", "i", 1, 0, "Aerial duels won"],
+      ["blocks", "Blk", "i", 1, 0, "Shots blocked"],
+      ["drbPast", "DrbdP", "i", 1, 0, "Times dribbled past"],
+      ["aerials", "AerW", "i", 1, 0, "Aerial duels won"],
+      ["aerTot", "AerT", "i", 1, 0, "Aerial duels contested"],
+      ["aer_pct", "Aer%", "pc", 0, 0, "Aerial duel win rate"],
+      ["errors", "Err", "i", 1, 0, "Errors leading to a shot or goal"],
       ["fouls", "Fls", "i", 1, 0, "Fouls committed"], ["dispossessed", "Disp", "i", 1, 0, "Dispossessed"] ] },
     { name: "Goalkeeping / on-pitch defence", cols: [
       ["saves", "Saves", "i", 1, 0, "Keeper saves"],
+      ["claims", "Claim", "i", 1, 0, "High balls claimed"],
       ["gPrev", "GPrv", "f", 1, 0, "Goals prevented (xG faced − conceded)"],
       ["xga", "xGA", "f", 1, 0, "xG faced while on pitch"],
       ["gConcOn", "GAon", "i", 1, 0, "Goals conceded while on pitch"] ] },
@@ -1217,8 +1232,10 @@
     var team = document.getElementById("playerTeam").value;
     var pos = (document.getElementById("playerPos") || {}).value || "";
     var minMins = +((document.getElementById("playerMin") || {}).value || 0);
-    // Normaliser: 0 = raw totals, 90 = per 90′, 95 = per average game (WC games run
-    // ~95′ with stoppage). Applies to counting stats only (null with no minutes).
+    // Normaliser: 0 = raw totals, 90 = per 90′, 97 = per average game — measured from
+    // our event data: regulation games average 96.8′ (median 97′) with stoppage; the
+    // all-games average is 99′ but that's skewed by ten 120′+ extra-time ties.
+    // Applies to counting stats only (null with no minutes).
     var norm = +((document.getElementById("playerNorm") || {}).value || 0);
     function pval(p, k) {
       var v = p[k];

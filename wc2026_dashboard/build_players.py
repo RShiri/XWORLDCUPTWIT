@@ -43,6 +43,11 @@ SUM_STATS = {
     "tacklesTotal": "tackles", "interceptions": "interceptions", "aerialsWon": "aerials",
     "dribblesWon": "dribbles", "foulsCommited": "fouls", "clearances": "clearances",
     "dispossessed": "dispossessed", "totalSaves": "saves",
+    # extended set (players-table ⚙ Columns extras)
+    "dribblesAttempted": "drbAtt", "dribbledPast": "drbPast",
+    "aerialsTotal": "aerTot", "tackleSuccessful": "tklWon",
+    "errors": "errors", "offsidesCaught": "offsides",
+    "cornersTotal": "corners", "shotsOnPost": "post", "claimsHigh": "claims",
 }
 
 
@@ -58,7 +63,8 @@ def _new_player(pid, name, team, pos):
     rec = dict(pid=pid, name=name, team=team, pos=pos, _posCounts={},
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
-               progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0, blocks=0, clrBox=0)
+               progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0, blocks=0, clrBox=0,
+               recoveries=0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -148,6 +154,18 @@ def _player_blocks_clears(match_data):
     return blocks, clr
 
 
+def _player_recoveries(match_data):
+    """playerId -> loose-ball recoveries (`BallRecovery` events)."""
+    rec = {}
+    for ev in match_data.get("events", []):
+        t = ev.get("type", {})
+        tn = t.get("displayName") if isinstance(t, dict) else ""
+        pid = ev.get("playerId")
+        if tn == "BallRecovery" and pid is not None and not is_shootout(ev):
+            rec[pid] = rec.get(pid, 0) + 1
+    return rec
+
+
 def _defense_shotlist(match_data):
     """[(teamId, minute, xg, is_goal, is_own)] for every shot (shootout excluded).
 
@@ -188,6 +206,7 @@ def aggregate():
         prog_map, _ = _player_creation(d)
         xa_map = player_xa_from_events(d)  # pass-level xA model (xg_core)
         blk_map, clrbox_map = _player_blocks_clears(d)
+        recov_map = _player_recoveries(d)
         shotlist = _defense_shotlist(d)
         team_ids = {s: d[s].get("teamId") for s in ("home", "away")}
         for side in ("home", "away"):
@@ -238,6 +257,7 @@ def aggregate():
                 rec["xa"] += xa_map.get(pid, 0.0)
                 rec["blocks"] += blk_map.get(pid, 0)
                 rec["clrBox"] += clrbox_map.get(pid, 0)
+                rec["recoveries"] += recov_map.get(pid, 0)
                 rt = _player_rating(p)
                 if rt is not None:
                     rec["rating_sum"] += rt
@@ -267,8 +287,13 @@ def aggregate():
         r["xga"] = round(r["xgaOn"], 2)
         r["xga90"] = round(r["xgaOn"] / r["mins"] * 90, 2) if r["mins"] else None
         r["gPrev"] = round(r["xgaOn"] - r["gConcOn"], 2)
-        for v in list(SUM_STATS.values()) + ["mins", "progPasses", "gConcOn", "blocks", "clrBox"]:
+        for v in list(SUM_STATS.values()) + ["mins", "progPasses", "gConcOn", "blocks",
+                                             "clrBox", "recoveries"]:
             r[v] = int(round(r[v]))
+        # success rates from the extended counts (None when never attempted)
+        r["drb_pct"] = round(100 * r["dribbles"] / r["drbAtt"]) if r["drbAtt"] else None
+        r["tkl_pct"] = round(100 * r["tklWon"] / r["tackles"]) if r["tackles"] else None
+        r["aer_pct"] = round(100 * r["aerials"] / r["aerTot"]) if r["aerTot"] else None
         r.pop("rating_sum", None)
         r.pop("rating_n", None)
         r.pop("xgaOn", None)
