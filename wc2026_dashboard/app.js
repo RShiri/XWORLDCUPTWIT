@@ -4201,7 +4201,9 @@
       // availability damps INSIDE each component, so the leader panels can't be
       // topped by a 300-minute hot streak the final index would never reward
       var avail = Math.sqrt(Math.min(1, p.mins / 600));
-      c.att = (0.5 * zb(gn, "g", pid, 0.3) + 0.3 * zb(gn, "xg", pid, 0.3) + 0.2 * zb(gn, "xgd", pid, 0.3)) * avail;
+      // Goal threat is ABSOLUTE (pure whole-pool z): a goal is a goal whoever scores
+      // it — positional fairness lives in the other components instead
+      c.att = (0.5 * zb(gn, "g", pid, 0) + 0.3 * zb(gn, "xg", pid, 0) + 0.2 * zb(gn, "xgd", pid, 0)) * avail;
       c.cre = (0.4 * zb(gn, "a", pid, 0.5) + 0.3 * zb(gn, "xa", pid, 0.5) + 0.3 * zb(gn, "kp", pid, 0.5)) * avail;
       c.pro = (0.5 * z.prog[pid] + 0.3 * z.drb[pid] + 0.2 * z.pp[pid]) * avail;
       // outfield defence: volume of actions + QUALITY (xG faced on pitch, so members of
@@ -4263,7 +4265,7 @@
     document.getElementById("mvpMethod").innerHTML =
       '<ol class="mvp-steps">' +
         "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly). <b>Goals and assists are stage-weighted first</b> — group ×1.0, R32 ×1.15, R16 ×1.3, QF ×1.5, SF ×1.75, final ×2.0 — every round is harder, so every round pays more.</li>" +
-        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat (70%) and Creation (50%) blend in whole-pool z</b> capped at 3.0, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
+        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat uses pure whole-pool z</b> (absolute production — a goal is a goal whoever scores it) and <b>Creation blends 50% whole-pool z</b>, capped at 3.0, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
         "<li>The z-scores combine into <b>six weighted components</b> (below), each damped by <b>availability</b> (×√min(1, minutes/600)) so a short hot streak can't top a panel.</li>" +
         "<li>The weighted sum then gains <b>+0.06 per knockout round reached</b> and loses <b>−0.03 per yellow / −0.10 per red</b>.</li>" +
         "<li>Scaled so the <b>winner = 100</b>. Pool: 270′+ played (" + rows.length + " players).</li>" +
