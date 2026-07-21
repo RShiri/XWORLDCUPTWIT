@@ -914,9 +914,12 @@ span.road-step.pending { display: block; padding: 10px 12px; color: var(--muted)
 .mvp-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
 .mvp-panel h4 { margin: 0 0 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
 .mvp-panel h4 i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
-.mp-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12.5px; }
+.mp-row { display: flex; align-items: center; gap: 7px; padding: 3.5px 0; font-size: 12.5px; }
+.mp-row.winner { background: rgba(61,220,151,0.06); border-radius: 6px; }
 .mp-row.winner .mp-nm { color: var(--accent); font-weight: 700; }
-.mp-nm { flex: 0 0 88px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-rk { flex: 0 0 12px; text-align: right; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.mp-row img.mp-flag { flex: 0 0 17px; width: 17px; height: 12px; object-fit: contain; border-radius: 2px; }
+.mp-nm { flex: 0 0 82px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mp-track { flex: 1; height: 10px; background: rgba(147,160,189,0.12); border-radius: 4px; overflow: hidden; }
 .mp-fill { height: 100%; border-radius: 4px; }
 .mp-val { flex: 0 0 46px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }

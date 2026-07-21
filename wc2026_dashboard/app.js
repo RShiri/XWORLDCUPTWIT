@@ -4317,6 +4317,9 @@
     // ── component leader panels: how it's calculated + top-5 z bars + a distribution
     //    strip of the WHOLE pool on the category's headline raw stat (top 3 highlighted) ──
     var F = M.feats;
+    // Dot-stack histogram: every player is a dot, dots stack in value bins so the
+    // distribution has a visible SHAPE; the top three sit in the component colour
+    // with staggered labels, the dashed line is the tournament average.
     function stripSVG(cc) {
       var sp = cc.strip;
       if (!sp) return "";
@@ -4327,36 +4330,56 @@
       var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
       if (hi - lo < 1e-9) return "";
       var mean = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
-      var W2 = 320, H2 = 92, X0 = 6, X1 = W2 - 6, Y0 = 40, YB = 66;
+      var W2 = 320, H2 = 130, X0 = 10, X1 = W2 - 10, YBASE = 96, YTOP = 42;
       function x(v) { return X0 + (X1 - X0) * (v - lo) / (hi - lo); }
+      var NB = 46, bins = [];
+      for (var bi = 0; bi < NB; bi++) bins.push([]);
+      players.forEach(function (r) {
+        var idx = Math.min(NB - 1, Math.floor((rv(r) - lo) / (hi - lo) * NB));
+        bins[idx].push(r);
+      });
+      var maxStack = Math.max.apply(null, bins.map(function (b) { return b.length; }));
+      var dy = Math.min(5, (YBASE - YTOP) / Math.max(1, maxStack));
       var top3 = players.slice().sort(function (a, b) { return rv(b) - rv(a); }).slice(0, 3);
       var s = ['<svg viewBox="0 0 ' + W2 + " " + H2 + '" class="mp-strip" role="img" aria-label="' +
         esc(cc.name + " distribution") + '">'];
-      s.push('<line x1="' + x(mean).toFixed(1) + '" y1="' + (Y0 - 6) + '" x2="' + x(mean).toFixed(1) +
-        '" y2="' + (YB + 2) + '" stroke="rgba(147,160,189,0.35)" stroke-dasharray="3 3"/>');
-      players.forEach(function (r, i) {
-        if (top3.indexOf(r) >= 0) return;
-        var jy = Y0 + 4 + ((i * 37) % 19);   // deterministic vertical jitter
-        s.push('<circle cx="' + x(rv(r)).toFixed(1) + '" cy="' + jy + '" r="2" fill="rgba(147,160,189,0.28)">' +
-          "<title>" + esc(r.p.name + " · " + rv(r).toFixed(sp.dp)) + "</title></circle>");
-      });
-      top3.forEach(function (r, i) {
-        var cx = x(rv(r)), ly = 10 + i * 11;
-        var lx = Math.min(Math.max(cx, 40), W2 - 40);
-        s.push('<line x1="' + cx.toFixed(1) + '" y1="' + (ly + 3) + '" x2="' + cx.toFixed(1) +
-            '" y2="' + (Y0 + 10) + '" stroke="' + cc.color + '" stroke-opacity="0.35"/>' +
-          '<circle cx="' + cx.toFixed(1) + '" cy="' + (Y0 + 10) + '" r="4.5" fill="' + cc.color +
-            '" stroke="#161d31" stroke-width="2"><title>' + esc(r.p.name + " · " + rv(r).toFixed(sp.dp)) + "</title></circle>" +
-          '<text x="' + lx.toFixed(1) + '" y="' + ly + '" font-size="9.5" fill="#e8edf7" text-anchor="middle" font-weight="600">' +
-            esc(r.p.name.split(" ").slice(-1)[0]) + " " + rv(r).toFixed(sp.dp) + "</text>");
-      });
+      s.push('<line x1="' + X0 + '" y1="' + (YBASE + 4) + '" x2="' + X1 + '" y2="' + (YBASE + 4) +
+        '" stroke="rgba(147,160,189,0.25)"/>');
       var mx2 = x(mean);
-      if (mx2 - X0 > 42)   // skip the min label when the mean hugs the left edge
-        s.push('<text x="' + X0 + '" y="' + (YB + 10) + '" font-size="8.5" fill="#93a0bd">' + lo.toFixed(sp.dp) + "</text>");
-      s.push('<text x="' + mx2.toFixed(1) + '" y="' + (YB + 10) + '" font-size="8.5" fill="#93a0bd" text-anchor="middle">avg ' + mean.toFixed(sp.dp) + "</text>");
-      if (X1 - mx2 > 42)
-        s.push('<text x="' + X1 + '" y="' + (YB + 10) + '" font-size="8.5" fill="#93a0bd" text-anchor="end">' + hi.toFixed(sp.dp) + "</text>");
-      s.push('<text x="' + (W2 / 2) + '" y="' + (H2 - 3) + '" font-size="8.5" fill="#93a0bd" text-anchor="middle">' + esc(sp.label) + "</text>");
+      s.push('<line x1="' + mx2.toFixed(1) + '" y1="' + (YTOP - 8) + '" x2="' + mx2.toFixed(1) +
+        '" y2="' + (YBASE + 4) + '" stroke="rgba(147,160,189,0.4)" stroke-dasharray="3 3"/>');
+      var topPos = [];
+      bins.forEach(function (b, i2) {
+        var cx = X0 + (i2 + 0.5) * (X1 - X0) / NB;
+        // stack biggest values on top so a highlighted leader is never buried
+        b.sort(function (a, bb) { return rv(a) - rv(bb); });
+        b.forEach(function (r, si) {
+          var cy = YBASE - si * dy, ti = top3.indexOf(r);
+          if (ti >= 0) { topPos.push({ r: r, ti: ti, cx: cx, cy: cy }); return; }
+          s.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
+            '" r="2.1" fill="rgba(147,160,189,0.34)"><title>' +
+            esc(r.p.name + " · " + rv(r).toFixed(sp.dp)) + "</title></circle>");
+        });
+      });
+      topPos.sort(function (a, b) { return a.ti - b.ti; });
+      topPos.forEach(function (t) {
+        var ly = 12 + t.ti * 12;
+        var lx = Math.min(Math.max(t.cx, 52), W2 - 52);
+        s.push('<line x1="' + t.cx.toFixed(1) + '" y1="' + (ly + 4) + '" x2="' + t.cx.toFixed(1) +
+            '" y2="' + (t.cy - 4).toFixed(1) + '" stroke="' + cc.color + '" stroke-opacity="0.45"/>' +
+          '<circle cx="' + t.cx.toFixed(1) + '" cy="' + t.cy.toFixed(1) + '" r="4.4" fill="' + cc.color +
+            '" stroke="#161d31" stroke-width="1.8"><title>' +
+            esc(t.r.p.name + " (" + t.r.p.team + ") · " + rv(t.r).toFixed(sp.dp)) + "</title></circle>" +
+          '<text x="' + lx.toFixed(1) + '" y="' + ly + '" font-size="10" fill="#e8edf7" text-anchor="middle" font-weight="700">' +
+            esc(t.r.p.name.split(" ").slice(-1)[0]) +
+            ' <tspan fill="#93a0bd" font-weight="600">' + rv(t.r).toFixed(sp.dp) + "</tspan></text>");
+      });
+      if (mx2 - X0 > 46)
+        s.push('<text x="' + X0 + '" y="' + (YBASE + 16) + '" font-size="9" fill="#93a0bd">' + lo.toFixed(sp.dp) + "</text>");
+      s.push('<text x="' + mx2.toFixed(1) + '" y="' + (YBASE + 16) + '" font-size="9" fill="#93a0bd" text-anchor="middle">avg ' + mean.toFixed(sp.dp) + "</text>");
+      if (X1 - mx2 > 46)
+        s.push('<text x="' + X1 + '" y="' + (YBASE + 16) + '" font-size="9" fill="#93a0bd" text-anchor="end">' + hi.toFixed(sp.dp) + "</text>");
+      s.push('<text x="' + (W2 / 2) + '" y="' + (H2 - 3) + '" font-size="9" fill="#93a0bd" text-anchor="middle">' + esc(sp.label) + "</text>");
       s.push("</svg>");
       return s.join("");
     }
@@ -4369,6 +4392,7 @@
           var pct = Math.max(3, 100 * Math.max(0, r.c[cc.k]) / mx);
           return '<div class="mp-row' + (r === win ? " winner" : "") + '" title="' +
               esc("#" + rank + " " + r.p.name + " · " + cc.name + " " + r.c[cc.k].toFixed(2) + " (z vs " + r.p._mvpGrp + " peers)") + '">' +
+            '<span class="mp-rk">' + rank + "</span>" + logoImg(r.p.team, "mp-flag") +
             '<span class="mp-nm">' + (r === win ? "★ " : "") + esc(r.p.name.split(" ").slice(-1)[0]) + "</span>" +
             '<div class="mp-track"><div class="mp-fill" style="width:' + pct.toFixed(0) + "%;background:" + cc.color + '"></div></div>' +
             '<span class="mp-val">' + (r.c[cc.k] >= 0 ? "+" : "") + r.c[cc.k].toFixed(2) + "</span></div>";
