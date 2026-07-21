@@ -4092,6 +4092,259 @@
     host.innerHTML = svg.join("");
   }
 
+  /* ======================= MVP — all-stats Player of the Tournament =======================
+     One composite "MVP Index" per player, built from every stat players.js carries.
+     Pipeline: per-90 rates → z-scores WITHIN position group (GK/DF/MF/FW, clamped ±2.5 so a
+     defender's two goals can't explode a low-variance distribution) → five weighted
+     components → availability damping + knockout-run bonus − card penalty. Component
+     colours are a CVD-validated categorical set derived from the site palette. */
+  var MVP_COMPS = [
+    { k: "att", name: "Goal threat", color: "#24ad74", w: 0.25,
+      parts: "0.5·goals + 0.3·xG + 0.2·finishing (goals−xG), per 90" },
+    { k: "cre", name: "Creation", color: "#c07f2e", w: 0.25,
+      parts: "0.4·assists + 0.3·xA + 0.3·key passes, per 90" },
+    { k: "pro", name: "Progression", color: "#3a84d9", w: 0.15,
+      parts: "0.5·progressive passes + 0.3·dribbles won, per 90 + 0.2·pass accuracy" },
+    { k: "def", name: "Defensive work", color: "#d94f65", w: 0.15,
+      parts: "0.7·defensive actions (Tkl+Int+Rec+Blk+Clr) per 90 + 0.3·aerial win% — keepers: 0.7·goals prevented + 0.3·saves & claims per 90" },
+    { k: "rat", name: "Judgment", color: "#8a55ee", w: 0.20,
+      parts: "WhoScored average match rating (the eye-test proxy)" },
+  ];
+
+  function mvpCompute() {
+    var pool = PLAYERS.filter(function (p) { return (p.mins || 0) >= 270 && p.rating != null; });
+    if (pool.length < 12) return null;
+    function n(p, k) { return +p[k] || 0; }
+    function p90(p, k) { return n(p, k) * 90 / p.mins; }
+    var feats = {};
+    pool.forEach(function (p) {
+      var defActs = n(p, "tackles") + n(p, "interceptions") + n(p, "recoveries") +
+                    n(p, "blocks") + n(p, "clearances");
+      feats[p.pid] = {
+        g: p90(p, "g"), xg: p90(p, "xg"), xgd: p90(p, "xg_diff"),
+        a: p90(p, "a"), xa: p90(p, "xa"), kp: p90(p, "keyPasses"),
+        prog: p90(p, "progPasses"), drb: p90(p, "dribbles"), pp: n(p, "pass_pct"),
+        da: defActs * 90 / p.mins, aer: n(p, "aer_pct"),
+        gprev: p90(p, "gPrev"), stop: (n(p, "saves") + n(p, "claims")) * 90 / p.mins,
+        rt: p.rating,
+      };
+      var gg = posGroup(p.pos);
+      p._mvpGrp = (gg === "GK" || gg === "DF" || gg === "FW") ? gg : "MF";
+    });
+    // z-scores within position group, clamped to ±2.5
+    var groups = {};
+    pool.forEach(function (p) { (groups[p._mvpGrp] = groups[p._mvpGrp] || []).push(p); });
+    var Z = {};
+    Object.keys(groups).forEach(function (gn) {
+      Z[gn] = {};
+      Object.keys(feats[groups[gn][0].pid]).forEach(function (k) {
+        var vals = groups[gn].map(function (q) { return feats[q.pid][k]; });
+        var m = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+        var sd = Math.sqrt(vals.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / vals.length);
+        Z[gn][k] = {};
+        groups[gn].forEach(function (q) {
+          // soft saturation: outliers damp toward ±2.5 without the fake ties a hard clamp makes
+          Z[gn][k][q.pid] = sd ? 2.5 * Math.tanh(((feats[q.pid][k] - m) / sd) / 2.5) : 0;
+        });
+      });
+    });
+    // knockout-run map (same source as the Best XI deep-run bonus)
+    var deep = {};
+    try {
+      var runIdx = { R32: 1, R16: 2, QF: 3, SF: 4, TP: 4, F: 5 };
+      var K = buildKnockout();
+      if (K) Object.keys(K.rounds).forEach(function (rd) {
+        (K.rounds[rd] || []).forEach(function (m) {
+          if (m.played && m.hs != null)
+            [m.home, m.away].forEach(function (t) { deep[t] = Math.max(deep[t] || 0, runIdx[rd]); });
+          else [0, 1].forEach(function (i) {
+            var s = koSide(K, m, i);
+            if (s.team) deep[s.team] = Math.max(deep[s.team] || 0, runIdx[rd]);
+          });
+        });
+      });
+    } catch (e) {}
+    var rows = pool.map(function (p) {
+      var z = Z[p._mvpGrp], pid = p.pid, c = {};
+      c.att = 0.5 * z.g[pid] + 0.3 * z.xg[pid] + 0.2 * z.xgd[pid];
+      c.cre = 0.4 * z.a[pid] + 0.3 * z.xa[pid] + 0.3 * z.kp[pid];
+      c.pro = 0.5 * z.prog[pid] + 0.3 * z.drb[pid] + 0.2 * z.pp[pid];
+      c.def = p._mvpGrp === "GK" ? 0.7 * z.gprev[pid] + 0.3 * z.stop[pid]
+                                 : 0.7 * z.da[pid] + 0.3 * z.aer[pid];
+      c.rat = z.rt[pid];
+      var base = MVP_COMPS.reduce(function (s, cc) { return s + cc.w * c[cc.k]; }, 0);
+      var avail = Math.sqrt(Math.min(1, p.mins / 600));
+      var ctx = 0.06 * (deep[p.team] || 0);
+      var disc = 0.03 * (p.yc || 0) + 0.10 * (p.rc || 0);
+      return { p: p, c: c, base: base, avail: avail, ctx: ctx, disc: disc,
+               S: base * avail + ctx - disc, run: deep[p.team] || 0 };
+    }).sort(function (a, b) { return b.S - a.S; });
+    var Smax = rows[0].S || 1;
+    rows.forEach(function (r) { r.idx = Math.round(1000 * r.S / Smax) / 10; });
+    return { rows: rows, pool: pool };
+  }
+
+  function mvpPct(rows, key, val) {   // percentile of a component value within the ranked pool
+    var below = 0;
+    rows.forEach(function (r) { if (r.c[key] < val) below++; });
+    return Math.round(100 * below / Math.max(1, rows.length - 1));
+  }
+
+  function renderMVP() {
+    var hero = document.getElementById("mvpHero");
+    if (!hero) return;
+    var M = mvpCompute();
+    if (!M) {
+      document.getElementById("view-mvp").innerHTML +=
+        '<p class="footer-note">Not enough player data for the MVP index yet.</p>';
+      return;
+    }
+    var rows = M.rows, win = rows[0], sec = rows[1];
+    var runName = { 0: "group stage", 1: "Round of 32", 2: "Round of 16", 3: "quarter-final", 4: "semi-final", 5: "final" };
+    function compTip(r) {
+      return MVP_COMPS.map(function (cc) {
+        return cc.name + " " + (r.c[cc.k] >= 0 ? "+" : "") + r.c[cc.k].toFixed(2);
+      }).join(" · ") + " · context +" + r.ctx.toFixed(2) + (r.disc ? " · cards −" + r.disc.toFixed(2) : "");
+    }
+    // ── hero ──
+    var topDecile = MVP_COMPS.filter(function (cc) {
+      return mvpPct(rows, cc.k, win.c[cc.k]) >= 90;
+    }).length;
+    hero.innerHTML =
+      '<div class="mvp-hero">' +
+        '<div class="mvp-crown">🏆 MVP · index 100</div>' +
+        '<div class="mvp-name">' + logoImg(win.p.team) + esc(win.p.name) +
+          ' <span class="mvp-team">' + esc(win.p.team) + " · " + esc(win.p.pos) + "</span></div>" +
+        '<div class="mvp-line">' + win.p.g + " goals · " + (win.p.a || 0) + " assists · " +
+          (win.p.xa || 0).toFixed(1) + " xA · rating " + win.p.rating.toFixed(2) + " · " +
+          win.p.mins + "′ · reached the " + runName[win.run] + "</div>" +
+        '<div class="mvp-verdict">Top <b>decile</b> of the whole 270′+ pool in <b>' + topDecile + " of 5</b> components — " +
+          "the breadth argument: others win single dimensions, nobody else is elite almost everywhere. " +
+          "№2 " + esc(sec.p.name) + " scores <b>" + sec.idx.toFixed(1) + "</b>.</div>" +
+      "</div>";
+    // ── methodology ──
+    document.getElementById("mvpMethod").innerHTML =
+      '<ol class="mvp-steps">' +
+        "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly).</li>" +
+        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\"</li>" +
+        "<li>The z-scores combine into <b>five weighted components</b> (below).</li>" +
+        "<li>The weighted sum is damped by <b>availability</b> (×√min(1, minutes/600)), then <b>+0.06 per knockout round reached</b> and <b>−0.03 per yellow / −0.10 per red</b>.</li>" +
+        "<li>Scaled so the <b>winner = 100</b>. Pool: 270′+ played (" + rows.length + " players).</li>" +
+      "</ol>" +
+      '<div class="mvp-weightbar">' + MVP_COMPS.map(function (cc) {
+        return '<div class="mw-seg" style="flex-basis:' + (cc.w * 100) + '%;background:' + cc.color +
+          '" title="' + esc(cc.name + " " + Math.round(cc.w * 100) + "% — " + cc.parts) + '"><span>' +
+          esc(cc.name) + " " + Math.round(cc.w * 100) + "%</span></div>";
+      }).join("") + "</div>" +
+      '<ul class="mvp-parts">' + MVP_COMPS.map(function (cc) {
+        return '<li><i style="background:' + cc.color + '"></i><b>' + esc(cc.name) + "</b> — " + esc(cc.parts) + "</li>";
+      }).join("") + "</ul>";
+    // ── top 10 bars ──
+    var W = 940, RH = 34, PADL = 190, PADR = 60, H = 10 * RH + 8;
+    var t10 = rows.slice(0, 10);
+    var svg = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Top 10 MVP index">'];
+    [25, 50, 75, 100].forEach(function (gx) {
+      var x = PADL + (W - PADL - PADR) * gx / 100;
+      svg.push('<line x1="' + x + '" y1="2" x2="' + x + '" y2="' + (H - 6) + '" stroke="rgba(147,160,189,0.14)"/>' +
+        '<text x="' + x + '" y="' + (H - 0) + '" font-size="9" fill="#93a0bd" text-anchor="middle">' + gx + "</text>");
+    });
+    t10.forEach(function (r, i) {
+      var y = i * RH + 6, bw = (W - PADL - PADR) * Math.max(0, r.idx) / 100;
+      var col = i === 0 ? "#3ddc97" : "#3a84d9";
+      svg.push('<g class="mvp-row"><title>' + esc("#" + (i + 1) + " " + r.p.name + " (" + r.p.team + ") · index " +
+          r.idx.toFixed(1) + " · " + compTip(r)) + "</title>" +
+        '<text x="' + (PADL - 34) + '" y="' + (y + 15) + '" font-size="12.5" fill="#e8edf7" text-anchor="end" font-weight="600">' +
+          esc(r.p.name) + "</text>" +
+        '<image href="' + LOGO + encodeURIComponent(r.p.team) + '.png" x="' + (PADL - 28) + '" y="' + (y + 4) + '" width="22" height="15"/>' +
+        '<rect x="' + PADL + '" y="' + (y + 2) + '" width="' + bw.toFixed(1) + '" height="' + (RH - 12) +
+          '" rx="4" fill="' + col + '"' + (i === 0 ? "" : ' opacity="0.75"') + "/>" +
+        '<text x="' + (PADL + bw + 8) + '" y="' + (y + 16) + '" font-size="12" fill="#e8edf7" font-weight="700">' +
+          r.idx.toFixed(1) + "</text></g>");
+    });
+    svg.push("</svg>");
+    document.getElementById("mvpTop10").innerHTML = svg.join("");
+    // ── component leader panels ──
+    document.getElementById("mvpComponents").innerHTML = '<div class="mvp-panels">' +
+      MVP_COMPS.map(function (cc) {
+        var sorted = rows.slice().sort(function (a, b) { return b.c[cc.k] - a.c[cc.k]; });
+        var top5 = sorted.slice(0, 5), winRank = sorted.indexOf(win) + 1;
+        var mx = Math.max(0.001, sorted[0].c[cc.k]);
+        function row(r, rank) {
+          var pct = Math.max(3, 100 * Math.max(0, r.c[cc.k]) / mx);
+          return '<div class="mp-row' + (r === win ? " winner" : "") + '" title="' +
+              esc("#" + rank + " " + r.p.name + " · " + cc.name + " " + r.c[cc.k].toFixed(2) + " (z vs " + r.p._mvpGrp + " peers)") + '">' +
+            '<span class="mp-nm">' + (r === win ? "★ " : "") + esc(r.p.name.split(" ").slice(-1)[0]) + "</span>" +
+            '<div class="mp-track"><div class="mp-fill" style="width:' + pct.toFixed(0) + "%;background:" + cc.color + '"></div></div>' +
+            '<span class="mp-val">' + (r.c[cc.k] >= 0 ? "+" : "") + r.c[cc.k].toFixed(2) + "</span></div>";
+        }
+        return '<div class="mvp-panel"><h4><i style="background:' + cc.color + '"></i>' + esc(cc.name) + "</h4>" +
+          top5.map(function (r, i) { return row(r, i + 1); }).join("") +
+          // the breadth argument: always show where the winner sits, even outside the top 5
+          (winRank > 5 ? '<div class="mp-more">… ★ ' + esc(win.p.name.split(" ").slice(-1)[0]) +
+            " is #" + winRank + " of " + rows.length + "</div>" : "") + "</div>";
+      }).join("") + "</div>";
+    // ── head-to-head №1 vs №2 ──
+    document.getElementById("mvpH2H").innerHTML =
+      '<div class="mvp-h2h-head"><span class="h2h-a">' + logoImg(win.p.team) + esc(win.p.name) + " · " + win.idx.toFixed(1) + "</span>" +
+        '<span class="h2h-b">' + sec.idx.toFixed(1) + " · " + esc(sec.p.name) + logoImg(sec.p.team) + "</span></div>" +
+      MVP_COMPS.map(function (cc) {
+        var a = cc.w * win.c[cc.k], b = cc.w * sec.c[cc.k];
+        if (Math.abs(a) < 0.005) a = 0;
+        if (Math.abs(b) < 0.005) b = 0;
+        var mx = Math.max(Math.abs(a), Math.abs(b), 0.001);
+        function half(v, side) {
+          var w = Math.abs(v) / mx * 46;
+          var col = side === "a" ? "#3ddc97" : "#4ea1ff";
+          var dim = v < 0 ? ";opacity:0.35" : "";
+          return '<div class="h2h-track ' + side + '"><div style="width:' + w.toFixed(1) + "%;background:" + col + dim + '"></div></div>';
+        }
+        return '<div class="mvp-h2h-row" title="' + esc(cc.name + ": " + win.p.name.split(" ").slice(-1)[0] + " " +
+            a.toFixed(2) + " vs " + sec.p.name.split(" ").slice(-1)[0] + " " + b.toFixed(2) + " (weighted contribution)") + '">' +
+          '<span class="h2h-val">' + a.toFixed(2) + "</span>" + half(a, "a") +
+          '<span class="h2h-lbl">' + esc(cc.name) + "</span>" + half(b, "b") +
+          '<span class="h2h-val">' + b.toFixed(2) + "</span></div>";
+      }).join("") +
+      '<p class="hint" style="margin:10px 0 0">Bars show each component × its weight — the actual contribution to the index. Faded = negative (below the positional average). Context: ' +
+        esc(win.p.name.split(" ").slice(-1)[0]) + " +" + win.ctx.toFixed(2) + " run" +
+        (win.disc ? " / −" + win.disc.toFixed(2) + " cards" : "") + " · " +
+        esc(sec.p.name.split(" ").slice(-1)[0]) + " +" + sec.ctx.toFixed(2) +
+        (sec.disc ? " / −" + sec.disc.toFixed(2) : "") + ".</p>";
+    // ── radar: top 3 on component percentiles ──
+    var R = 128, CX = 210, CY = 168, NAMES = MVP_COMPS.map(function (c) { return c.name; });
+    var tri = rows.slice(0, 3), triCol = ["#3ddc97", "#4ea1ff", "#ffb454"];
+    function pt(i, frac) {
+      var ang = -Math.PI / 2 + i * 2 * Math.PI / 5;
+      return [(CX + Math.cos(ang) * R * frac).toFixed(1), (CY + Math.sin(ang) * R * frac).toFixed(1)];
+    }
+    var rsvg = ['<svg viewBox="0 0 620 336" role="img" aria-label="Top three component percentiles">'];
+    [0.25, 0.5, 0.75, 1].forEach(function (fr) {
+      rsvg.push('<polygon points="' + [0, 1, 2, 3, 4].map(function (i) { return pt(i, fr).join(","); }).join(" ") +
+        '" fill="none" stroke="rgba(147,160,189,0.18)"/>');
+    });
+    NAMES.forEach(function (nm, i) {
+      var lp = pt(i, 1.22);
+      rsvg.push('<line x1="' + CX + '" y1="' + CY + '" x2="' + pt(i, 1)[0] + '" y2="' + pt(i, 1)[1] + '" stroke="rgba(147,160,189,0.18)"/>' +
+        '<text x="' + lp[0] + '" y="' + lp[1] + '" font-size="11" fill="#93a0bd" text-anchor="middle">' + esc(nm) + "</text>");
+    });
+    tri.forEach(function (r, ti) {
+      var pts = MVP_COMPS.map(function (cc, i) { return pt(i, Math.max(0.04, mvpPct(rows, cc.k, r.c[cc.k]) / 100)); });
+      rsvg.push('<polygon points="' + pts.map(function (q) { return q.join(","); }).join(" ") +
+        '" fill="' + triCol[ti] + '" fill-opacity="0.10" stroke="' + triCol[ti] + '" stroke-width="2"><title>' +
+        esc(r.p.name + " — " + MVP_COMPS.map(function (cc) { return cc.name + " " + mvpPct(rows, cc.k, r.c[cc.k]) + "th pct"; }).join(" · ")) +
+        "</title></polygon>");
+    });
+    rsvg.push('<g font-size="12.5">' + tri.map(function (r, ti) {
+      return '<g transform="translate(430,' + (100 + ti * 26) + ')"><rect x="0" y="-9" width="12" height="12" rx="3" fill="' + triCol[ti] + '"/>' +
+        '<text x="18" y="1" fill="#e8edf7" font-weight="600">' + esc(r.p.name) + '</text>' +
+        '<text x="18" y="14" fill="#93a0bd" font-size="10.5">index ' + r.idx.toFixed(1) + "</text></g>";
+    }).join("") + "</g></svg>");
+    document.getElementById("mvpRadar").innerHTML = rsvg.join("");
+    document.getElementById("mvpFoot").innerHTML =
+      "Honest caveats: the index is <b>context-blind</b> (it can't see marking assignments or tactical roles), " +
+      "match ratings inherit WhoScored's own biases, keepers are only comparable to keepers, and the knockout bonus " +
+      "deliberately rewards winning — remove it and the ranking above barely changes at the top.";
+  }
+
   /* ---------------- init ---------------- */
   renderOverviewStats();
   renderGroups();
@@ -4114,6 +4367,7 @@
   renderUnlucky();
   initStandouts();
   initTeamLab();
+  renderMVP();
   // Cooling-break analysis and Power Rank predictions are 2026-only by design (frozen
   // baselines / a 2026-dated FIFA snapshot — see ROADMAP.md); their tab buttons are
   // already removed above, and their data files aren't even loaded for history.

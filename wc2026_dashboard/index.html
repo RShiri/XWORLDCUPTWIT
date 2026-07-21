@@ -20,6 +20,7 @@
       <button data-view="tables" class="active">Tables</button>
       <button data-view="story">Story</button>
       <button data-view="awards">Awards</button>
+      <button data-view="mvp">MVP</button>
       <button data-view="eras">Eras</button>
       <button data-view="matches">Matches</button>
       <button data-view="players">Players</button>
@@ -132,6 +133,50 @@
          Hover a shirt for the player's numbers, including their team's run.</p>
       <div class="axi-wrap" id="bestXI"></div>
     </div>
+  </section>
+
+  <!-- MVP — all-stats Player of the Tournament -->
+  <section id="view-mvp" class="view">
+    <div class="section-head">
+      <h2>Player of the Tournament — the all-stats verdict</h2>
+      <p>One number per player, built from <b>every stat we track</b> — scoring, creation, ball
+         progression, defensive work, match ratings, discipline, availability and how far the team
+         went. Each stat is taken per 90 minutes and scored against the player's <b>positional
+         peers</b>, so a defender is never punished for not scoring and a striker isn't expected
+         to tackle.</p>
+    </div>
+
+    <div id="mvpHero"></div>
+
+    <div class="card full-card">
+      <h3>How the MVP Index is built</h3>
+      <div id="mvpMethod"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>The top 10 <span class="pl-sub">MVP Index · winner = 100</span></h3>
+      <p class="hint">Hover a bar for the full component breakdown.</p>
+      <div id="mvpTop10"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Who owns each dimension <span class="pl-sub">component leaders (z-score vs positional peers)</span></h3>
+      <p class="hint">The winner's case in one picture: nobody tops every list, but only one player
+         appears near the top of almost all of them.</p>
+      <div id="mvpComponents"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>Head to head: №1 vs №2 <span class="pl-sub">component scores, weighted contribution</span></h3>
+      <div id="mvpH2H"></div>
+    </div>
+
+    <div class="card full-card">
+      <h3>The podium, axis by axis <span class="pl-sub">top three · percentile within the 270′+ pool</span></h3>
+      <div id="mvpRadar"></div>
+    </div>
+
+    <p class="hint" id="mvpFoot"></p>
   </section>
 
   <!-- ERAS (cross-tournament comparison: 2018 · 2022 · 2026) -->

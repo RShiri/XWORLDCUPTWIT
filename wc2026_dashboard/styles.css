@@ -884,6 +884,59 @@ span.road-step.pending { display: block; padding: 10px 12px; color: var(--muted)
 .axi-node { cursor: default; }
 .axi-node:hover circle { stroke: #ffd24d; }
 
+/* ===================== MVP tab (all-stats Player of the Tournament) ===================== */
+.mvp-hero {
+  background: linear-gradient(135deg, rgba(61,220,151,0.10), rgba(78,161,255,0.06)), var(--card);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 22px 24px; margin-bottom: 22px;
+}
+.mvp-crown { font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--accent); }
+.mvp-name { font-size: 28px; font-weight: 800; margin: 8px 0 2px; display: flex; align-items: center; gap: 10px; }
+.mvp-name img { width: 34px; height: 24px; border-radius: 3px; }
+.mvp-name .mvp-team { font-size: 14px; font-weight: 600; color: var(--muted); }
+.mvp-line { color: var(--text); font-size: 14px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.mvp-verdict { color: var(--muted); font-size: 13.5px; margin-top: 10px; max-width: 860px; line-height: 1.5; }
+
+.mvp-steps { margin: 6px 0 16px; padding-left: 20px; color: var(--muted); font-size: 13.5px; line-height: 1.65; }
+.mvp-steps b, .mvp-parts b { color: var(--text); }
+.mvp-weightbar { display: flex; gap: 2px; height: 34px; border-radius: 8px; overflow: hidden; margin: 4px 0 12px; }
+.mvp-weightbar .mw-seg { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.mvp-weightbar .mw-seg span {
+  font-size: 11px; font-weight: 700; color: #0b0f1a; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; padding: 0 6px;
+}
+.mvp-parts { list-style: none; margin: 0; padding: 0; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+.mvp-parts i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: baseline; }
+
+#mvpTop10 svg { width: 100%; height: auto; display: block; }
+.mvp-row:hover rect { filter: brightness(1.2); }
+
+.mvp-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.mvp-panel h4 { margin: 0 0 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.mvp-panel h4 i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.mp-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12.5px; }
+.mp-row.winner .mp-nm { color: var(--accent); font-weight: 700; }
+.mp-nm { flex: 0 0 88px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-track { flex: 1; height: 10px; background: rgba(147,160,189,0.12); border-radius: 4px; overflow: hidden; }
+.mp-fill { height: 100%; border-radius: 4px; }
+.mp-val { flex: 0 0 46px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mp-more { font-size: 11.5px; color: var(--accent); padding: 5px 0 0; }
+
+.mvp-h2h-head { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+.mvp-h2h-head img { width: 22px; height: 15px; margin: 0 6px; vertical-align: -2px; }
+.mvp-h2h-head .h2h-a { color: var(--accent); }
+.mvp-h2h-head .h2h-b { color: var(--accent-2); }
+.mvp-h2h-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.h2h-lbl { flex: 0 0 130px; text-align: center; font-size: 12px; color: var(--muted); }
+.h2h-val { flex: 0 0 44px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.h2h-val:first-child { text-align: right; }
+.h2h-track { flex: 1; height: 12px; background: rgba(147,160,189,0.10); border-radius: 4px; position: relative; overflow: hidden; }
+.h2h-track div { position: absolute; top: 1px; bottom: 1px; border-radius: 3px; }
+.h2h-track.a div { right: 0; }
+.h2h-track.b div { left: 0; }
+
+#mvpRadar svg { width: 100%; max-width: 640px; height: auto; display: block; margin: 0 auto; }
+
 /* ===================== Final Hub (Story tab) ===================== */
 .fh-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
   box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 18px; }
