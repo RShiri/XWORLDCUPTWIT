@@ -1137,9 +1137,54 @@
   var playerSort = { key: "ga", dir: -1 };
   var playerPreset = "ga";
 
-  // Counting stats that make sense normalised per 90 minutes (averages/percentages don't).
-  var PER90_KEYS = { g: 1, a: 1, ga: 1, xg: 1, xg_diff: 1, shots: 1, sot: 1,
-    keyPasses: 1, passes: 1, tackles: 1, interceptions: 1 };
+  // Column registry for the players table: [key, header, type, normalisable, defaultOn, full name].
+  // type: i=int, f=2dp float, pc=percent. "normalisable" marks counting stats that make
+  // sense per 90/95 minutes (averages and percentages don't). Grouped for the ⚙ Columns
+  // chooser; flattened in this order for the table, so the default view keeps the classic
+  // column structure and extras slot in beside their family when enabled.
+  var PLAYER_COL_GROUPS = [
+    { name: "Attacking", cols: [
+      ["g", "G", "i", 1, 1, "Goals"], ["a", "A", "i", 1, 1, "Assists"],
+      ["ga", "G+A", "i", 1, 1, "Goals + assists"], ["xg", "xG", "f", 1, 1, "Expected goals"],
+      ["xg_diff", "xG±", "f", 1, 1, "Finishing (goals − xG)"], ["xa", "xA", "f", 1, 0, "Expected assists"],
+      ["shots", "Sh", "i", 1, 1, "Shots"], ["sot", "SoT", "i", 1, 1, "Shots on target"],
+      ["dribbles", "Drb", "i", 1, 0, "Dribbles completed"] ] },
+    { name: "Passing", cols: [
+      ["keyPasses", "KP", "i", 1, 1, "Key passes"], ["passes", "Pass", "i", 1, 1, "Passes"],
+      ["pass_pct", "Pass%", "pc", 0, 1, "Pass accuracy"],
+      ["progPasses", "PrgP", "i", 1, 0, "Progressive passes"],
+      ["touches", "Tch", "i", 1, 0, "Touches"] ] },
+    { name: "Defending", cols: [
+      ["tackles", "Tkl", "i", 1, 1, "Tackles"], ["interceptions", "Int", "i", 1, 1, "Interceptions"],
+      ["clearances", "Clr", "i", 1, 0, "Clearances"], ["clrBox", "BoxClr", "i", 1, 0, "Clearances in own box"],
+      ["blocks", "Blk", "i", 1, 0, "Shots blocked"], ["aerials", "AerW", "i", 1, 0, "Aerial duels won"],
+      ["fouls", "Fls", "i", 1, 0, "Fouls committed"], ["dispossessed", "Disp", "i", 1, 0, "Dispossessed"] ] },
+    { name: "Goalkeeping / on-pitch defence", cols: [
+      ["saves", "Saves", "i", 1, 0, "Keeper saves"],
+      ["gPrev", "GPrv", "f", 1, 0, "Goals prevented (xG faced − conceded)"],
+      ["xga", "xGA", "f", 1, 0, "xG faced while on pitch"],
+      ["gConcOn", "GAon", "i", 1, 0, "Goals conceded while on pitch"] ] },
+    { name: "General", cols: [
+      ["starts", "St", "i", 0, 0, "Starts"], ["yc", "Y", "i", 0, 1, "Yellow cards"],
+      ["rc", "R", "i", 0, 1, "Red cards"], ["rating", "Rt", "f", 0, 1, "Average match rating"],
+      ["rating_best", "RtB", "f", 0, 0, "Best single-match rating"] ] },
+  ];
+  var PLAYER_COL_DEFS = [];
+  PLAYER_COL_GROUPS.forEach(function (g) { g.cols.forEach(function (c) { PLAYER_COL_DEFS.push(c); }); });
+  var PER90_KEYS = {};
+  PLAYER_COL_DEFS.forEach(function (c) { if (c[3]) PER90_KEYS[c[0]] = 1; });
+  var playerColOn = (function () {
+    var st = {};
+    PLAYER_COL_DEFS.forEach(function (c) { st[c[0]] = !!c[4]; });
+    try {   // remember the user's column picks across visits
+      var saved = JSON.parse(localStorage.getItem("wcPlayerCols") || "{}");
+      Object.keys(saved).forEach(function (k) { if (k in st) st[k] = !!saved[k]; });
+    } catch (e) {}
+    return st;
+  })();
+  function savePlayerCols() {
+    try { localStorage.setItem("wcPlayerCols", JSON.stringify(playerColOn)); } catch (e) {}
+  }
 
   // WhoScored position codes → coarse groups (DMC/DML/DMR are midfielders, not defenders).
   function posGroup(pos) {
@@ -1172,22 +1217,22 @@
     var team = document.getElementById("playerTeam").value;
     var pos = (document.getElementById("playerPos") || {}).value || "";
     var minMins = +((document.getElementById("playerMin") || {}).value || 0);
-    var per90 = !!(document.getElementById("playerPer90") || {}).checked;
-    // Effective value of a stat: per-90 normalised when the toggle is on and the
-    // stat is a counting stat (null when the player has no minutes to divide by).
+    // Normaliser: 0 = raw totals, 90 = per 90′, 95 = per average game (WC games run
+    // ~95′ with stoppage). Applies to counting stats only (null with no minutes).
+    var norm = +((document.getElementById("playerNorm") || {}).value || 0);
     function pval(p, k) {
       var v = p[k];
-      if (v == null || !per90 || !PER90_KEYS[k]) return v;
-      return p.mins > 0 ? v * 90 / p.mins : null;
+      if (v == null || !norm || !PER90_KEYS[k]) return v;
+      return p.mins > 0 ? v * norm / p.mins : null;
     }
     var cols = [
       ["name", "Player", "t"], ["team", "Team", "tm"], ["pos", "Pos", "s"],
-      ["mp", "MP", "i"], ["mins", "Min", "i"], ["g", "G", "i"], ["a", "A", "i"], ["ga", "G+A", "i"],
-      ["xg", "xG", "f"], ["xg_diff", "xG±", "f"], ["shots", "Sh", "i"], ["sot", "SoT", "i"],
-      ["keyPasses", "KP", "i"], ["passes", "Pass", "i"], ["pass_pct", "Pass%", "pc"],
-      ["tackles", "Tkl", "i"], ["interceptions", "Int", "i"], ["yc", "Y", "i"], ["rc", "R", "i"],
-      ["rating", "Rt", "f"],
+      ["mp", "MP", "i"], ["mins", "Min", "i"],
     ];
+    PLAYER_COL_DEFS.forEach(function (c) { if (playerColOn[c[0]]) cols.push(c); });
+    // Sorted column just got disabled? Fall back to minutes (always present).
+    if (!cols.some(function (c) { return c[0] === playerSort.key; }))
+      playerSort = { key: "mins", dir: -1 };
     var filtered = PLAYERS.filter(function (p) {
       if (team && p.team !== team) return false;
       if (pos && posGroup(p.pos) !== pos) return false;
@@ -1214,7 +1259,7 @@
       var v = pval(p, k);
       if (v == null) return "<td>–</td>";
       var n = +v;
-      if (c[2] === "f" || (per90 && PER90_KEYS[k])) v = n.toFixed(2);
+      if (c[2] === "f" || (norm && PER90_KEYS[k])) v = n.toFixed(2);
       else if (c[2] === "pc") v = v + "%";
       var cls = (k === "xg_diff") ? (n > 0.05 ? "delta pos" : n < -0.05 ? "delta neg" : "") : "";
       var disp = (k === "xg_diff" && n > 0 ? "+" : "") + v;
@@ -1222,9 +1267,9 @@
     }
     var head = cols.map(function (c) {
       var arr = playerSort.key === c[0] ? (playerSort.dir < 0 ? " ▼" : " ▲") : "";
-      var lbl = c[1] + (per90 && PER90_KEYS[c[0]] ? "/90" : "");
-      return '<th class="' + (c[2] === "t" || c[2] === "tm" ? "team" : "") + '" data-k="' + c[0] + '">' +
-        lbl + '<span class="arr">' + arr + "</span></th>";
+      var lbl = c[1] + (norm && PER90_KEYS[c[0]] ? "/" + norm : "");
+      return '<th class="' + (c[2] === "t" || c[2] === "tm" ? "team" : "") + '" data-k="' + c[0] +
+        '" title="' + esc(c[5] || c[1]) + '">' + lbl + '<span class="arr">' + arr + "</span></th>";
     }).join("");
     var body = rows.map(function (p) {
       return "<tr>" + cols.map(function (c) { return cell(p, c); }).join("") + "</tr>";
@@ -1255,7 +1300,7 @@
     });
     sel.addEventListener("change", renderPlayersTable);
     document.getElementById("playerSearch").addEventListener("input", renderPlayersTable);
-    ["playerPos", "playerMin", "playerPer90"].forEach(function (id) {
+    ["playerPos", "playerMin", "playerNorm"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.addEventListener("change", renderPlayersTable);
     });
@@ -1265,9 +1310,39 @@
         b.classList.add("active");
         playerPreset = b.dataset.preset;
         playerSort = { key: playerPreset, dir: -1 };
+        // A preset must be able to show what it sorts by — re-enable its column if hidden.
+        if (playerPreset in playerColOn && !playerColOn[playerPreset]) {
+          playerColOn[playerPreset] = true;
+          savePlayerCols();
+          var cb = document.querySelector('#playerColsPanel input[data-k="' + playerPreset + '"]');
+          if (cb) cb.checked = true;
+        }
         renderPlayersTable();
       });
     });
+    // ⚙ Columns chooser: toggleable panel of extra stat columns, grouped by family.
+    var colsBtn = document.getElementById("playerColsBtn"), colsPanel = document.getElementById("playerColsPanel");
+    if (colsBtn && colsPanel) {
+      colsPanel.innerHTML = PLAYER_COL_GROUPS.map(function (g) {
+        return '<div class="cols-group"><div class="cg-title">' + esc(g.name) + "</div>" +
+          g.cols.map(function (c) {
+            return '<label class="cg-item"><input type="checkbox" data-k="' + c[0] + '"' +
+              (playerColOn[c[0]] ? " checked" : "") + "><b>" + esc(c[1]) + "</b><span class='cg-sub'>" +
+              esc(c[5] || "") + "</span></label>";
+          }).join("") + "</div>";
+      }).join("");
+      colsBtn.addEventListener("click", function () {
+        colsPanel.hidden = !colsPanel.hidden;
+        colsBtn.classList.toggle("open", !colsPanel.hidden);
+      });
+      colsPanel.addEventListener("change", function (e) {
+        var k = e.target && e.target.dataset ? e.target.dataset.k : null;
+        if (!k) return;
+        playerColOn[k] = e.target.checked;
+        savePlayerCols();
+        renderPlayersTable();
+      });
+    }
     renderPlayerLeaders();
     renderPlayersTable();
     renderPlayerBoards();

@@ -222,15 +222,31 @@ tbody tr.qual2 td:first-child { box-shadow: inset 3px 0 0 var(--accent-2); }
 .controls .ctl-chk {
   display: inline-flex; align-items: center; gap: 7px;
   background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-  padding: 9px 12px; font-size: 14px; color: var(--muted);
+  padding: 9px 12px; font-size: 14px; color: var(--muted); font-family: inherit;
   cursor: pointer; user-select: none;
 }
-.controls .ctl-chk input {
-  accent-color: var(--accent); margin: 0; cursor: pointer;
-  min-width: 0; width: 15px; height: 15px; /* beat the .controls input { min-width:220px } rule */
-}
-.controls .ctl-chk:has(input:checked) { color: var(--accent); border-color: var(--accent); font-weight: 700; }
+.controls .ctl-chk:hover { color: var(--text); border-color: var(--accent-2); }
+.controls .ctl-chk.open { color: var(--accent); border-color: var(--accent); font-weight: 700; }
 .controls .ctl-count { margin-left: auto; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+
+/* ⚙ Columns chooser (players table) */
+.cols-panel {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 18px; margin: -8px 0 18px;
+  display: flex; flex-wrap: wrap; gap: 8px 28px;
+}
+.cols-panel .cols-group { min-width: 150px; }
+.cols-panel .cg-title {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--accent-2); font-weight: 700; margin: 4px 0 6px;
+}
+.cols-panel .cg-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--text); padding: 2.5px 0; cursor: pointer;
+}
+.cols-panel .cg-item input { accent-color: var(--accent); margin: 0; cursor: pointer; }
+.cols-panel .cg-item b { min-width: 42px; font-weight: 700; }
+.cols-panel .cg-item .cg-sub { color: var(--muted); font-size: 11.5px; }
 /* Solid dark option list regardless of the OS theme (popups ignore card alpha). */
 select option, select optgroup { background-color: var(--bg-2); color: var(--text); }
 select option:disabled { color: var(--muted); }

@@ -218,17 +218,24 @@
         <option value="270">270+ mins</option>
         <option value="450">450+ mins</option>
       </select>
-      <label class="ctl-chk" title="Normalise counting stats per 90 minutes played">
-        <input type="checkbox" id="playerPer90" /> Per 90
-      </label>
+      <select id="playerNorm" title="Normalise counting stats by minutes played">
+        <option value="0">Totals</option>
+        <option value="90">Per 90 mins</option>
+        <option value="95">Per avg game (95′)</option>
+      </select>
+      <button id="playerColsBtn" class="ctl-chk" type="button"
+              title="Choose which stat columns to show">⚙ Columns</button>
       <span class="ctl-count" id="playerCount"></span>
     </div>
+    <div class="cols-panel" id="playerColsPanel" hidden></div>
     <div class="card" style="padding:0; overflow:hidden">
       <div class="table-scroll"><div id="playersTable"></div></div>
     </div>
     <p class="hint" style="margin-top:10px">Min. = minutes · Rt = average match rating · xG±= goals minus xG (finishing).
-       Use the minutes filter to drop small-sample players and <b>Per 90</b> to normalise counting
-       stats per 90 minutes played. Only games with player-level data are counted.</p>
+       Use the minutes filter to drop small-sample players, the normaliser to show counting stats
+       <b>per 90′</b> or <b>per average game (95′)</b>, and <b>⚙ Columns</b> to enable extra stats —
+       keeper saves &amp; goals prevented, xA, progressive passes, dribbles, aerials, blocks and more
+       (hover a column header for its meaning). Only games with player-level data are counted.</p>
 
     <h2 style="margin:30px 0 4px;font-size:20px">Leaderboards</h2>
     <p class="hint" style="margin:0 0 16px">Top eight players in each category so far.</p>

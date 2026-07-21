@@ -204,10 +204,11 @@ td.pts { color: var(--accent); font-weight: 700; }
 
 /* ---- controls ---- */
 .controls input, .controls select, .so-controls select, .so-controls input,
-.controls .ctl-chk {
+.controls .ctl-chk, .cols-panel {
   background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 8px;
   font-family: var(--font-body);
 }
+.cols-panel { border-radius: 12px; }
 .controls input:focus, .controls select:focus,
 .so-controls select:focus, .so-controls input:focus {
   border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-2-soft);
