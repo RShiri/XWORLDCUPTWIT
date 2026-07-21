@@ -4340,7 +4340,9 @@
       });
       var maxStack = Math.max.apply(null, bins.map(function (b) { return b.length; }));
       var dy = Math.min(5, (YBASE - YTOP) / Math.max(1, maxStack));
-      var top3 = players.slice().sort(function (a, b) { return rv(b) - rv(a); }).slice(0, 3);
+      // highlight the COMPONENT's top three (same players as the list above), shown at
+      // their raw value — not the raw-stat leaders, which can differ and confuse
+      var top3 = players.slice().sort(function (a, b) { return b.c[cc.k] - a.c[cc.k]; }).slice(0, 3);
       var s = ['<svg viewBox="0 0 ' + W2 + " " + H2 + '" class="mp-strip" role="img" aria-label="' +
         esc(cc.name + " distribution") + '">'];
       s.push('<line x1="' + X0 + '" y1="' + (YBASE + 4) + '" x2="' + X1 + '" y2="' + (YBASE + 4) +
@@ -4406,6 +4408,71 @@
             " is #" + winRank + " of " + rows.length + "</div>" : "") +
           stripSVG(cc) + "</div>";
       }).join("") + "</div>";
+    // ── the MVP against the field: raw scatters (all pool, winner highlighted) ──
+    var scHost = document.getElementById("mvpScatters");
+    if (scHost) {
+      var SCATS = [
+        { t: "Finishing — xG → goals", xl: "xG (quality of chances)", yl: "goals", diag: true,
+          x: function (r) { return r.p.xg || 0; }, y: function (r) { return r.p.g || 0; }, dp: 1 },
+        { t: "Creation — xA → assists", xl: "xA (chances created)", yl: "assists", diag: true,
+          x: function (r) { return r.p.xa || 0; }, y: function (r) { return r.p.a || 0; }, dp: 1 },
+        { t: "Engine — progression → chance supply", xl: "progressive passes / 90", yl: "key passes / 90",
+          x: function (r) { return F[r.p.pid].prog; }, y: function (r) { return F[r.p.pid].kp; }, dp: 1 },
+      ];
+      scHost.innerHTML = SCATS.map(function (cf) {
+        var W3 = 320, H3 = 250, ML = 34, MR = 12, MT = 14, MB = 34;
+        var xm = Math.max.apply(null, rows.map(cf.x)) * 1.08 || 1;
+        var ym = Math.max.apply(null, rows.map(cf.y)) * 1.1 || 1;
+        function X(v) { return ML + (W3 - ML - MR) * v / xm; }
+        function Y(v) { return H3 - MB - (H3 - MT - MB) * v / ym; }
+        var s = ['<div class="mvp-scat"><h5>' + esc(cf.t) + '</h5><svg viewBox="0 0 ' + W3 + " " + H3 +
+          '" role="img" aria-label="' + esc(cf.t) + '">'];
+        // recessive frame + quarter grid
+        [0.25, 0.5, 0.75].forEach(function (fr) {
+          s.push('<line x1="' + X(xm * fr).toFixed(1) + '" y1="' + Y(0) + '" x2="' + X(xm * fr).toFixed(1) + '" y2="' + MT + '" stroke="rgba(147,160,189,0.10)"/>' +
+            '<line x1="' + ML + '" y1="' + Y(ym * fr).toFixed(1) + '" x2="' + (W3 - MR) + '" y2="' + Y(ym * fr).toFixed(1) + '" stroke="rgba(147,160,189,0.10)"/>');
+        });
+        s.push('<line x1="' + ML + '" y1="' + Y(0) + '" x2="' + (W3 - MR) + '" y2="' + Y(0) + '" stroke="rgba(147,160,189,0.3)"/>' +
+          '<line x1="' + ML + '" y1="' + Y(0) + '" x2="' + ML + '" y2="' + MT + '" stroke="rgba(147,160,189,0.3)"/>');
+        if (cf.diag) {
+          var dm = Math.min(xm, ym);
+          s.push('<line x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(dm).toFixed(1) + '" y2="' + Y(dm).toFixed(1) +
+            '" stroke="rgba(147,160,189,0.35)" stroke-dasharray="4 3"/>');
+        }
+        rows.forEach(function (r) {
+          if (r === win) return;
+          s.push('<circle cx="' + X(cf.x(r)).toFixed(1) + '" cy="' + Y(cf.y(r)).toFixed(1) +
+            '" r="2.4" fill="rgba(147,160,189,0.35)"><title>' +
+            esc(r.p.name + " (" + r.p.team + ") · " + cf.x(r).toFixed(cf.dp) + " / " + cf.y(r).toFixed(cf.dp)) +
+            "</title></circle>");
+        });
+        // label the notable field: top 3 by y plus the top by x (minus the winner)
+        var labs = rows.slice().sort(function (a, b) { return cf.y(b) - cf.y(a); }).slice(0, 3)
+          .concat(rows.slice().sort(function (a, b) { return cf.x(b) - cf.x(a); }).slice(0, 1))
+          .filter(function (r, i, arr) { return r !== win && arr.indexOf(r) === i; }).slice(0, 3);
+        labs.forEach(function (r) {
+          var cx = X(cf.x(r)), cy = Y(cf.y(r));
+          var anch = cx > W3 * 0.72 ? "end" : "start", dx = anch === "end" ? -7 : 7;
+          s.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.4" fill="rgba(147,160,189,0.75)"><title>' +
+              esc(r.p.name + " · " + cf.x(r).toFixed(cf.dp) + " / " + cf.y(r).toFixed(cf.dp)) + "</title></circle>" +
+            '<text x="' + (cx + dx).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" font-size="9.5" fill="#93a0bd" text-anchor="' + anch + '">' +
+              esc(r.p.name.split(" ").slice(-1)[0]) + "</text>");
+        });
+        var wx = X(cf.x(win)), wy = Y(cf.y(win));
+        var wAnch = wx > W3 * 0.7 ? "end" : "start", wdx = wAnch === "end" ? -9 : 9;
+        s.push('<circle cx="' + wx.toFixed(1) + '" cy="' + wy.toFixed(1) + '" r="5.5" fill="#3ddc97" stroke="#161d31" stroke-width="2"><title>' +
+            esc(win.p.name + " · " + cf.x(win).toFixed(cf.dp) + " / " + cf.y(win).toFixed(cf.dp)) + "</title></circle>" +
+          '<text x="' + (wx + wdx).toFixed(1) + '" y="' + (wy + 4).toFixed(1) + '" font-size="11" font-weight="700" fill="#3ddc97" text-anchor="' + wAnch + '">★ ' +
+            esc(win.p.name.split(" ").slice(-1)[0]) + "</text>");
+        s.push('<text x="' + ((ML + W3 - MR) / 2) + '" y="' + (H3 - 6) + '" font-size="9.5" fill="#93a0bd" text-anchor="middle">' + esc(cf.xl) + "</text>" +
+          '<text x="10" y="' + ((MT + H3 - MB) / 2) + '" font-size="9.5" fill="#93a0bd" text-anchor="middle" transform="rotate(-90 10 ' + ((MT + H3 - MB) / 2) + ')">' + esc(cf.yl) + "</text>" +
+          '<text x="' + (W3 - MR) + '" y="' + (Y(0) + 12) + '" font-size="8.5" fill="#93a0bd" text-anchor="end">' + xm.toFixed(cf.dp) + "</text>" +
+          '<text x="' + (ML - 4) + '" y="' + (MT + 8) + '" font-size="8.5" fill="#93a0bd" text-anchor="end">' + ym.toFixed(cf.dp) + "</text>");
+        s.push("</svg></div>");
+        return s.join("");
+      }).join("");
+    }
+
     // ── head-to-head №1 vs №2 ──
     document.getElementById("mvpH2H").innerHTML =
       '<div class="mvp-h2h-head"><span class="h2h-a">' + logoImg(win.p.team) + esc(win.p.name) + " · " + win.idx.toFixed(1) + "</span>" +
