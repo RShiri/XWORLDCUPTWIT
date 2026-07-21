@@ -1,5 +1,18 @@
 # CLAUDE.md — project guide for AI sessions
 
+## 🔴 PENDING TASK — next session ON THE SCRAPE PC (delete this block when done)
+Run the one-off WhoScored-extras backfill (formations / managers / referee for the
+~104 matches scraped before 2026-07-20). It only works where WhoScored is reachable
+(the scrape PC's Chrome + undetected-chromedriver setup) — NOT from cloud sessions.
+1. Sanity-check first: `py tools/backfill_ws_extras.py --limit 5`, open a patched
+   match JSON and a Match Centre page locally to confirm formations/manager/referee
+   appear (lineup cards + scoreboard meta).
+2. Full run (overnight, ~40s/match, resumable — re-run to retry failures):
+   `py tools/backfill_ws_extras.py --rebuild`
+3. Commit + push: the patched `wc2026/matches/*.json` + regenerated
+   `wc2026_dashboard/matches_detail/` (stage specific paths, no `git add -A`).
+4. Delete this block from CLAUDE.md in the same commit.
+
 WC2026 match analytics. Two outputs from one scraped dataset:
 1. **PNG infographics** — `wc2026/renderer.py` (matplotlib/mplsoccer), published to `WorldCup2026/`.
 2. **Interactive web dashboard** — `wc2026_dashboard/` static site, live on GitHub Pages:
