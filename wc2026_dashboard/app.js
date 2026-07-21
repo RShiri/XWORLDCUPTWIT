@@ -4095,19 +4095,22 @@
   /* ======================= MVP — all-stats Player of the Tournament =======================
      One composite "MVP Index" per player, built from every stat players.js carries.
      Pipeline: per-90 rates → z-scores WITHIN position group (GK/DF/MF/FW, clamped ±2.5 so a
-     defender's two goals can't explode a low-variance distribution) → five weighted
+     defender's two goals can't explode a low-variance distribution; attacking components
+     blend in a whole-pool z capped at 3.0 so absolute output counts) → six weighted
      components → availability damping + knockout-run bonus − card penalty. Component
      colours are a CVD-validated categorical set derived from the site palette. */
   var MVP_COMPS = [
-    { k: "att", name: "Goal threat", color: "#24ad74", w: 0.25,
+    { k: "att", name: "Goal threat", color: "#24ad74", w: 0.20,
       parts: "0.5·goals + 0.3·xG + 0.2·finishing (goals−xG), per 90" },
-    { k: "cre", name: "Creation", color: "#c07f2e", w: 0.25,
+    { k: "cre", name: "Creation", color: "#c07f2e", w: 0.20,
       parts: "0.4·assists + 0.3·xA + 0.3·key passes, per 90" },
     { k: "pro", name: "Progression", color: "#3a84d9", w: 0.15,
       parts: "0.5·progressive passes + 0.3·dribbles won, per 90 + 0.2·pass accuracy" },
     { k: "def", name: "Defensive work", color: "#d94f65", w: 0.15,
       parts: "0.7·defensive actions (Tkl+Int+Rec+Blk+Clr) per 90 + 0.3·aerial win% — keepers: 0.7·goals prevented + 0.3·saves & claims per 90" },
-    { k: "rat", name: "Judgment", color: "#8a55ee", w: 0.20,
+    { k: "imp", name: "Team impact", color: "#1ba3ad", w: 0.15,
+      parts: "0.45·share of the team's goals + assists + 0.35·share of team xG + xA + 0.20·share of possible minutes — how much of the team runs through them" },
+    { k: "rat", name: "Judgment", color: "#8a55ee", w: 0.15,
       parts: "WhoScored average match rating (the eye-test proxy)" },
   ];
 
@@ -4116,10 +4119,14 @@
     if (pool.length < 12) return null;
     function n(p, k) { return +p[k] || 0; }
     function p90(p, k) { return n(p, k) * 90 / p.mins; }
+    // team totals for the Team-impact shares (goals scored, xG, games played)
+    var tt = {};
+    TOTALS.forEach(function (t) { tt[t.team] = t; });
     var feats = {};
     pool.forEach(function (p) {
       var defActs = n(p, "tackles") + n(p, "interceptions") + n(p, "recoveries") +
                     n(p, "blocks") + n(p, "clearances");
+      var T = tt[p.team] || {};
       feats[p.pid] = {
         g: p90(p, "g"), xg: p90(p, "xg"), xgd: p90(p, "xg_diff"),
         a: p90(p, "a"), xa: p90(p, "xa"), kp: p90(p, "keyPasses"),
@@ -4127,6 +4134,10 @@
         da: defActs * 90 / p.mins, aer: n(p, "aer_pct"),
         gprev: p90(p, "gPrev"), stop: (n(p, "saves") + n(p, "claims")) * 90 / p.mins,
         rt: p.rating,
+        // impact shares: how much of the TEAM's output runs through this player
+        gi: (n(p, "g") + n(p, "a")) / Math.max(1, T.gf || 0),
+        xi: (n(p, "xg") + n(p, "xa")) / Math.max(0.5, T.xgf || 0),
+        ms: p.mins / Math.max(1, (T.mp || 1) * 97),
       };
       var gg = posGroup(p.pos);
       p._mvpGrp = (gg === "GK" || gg === "DF" || gg === "FW") ? gg : "MF";
@@ -4134,28 +4145,30 @@
     // z-scores within position group, plus whole-pool z for the attacking features
     var groups = {};
     pool.forEach(function (p) { (groups[p._mvpGrp] = groups[p._mvpGrp] || []).push(p); });
-    function zmap(players, k) {
+    function zmap(players, k, cap) {
       var vals = players.map(function (q) { return feats[q.pid][k]; });
       var m = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
       var sd = Math.sqrt(vals.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / vals.length);
       var out = {};
       players.forEach(function (q) {
-        // soft saturation: outliers damp toward ±2.5 without the fake ties a hard clamp makes
-        out[q.pid] = sd ? 2.5 * Math.tanh(((feats[q.pid][k] - m) / sd) / 2.5) : 0;
+        // soft saturation: outliers damp toward ±cap without the fake ties a hard clamp makes
+        out[q.pid] = sd ? cap * Math.tanh(((feats[q.pid][k] - m) / sd) / cap) : 0;
       });
       return out;
     }
     var Z = {};
     Object.keys(groups).forEach(function (gn) {
       Z[gn] = {};
-      Object.keys(feats[groups[gn][0].pid]).forEach(function (k) { Z[gn][k] = zmap(groups[gn], k); });
+      Object.keys(feats[groups[gn][0].pid]).forEach(function (k) { Z[gn][k] = zmap(groups[gn], k, 2.5); });
     });
-    // Goal threat & Creation blend 50% positional z + 50% whole-pool z: positional-only let
-    // "elite for a defender" outrank "elite outright" (a full-back's 0.30 g/90 is a 3σ freak
-    // among defenders, but absolute production has to count too).
+    // Attacking components also use a whole-pool z: positional-only let "elite for a
+    // defender" outrank "elite outright" (a full-back's 0.30 g/90 is a 3σ freak among
+    // defenders, but absolute production has to count too). The pool z is capped at 3.0
+    // so the true monsters (a 5σ scorer vs a 4σ one) still separate. Goal threat leans
+    // 70% pool / 30% positional; Creation stays an even blend.
     var ZALL = {};
-    ["g", "xg", "xgd", "a", "xa", "kp"].forEach(function (k) { ZALL[k] = zmap(pool, k); });
-    function zb(gn, k, pid) { return 0.5 * Z[gn][k][pid] + 0.5 * ZALL[k][pid]; }
+    ["g", "xg", "xgd", "a", "xa", "kp"].forEach(function (k) { ZALL[k] = zmap(pool, k, 3.0); });
+    function zb(gn, k, pid, wPos) { return wPos * Z[gn][k][pid] + (1 - wPos) * ZALL[k][pid]; }
     // knockout-run map (same source as the Best XI deep-run bonus)
     var deep = {};
     try {
@@ -4174,18 +4187,21 @@
     } catch (e) {}
     var rows = pool.map(function (p) {
       var z = Z[p._mvpGrp], gn = p._mvpGrp, pid = p.pid, c = {};
-      c.att = 0.5 * zb(gn, "g", pid) + 0.3 * zb(gn, "xg", pid) + 0.2 * zb(gn, "xgd", pid);
-      c.cre = 0.4 * zb(gn, "a", pid) + 0.3 * zb(gn, "xa", pid) + 0.3 * zb(gn, "kp", pid);
-      c.pro = 0.5 * z.prog[pid] + 0.3 * z.drb[pid] + 0.2 * z.pp[pid];
-      c.def = p._mvpGrp === "GK" ? 0.7 * z.gprev[pid] + 0.3 * z.stop[pid]
-                                 : 0.7 * z.da[pid] + 0.3 * z.aer[pid];
-      c.rat = z.rt[pid];
-      var base = MVP_COMPS.reduce(function (s, cc) { return s + cc.w * c[cc.k]; }, 0);
+      // availability damps INSIDE each component, so the leader panels can't be
+      // topped by a 300-minute hot streak the final index would never reward
       var avail = Math.sqrt(Math.min(1, p.mins / 600));
+      c.att = (0.5 * zb(gn, "g", pid, 0.3) + 0.3 * zb(gn, "xg", pid, 0.3) + 0.2 * zb(gn, "xgd", pid, 0.3)) * avail;
+      c.cre = (0.4 * zb(gn, "a", pid, 0.5) + 0.3 * zb(gn, "xa", pid, 0.5) + 0.3 * zb(gn, "kp", pid, 0.5)) * avail;
+      c.pro = (0.5 * z.prog[pid] + 0.3 * z.drb[pid] + 0.2 * z.pp[pid]) * avail;
+      c.def = (p._mvpGrp === "GK" ? 0.7 * z.gprev[pid] + 0.3 * z.stop[pid]
+                                  : 0.7 * z.da[pid] + 0.3 * z.aer[pid]) * avail;
+      c.imp = (0.45 * z.gi[pid] + 0.35 * z.xi[pid] + 0.20 * z.ms[pid]) * avail;
+      c.rat = z.rt[pid] * avail;
+      var base = MVP_COMPS.reduce(function (s, cc) { return s + cc.w * c[cc.k]; }, 0);
       var ctx = 0.06 * (deep[p.team] || 0);
       var disc = 0.03 * (p.yc || 0) + 0.10 * (p.rc || 0);
       return { p: p, c: c, base: base, avail: avail, ctx: ctx, disc: disc,
-               S: base * avail + ctx - disc, run: deep[p.team] || 0 };
+               S: base + ctx - disc, run: deep[p.team] || 0 };
     }).sort(function (a, b) { return b.S - a.S; });
     var Smax = rows[0].S || 1;
     rows.forEach(function (r) { r.idx = Math.round(1000 * r.S / Smax) / 10; });
@@ -4226,7 +4242,7 @@
         '<div class="mvp-line">' + win.p.g + " goals · " + (win.p.a || 0) + " assists · " +
           (win.p.xa || 0).toFixed(1) + " xA · rating " + win.p.rating.toFixed(2) + " · " +
           win.p.mins + "′ · reached the " + runName[win.run] + "</div>" +
-        '<div class="mvp-verdict">Top <b>decile</b> of the whole 270′+ pool in <b>' + topDecile + " of 5</b> components — " +
+        '<div class="mvp-verdict">Top <b>decile</b> of the whole 270′+ pool in <b>' + topDecile + " of " + MVP_COMPS.length + "</b> components — " +
           "the breadth argument: others win single dimensions, nobody else is elite almost everywhere. " +
           "№2 " + esc(sec.p.name) + " scores <b>" + sec.idx.toFixed(1) + "</b>.</div>" +
       "</div>";
@@ -4234,9 +4250,9 @@
     document.getElementById("mvpMethod").innerHTML =
       '<ol class="mvp-steps">' +
         "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly).</li>" +
-        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat and Creation blend in 50% whole-pool z</b>, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
-        "<li>The z-scores combine into <b>five weighted components</b> (below).</li>" +
-        "<li>The weighted sum is damped by <b>availability</b> (×√min(1, minutes/600)), then <b>+0.06 per knockout round reached</b> and <b>−0.03 per yellow / −0.10 per red</b>.</li>" +
+        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat (70%) and Creation (50%) blend in whole-pool z</b> capped at 3.0, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
+        "<li>The z-scores combine into <b>six weighted components</b> (below), each damped by <b>availability</b> (×√min(1, minutes/600)) so a short hot streak can't top a panel.</li>" +
+        "<li>The weighted sum then gains <b>+0.06 per knockout round reached</b> and loses <b>−0.03 per yellow / −0.10 per red</b>.</li>" +
         "<li>Scaled so the <b>winner = 100</b>. Pool: 270′+ played (" + rows.length + " players).</li>" +
       "</ol>" +
       '<div class="mvp-weightbar">' + MVP_COMPS.map(function (cc) {
@@ -4319,14 +4335,15 @@
         (sec.disc ? " / −" + sec.disc.toFixed(2) : "") + ".</p>";
     // ── radar: top 3 on component percentiles ──
     var R = 128, CX = 210, CY = 168, NAMES = MVP_COMPS.map(function (c) { return c.name; });
+    var NAX = MVP_COMPS.length, AXI = NAMES.map(function (_, i) { return i; });
     var tri = rows.slice(0, 3), triCol = ["#3ddc97", "#4ea1ff", "#ffb454"];
     function pt(i, frac) {
-      var ang = -Math.PI / 2 + i * 2 * Math.PI / 5;
+      var ang = -Math.PI / 2 + i * 2 * Math.PI / NAX;
       return [(CX + Math.cos(ang) * R * frac).toFixed(1), (CY + Math.sin(ang) * R * frac).toFixed(1)];
     }
     var rsvg = ['<svg viewBox="0 0 620 336" role="img" aria-label="Top three component percentiles">'];
     [0.25, 0.5, 0.75, 1].forEach(function (fr) {
-      rsvg.push('<polygon points="' + [0, 1, 2, 3, 4].map(function (i) { return pt(i, fr).join(","); }).join(" ") +
+      rsvg.push('<polygon points="' + AXI.map(function (i) { return pt(i, fr).join(","); }).join(" ") +
         '" fill="none" stroke="rgba(147,160,189,0.18)"/>');
     });
     NAMES.forEach(function (nm, i) {
