@@ -4101,15 +4101,15 @@
      colours are a CVD-validated categorical set derived from the site palette. */
   var MVP_COMPS = [
     { k: "att", name: "Goal threat", color: "#24ad74", w: 0.20,
-      parts: "0.5·goals + 0.3·xG + 0.2·finishing (goals−xG), per 90" },
+      parts: "0.5·goals (stage-weighted) + 0.3·xG + 0.2·finishing (goals−xG), per 90" },
     { k: "cre", name: "Creation", color: "#c07f2e", w: 0.20,
-      parts: "0.4·assists + 0.3·xA + 0.3·key passes, per 90" },
+      parts: "0.4·assists (stage-weighted) + 0.3·xA + 0.3·key passes, per 90" },
     { k: "pro", name: "Progression", color: "#3a84d9", w: 0.15,
       parts: "0.5·progressive passes + 0.3·dribbles won, per 90 + 0.2·pass accuracy" },
     { k: "def", name: "Defensive work", color: "#d94f65", w: 0.15,
-      parts: "0.7·defensive actions (Tkl+Int+Rec+Blk+Clr) per 90 + 0.3·aerial win% — keepers: 0.7·goals prevented + 0.3·saves & claims per 90" },
+      parts: "0.5·defensive actions (Tkl+Int+Rec+Blk+Clr) per 90 + 0.3·defensive quality (least xG faced on pitch) + 0.2·aerial win% — keepers: 0.7·goals prevented + 0.3·saves & claims per 90" },
     { k: "imp", name: "Team impact", color: "#1ba3ad", w: 0.15,
-      parts: "0.45·share of the team's goals + assists + 0.35·share of team xG + xA + 0.20·share of possible minutes — how much of the team runs through them" },
+      parts: "0.45·share of the team's goals + assists + 0.35·share of team xG + xA + 0.20·share of possible minutes — position-agnostic (whole-pool z): carrying is carrying" },
     { k: "rat", name: "Judgment", color: "#8a55ee", w: 0.15,
       parts: "WhoScored average match rating (the eye-test proxy)" },
   ];
@@ -4128,10 +4128,16 @@
                     n(p, "blocks") + n(p, "clearances");
       var T = tt[p.team] || {};
       feats[p.pid] = {
-        g: p90(p, "g"), xg: p90(p, "xg"), xgd: p90(p, "xg_diff"),
-        a: p90(p, "a"), xa: p90(p, "xa"), kp: p90(p, "keyPasses"),
+        // goals/assists are STAGE-WEIGHTED (wg/wa from build_players: group x1.0 ...
+        // final x2.0) — a knockout goal is worth more; fall back to raw counts on
+        // edition data built before the field existed
+        g: (p.wg != null ? p.wg : n(p, "g")) * 90 / p.mins,
+        a: (p.wa != null ? p.wa : n(p, "a")) * 90 / p.mins,
+        xg: p90(p, "xg"), xgd: p90(p, "xg_diff"),
+        xa: p90(p, "xa"), kp: p90(p, "keyPasses"),
         prog: p90(p, "progPasses"), drb: p90(p, "dribbles"), pp: n(p, "pass_pct"),
         da: defActs * 90 / p.mins, aer: n(p, "aer_pct"),
+        nxga: -n(p, "xga90"),   // on-pitch defensive quality: less xG faced = better
         gprev: p90(p, "gPrev"), stop: (n(p, "saves") + n(p, "claims")) * 90 / p.mins,
         rt: p.rating,
         // impact shares: how much of the TEAM's output runs through this player
@@ -4169,6 +4175,11 @@
     var ZALL = {};
     ["g", "xg", "xgd", "a", "xa", "kp"].forEach(function (k) { ZALL[k] = zmap(pool, k, 3.0); });
     function zb(gn, k, pid, wPos) { return wPos * Z[gn][k][pid] + (1 - wPos) * ZALL[k][pid]; }
+    // Team impact is position-AGNOSTIC by design: carrying 63% of your team's goals is
+    // carrying, whoever you are — pool z only, so a defender's modest share can't beat
+    // a superstar's massive one on positional rarity.
+    var ZIMP = {};
+    ["gi", "xi", "ms"].forEach(function (k) { ZIMP[k] = zmap(pool, k, 2.5); });
     // knockout-run map (same source as the Best XI deep-run bonus)
     var deep = {};
     try {
@@ -4193,9 +4204,11 @@
       c.att = (0.5 * zb(gn, "g", pid, 0.3) + 0.3 * zb(gn, "xg", pid, 0.3) + 0.2 * zb(gn, "xgd", pid, 0.3)) * avail;
       c.cre = (0.4 * zb(gn, "a", pid, 0.5) + 0.3 * zb(gn, "xa", pid, 0.5) + 0.3 * zb(gn, "kp", pid, 0.5)) * avail;
       c.pro = (0.5 * z.prog[pid] + 0.3 * z.drb[pid] + 0.2 * z.pp[pid]) * avail;
+      // outfield defence: volume of actions + QUALITY (xG faced on pitch, so members of
+      // a great defence score even when possession means they rarely have to tackle)
       c.def = (p._mvpGrp === "GK" ? 0.7 * z.gprev[pid] + 0.3 * z.stop[pid]
-                                  : 0.7 * z.da[pid] + 0.3 * z.aer[pid]) * avail;
-      c.imp = (0.45 * z.gi[pid] + 0.35 * z.xi[pid] + 0.20 * z.ms[pid]) * avail;
+                                  : 0.5 * z.da[pid] + 0.3 * z.nxga[pid] + 0.2 * z.aer[pid]) * avail;
+      c.imp = (0.45 * ZIMP.gi[pid] + 0.35 * ZIMP.xi[pid] + 0.20 * ZIMP.ms[pid]) * avail;
       c.rat = z.rt[pid] * avail;
       var base = MVP_COMPS.reduce(function (s, cc) { return s + cc.w * c[cc.k]; }, 0);
       var ctx = 0.06 * (deep[p.team] || 0);
@@ -4249,7 +4262,7 @@
     // ── methodology ──
     document.getElementById("mvpMethod").innerHTML =
       '<ol class="mvp-steps">' +
-        "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly).</li>" +
+        "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly). <b>Goals and assists are stage-weighted first</b> — group ×1.0, R32 ×1.15, R16 ×1.3, QF ×1.5, SF ×1.75, final ×2.0 — every round is harder, so every round pays more.</li>" +
         "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat (70%) and Creation (50%) blend in whole-pool z</b> capped at 3.0, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
         "<li>The z-scores combine into <b>six weighted components</b> (below), each damped by <b>availability</b> (×√min(1, minutes/600)) so a short hot streak can't top a panel.</li>" +
         "<li>The weighted sum then gains <b>+0.06 per knockout round reached</b> and loses <b>−0.03 per yellow / −0.10 per red</b>.</li>" +

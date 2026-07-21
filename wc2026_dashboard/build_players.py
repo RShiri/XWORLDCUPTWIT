@@ -9,6 +9,7 @@ aggregate()/per_match_rows() for the database exporter.
 import json
 import glob
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +65,7 @@ def _new_player(pid, name, team, pos):
                mp=0, starts=0, mins=0, g=0, a=0, yc=0, rc=0,
                rating_sum=0.0, rating_n=0, rating_best=0.0, xg=0.0,
                progPasses=0, xa=0.0, xgaOn=0.0, gConcOn=0, blocks=0, clrBox=0,
-               recoveries=0)
+               recoveries=0, wg=0.0, wa=0.0)
     for v in SUM_STATS.values():
         rec[v] = 0.0
     return rec
@@ -152,6 +153,30 @@ def _player_blocks_clears(match_data):
         elif tn == "Clearance" and _in_own_box(ev.get("x"), ev.get("y")):
             clr[pid] = clr.get(pid, 0) + 1
     return blocks, clr
+
+
+# Stage weights for the "every round counts more" aggregates (wg/wa): a final goal is
+# worth 2x a group-stage one. Stage is derived from the SLOT-CODED match id — played KO
+# games keep their slot filenames (stub-overwrite convention), and wc_metadata.stage
+# lies on overwritten KO stubs, so the id is the reliable signal.
+_STAGE_W = {"GS": 1.0, "R32": 1.15, "R16": 1.3, "QF": 1.5, "SF": 1.75, "TP": 1.6, "F": 2.0}
+_SLOT_TOKEN = re.compile(r"^(?:[12][A-L]|3[A-L]{4,6})$")       # R32 sides: 1A / 2K / 3ABCDF
+_SLOT_GLUED = re.compile(r"^(?:[12][A-L]|3[A-L]{4,6}){2}$")    # R16 sides: 2A2B / 1E3ABCDF
+
+
+def _stage_weight(mid):
+    if "Winner_SF" in mid: return _STAGE_W["F"]
+    if "Loser_SF" in mid: return _STAGE_W["TP"]
+    if "Winner_QF" in mid: return _STAGE_W["SF"]
+    if "Winner_EF" in mid: return _STAGE_W["QF"]
+    m = re.match(r"^\d{4}_\d{2}_\d{2}_(.+)_vs_(.+)$", mid)
+    if m:
+        a, b = m.group(1), m.group(2)
+        if _SLOT_TOKEN.match(a) and _SLOT_TOKEN.match(b):
+            return _STAGE_W["R32"]
+        if _SLOT_GLUED.match(a) and _SLOT_GLUED.match(b):
+            return _STAGE_W["R16"]
+    return _STAGE_W["GS"]
 
 
 def _player_recoveries(match_data):
@@ -250,6 +275,9 @@ def aggregate():
                             rec["gConcOn"] += 1
                 rec["g"] += ex["goals"].get(pid, 0)
                 rec["a"] += ex["assists"].get(pid, 0)
+                _sw = _stage_weight(mid)
+                rec["wg"] += _sw * ex["goals"].get(pid, 0)
+                rec["wa"] += _sw * ex["assists"].get(pid, 0)
                 rec["yc"] += ex["yellow"].get(pid, 0)
                 rec["rc"] += ex["red"].get(pid, 0)
                 rec["xg"] += shot_xg_map.get(pid, 0.0)
@@ -284,6 +312,8 @@ def aggregate():
         r["xg_diff"] = round(r["g"] - r["xg"], 2)
         r["xa"] = round(r["xa"], 2)
         # on-pitch defence: xG faced, per-90, and goals prevented (faced − conceded)
+        r["wg"] = round(r["wg"], 2)   # stage-weighted goals/assists (final counts 2x)
+        r["wa"] = round(r["wa"], 2)
         r["xga"] = round(r["xgaOn"], 2)
         r["xga90"] = round(r["xgaOn"] / r["mins"] * 90, 2) if r["mins"] else None
         r["gPrev"] = round(r["xgaOn"] - r["gConcOn"], 2)
