@@ -4264,7 +4264,7 @@
     // ── methodology ──
     document.getElementById("mvpMethod").innerHTML =
       '<ol class="mvp-steps">' +
-        "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly). <b>Goals and assists are stage-weighted first</b> — group ×1.0, R32 ×1.15, R16 ×1.3, QF ×1.5, SF ×1.75, final ×2.0 — every round is harder, so every round pays more.</li>" +
+        "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly). <b>Goals and assists are stage-weighted first</b> — group ×1.0, R32 ×1.15, R16 ×1.3, QF ×1.5, SF ×1.75, third-place ×1.5, final ×2.0 — every round is harder, so every round pays more — <b>and by game state</b>: go-ahead goals ×1.25 and equalisers ×1.2 (+15% more after 75′), sparking a comeback ×1.1, padding an already-decided score ×0.7 (×0.5 late) — a goal that changes the game outweighs one that decorates it. The assist inherits its goal’s weight.</li>" +
         "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat uses pure whole-pool z</b> (absolute production — a goal is a goal whoever scores it) and <b>Creation blends 50% whole-pool z</b>, capped at 3.0, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
         "<li>The z-scores combine into <b>six weighted components</b> (below), each damped by <b>availability</b> (×√min(1, minutes/600)) so a short hot streak can't top a panel.</li>" +
         "<li>The weighted sum then gains <b>+0.06 per knockout round reached</b> and loses <b>−0.03 per yellow / −0.10 per red</b>.</li>" +

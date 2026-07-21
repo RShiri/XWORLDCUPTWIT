@@ -16,7 +16,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
-from build_match_details import norm, _match_extras, _player_rating, is_match_file
+from build_match_details import (norm, _match_extras, _player_rating, is_match_file,
+                                 _assist_playerid)
 from xg_model import (ascii_name, SHOT_TYPES, shot_xg, is_shootout,
                       player_xa_from_events)
 
@@ -159,7 +160,7 @@ def _player_blocks_clears(match_data):
 # worth 2x a group-stage one. Stage is derived from the SLOT-CODED match id — played KO
 # games keep their slot filenames (stub-overwrite convention), and wc_metadata.stage
 # lies on overwritten KO stubs, so the id is the reliable signal.
-_STAGE_W = {"GS": 1.0, "R32": 1.15, "R16": 1.3, "QF": 1.5, "SF": 1.75, "TP": 1.6, "F": 2.0}
+_STAGE_W = {"GS": 1.0, "R32": 1.15, "R16": 1.3, "QF": 1.5, "SF": 1.75, "TP": 1.5, "F": 2.0}
 _SLOT_TOKEN = re.compile(r"^(?:[12][A-L]|3[A-L]{4,6})$")       # R32 sides: 1A / 2K / 3ABCDF
 _SLOT_GLUED = re.compile(r"^(?:[12][A-L]|3[A-L]{4,6}){2}$")    # R16 sides: 2A2B / 1E3ABCDF
 
@@ -177,6 +178,64 @@ def _stage_weight(mid):
         if _SLOT_GLUED.match(a) and _SLOT_GLUED.match(b):
             return _STAGE_W["R16"]
     return _STAGE_W["GS"]
+
+
+def _goal_state_w(margin_before, minute):
+    """Game-state weight for one goal: what did it change?
+
+    margin_before = scoring team's lead BEFORE the goal. Go-ahead goals and
+    equalisers matter most (more so late), cutting a big deficit matters if there
+    is still time for the comeback, and padding an already-decided score — or a
+    consolation when the game is gone — matters least."""
+    if margin_before >= 2:                       # padding a decided game
+        return 0.5 if minute >= 80 else 0.7
+    if margin_before <= -2:                      # chasing from 2+ down
+        return 0.7 if minute >= 80 else 1.1      # late = consolation, early = comeback spark
+    if margin_before == 1:                       # doubling the lead
+        return 1.0
+    w = 1.25 if margin_before == 0 else 1.2      # go-ahead goal / equaliser
+    if minute >= 75:
+        w *= 1.15                                # late decider or late equaliser
+    return w
+
+
+def _weighted_goal_contribs(match_data, stage_w):
+    """playerId -> weighted goals / weighted assists for one match.
+
+    Walks the goal events in match order with a running score, so every goal
+    carries stage weight x game-state weight (_goal_state_w). The assist inherits
+    its goal's full weight. Own goals move the score but credit nobody; shootout
+    kicks are excluded."""
+    events = match_data.get("events", [])
+    home_tid = match_data.get("home", {}).get("teamId")
+    away_tid = match_data.get("away", {}).get("teamId")
+    by_team_eid = {}
+    for e in events:
+        by_team_eid.setdefault(e.get("teamId"), {})[e.get("eventId")] = e
+    goal_evs = [e for e in events
+                if e.get("type", {}).get("displayName") == "Goal" and not is_shootout(e)]
+    goal_evs.sort(key=lambda e: (e.get("expandedMinute") if e.get("expandedMinute") is not None
+                                 else (e.get("minute") or 0), e.get("second") or 0))
+    score = {home_tid: 0, away_tid: 0}
+    wg, wa = {}, {}
+    for e in goal_evs:
+        quals = {q.get("type", {}).get("displayName", "") for q in e.get("qualifiers", [])}
+        own = bool(e.get("isOwnGoal")) or "OwnGoal" in quals
+        tid = e.get("teamId")
+        scoring = (away_tid if tid == home_tid else home_tid) if own else tid
+        other = away_tid if scoring == home_tid else home_tid
+        margin_before = score.get(scoring, 0) - score.get(other, 0)
+        score[scoring] = score.get(scoring, 0) + 1
+        if own:
+            continue                             # nobody gets credit for an own goal
+        w = stage_w * _goal_state_w(margin_before, e.get("minute") or 0)
+        pid = e.get("playerId")
+        if pid is not None:
+            wg[pid] = wg.get(pid, 0.0) + w
+        aid = _assist_playerid(e, pid, by_team_eid)
+        if aid is not None:
+            wa[aid] = wa.get(aid, 0.0) + w
+    return wg, wa
 
 
 def _player_recoveries(match_data):
@@ -232,6 +291,7 @@ def aggregate():
         xa_map = player_xa_from_events(d)  # pass-level xA model (xg_core)
         blk_map, clrbox_map = _player_blocks_clears(d)
         recov_map = _player_recoveries(d)
+        wgoal_map, wassist_map = _weighted_goal_contribs(d, _stage_weight(mid))
         shotlist = _defense_shotlist(d)
         team_ids = {s: d[s].get("teamId") for s in ("home", "away")}
         for side in ("home", "away"):
@@ -275,9 +335,8 @@ def aggregate():
                             rec["gConcOn"] += 1
                 rec["g"] += ex["goals"].get(pid, 0)
                 rec["a"] += ex["assists"].get(pid, 0)
-                _sw = _stage_weight(mid)
-                rec["wg"] += _sw * ex["goals"].get(pid, 0)
-                rec["wa"] += _sw * ex["assists"].get(pid, 0)
+                rec["wg"] += wgoal_map.get(pid, 0.0)
+                rec["wa"] += wassist_map.get(pid, 0.0)
                 rec["yc"] += ex["yellow"].get(pid, 0)
                 rec["rc"] += ex["red"].get(pid, 0)
                 rec["xg"] += shot_xg_map.get(pid, 0.0)
@@ -312,7 +371,7 @@ def aggregate():
         r["xg_diff"] = round(r["g"] - r["xg"], 2)
         r["xa"] = round(r["xa"], 2)
         # on-pitch defence: xG faced, per-90, and goals prevented (faced − conceded)
-        r["wg"] = round(r["wg"], 2)   # stage-weighted goals/assists (final counts 2x)
+        r["wg"] = round(r["wg"], 2)   # stage- & game-state-weighted goals/assists
         r["wa"] = round(r["wa"], 2)
         r["xga"] = round(r["xgaOn"], 2)
         r["xga90"] = round(r["xgaOn"] / r["mins"] * 90, 2) if r["mins"] else None
