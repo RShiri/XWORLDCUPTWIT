@@ -4131,23 +4131,31 @@
       var gg = posGroup(p.pos);
       p._mvpGrp = (gg === "GK" || gg === "DF" || gg === "FW") ? gg : "MF";
     });
-    // z-scores within position group, clamped to ±2.5
+    // z-scores within position group, plus whole-pool z for the attacking features
     var groups = {};
     pool.forEach(function (p) { (groups[p._mvpGrp] = groups[p._mvpGrp] || []).push(p); });
+    function zmap(players, k) {
+      var vals = players.map(function (q) { return feats[q.pid][k]; });
+      var m = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+      var sd = Math.sqrt(vals.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / vals.length);
+      var out = {};
+      players.forEach(function (q) {
+        // soft saturation: outliers damp toward ±2.5 without the fake ties a hard clamp makes
+        out[q.pid] = sd ? 2.5 * Math.tanh(((feats[q.pid][k] - m) / sd) / 2.5) : 0;
+      });
+      return out;
+    }
     var Z = {};
     Object.keys(groups).forEach(function (gn) {
       Z[gn] = {};
-      Object.keys(feats[groups[gn][0].pid]).forEach(function (k) {
-        var vals = groups[gn].map(function (q) { return feats[q.pid][k]; });
-        var m = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
-        var sd = Math.sqrt(vals.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / vals.length);
-        Z[gn][k] = {};
-        groups[gn].forEach(function (q) {
-          // soft saturation: outliers damp toward ±2.5 without the fake ties a hard clamp makes
-          Z[gn][k][q.pid] = sd ? 2.5 * Math.tanh(((feats[q.pid][k] - m) / sd) / 2.5) : 0;
-        });
-      });
+      Object.keys(feats[groups[gn][0].pid]).forEach(function (k) { Z[gn][k] = zmap(groups[gn], k); });
     });
+    // Goal threat & Creation blend 50% positional z + 50% whole-pool z: positional-only let
+    // "elite for a defender" outrank "elite outright" (a full-back's 0.30 g/90 is a 3σ freak
+    // among defenders, but absolute production has to count too).
+    var ZALL = {};
+    ["g", "xg", "xgd", "a", "xa", "kp"].forEach(function (k) { ZALL[k] = zmap(pool, k); });
+    function zb(gn, k, pid) { return 0.5 * Z[gn][k][pid] + 0.5 * ZALL[k][pid]; }
     // knockout-run map (same source as the Best XI deep-run bonus)
     var deep = {};
     try {
@@ -4165,9 +4173,9 @@
       });
     } catch (e) {}
     var rows = pool.map(function (p) {
-      var z = Z[p._mvpGrp], pid = p.pid, c = {};
-      c.att = 0.5 * z.g[pid] + 0.3 * z.xg[pid] + 0.2 * z.xgd[pid];
-      c.cre = 0.4 * z.a[pid] + 0.3 * z.xa[pid] + 0.3 * z.kp[pid];
+      var z = Z[p._mvpGrp], gn = p._mvpGrp, pid = p.pid, c = {};
+      c.att = 0.5 * zb(gn, "g", pid) + 0.3 * zb(gn, "xg", pid) + 0.2 * zb(gn, "xgd", pid);
+      c.cre = 0.4 * zb(gn, "a", pid) + 0.3 * zb(gn, "xa", pid) + 0.3 * zb(gn, "kp", pid);
       c.pro = 0.5 * z.prog[pid] + 0.3 * z.drb[pid] + 0.2 * z.pp[pid];
       c.def = p._mvpGrp === "GK" ? 0.7 * z.gprev[pid] + 0.3 * z.stop[pid]
                                  : 0.7 * z.da[pid] + 0.3 * z.aer[pid];
@@ -4226,7 +4234,7 @@
     document.getElementById("mvpMethod").innerHTML =
       '<ol class="mvp-steps">' +
         "<li>Every counting stat becomes a <b>per-90 rate</b> (a 500′ player and an 800′ player compare fairly).</li>" +
-        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\"</li>" +
+        "<li>Each rate is <b>z-scored against positional peers</b> (GK / DF / MF / FW), softly capped at ±2.5 (tanh) so one freak outlier can't run away — \"how unusual is this number <i>for that job</i>?\" <b>Goal threat and Creation blend in 50% whole-pool z</b>, so absolute output counts too and \"elite for a defender\" can't outrank \"elite outright\".</li>" +
         "<li>The z-scores combine into <b>five weighted components</b> (below).</li>" +
         "<li>The weighted sum is damped by <b>availability</b> (×√min(1, minutes/600)), then <b>+0.06 per knockout round reached</b> and <b>−0.03 per yellow / −0.10 per red</b>.</li>" +
         "<li>Scaled so the <b>winner = 100</b>. Pool: 270′+ played (" + rows.length + " players).</li>" +
