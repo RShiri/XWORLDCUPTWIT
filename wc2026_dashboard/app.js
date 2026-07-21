@@ -4101,17 +4101,29 @@
      colours are a CVD-validated categorical set derived from the site palette. */
   var MVP_COMPS = [
     { k: "att", name: "Goal threat", color: "#24ad74", w: 0.20,
-      parts: "0.5·goals (stage-weighted) + 0.3·xG + 0.2·finishing (goals−xG), per 90" },
+      parts: "0.5·goals (stage-weighted) + 0.3·xG + 0.2·finishing (goals−xG), per 90",
+      how: "Absolute — whole-pool z only: a goal is a goal whoever scores it. Goals carry round × game-state weight (a final winner ≫ group-stage padding).",
+      strip: { f: "g", label: "weighted goals / 90", dp: 2 } },
     { k: "cre", name: "Creation", color: "#c07f2e", w: 0.20,
-      parts: "0.4·assists (stage-weighted) + 0.3·xA + 0.3·key passes, per 90" },
+      parts: "0.4·assists (stage-weighted) + 0.3·xA + 0.3·key passes, per 90",
+      how: "50% vs positional peers, 50% vs the whole pool. Assists inherit their goal's round & game-state weight; xA credits chances created even when the finish was missed.",
+      strip: { f: "a", label: "weighted assists / 90", dp: 2 } },
     { k: "pro", name: "Progression", color: "#3a84d9", w: 0.15,
-      parts: "0.5·progressive passes + 0.3·dribbles won, per 90 + 0.2·pass accuracy" },
+      parts: "0.5·progressive passes + 0.3·dribbles won, per 90 + 0.2·pass accuracy",
+      how: "Positional z: who moves the ball forward most for their role — progressive passes (≥14 units toward goal), completed take-ons, and clean passing.",
+      strip: { f: "prog", label: "progressive passes / 90", dp: 1 } },
     { k: "def", name: "Defensive work", color: "#d94f65", w: 0.15,
-      parts: "0.5·defensive actions (Tkl+Int+Rec+Blk+Clr) per 90 + 0.3·defensive quality (least xG faced on pitch) + 0.2·aerial win% — keepers: 0.7·goals prevented + 0.3·saves & claims per 90" },
+      parts: "0.5·defensive actions (Tkl+Int+Rec+Blk+Clr) per 90 + 0.3·defensive quality (least xG faced on pitch) + 0.2·aerial win% — keepers: 0.7·goals prevented + 0.3·saves & claims per 90",
+      how: "Positional z: volume of defensive actions PLUS quality (least xG faced while on the pitch — so the best defence scores even when possession means few tackles). Keepers judged on goals prevented instead.",
+      strip: { f: "da", label: "defensive actions / 90 (outfield)", dp: 1, noGK: true } },
     { k: "imp", name: "Team impact", color: "#1ba3ad", w: 0.15,
-      parts: "0.45·share of the team's goals + assists + 0.35·share of team xG + xA + 0.20·share of possible minutes — position-agnostic (whole-pool z): carrying is carrying" },
+      parts: "0.45·share of the team's goals + assists + 0.35·share of team xG + xA + 0.20·share of possible minutes — position-agnostic (whole-pool z): carrying is carrying",
+      how: "Whole-pool z, no positional adjustment: carrying 63% of your team's goals is carrying, whoever you are.",
+      strip: { f: "gi", label: "% of team's goals with their G/A", dp: 0, pct: 100 } },
     { k: "rat", name: "Judgment", color: "#8a55ee", w: 0.15,
-      parts: "WhoScored average match rating (the eye-test proxy)" },
+      parts: "WhoScored average match rating (the eye-test proxy)",
+      how: "Positional z of the average WhoScored match rating — the closest thing the data has to the eye test.",
+      strip: { f: "rt", label: "average match rating", dp: 2 } },
   ];
 
   function mvpCompute() {
@@ -4220,7 +4232,7 @@
     }).sort(function (a, b) { return b.S - a.S; });
     var Smax = rows[0].S || 1;
     rows.forEach(function (r) { r.idx = Math.round(1000 * r.S / Smax) / 10; });
-    return { rows: rows, pool: pool };
+    return { rows: rows, pool: pool, feats: feats };
   }
 
   function mvpPct(rows, key, val) {   // percentile of a component value within the ranked pool
@@ -4302,7 +4314,52 @@
     });
     svg.push("</svg>");
     document.getElementById("mvpTop10").innerHTML = svg.join("");
-    // ── component leader panels ──
+    // ── component leader panels: how it's calculated + top-5 z bars + a distribution
+    //    strip of the WHOLE pool on the category's headline raw stat (top 3 highlighted) ──
+    var F = M.feats;
+    function stripSVG(cc) {
+      var sp = cc.strip;
+      if (!sp) return "";
+      var players = rows.filter(function (r) { return !(sp.noGK && r.p._mvpGrp === "GK"); });
+      var scale = sp.pct || 1;
+      function rv(r) { return (F[r.p.pid][sp.f] || 0) * scale; }
+      var vals = players.map(rv);
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      if (hi - lo < 1e-9) return "";
+      var mean = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+      var W2 = 320, H2 = 92, X0 = 6, X1 = W2 - 6, Y0 = 40, YB = 66;
+      function x(v) { return X0 + (X1 - X0) * (v - lo) / (hi - lo); }
+      var top3 = players.slice().sort(function (a, b) { return rv(b) - rv(a); }).slice(0, 3);
+      var s = ['<svg viewBox="0 0 ' + W2 + " " + H2 + '" class="mp-strip" role="img" aria-label="' +
+        esc(cc.name + " distribution") + '">'];
+      s.push('<line x1="' + x(mean).toFixed(1) + '" y1="' + (Y0 - 6) + '" x2="' + x(mean).toFixed(1) +
+        '" y2="' + (YB + 2) + '" stroke="rgba(147,160,189,0.35)" stroke-dasharray="3 3"/>');
+      players.forEach(function (r, i) {
+        if (top3.indexOf(r) >= 0) return;
+        var jy = Y0 + 4 + ((i * 37) % 19);   // deterministic vertical jitter
+        s.push('<circle cx="' + x(rv(r)).toFixed(1) + '" cy="' + jy + '" r="2" fill="rgba(147,160,189,0.28)">' +
+          "<title>" + esc(r.p.name + " · " + rv(r).toFixed(sp.dp)) + "</title></circle>");
+      });
+      top3.forEach(function (r, i) {
+        var cx = x(rv(r)), ly = 10 + i * 11;
+        var lx = Math.min(Math.max(cx, 40), W2 - 40);
+        s.push('<line x1="' + cx.toFixed(1) + '" y1="' + (ly + 3) + '" x2="' + cx.toFixed(1) +
+            '" y2="' + (Y0 + 10) + '" stroke="' + cc.color + '" stroke-opacity="0.35"/>' +
+          '<circle cx="' + cx.toFixed(1) + '" cy="' + (Y0 + 10) + '" r="4.5" fill="' + cc.color +
+            '" stroke="#161d31" stroke-width="2"><title>' + esc(r.p.name + " · " + rv(r).toFixed(sp.dp)) + "</title></circle>" +
+          '<text x="' + lx.toFixed(1) + '" y="' + ly + '" font-size="9.5" fill="#e8edf7" text-anchor="middle" font-weight="600">' +
+            esc(r.p.name.split(" ").slice(-1)[0]) + " " + rv(r).toFixed(sp.dp) + "</text>");
+      });
+      var mx2 = x(mean);
+      if (mx2 - X0 > 42)   // skip the min label when the mean hugs the left edge
+        s.push('<text x="' + X0 + '" y="' + (YB + 10) + '" font-size="8.5" fill="#93a0bd">' + lo.toFixed(sp.dp) + "</text>");
+      s.push('<text x="' + mx2.toFixed(1) + '" y="' + (YB + 10) + '" font-size="8.5" fill="#93a0bd" text-anchor="middle">avg ' + mean.toFixed(sp.dp) + "</text>");
+      if (X1 - mx2 > 42)
+        s.push('<text x="' + X1 + '" y="' + (YB + 10) + '" font-size="8.5" fill="#93a0bd" text-anchor="end">' + hi.toFixed(sp.dp) + "</text>");
+      s.push('<text x="' + (W2 / 2) + '" y="' + (H2 - 3) + '" font-size="8.5" fill="#93a0bd" text-anchor="middle">' + esc(sp.label) + "</text>");
+      s.push("</svg>");
+      return s.join("");
+    }
     document.getElementById("mvpComponents").innerHTML = '<div class="mvp-panels">' +
       MVP_COMPS.map(function (cc) {
         var sorted = rows.slice().sort(function (a, b) { return b.c[cc.k] - a.c[cc.k]; });
@@ -4316,11 +4373,14 @@
             '<div class="mp-track"><div class="mp-fill" style="width:' + pct.toFixed(0) + "%;background:" + cc.color + '"></div></div>' +
             '<span class="mp-val">' + (r.c[cc.k] >= 0 ? "+" : "") + r.c[cc.k].toFixed(2) + "</span></div>";
         }
-        return '<div class="mvp-panel"><h4><i style="background:' + cc.color + '"></i>' + esc(cc.name) + "</h4>" +
+        return '<div class="mvp-panel"><h4><i style="background:' + cc.color + '"></i>' + esc(cc.name) +
+          '<span class="mp-w">' + Math.round(cc.w * 100) + "%</span></h4>" +
+          '<p class="mp-how">' + esc(cc.how || "") + "</p>" +
           top5.map(function (r, i) { return row(r, i + 1); }).join("") +
           // the breadth argument: always show where the winner sits, even outside the top 5
           (winRank > 5 ? '<div class="mp-more">… ★ ' + esc(win.p.name.split(" ").slice(-1)[0]) +
-            " is #" + winRank + " of " + rows.length + "</div>" : "") + "</div>";
+            " is #" + winRank + " of " + rows.length + "</div>" : "") +
+          stripSVG(cc) + "</div>";
       }).join("") + "</div>";
     // ── head-to-head №1 vs №2 ──
     document.getElementById("mvpH2H").innerHTML =
