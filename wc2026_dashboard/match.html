@@ -38,6 +38,9 @@
     window.WC_EDITION = ed;
     var base = ed === 2026 ? "" : "editions/" + ed + "/";
     document.write('<scr'+'ipt src="ratings.js?v='+_mv+'"></scr'+'ipt>');
+    // calibrated win-probability parameters (all editions share the one table,
+    // so it loads root-relative like ratings.js — no edition base prefix)
+    document.write('<scr'+'ipt src="winprob_params.js?v='+_mv+'"></scr'+'ipt>');
     document.write('<scr'+'ipt src="'+base+'data.js?v='+_mv+'"></scr'+'ipt>');
     document.write('<scr'+'ipt src="match.js?v='+_mv+'"></scr'+'ipt>');
   })();</script>

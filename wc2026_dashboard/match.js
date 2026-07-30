@@ -299,9 +299,11 @@
   }
 
   /* Live win probability — a betting-style "who wins?" timeline. Each side's line is seeded at
-     kickoff from the FIFA-ranking gap (the favourite starts higher), then re-estimated every
-     minute from the running score + live xG through a double-Poisson outcome model. It converges
-     to the actual result by full time (a level knockout resolves to the shootout winner).
+     kickoff from calibrated attack/defence rates (winprob_params.js, fit on WC 2018/2022/2026 —
+     neutral venue, no home advantage), then re-estimated every minute from the running score +
+     the last-15' xG pace through a double-Poisson outcome model. It converges to the actual
+     result by full time (a level knockout resolves to the shootout winner). Where the params
+     file (or a team) is missing it falls back to the old FIFA-ranking Elo seeding.
      Knockouts fold the draw 50/50 into the two team lines; group games add a grey Draw line. */
   function buildWinProb(D) {
     var host = document.getElementById("mv-winprob");
@@ -315,27 +317,43 @@
     var maxMin = Math.max(90, Math.ceil(lastMin / 5) * 5);
     var isKO = /round of|quarter|semi|final|3rd place|third place|play-?off/i.test(D.stage || "");
 
-    // ---- model constants ----
+    // ---- model constants (Elo fallback path) ----
     var HALF_MU = 1.35, GOAL_PER_ELO = 0.006, HFA = 0.10, T0 = 25;
+    // Calibrated model (winprob_params.js): country att/def rates + the in-play blend
+    // weight / grid size / floor, fit by live-pipeline/tradepipe/calibrate.py. Used when
+    // the file loaded AND both sides are in its table; otherwise the Elo path below runs.
+    var WP = window.WINPROB_PARAMS || null;
+    var calH = WP && WP.teams ? WP.teams[D.home.name] : null;
+    var calA = WP && WP.teams ? WP.teams[D.away.name] : null;
+    var useCal = !!(WP && calH && calA);
+    var MAXG = useCal ? WP.maxGoals : 8;
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
     function poisson(k, lam) { var f = 1; for (var i = 2; i <= k; i++) f *= i; return Math.exp(-lam) * Math.pow(lam, k) / f; }
     // double-Poisson over remaining goals, offset by the current score → P(final H/D/A)
     function P3(muH, muA, cH, cA) {
       var pW = 0, pD = 0, pL = 0;
-      for (var i = 0; i <= 8; i++) for (var j = 0; j <= 8; j++) {
+      for (var i = 0; i <= MAXG; i++) for (var j = 0; j <= MAXG; j++) {
         var p = poisson(i, muH) * poisson(j, muA);
         var fh = cH + i, fa = cA + j;
         if (fh > fa) pW += p; else if (fh === fa) pD += p; else pL += p;
       }
-      return [pW, pD, pL];
+      var tot = pW + pD + pL;               // renormalize the truncated grid tail
+      return [pW / tot, pD / tot, pL / tot];
     }
     var FIFA = window.FIFA_PTS || {};
     function fifa(name) { return FIFA[name] || 1400; }
 
-    // pre-match seed λ from the ranking gap
-    var sup = GOAL_PER_ELO * (fifa(D.home.name) - fifa(D.away.name));
-    var lamH0 = clamp(HALF_MU + sup / 2 + HFA / 2, 0.15, 4);
-    var lamA0 = clamp(HALF_MU - sup / 2 - HFA / 2, 0.15, 4);
+    // pre-match seed λ: calibrated att·def rates (World Cup = neutral venue, no HFA term);
+    // Elo fallback keeps the old ranking-gap seeding for teams outside the fitted table.
+    var lamH0, lamA0;
+    if (useCal) {
+      lamH0 = Math.max(WP.lamFloor, calH.att * calA.def / WP.mu);
+      lamA0 = Math.max(WP.lamFloor, calA.att * calH.def / WP.mu);
+    } else {
+      var sup = GOAL_PER_ELO * (fifa(D.home.name) - fifa(D.away.name));
+      lamH0 = clamp(HALF_MU + sup / 2 + HFA / 2, 0.15, 4);
+      lamA0 = clamp(HALF_MU - sup / 2 - HFA / 2, 0.15, 4);
+    }
     var baseRateH = lamH0 / 90, baseRateA = lamA0 / 90;
 
     // cumulative xG up to a given minute, per side
@@ -346,24 +364,40 @@
     function wpAt(t) {
       var R = Math.max(0, maxMin - t);
       var cH = goalsUpTo("home", t), cA = goalsUpTo("away", t);
-      var xgRH = t > 0 ? xgUpTo("home", t) / t : baseRateH;
-      var xgRA = t > 0 ? xgUpTo("away", t) / t : baseRateA;
-      var w = t / (t + T0);
-      var rateH = (1 - w) * baseRateH + w * xgRH, rateA = (1 - w) * baseRateA + w * xgRA;
-      // Game state: a side chasing a deficit pushes (rate up ~25% per goal down, capped
-      // at two), the side protecting a lead manages the game (rate down ~15%). Without
-      // this, a trailing team is priced off its own starved in-match xG — France '26 SF
-      // (0.40 xG all game) flat-lined at 0% from the second goal, which no in-play
-      // model would show while a comeback was still mathematically live.
-      var d = cH - cA;
-      if (d < 0) { rateH *= 1 + 0.25 * Math.min(2, -d); rateA *= 0.85; }
-      else if (d > 0) { rateA *= 1 + 0.25 * Math.min(2, d); rateH *= 0.85; }
-      // Residual threat: blended rates never drop below half the pre-match base — a
-      // World Cup side always carries some chance of the next goal, however blunt its
-      // xG has been so far.
-      rateH = Math.max(rateH, 0.5 * baseRateH);
-      rateA = Math.max(rateA, 0.5 * baseRateA);
-      var pr = P3(clamp(rateH, 0, 10) * R, clamp(rateA, 0, 10) * R, cH, cA);
+      var lamRemH, lamRemA;
+      if (useCal) {
+        // Calibrated in-play update: blend the pre-match λ with the side's live pace
+        // (xG in the last 15', extrapolated to a full match), scale by the minutes
+        // left (regulation + ET, so the horizon matches the chart), and floor it so
+        // a dominated side is never priced fully dead:
+        //   lamRem = (R/90)·((1−w)·lamPre + w·90·pace15), min lamFloor·R/90
+        var frac = R / 90, w = WP.w;
+        var paceH = (xgUpTo("home", t) - xgUpTo("home", t - 15)) / 15;
+        var paceA = (xgUpTo("away", t) - xgUpTo("away", t - 15)) / 15;
+        lamRemH = Math.max(frac * ((1 - w) * lamH0 + w * 90 * paceH), WP.lamFloor * frac);
+        lamRemA = Math.max(frac * ((1 - w) * lamA0 + w * 90 * paceA), WP.lamFloor * frac);
+      } else {
+        // ---- old Elo path (params file/teams missing) ----
+        var xgRH = t > 0 ? xgUpTo("home", t) / t : baseRateH;
+        var xgRA = t > 0 ? xgUpTo("away", t) / t : baseRateA;
+        var wE = t / (t + T0);
+        var rateH = (1 - wE) * baseRateH + wE * xgRH, rateA = (1 - wE) * baseRateA + wE * xgRA;
+        // Game state: a side chasing a deficit pushes (rate up ~25% per goal down, capped
+        // at two), the side protecting a lead manages the game (rate down ~15%). Without
+        // this, a trailing team is priced off its own starved in-match xG — France '26 SF
+        // (0.40 xG all game) flat-lined at 0% from the second goal, which no in-play
+        // model would show while a comeback was still mathematically live.
+        var d = cH - cA;
+        if (d < 0) { rateH *= 1 + 0.25 * Math.min(2, -d); rateA *= 0.85; }
+        else if (d > 0) { rateA *= 1 + 0.25 * Math.min(2, d); rateH *= 0.85; }
+        // Residual threat: blended rates never drop below half the pre-match base — a
+        // World Cup side always carries some chance of the next goal, however blunt its
+        // xG has been so far.
+        rateH = Math.max(rateH, 0.5 * baseRateH);
+        rateA = Math.max(rateA, 0.5 * baseRateA);
+        lamRemH = clamp(rateH, 0, 10) * R; lamRemA = clamp(rateA, 0, 10) * R;
+      }
+      var pr = P3(lamRemH, lamRemA, cH, cA);
       var pW = pr[0], pD = pr[1], pL = pr[2];
       if (isKO) return [(pW + pD / 2) * 100, (pL + pD / 2) * 100, 0];
       return [pW * 100, pL * 100, pD * 100];
@@ -533,7 +567,9 @@
       '<span><i style="background:' + colA + '"></i>' + esc(D.away.name) + " — <b>" + fmtPct(finA) + "%</b> win</span>" +
       (isKO ? "" : '<span><i style="background:' + colD + '"></i>Draw — <b>' + fmtPct(finD) + "%</b></span>") +
       "</div>";
-    host.innerHTML = '<p class="hint">Live <b>win probability</b> — seeded at kickoff from the FIFA-ranking gap, then updated each minute by the running score and live xG. ' +
+    host.innerHTML = '<p class="hint">Live <b>win probability</b> — ' +
+      (useCal ? "seeded at kickoff from calibrated team attack/defence rates (neutral venue), then updated each minute by the running score and the last-15&prime; xG pace. "
+              : "seeded at kickoff from the FIFA-ranking gap, then updated each minute by the running score and live xG. ") +
       (isKO ? "A level knockout resolves to the shootout winner. " : "The grey line is the draw chance. ") +
       'Each goal is labelled with the score; <b>hover (or drag) across the chart to read the win % at any minute</b>. An estimate, not a betting market.</p>' +
       '<div class="mv-mom-wrap">' + svg.join("") + "</div>" + legend +
