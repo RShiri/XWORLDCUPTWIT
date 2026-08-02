@@ -325,7 +325,10 @@
     var WP = window.WINPROB_PARAMS || null;
     var calH = WP && WP.teams ? WP.teams[D.home.name] : null;
     var calA = WP && WP.teams ? WP.teams[D.away.name] : null;
-    var useCal = !!(WP && calH && calA);
+    var useCal = !!(WP && calH && calA && window.WinProb);
+    // The maths lives in winprob_model.js, the single browser port of
+    // tradepipe/model.py that calibrate.py ships next to winprob_params.js.
+    var calModel = useCal ? window.WinProb.forMatch(WP, D.home.name, D.away.name) : null;
     var MAXG = useCal ? WP.maxGoals : 8;
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
     function poisson(k, lam) { var f = 1; for (var i = 2; i <= k; i++) f *= i; return Math.exp(-lam) * Math.pow(lam, k) / f; }
@@ -364,18 +367,22 @@
     function wpAt(t) {
       var R = Math.max(0, maxMin - t);
       var cH = goalsUpTo("home", t), cA = goalsUpTo("away", t);
-      var lamRemH, lamRemA;
+      var lamRemH, lamRemA, pr = null;
       if (useCal) {
-        // Calibrated in-play update: blend the pre-match λ with the side's live pace
-        // (xG in the last 15', extrapolated to a full match), scale by the minutes
-        // left (regulation + ET, so the horizon matches the chart), and floor it so
-        // a dominated side is never priced fully dead:
-        //   lamRem = (R/90)·((1−w)·lamPre + w·90·pace15), min lamFloor·R/90
-        var frac = R / 90, w = WP.w;
-        var paceH = (xgUpTo("home", t) - xgUpTo("home", t - 15)) / 15;
-        var paceA = (xgUpTo("away", t) - xgUpTo("away", t - 15)) / 15;
-        lamRemH = Math.max(frac * ((1 - w) * lamH0 + w * 90 * paceH), WP.lamFloor * frac);
-        lamRemA = Math.max(frac * ((1 - w) * lamA0 + w * 90 * paceA), WP.lamFloor * frac);
+        // Calibrated in-play update, run by the shared model: the same code
+        // the Python pipeline prices with. Past 90' the fitted
+        // remaining-scoring profile no longer applies (it is defined on the
+        // 90-minute market clock), so hand it an explicit horizon instead —
+        // the minutes left to the real final whistle, as a share of a
+        // 90-minute match's worth of scoring, which keeps the curve running
+        // to the end of the chart through extra time.
+        var win = WP.window || 15;
+        pr = calModel.probsAt(t, {
+          scoreH: cH, scoreA: cA,
+          xgH: xgUpTo("home", t) - xgUpTo("home", t - win),
+          xgA: xgUpTo("away", t) - xgUpTo("away", t - win),
+          horizon: maxMin > 90 ? R / 90 : null
+        });
       } else {
         // ---- old Elo path (params file/teams missing) ----
         var xgRH = t > 0 ? xgUpTo("home", t) / t : baseRateH;
@@ -397,7 +404,7 @@
         rateA = Math.max(rateA, 0.5 * baseRateA);
         lamRemH = clamp(rateH, 0, 10) * R; lamRemA = clamp(rateA, 0, 10) * R;
       }
-      var pr = P3(lamRemH, lamRemA, cH, cA);
+      if (!pr) pr = P3(lamRemH, lamRemA, cH, cA);
       var pW = pr[0], pD = pr[1], pL = pr[2];
       if (isKO) return [(pW + pD / 2) * 100, (pL + pD / 2) * 100, 0];
       return [pW * 100, pL * 100, pD * 100];

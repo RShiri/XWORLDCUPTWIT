@@ -123,6 +123,41 @@ class XGScorer:
             yield ev.get("eventId"), self.xg_from_shot_event(ev, byid, prev_pass, league)
 
     # ---------------------------------------------------------- legacy scalar
+
+    def match_xg_by_id(self, match_data, league=None):
+        """{id(event): xg} for every real shot in the match — the collision-safe
+        integration point for build pipelines. Same shot selection and scoring as
+        iter_match_xg (each shot linked to its assisting pass, penalties flat, own goals
+        and shootout kicks excluded), but keyed by Python object identity instead of the
+        non-unique WhoScored event_id. Callers look each shot up by id(ev) from the SAME
+        match_data, so the identities line up and colliding-eventId shots stay distinct."""
+        evs = match_data.get("events", [])
+        byid = {e.get("eventId"): e for e in evs}
+        out, prev_pass = {}, None
+        for ev in evs:
+            t = ev.get("type", {})
+            dn = t.get("displayName") if isinstance(t, dict) else None
+            if dn == "Pass":
+                prev_pass = ev
+            if not isinstance(t, dict) or dn not in SHOT_TYPES:
+                continue
+            if is_shootout(ev) or "OwnGoal" in _qual_set(ev):
+                continue
+            out[id(ev)] = self.xg_from_shot_event(ev, byid, prev_pass, league)
+        return out
+
+    # ---------------------------------------------------------- legacy scalar
+    def estimate_xg(self, x_sb, y_sb, is_penalty, is_big_chance, body_part,
+                    situation="Open Play", assisted=False, league=None):
+        """Backward-compatible scalar API. NOTE: it cannot see the assisting pass,
+        so the 5 assist-context extras (and the shot-type tags) default to 0 — use
+        iter_match_xg / xg_from_shot_event for full v3 xG."""
+        if is_penalty:
+            return self.art.get("penalty_xg", 0.76)
+        feats = feature_dict(x_sb, y_sb, body_part, situation, is_big_chance,
+                             assisted=assisted)
+        return self.xg_from_features(feats, league=league)
+
     def estimate_xg(self, x_sb, y_sb, is_penalty, is_big_chance, body_part,
                     situation="Open Play", assisted=False, league=None):
         """Backward-compatible scalar API. NOTE: it cannot see the assisting pass,

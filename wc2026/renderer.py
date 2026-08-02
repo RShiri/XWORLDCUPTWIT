@@ -137,8 +137,12 @@ _SHOT_TYPES = {"MissedShots", "SavedShot", "ShotOnPost", "BlockedShot", "Goal"}
 def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
     tid = _team_id_for_name(match_data, team_name)
     rows = []
-    # v3 xG per shot (assist-context aware), keyed by eventId, computed once per match
-    xg_map = dict(_XG_SCORER.iter_match_xg(match_data, league=_XG_LEAGUE))
+    # v3 xG per shot (assist-context aware), computed once per match and keyed by
+    # id(event): WhoScored eventId is NOT unique within a match (two real shots
+    # share one in 8 of the 104 WC2026 fixtures), so an eventId-keyed dict hands
+    # both shots the same xG. This is the same collision-safe path the site uses,
+    # so the PNG and the dashboard agree by construction.
+    xg_map = _XG_SCORER.match_xg_by_id(match_data, league=_XG_LEAGUE)
     for ev in match_data.get("events", []):
         if ev.get("teamId") != tid:
             continue
@@ -176,7 +180,7 @@ def build_shot_df(match_data: dict, team_name: str) -> pd.DataFrame:
             "is_goal":      type_name == "Goal",
             "is_on_target": type_name in ("SavedShot", "Goal"),
             "xG":           (xg_stored if xg_stored is not None
-                             else xg_map.get(ev.get("eventId"),
+                             else xg_map.get(id(ev),
                                   _estimate_xg(x_sb, y_sb, is_penalty, big_chance, body, situation,
                                                assisted=ev.get("relatedPlayerId") is not None))),
             "body_part":    body,

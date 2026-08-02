@@ -286,7 +286,17 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   (WinError 183 / wedged Chrome). `renderer.render_wc_dashboard` raises a clear error on an
   empty stub instead of dividing by zero; `tools/catchup.py` `_is_real` treats a crash-stub
   (has `_sources/_scraped_at` but no events/lineups) as incomplete so the daily sweep retries.
-- **Live PNGs must be in tracked `WorldCup2026/`**, NOT git-ignored `wc2026/output/`, or
+- **Repo size**: this repo is ~1 GB, at GitHub's guidance limit. Two things hold it down.
+  (1) `matches_detail/*.js` ship the pass stream **columnar** — `passes` was 93% of every
+  file, so `build_match_details.compact_passes()` writes a name table + flag bitmask + one
+  row per pass (51 MB → 13 MB, lossless) and wraps the file in `window.__mdExpand(...)`,
+  which `wc2026_dashboard/expand_passes.js` decodes **before** `match.js` runs — so no
+  dashboard code sees the difference. Any new *Python* reader of these files must call
+  `expand_passes()`. (2) The 381 MB PNG archive can move to a GitHub Release: see
+  `tools/publish_png_release.py` and `WC_PNG_BASE_URL`. Publish and verify BEFORE
+  untracking, never the reverse.
+- **Live PNGs must be in tracked `WorldCup2026/`** (unless `WC_PNG_BASE_URL` points at a
+  published Release — see above), NOT git-ignored `wc2026/output/`, or
   Infographic-PNG links 404. `find_png` prefers WorldCup2026 then falls back to output.
 - **Shot/pass maps**: `match.js` `ty()` flips the across-pitch y (`PH - y` for home) to
   match the PNG/broadcast orientation. Don't "simplify" it away — it un-mirrors the map.

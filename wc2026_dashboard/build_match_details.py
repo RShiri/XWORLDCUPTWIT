@@ -255,20 +255,58 @@ def _shootout(match_data, side_of):
     return pens
 
 
-def find_png(match_id):
-    """Relative path (from the dashboard folder) to the rendered infographic, or None.
+# Where the published infographics live. Empty (the default) keeps the historic
+# behaviour: PNGs are tracked in WorldCup2026/ and linked by relative path.
+#
+# Set WC_PNG_BASE_URL to a GitHub Release download base to serve them from a
+# Release asset instead — e.g.
+#   WC_PNG_BASE_URL=https://github.com/RShiri/XWORLDCUPTWIT/releases/download/pngs-2026
+# The 225 renders are ~381 MB, over half this repository, and they are immutable
+# once a match is played: a Release is the right home for them, and Release
+# assets are CDN-served and do not count against the repo. See
+# tools/publish_png_release.py for the migration (publish FIRST, then switch
+# this over and untrack the folder — never the other way round, or every
+# Infographic link 404s in between).
+PNG_BASE_URL = os.environ.get("WC_PNG_BASE_URL", "").rstrip("/")
 
-    Always emits the published WorldCup2026 path (where the deploy copies the PNG),
-    even when the file currently only exists in the git-ignored wc2026/output. A
-    fresh auto-deploy regenerates data.js *before* the PNG reaches WorldCup2026,
-    so returning the output/ path here would 404 the Infographic link on the live
-    site. The PNG is checked in both places only to decide whether the match has a
-    render at all."""
+
+def find_png(match_id):
+    """Link to the rendered infographic, or None if the match has no render.
+
+    With PNG_BASE_URL set this returns the Release asset URL. Otherwise it
+    emits the published WorldCup2026 relative path (where the deploy copies
+    the PNG), even when the file currently only exists in the git-ignored
+    wc2026/output: a fresh auto-deploy regenerates data.js *before* the PNG
+    reaches WorldCup2026, so returning the output/ path here would 404 the
+    Infographic link on the live site. The PNG is checked in both places only
+    to decide whether the match has a render at all."""
     published = os.path.join("WorldCup2026", match_id + ".png")
     for rel in (published, os.path.join("wc2026", "output", match_id + ".png")):
         if os.path.exists(os.path.join(ROOT, rel)):
+            if PNG_BASE_URL:
+                return "%s/%s.png" % (PNG_BASE_URL, match_id)
             return "../" + published.replace("\\", "/")
+    if PNG_BASE_URL and MANIFEST_PNGS and match_id + ".png" in MANIFEST_PNGS:
+        # The folder has already been untracked; the manifest is what tells us
+        # a render exists for this match.
+        return "%s/%s.png" % (PNG_BASE_URL, match_id)
     return None
+
+
+def _load_png_manifest():
+    """Names of every PNG published to the Release, if the manifest exists.
+
+    Written by tools/publish_png_release.py so the builders still know which
+    matches have a render after WorldCup2026/ stops being tracked."""
+    path = os.path.join(ROOT, "WorldCup2026_manifest.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return set(json.load(fh).get("files") or [])
+    except Exception:
+        return set()
+
+
+MANIFEST_PNGS = _load_png_manifest()
 
 
 def find_png_dark(match_id):
@@ -781,6 +819,57 @@ def write_share_card(match_data, match_id):
         fh.write(html)
 
 
+PASS_FLAGS = ["ok", "key", "assist", "cross", "through", "prog"]
+
+
+def compact_passes(passes):
+    """Columnar encoding of the pass stream — ~75% smaller, lossless.
+
+    A match file averages 200 KB and `passes` is ~93% of it: roughly a
+    thousand objects that each repeat fifteen key names and spell out six
+    mostly-false booleans. Storing one name table, one flag bitmask and one
+    row per pass removes that repetition without dropping a single field.
+
+    Decoded by `expand_passes.js` in the browser (loaded before match.js, so
+    match.js still sees ordinary pass objects) and by `expand_passes()` below
+    for any Python reader. Already-compact input is returned untouched, so a
+    re-run is idempotent."""
+    if isinstance(passes, dict) and passes.get("__c"):
+        return passes
+    names, index, rows = [], {}, []
+    for p in passes:
+        for who in (p.get("player"), p.get("recv")):
+            if who is not None and who not in index:
+                index[who] = len(names)
+                names.append(who)
+        bits = 0
+        for i, key in enumerate(PASS_FLAGS):
+            if p.get(key):
+                bits |= 1 << i
+        rows.append([0 if p.get("team") == "home" else 1,
+                     p.get("x"), p.get("y"), p.get("ex"), p.get("ey"),
+                     p.get("min"), p.get("sec"),
+                     index.get(p.get("player"), -1),
+                     index.get(p.get("recv"), -1), bits])
+    return {"__c": 1, "n": names, "f": PASS_FLAGS, "r": rows}
+
+
+def expand_passes(block):
+    """Inverse of compact_passes, for any Python reader of these files."""
+    if not isinstance(block, dict) or not block.get("__c"):
+        return block
+    names, flags, out = block["n"], block["f"], []
+    for team, x, y, ex, ey, mn, sec, pi, ri, bits in block["r"]:
+        p = {"team": "home" if team == 0 else "away",
+             "x": x, "y": y, "ex": ex, "ey": ey, "min": mn, "sec": sec,
+             "player": names[pi] if pi >= 0 else None,
+             "recv": names[ri] if ri >= 0 else None}
+        for i, key in enumerate(flags):
+            p[key] = bool(bits & (1 << i))
+        out.append(p)
+    return out
+
+
 def write_detail(match_data, match_id=None):
     """Write matches_detail/<id>.js for one match. Returns the path or None."""
     if not (match_data.get("events")):
@@ -798,11 +887,14 @@ def write_detail(match_data, match_id=None):
     detail["png_dark"] = find_png_dark(match_id)
     if EDITION != 2026:
         detail["edition"] = EDITION   # 2026 files stay byte-identical (no new key)
+    detail["passes"] = compact_passes(detail.get("passes") or [])
     out = os.path.join(OUT_DIR, match_id + ".js")
     with open(out, "w", encoding="utf-8") as fh:
-        fh.write("window.MATCH_DETAIL = ")
+        # __mdExpand (expand_passes.js) restores the plain pass objects in the
+        # browser before match.js runs, so nothing downstream changes.
+        fh.write("window.MATCH_DETAIL = window.__mdExpand(")
         json.dump(detail, fh, ensure_ascii=False, separators=(",", ":"))
-        fh.write(";\n")
+        fh.write(");\n")
     try:
         write_share_card(match_data, match_id)        # non-fatal: a shim failure must not block the detail
     except Exception as exc:  # pragma: no cover

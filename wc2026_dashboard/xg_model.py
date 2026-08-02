@@ -29,12 +29,20 @@ _XG_MAP = {"key": None, "map": {}}
 
 
 def _match_xg_map(match_data):
+    """{id(event) -> xG} for the match, cached.
+
+    KEYED BY id(event), NOT by WhoScored eventId. eventId is not unique
+    within a match: in 8 of the 104 WC2026 fixtures two REAL SHOTS share
+    one, and a dict keyed on eventId silently gives both of them whichever
+    xG was written last. Callers look each shot up with the same event
+    object from this match_data, so identity matches and colliding shots
+    stay distinct."""
     key = match_data.get("matchId")
     if key is None:
         key = id(match_data.get("events"))
     if _XG_MAP["key"] != key:
         _XG_MAP["key"] = key
-        _XG_MAP["map"] = dict(_XG.iter_match_xg(match_data, league=_LEAGUE))
+        _XG_MAP["map"] = _XG.match_xg_by_id(match_data, league=_LEAGUE)
     return _XG_MAP["map"]
 
 SCALE_Y = 0.80
@@ -130,7 +138,8 @@ def shot_xg(ev, match_data=None):
     meta = dict(body=body, situation=situation, zone=zone,
                 big_chance=big_chance, penalty=is_penalty)
     if match_data is not None:
-        xg = _match_xg_map(match_data).get(ev.get("eventId"))
+        # id(ev), not ev["eventId"] — see _match_xg_map: eventId collides.
+        xg = _match_xg_map(match_data).get(id(ev))
         if xg is not None:
             return xg, meta
     x_sb = ws_to_sb_x(ev.get("x", 0))
