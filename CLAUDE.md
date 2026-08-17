@@ -28,6 +28,10 @@ WC2026 match analytics. Two outputs from one scraped dataset:
   `twitter_bot.py`. Run from repo root: `py tools/<script>.py`. See `tools/README.md`.
 - **`wc2026_dashboard/` = the website** (source + generated `data.js`/`players.js`/
   `matches_detail/`/`database/`). **`WorldCup2026/` = published PNGs.**
+- **`.claude/skills/wc-graphs/` = the charting skill** — the SVG idiom, pitch coordinate
+  systems, palette guards and PNG-panel conventions behind all ~50 graphs, plus an
+  inventory of every one of them. Read it before adding or editing any visual. It's the
+  one tracked exception to the "don't commit `.claude/`" rule.
 
 ## Pipeline
 - One-shot per match: `py -m wc2026.run_match --fotmob-id <id>` (or `--from-file <json>`).
@@ -295,7 +299,8 @@ WC2026 match analytics. Two outputs from one scraped dataset:
 - **CSS cache-busting**: `index.html`/`match.html` load `styles.css?v=Date.now()` so
   changes reach browsers. Keep that when editing the HTML head.
 - **Committing**: the working tree often has unrelated in-progress changes — stage
-  specific paths, don't blind `git add -A`. Don't commit `.claude/` (local config).
+  specific paths, don't blind `git add -A`. Don't commit `.claude/` (local config) —
+  except `.claude/skills/`, which is shared project documentation and is tracked.
 - No `gh` CLI on this machine; GitHub Pages was enabled via REST API with `GIT_TOKEN`.
 - Git auth uses a PAT (credential helper / `GIT_TOKEN`); never print it.
 

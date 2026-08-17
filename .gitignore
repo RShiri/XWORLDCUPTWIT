@@ -30,8 +30,12 @@ laliga_dashboard/
 laliga_png/
 team_logos/laliga/
 
-# Local Claude Code session config
-.claude/
+# Local Claude Code session config — except the shared project skills, which are
+# documentation of how this repo works and belong in the repo like any other doc.
+# (`.claude/*` not `.claude/` — git won't descend into an excluded directory, so the
+# negation below can only work if the directory itself stays un-excluded.)
+.claude/*
+!.claude/skills/
 
 # Historical WC raw scrapes — never committed (repo-size policy in ROADMAP.md);
 # published as zipped Actions artifacts / GitHub Release assets instead. The
