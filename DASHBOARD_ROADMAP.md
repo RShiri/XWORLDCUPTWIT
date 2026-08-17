@@ -43,10 +43,9 @@ aren't built yet — current features are in `wc2026_dashboard/README.md`.
    laid out from both sides into the centre. `renderBracket` in `app.js` + `.bracket-tree`
    styles; see `wc2026_dashboard/README.md`.
 
-5. **xG flow / momentum timeline (per match)** — *M, high value.*
-   Cumulative "xG race" line per team over match minutes, plus a momentum bar — the single
-   most-requested modern match-viz. Event stream already has per-shot minute + xG.
-   *Touches:* `build_match_details.py` (already has shots w/ minute+xG), `match.js` (new chart).
+5. **xG flow / momentum timeline (per match)** — ✅ **SHIPPED.**
+   Cumulative "xG race" per team with goal markers and an HT line: `buildMomentum` in
+   `match.js` (`#mv-momentum`), plus the separate win-probability timeline below it.
 
 6. **Player profile pages** — *M.*
    Click a player in the Players table → a per-player page: per-match log, season totals,
@@ -64,6 +63,11 @@ aren't built yet — current features are in `wc2026_dashboard/README.md`.
 
 ---
 
+> **New charts are queued in `.claude/skills/wc-graphs/references/backlog.md`**, which is
+> ranked, carries the verified data inventory behind each item, and is what the weekly
+> auto-propose run works from. Items 9–13 and 15–16 below are mirrored there. Keep the
+> backlog as the live queue and this file as the wider roadmap.
+
 ## LATER — depth, polish, breadth
 
 9. **Player touch heatmaps** — *M.* From event coordinates per player (Match Centre + profile).
@@ -72,7 +76,9 @@ aren't built yet — current features are in `wc2026_dashboard/README.md`.
 11. **Field tilt & territory** — *S.* Possession-territory and final-third entry maps per match.
 12. **Golden Boot / POTT race trackers** — *S.* Running leaderboards with sparkline trends.
 13. **Team form & trends** — *S.* Result/xG sparklines per team on the Team-totals view.
-14. **Dark mode** — *S.* Theme toggle; the CSS is already variable-driven via cache-busted sheets.
+14. **Dark mode** — ✅ **SHIPPED**, though not as a toggle: the site went dark-only via the
+    "Telemetry" skin (`futuristic-theme.css`, loaded after `styles.css` on every page), and the
+    PNG renderer gained a `theme="dark"` variant published as `<id>_dark.png`.
 15. **Mobile/responsive audit** — *M.* The pitch SVGs and wide tables need a small-screen pass.
 16. **Accessibility pass** — *M.* Keyboard nav for shot/pass dots, ARIA labels, contrast check.
 17. **Shareable cards / Open Graph** — *S.* Per-match `og:image` (reuse the PNG) so links unfurl.

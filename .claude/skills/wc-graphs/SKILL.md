@@ -47,6 +47,9 @@ draw it.
 - `references/palette.md` — CSS variables, team colours, the collision and darkness
   guards, rating colours.
 - `references/png-renderer.md` — matplotlib figure layout, theming, panel conventions.
+- `references/backlog.md` — the ranked queue of charts worth building next, with the
+  verified data inventory behind each. Read it when asked for "a new chart" without a
+  specific one named.
 
 ## Workflow
 
@@ -141,3 +144,19 @@ So: commit and push your source edits by hand, staging specific paths (the worki
 usually carries unrelated in-progress work — no blind `git add -A`). The HTML loads its
 stylesheets with `?v=Date.now()`; keep that when editing the head or CSS changes won't
 reach browsers. After pushing, the live site needs about a minute plus one `Ctrl+F5`.
+
+## The weekly auto-propose run
+
+A Routine fires a fresh session weekly to build the next chart off
+`references/backlog.md`. If you're that run, the rules are:
+
+- **One chart, one PR.** Take the highest-ranked `todo` item; skip `blocked` and
+  `needs-decision` — those are waiting on a human.
+- **Builder first.** Several items need a field added to a `build_*.py` before the chart is
+  possible. Do that in the same PR and regenerate, or the chart has nothing to draw.
+- **Never push to `main`,** and never merge your own PR.
+- **Flip the item to `in-review (#PR)`** in the same commit, so the next run doesn't
+  rebuild it.
+- **If nothing is actionable, stop and open nothing.** An empty queue is a fine outcome;
+  an invented chart to fill the slot is not.
+- Say plainly in the PR body what the chart shows, what it can't, and what you verified.
