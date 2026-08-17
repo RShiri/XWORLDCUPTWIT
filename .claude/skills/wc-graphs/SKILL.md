@@ -147,16 +147,28 @@ reach browsers. After pushing, the live site needs about a minute plus one `Ctrl
 
 ## The weekly auto-propose run
 
-A Routine fires a fresh session weekly to build the next chart off
-`references/backlog.md`. If you're that run, the rules are:
+A Routine (`trig_01EAJTKw5J1mTkCRaPak11Hi`, Mondays 03:00 UTC) fires a fresh session
+weekly to build the next chart off `references/backlog.md`. If you're that run, the rules
+are:
 
-- **One chart, one PR.** Take the highest-ranked `todo` item; skip `blocked` and
+- **One chart, one branch.** Take the highest-ranked `todo` item; skip `blocked` and
   `needs-decision` — those are waiting on a human.
+- **Stop if a `claude/chart-*` branch already exists** on the remote
+  (`git ls-remote --heads origin 'claude/chart-*'`). The previous chart is still awaiting
+  review, and stacking unreviewed branches just costs the reviewer time.
 - **Builder first.** Several items need a field added to a `build_*.py` before the chart is
-  possible. Do that in the same PR and regenerate, or the chart has nothing to draw.
-- **Never push to `main`,** and never merge your own PR.
-- **Flip the item to `in-review (#PR)`** in the same commit, so the next run doesn't
+  possible. Do that in the same branch and regenerate, or the chart has nothing to draw.
+- **Never commit to `main`.**
+- **Flip the item to `in-review (<branch>)`** in the same commit, so the next run doesn't
   rebuild it.
-- **If nothing is actionable, stop and open nothing.** An empty queue is a fine outcome;
+- **If nothing is actionable, stop and push nothing.** An empty queue is a fine outcome;
   an invented chart to fill the slot is not.
-- Say plainly in the PR body what the chart shows, what it can't, and what you verified.
+- Say plainly what the chart shows, what it can't, and what you actually verified.
+
+**Delivery is a pushed branch, not a PR.** Fired sessions have no GitHub API access — no
+`gh`, no `mcp__github__*`, and the environment's `GITHUB_TOKEN` is proxy-gated (403 against
+`api.github.com`). Git push works fine. So the run pushes `claude/chart-<slug>` and ends
+with the compare URL —
+`https://github.com/RShiri/XWORLDCUPTWIT/compare/main...claude/chart-<slug>?expand=1` —
+which arrives as a push notification and opens a pre-filled PR in two clicks. If a future
+run does have the GitHub tools, open the PR directly instead.
