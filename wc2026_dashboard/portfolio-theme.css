@@ -1,0 +1,256 @@
+/* ============================================================
+   Portfolio theme: aligns the dashboard with rshiri.github.io.
+   Loads AFTER styles.css / match.css / futuristic-theme.css and only
+   applies once the shared brand kit (brand.js) has set
+   html[data-site-style="c"|"a"]:
+     c = HUD      (navy, cyan hairlines, square corners, corner brackets,
+                   Chakra Petch caps over IBM Plex Sans)
+     a = Matchday (near-black plates, lime, chamfered corner,
+                   Barlow Condensed italic caps, skewed tabs/buttons)
+   Data colours (team colours, the green/purple/pink chart series,
+   win/draw/loss, warn/bad) are left alone on purpose.
+   ============================================================ */
+
+/* ---------- shared: map the dashboard's tokens onto --rs-* ---------- */
+html[data-site-style] {
+  --bg: var(--rs-bg);
+  --bg-2: var(--rs-bg-soft);
+  --card: var(--rs-panel);
+  --card-2: var(--rs-panel-2);
+  --line: var(--rs-line);
+  --line-strong: var(--rs-line-strong);
+  --text: var(--rs-ink);
+  --muted: var(--rs-muted);
+  --accent: var(--rs-accent);
+  --accent-soft: var(--rs-accent-soft);
+  --good: var(--rs-accent);
+  --shadow: none;
+  --radius: 0px;
+  --font-display: var(--rs-display);
+  --font-body: var(--rs-text);
+  accent-color: var(--rs-accent);
+  scrollbar-color: var(--rs-line-strong) var(--rs-bg);
+}
+html[data-site-style] body {
+  font-family: var(--rs-text);
+  color: var(--rs-ink);
+  background: var(--rs-bg);
+}
+html[data-site-style="c"] body {
+  background: radial-gradient(80% 50% at 75% 0%, rgba(77, 240, 255, .07), transparent 70%) no-repeat, var(--rs-bg);
+}
+html[data-site-style] a { color: var(--rs-accent); }
+html[data-site-style] ::selection { background: var(--rs-accent); color: var(--rs-accent-ink); }
+html[data-site-style] :focus-visible { outline: 2px solid var(--rs-accent); outline-offset: 2px; }
+html[data-site-style] ::-webkit-scrollbar-thumb { background: var(--rs-line-strong); border-radius: 0; }
+
+/* square corners everywhere in the dashboard (both looks have --rs-radius: 0)… */
+html[data-site-style][data-site-style] :is(header.site, main, .tooltip, .live-toast) :is(*, *::before, *::after),
+html[data-site-style] .tooltip { border-radius: 0; }
+/* …except the things that are circles on purpose (legend dots, play button) */
+html[data-site-style][data-site-style] main :is(.cl-sw, .pl-sw, .fh-dot, .play-btn, .dot, .pt-lg, .sw, .agm-lz, .so-tm) { border-radius: 50%; }
+
+/* glass + glow off: flat plates like the portfolio */
+html[data-site-style] :is(.card, .stat, .group-card, .third-card, .data-card, .db-match, .match-row,
+  .bk-match, .explainer, .insight, .champ-badge, .pred-card, .scoreboard, .pitch-wrap, .lineup-card) {
+  backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none;
+  background-color: var(--rs-panel);
+}
+html[data-site-style] .stat { background: var(--rs-panel); }
+
+/* ---------- header (the portfolio bar sits above; header stays sticky at top:0) ---------- */
+html[data-site-style] header.site {
+  background: color-mix(in srgb, var(--rs-bg) 90%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rs-line);
+}
+html[data-site-style] header.site::before { display: none; }
+html[data-site-style] .brand::before { display: none; }
+html[data-site-style] .brand .title {
+  font-family: var(--rs-display); text-transform: uppercase; color: var(--rs-ink);
+}
+html[data-site-style] .brand .title span { color: var(--rs-accent); text-shadow: none; }
+html[data-site-style] .brand .sub { font-family: var(--rs-text); color: var(--rs-muted); }
+html[data-site-style] .brand .sub::before { background: var(--rs-accent); box-shadow: none; border-radius: 0; }
+
+html[data-site-style] .ed-pill {
+  font-family: var(--rs-display); letter-spacing: .12em; color: var(--rs-muted);
+  border-color: var(--rs-line-strong); background: transparent;
+}
+html[data-site-style] .ed-pill:hover { color: var(--rs-ink); border-color: var(--rs-accent); background: var(--rs-accent-soft); }
+html[data-site-style] .ed-pill.active { color: var(--rs-accent-ink); background: var(--rs-accent); border-color: var(--rs-accent); }
+
+/* nav tabs */
+html[data-site-style] nav.tabs { background: transparent; border: 1px solid var(--rs-line); padding: 3px; gap: 2px; }
+html[data-site-style] nav.tabs button {
+  font-family: var(--rs-display); color: var(--rs-muted); text-transform: uppercase;
+  border: 1px solid transparent; box-shadow: none;
+}
+html[data-site-style] nav.tabs button:hover { color: var(--rs-ink); background: var(--rs-accent-soft); border-color: var(--rs-line); }
+html[data-site-style] nav.tabs button.active {
+  color: var(--rs-accent-ink); background: var(--rs-accent); border-color: var(--rs-accent); box-shadow: none;
+}
+
+/* ---------- headings ---------- */
+html[data-site-style] :is(h1, h2, h3, h4) { font-family: var(--rs-display); color: var(--rs-ink); }
+html[data-site-style] .section-head h2 { text-transform: uppercase; padding-left: 0; }
+html[data-site-style] .section-head h2::before { display: none; }
+html[data-site-style] .section-head p { color: var(--rs-body); }
+html[data-site-style] .mv-title { font-family: var(--rs-display); text-transform: uppercase; letter-spacing: .04em; border-bottom-color: var(--rs-line); }
+html[data-site-style] .explainer h3 { color: var(--rs-accent); }
+
+/* ---------- stat tiles ---------- */
+html[data-site-style] .stat .v,
+html[data-site-style] .stat .v.blue {
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: var(--rs-ink); -webkit-text-fill-color: currentColor; font-family: var(--rs-display);
+}
+html[data-site-style] .stat .v.accent { background: none; color: var(--rs-accent); -webkit-text-fill-color: currentColor; }
+html[data-site-style] .stat .v.blue { color: var(--accent-2); }
+html[data-site-style] .stat .k { color: var(--rs-muted); }
+
+/* ---------- tables ---------- */
+html[data-site-style] table thead th { font-family: var(--rs-display); color: var(--rs-muted); text-transform: uppercase; }
+html[data-site-style] td.pts { color: var(--rs-accent); }
+html[data-site-style] tbody td { border-bottom-color: var(--rs-line); }
+html[data-site-style] tbody tr.qual td:first-child { box-shadow: inset 3px 0 0 var(--rs-accent); }
+html[data-site-style] tbody tr.qual2 td:first-child { box-shadow: inset 3px 0 0 var(--accent-2); }
+html[data-site-style] .legend i.q1 { background: var(--rs-accent); box-shadow: none; }
+html[data-site-style] .legend i.q2 { box-shadow: none; }
+html[data-site-style] .group-card h3 { background: transparent; color: var(--rs-muted); font-family: var(--rs-display); }
+html[data-site-style] .group-card h3 b { background: var(--rs-accent); color: var(--rs-accent-ink); clip-path: none; }
+
+/* ---------- controls / buttons ---------- */
+html[data-site-style] :is(.controls input, .controls select, .so-controls select, .so-controls input,
+  .controls .ctl-chk, .cols-panel, .ctl select, .ctl input) {
+  background: var(--rs-bg-soft); border-color: var(--rs-line); color: var(--rs-ink);
+}
+html[data-site-style] :is(.controls input, .controls select, .so-controls select, .so-controls input):focus {
+  border-color: var(--rs-accent); box-shadow: 0 0 0 3px var(--rs-accent-soft);
+}
+html[data-site-style] select option, html[data-site-style] select optgroup { background-color: var(--rs-panel); color: var(--rs-ink); }
+html[data-site-style] .seg { background: transparent; border-color: var(--rs-line); }
+html[data-site-style] .seg-btn { font-family: var(--rs-display); text-transform: uppercase; letter-spacing: .06em; color: var(--rs-muted); }
+html[data-site-style] .seg-btn:hover { color: var(--rs-ink); }
+html[data-site-style] .seg-btn.active { background: var(--rs-accent); color: var(--rs-accent-ink); box-shadow: none; }
+html[data-site-style] :is(.back-link, .png-btn, .agm-dl, .agm-tab, .chip-toggle, .so-chip, .ctl-chk) {
+  font-family: var(--rs-display); text-transform: uppercase; letter-spacing: .06em; border-color: var(--rs-line-strong);
+}
+html[data-site-style] :is(.back-link, .png-btn, .agm-dl, .agm-tab, .chip-toggle, .so-chip, .ctl-chk):not(.on, .active) { background: transparent; }
+/* match page: the header nav only holds the back link, so drop the empty full-width box */
+html[data-site-style] nav.tabs:has(> .back-link) { border: 0; padding: 0; justify-content: flex-start; }
+html[data-site-style] :is(.back-link, .png-btn, .agm-dl):hover { color: var(--rs-accent); border-color: var(--rs-accent); background: var(--rs-accent-soft); }
+html[data-site-style] .play-btn { background: var(--rs-accent); color: var(--rs-accent-ink); }
+html[data-site-style] .play-btn.playing { background: var(--warn); }
+html[data-site-style] nav.tabs .back-link { color: var(--rs-ink); }
+
+/* ---------- misc chrome ---------- */
+html[data-site-style] .tooltip { background: var(--rs-panel); border: 1px solid var(--rs-line-strong); box-shadow: none; clip-path: none; color: var(--rs-ink); }
+html[data-site-style] .live-toast { background: var(--rs-accent); color: var(--rs-accent-ink); box-shadow: none; font-family: var(--rs-display); }
+html[data-site-style] .pwr-bar span, html[data-site-style] .corr-scale-fill { box-shadow: none; }
+html[data-site-style] .data-card:hover { border-color: var(--rs-accent); box-shadow: none; }
+html[data-site-style] .bk-match.played { border-color: var(--rs-line-strong); }
+html[data-site-style] .bk-side.win .sc { color: var(--rs-accent); text-shadow: none; }
+html[data-site-style] .timeline .goal-ev .min { color: var(--rs-accent); }
+html[data-site-style] .champ-badge { background: var(--rs-panel); }
+html[data-site-style] .footer-note { color: var(--rs-muted); }
+
+/* SVG chart chrome drawn by app.js/match.js: CSS beats presentation
+   attributes, so remap the hard-coded axis text + gridline colours to the
+   look's tokens. Only text/lines/axes are touched, never data marks. */
+html[data-site-style] svg text:is([fill="#8b8fb8"], [fill="#7a7fb0"], [fill="#93a0bd"], [fill="#a8ace0"]) { fill: var(--rs-muted); }
+html[data-site-style] svg text:is([fill="#eef0fb"], [fill="#d6d9f5"], [fill="#e8edf7"]) { fill: var(--rs-ink); }
+html[data-site-style] svg :is(line, polygon, path, polyline):is([stroke="#14152e"], [stroke="#262c52"], [stroke="#0b0d1f"], [stroke="#33366e"], [stroke="#26304d"]) { stroke: var(--rs-line); }
+html[data-site-style] svg :is(rect)[fill="#0b0d1f"] { fill: var(--rs-bg-soft); }
+html[data-site-style] svg [stroke="#050611"] { stroke: var(--rs-bg); }
+html[data-site-style] svg text { font-family: var(--rs-text); }
+
+/* ============================ C · HUD ============================ */
+html[data-site-style="c"] :is(h1, h2, h3, .brand .title) { text-transform: uppercase; letter-spacing: .02em; }
+html[data-site-style="c"] .brand .title { font-weight: 700; letter-spacing: .06em; }
+html[data-site-style="c"] .section-head h2::after { content: none; }
+html[data-site-style="c"] .section-head h2 { letter-spacing: .04em; }
+html[data-site-style="c"] .section-head h2 { display: flex; align-items: baseline; gap: .5ch; }
+html[data-site-style="c"] .section-head h2::before { content: "//"; display: inline; position: static; width: auto; background: none; color: var(--rs-accent); }
+html[data-site-style="c"] nav.tabs button { letter-spacing: .06em; font-size: 12px; padding-left: 8px; padding-right: 8px; }
+/* Plex is a touch wider than the old Inter: tighten the group-table cells so PTS stays in view */
+html[data-site-style="c"] .group-card :is(thead th, tbody td) { padding-left: 5px; padding-right: 5px; }
+html[data-site-style="c"] .group-card .team-cell .nm { max-width: 128px; }
+
+/* cards: square, cyan hairline, corner brackets top-left + bottom-right */
+html[data-site-style="c"] :is(.card, .stat, .group-card, .third-card, .data-card, .db-match, .match-row,
+  .bk-match, .explainer, .insight, .champ-badge, .pred-card) {
+  clip-path: none; border: 1px solid var(--rs-line);
+}
+html[data-site-style="c"] :is(.card, .stat, .group-card, .third-card, .data-card, .db-match, .match-row,
+  .bk-match, .explainer, .insight, .champ-badge, .pred-card)::after {
+  content: ''; position: absolute; inset: -1px; pointer-events: none;
+  background:
+    linear-gradient(var(--rs-accent), var(--rs-accent)) top left / 10px 2px no-repeat,
+    linear-gradient(var(--rs-accent), var(--rs-accent)) top left / 2px 10px no-repeat,
+    linear-gradient(var(--rs-accent), var(--rs-accent)) bottom right / 10px 2px no-repeat,
+    linear-gradient(var(--rs-accent), var(--rs-accent)) bottom right / 2px 10px no-repeat;
+  opacity: .75;
+}
+/* small repeated rows: brackets would be noise there */
+html[data-site-style="c"] :is(.match-row, .bk-match, .db-match, .pred-card)::after { content: none; }
+html[data-site-style="c"] :is(.card.full-card, .explainer)::before { display: none; }
+html[data-site-style="c"] :is(.scoreboard, .pitch-wrap) { position: relative; border-color: var(--rs-line); }
+html[data-site-style="c"] .scoreboard::before, html[data-site-style="c"] .scoreboard::after {
+  content: ''; position: absolute; width: 18px; height: 18px; border: 2px solid var(--rs-accent); pointer-events: none;
+}
+html[data-site-style="c"] .scoreboard::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+html[data-site-style="c"] .scoreboard::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+html[data-site-style="c"] .sb-score, html[data-site-style="c"] .sb-team .nm { font-family: var(--rs-display); text-transform: uppercase; }
+
+/* ========================== A · Matchday ========================== */
+html[data-site-style="a"] :is(h1, h2, h3, .brand .title, .mv-title) { font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: .01em; }
+html[data-site-style="a"] .brand .title { font-size: 26px; }
+html[data-site-style="a"] .section-head h2 { font-size: 30px; display: flex; align-items: center; gap: 10px; }
+html[data-site-style="a"] .section-head h2::before {
+  content: ''; display: block; position: static; flex: none; width: 12px; height: .8em;
+  background: var(--rs-accent); transform: skewX(-18deg);
+}
+html[data-site-style="a"] .mv-title { font-size: 22px; }
+html[data-site-style="a"] .card h3 { font-size: 19px; }
+
+/* skewed tabs / buttons with counter-skewed labels */
+html[data-site-style="a"] nav.tabs { border: 0; padding: 0 6px; gap: 4px; }
+html[data-site-style="a"] nav.tabs button,
+html[data-site-style="a"] .seg-btn,
+html[data-site-style="a"] :is(.back-link, .png-btn, .agm-dl, .ed-pill) {
+  font-style: italic; font-weight: 800; letter-spacing: .04em; transform: skewX(-12deg);
+}
+html[data-site-style="a"] nav.tabs button { font-size: 16px; }
+html[data-site-style="a"] .seg-btn { font-size: 15px; }
+html[data-site-style="a"] .ed-pill { font-size: 14px; }
+
+/* cards: plates with a chamfered top-right corner */
+html[data-site-style="a"] :is(.card, .stat, .group-card, .third-card, .data-card, .explainer, .insight, .champ-badge, .scoreboard, .pitch-wrap) {
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+  border: 1px solid var(--rs-line); background: var(--rs-panel);
+}
+html[data-site-style="a"] :is(.db-match, .match-row, .bk-match, .pred-card) {
+  clip-path: none; border: 1px solid var(--rs-line); background: var(--rs-panel);
+}
+html[data-site-style="a"] :is(.card, .stat, .group-card, .third-card, .data-card, .db-match, .match-row,
+  .bk-match, .explainer, .insight, .champ-badge, .pred-card)::after { content: none; }
+html[data-site-style="a"] :is(.card.full-card, .explainer)::before { display: none; }
+html[data-site-style="a"] .stat { border-left: 3px solid var(--rs-accent); }
+html[data-site-style="a"] .stat .v { font-style: italic; font-weight: 800; font-size: 34px; }
+html[data-site-style="a"] table thead th { font-style: italic; font-weight: 800; font-size: 13px; letter-spacing: .06em; }
+html[data-site-style="a"] .sb-score, html[data-site-style="a"] .sb-team .nm { font-family: var(--rs-display); font-style: italic; font-weight: 800; text-transform: uppercase; }
+html[data-site-style="a"] .sb-score { font-size: 46px; }
+html[data-site-style="a"] .group-card h3 b { transform: skewX(-12deg); font-style: italic; }
+
+/* ---------- phones ---------- */
+@media (max-width: 640px) {
+  /* centred + overflow-x hid the first tabs off the unreachable left edge */
+  html[data-site-style] nav.tabs { justify-content: flex-start; }
+  html[data-site-style="a"] .section-head h2 { font-size: 24px; }
+  html[data-site-style="a"] .brand .title { font-size: 21px; }
+  html[data-site-style="a"] nav.tabs button { font-size: 14px; }
+  /* the speed slider row on the Match Centre timelines was 50px wider than a phone */
+  html[data-site-style] .timeline-scrub, html[data-site-style] .agm-anim-bar { flex-wrap: wrap; }
+  html[data-site-style] .timeline-scrub .spd input { width: 70px; }
+}

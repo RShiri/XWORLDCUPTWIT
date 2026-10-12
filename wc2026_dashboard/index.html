@@ -4,9 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>World Cup 2026 — Dashboard & xG Lab</title>
+<link rel="stylesheet" href="https://rshiri.github.io/assets/brand/brand.css">
+<script src="https://rshiri.github.io/assets/brand/brand.js"></script>
 <script>document.write('<link rel="stylesheet" href="styles.css?v=' + Date.now() + '">');</script>
 <script>document.write('<link rel="stylesheet" href="futuristic-theme.css?v=' + Date.now() + '">');</script>
-<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="futuristic-theme.css" /></noscript>
+<script>document.write('<link rel="stylesheet" href="portfolio-theme.css?v=' + Date.now() + '">');</script>
+<script>document.write('<scr' + 'ipt src="portfolio-content.js?v=' + Date.now() + '"></scr' + 'ipt>');</script>
+<noscript><link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="futuristic-theme.css" /><link rel="stylesheet" href="portfolio-theme.css" /></noscript>
 </head>
 <body>
 <header class="site">
@@ -40,7 +44,7 @@
   <section id="view-tables" class="view active">
     <div class="section-head">
       <h2>Group Standings</h2>
-      <p>Live group tables built from played matches. Ranking by points, then goal difference, then goals for.</p>
+      <p data-he="טבלאות בתים חיות שנבנות מהמשחקים ששוחקו. הדירוג לפי נקודות, אחר כך הפרש שערים ואז שערי זכות.">Live group tables built from played matches. Ranking by points, then goal difference, then goals for.</p>
     </div>
     <div class="stats-strip" id="overviewStats"></div>
     <div class="group-grid" id="groupGrid"></div>
@@ -95,7 +99,7 @@
     <div class="grid-2">
       <div class="card">
         <h3>Golden Boot race</h3>
-        <p class="hint">Top scorers — ties break by assists, then fewer minutes played (the FIFA rule).
+        <p class="hint" data-he="מלכי השערים — שוויון מוכרע לפי בישולים, ואז לפי פחות דקות משחק (הכלל של פיפ&quot;א). הפס הוא השערים; האותיות הקטנות הן הבישולים וה-xG של המודל שלנו.">Top scorers — ties break by assists, then fewer minutes played (the FIFA rule).
            The bar is goals; the small print is assists and our model's xG.</p>
         <div id="storyScorers"></div>
       </div>
@@ -108,7 +112,7 @@
     </div>
     <div class="card full-card">
       <h3>Records &amp; numbers</h3>
-      <p class="hint">Tournament records straight from the scraped data — they update after every match.</p>
+      <p class="hint" data-he="שיאי הטורניר ישר מהנתונים שנסרקו — מתעדכנים אחרי כל משחק.">Tournament records straight from the scraped data — they update after every match.</p>
       <div class="stats-strip" id="storyRecords"></div>
     </div>
   </section>
@@ -171,7 +175,7 @@
 
     <div class="card full-card">
       <h3>The MVP against the field <span class="pl-sub">raw output · every 270′+ player · MVP highlighted</span></h3>
-      <p class="hint">Where the winner sits on the raw numbers behind the index: chance quality vs goals
+      <p class="hint" data-he="איפה הזוכה עומד במספרים הגולמיים שמאחורי המדד: איכות ההזדמנויות מול שערים (האלכסון = הבקעה בדיוק לפי מה שההזדמנויות שוות — מעליו זה ביצוע יתר), הזדמנויות שנוצרו מול בישולים, וגרף המנוע — קידום הכדור מול אספקת בעיטות. רחפו מעל נקודה כדי לראות את השחקן.">Where the winner sits on the raw numbers behind the index: chance quality vs goals
          scored (the diagonal = scoring exactly what your chances deserve — above it is
          overperformance), chances created vs assists, and the engine plot — moving the ball
          forward vs supplying shots. Hover any dot for the player.</p>
@@ -195,7 +199,7 @@
   <section id="view-eras" class="view">
     <div class="section-head">
       <h2>Eras</h2>
-      <p>Every published World Cup, side by side — one calibrated xG model across every edition, so the
+      <p data-he="כל מונדיאל שפורסם, זה לצד זה — מודל xG מכויל אחד לכל המהדורות, כך שההשוואה הוגנת (בלי ערבוב של xG מספקים שונים). מתמלא ככל שמהדורות היסטוריות נוספות; כרגע ייתכן שרק 2026 זמינה.">Every published World Cup, side by side — one calibrated xG model across every edition, so the
          comparison is apples to apples (no mixing vendor xG). Lights up as historical editions are
          backfilled; today only 2026 may be available.</p>
     </div>
@@ -206,7 +210,7 @@
   <section id="view-matches" class="view">
     <div class="section-head">
       <h2>Matches</h2>
-      <p>Every fixture and result in one place. Tap a played match to open its full head-to-head
+      <p data-he="כל המשחקים והתוצאות במקום אחד. הקישו על משחק ששוחק כדי לפתוח את שורת הסטטיסטיקה המלאה שלו, או קפצו למרכז המשחק האינטראקטיבי. עברו לסיכומי קבוצות כדי לראות סיכומים מצטברים.">Every fixture and result in one place. Tap a played match to open its full head-to-head
          stat line, or jump into the interactive Match Centre. Switch to Team totals for season aggregates.</p>
     </div>
     <div class="controls">
@@ -234,7 +238,7 @@
       <div class="card" style="padding:0; overflow:hidden">
         <div class="table-scroll"><div id="teamTable"></div></div>
       </div>
-      <p class="hint" style="margin-top:10px">Averages are per game played. Tap a column header to sort.</p>
+      <p class="hint" style="margin-top:10px" data-he="הממוצעים הם למשחק ששוחק. הקישו על כותרת עמודה כדי למיין.">Averages are per game played. Tap a column header to sort.</p>
     </div>
   </section>
 
@@ -348,7 +352,7 @@
       </div>
       <div class="card">
         <h3>How closely do goals follow xG?</h3>
-        <p class="hint">If xG were perfect, goals would track it exactly. This measures how strong that link has been
+        <p class="hint" data-he="אם ה-xG היה מושלם, השערים היו צמודים אליו בדיוק. כאן מודדים כמה חזק הקשר הזה עד עכשיו — וכמה כישרון סיום או מזל מוסיפים רעש מעליו.">If xG were perfect, goals would track it exactly. This measures how strong that link has been
            so far — and how much finishing skill or luck is adding noise on top.</p>
         <div id="corrBox"></div>
         <div class="insight" id="corrInsight"></div>
@@ -402,7 +406,7 @@
 
     <div class="card full-card">
       <h3>Is there a home advantage?</h3>
-      <p class="hint">Average xG created by teams listed as "home" vs "away". A clear gap suggests the designated
+      <p class="hint" data-he="ה-xG הממוצע שנוצר על ידי קבוצות שרשומות כ&quot;בית&quot; מול &quot;חוץ&quot;. פער ברור מרמז שהצד שמוגדר כמארח נוטה ליצור הזדמנויות טובות יותר — יתרון הביתיות הקלאסי, במונחים של איכות הזדמנויות.">Average xG created by teams listed as "home" vs "away". A clear gap suggests the designated
          home side tends to create better chances — the classic home advantage, in chance-quality terms.</p>
       <div id="homeAway"></div>
     </div>
@@ -418,7 +422,7 @@
 
     <div class="card full-card">
       <h3>Did the team that "deserved" it actually win?</h3>
-      <p class="hint">For every game with xG, we check whether the side with more xG (the better chances) got the
+      <p class="hint" data-he="בכל משחק עם xG אנחנו בודקים אם הצד עם יותר xG (ההזדמנויות הטובות יותר) קיבל את התוצאה. אחוז התאמה גבוה פירושו שה-xG עוקב אחרי המציאות; אי-התאמות (✘) הן המשחקים שהתריסו נגד מהלך המשחק — הרבה פעמים הוכרעו בבעיטת חלומות, פנדל או כרטיס אדום.">For every game with xG, we check whether the side with more xG (the better chances) got the
          result. A high match rate means xG is tracking reality; mismatches (✘) are the games that defied the
          underlying play — often decided by a worldie, a penalty, or a red card.</p>
       <div class="table-scroll" id="agreement"></div>
@@ -436,14 +440,14 @@
   <section id="view-data" class="view">
     <div class="section-head">
       <h2>Full Database</h2>
-      <p>The complete dataset behind this site — game results, per-game team stats, per-game and
+      <p data-he="כל הנתונים שמאחורי האתר — תוצאות, סטטיסטיקות קבוצה לכל משחק, סטטיסטיקות שחקנים לכל משחק ומצטברות, וטבלאות — מיוצאים משני המקורות שנסרקו (FotMob ו-WhoScored). הורידו את הטבלאות כ-CSV, את הכול כמסד SQLite, או עיינו בקובצי המשחק הגולמיים.">The complete dataset behind this site — game results, per-game team stats, per-game and
          aggregate player stats, and standings — exported from both scraped sources (FotMob + WhoScored).
          Download the tables as CSV, the whole thing as a SQLite database, or browse the raw match files.</p>
     </div>
     <div class="data-grid" id="dataDownloads"></div>
     <div class="card full-card" style="margin-top:18px">
       <h3>SQLite database</h3>
-      <p class="hint">One file with every table (matches, team_match_stats, player_match_stats, players, standings),
+      <p class="hint" data-he="קובץ אחד עם כל הטבלאות (matches, team_match_stats, player_match_stats, players, standings), מוכן לשאילתות SQL בכל כלי (DB Browser for SQLite, פייתון וכו&#x27;).">One file with every table (matches, team_match_stats, player_match_stats, players, standings),
          ready for SQL queries in any tool (DB Browser for SQLite, Python, etc.).</p>
       <a class="png-btn" id="sqliteLink" href="database/wc2026.sqlite" download>⬇ wc2026.sqlite</a>
     </div>
@@ -478,7 +482,7 @@
       <p>2. <b>Squad</b> (±55 pts) — a "best XI" proxy: each team's 11 most-used players this
          tournament (by minutes played), their match ratings averaged and minutes-weighted, compared
          against the 48-team field average.</p>
-      <p>For each knockout tie we turn the two teams' Power Index gap into a win probability with an
+      <p data-he="בכל משחק נוקאאוט אנחנו הופכים את הפער במדד הכוח בין שתי הנבחרות לסיכוי ניצחון בעקומה בסגנון Elo (יתרון של 100 נקודות ≈ 64%, 200 ≈ 74%). הצד עם הדירוג הגבוה צפוי לעלות, עם תוצאה סבירה שנגזרת מאותו פער ומכושר הכיבוש של כל נבחרת. כיוון שזה נוקאאוט, המודל תמיד בוחר מנצחת — משחקים שקולים מוכרעים &quot;בפנדלים&quot; לטובת מדד הכוח הגבוה. אחרי שמשחק משוחק בפועל, התוצאה האמיתית מחליפה את התחזית וממשיכה לסיבוב הבא — זו הקרנה דטרמיניסטית של מה שעוד לא קרה, לא הסתברות על כל עץ אפשרי: בטורנירים אמיתיים יש הפתעות שמסלול &quot;הפייבוריטית עולה&quot; לא יכול לצפות.">For each knockout tie we turn the two teams' Power Index gap into a win probability with an
          Elo-style curve (a 100-point edge ≈ 64%, 200 ≈ 74%). The higher-rated side is projected to advance,
          with a likely scoreline derived from the same gap and each team's scoring form. Because it's a
          knockout, the model always picks a winner — level games are decided "on penalties" by the higher
@@ -486,7 +490,7 @@
          forward into the next round — this is a deterministic projection for what hasn't happened yet,
          not a probability over every possible bracket: real tournaments throw up upsets the
          favourites-advance path can't.</p>
-      <p class="explainer-note">FIFA ranking source: the FIFA/Coca-Cola Men's World Ranking published
+      <p class="explainer-note" data-he="מקור דירוג פיפ&quot;א: דירוג פיפ&quot;א/קוקה-קולה לגברים שפורסם ב-11 ביוני 2026 (ארגנטינה ראשונה עם 1877 נקודות). הנקודות של הנבחרות המדורגות הכי נמוך הן הערכה. הכושר, ה-xG, האיכות ודירוגי הסגל מגיעים כולם מנתוני המשחקים והשחקנים שהאתר הזה סורק בעצמו.">FIFA ranking source: the FIFA/Coca-Cola Men's World Ranking published
          11&nbsp;June&nbsp;2026 (Argentina 1st on 1877 pts). Points for the lowest-ranked sides are
          approximate. Form, xG, quality and squad ratings all come from this site's own scraped
          match &amp; player data.</p>
@@ -520,7 +524,7 @@
 
     <div class="card full-card">
       <h3>Predicted road to the final</h3>
-      <p class="hint">Every tie from the Round of 32 to the final, as projected by the Power Index model.
+      <p class="hint" data-he="כל משחק משלב 32 האחרונות ועד הגמר, לפי התחזית של מודל מדד הכוח. הצד שצפוי לעלות מודגש, עם סיכוי הניצחון שלו והתוצאה הסבירה לפי המודל. משחקים שהמשתתפות בהם עוד לא נקבעו מוקרנים לפי המנצחות החזויות שמזינות אותם.">Every tie from the Round of 32 to the final, as projected by the Power Index model.
          The side tipped to go through is highlighted, with its win probability and the model's likely
          scoreline. Ties whose participants aren't fixed yet are projected from the predicted winners feeding into them.</p>
       <div id="predRounds"></div>
@@ -762,7 +766,7 @@
   <section id="view-breaks" class="view">
     <div class="section-head">
       <h2>Cooling Breaks</h2>
-      <p>What the two cooling breaks (~min 23 and ~min 74) actually do to a game. Break minutes are
+      <p data-he="מה שתי הפסקות ההתרעננות (בערך בדקה 23 ובדקה 74) באמת עושות למשחק. דקות ההפסקה מזוהות מפערים מתים ברצף האירועים; המומנטום משלב xG בחלון, הטיית מגרש והחזקת כדור, ונמדד מול התנודות של חלונות רגילים של 7 דקות. ספוילר: ההפסקות מזיזות משחקים פחות ממה שהכותרות טוענות — ורוב אפקט &quot;המובילה מאבדת מומנטום&quot; הוא רגרסיה לממוצע (בקרת האפור למטה מראה כמה).">What the two cooling breaks (~min 23 and ~min 74) actually do to a game. Break minutes are
          detected from dead gaps in the event stream; momentum blends window xG, field tilt and
          possession, measured against the churn of ordinary 7-minute windows. Spoiler: the breaks move
          games less than the headlines claim — and most of the “leader loses momentum” effect is
@@ -786,7 +790,7 @@
     </div>
     <div class="card full-card">
       <h3 id="bkRiverTitle">Momentum river</h3>
-      <p class="hint">The rolling momentum balance (above 0 = home on top). Shaded bands are the
+      <p class="hint" data-he="מאזן המומנטום המתגלגל (מעל 0 = הבית שולטת). הרצועות המוצללות הן הפסקות ההתרעננות, הקו המקווקו הוא המחצית, ⚽ מסמן שערים. בחרו משחק — או לחצו על פס ברצועה למטה.">The rolling momentum balance (above 0 = home on top). Shaded bands are the
          cooling breaks, the dashed line is half-time, ⚽ marks goals. Pick a match — or click a bar
          in the strip below.</p>
       <div class="controls"><select id="bkMatch"></select></div>
@@ -795,7 +799,7 @@
     </div>
     <div class="card full-card">
       <h3 id="bkStripTitle">Who got shaken — every match</h3>
-      <p class="hint">One bar per match: how far the momentum shift across this break sits above (or
+      <p class="hint" data-he="פס אחד לכל משחק: כמה רחוק שינוי המומנטום סביב ההפסקה הזו נמצא מעל (או מתחת) לתנודה הרגילה בין חלון לחלון בטורניר (μ). פסים שעוברים את קו ה-+1σ המקווקו הם המשחקים ש&quot;מעל הממוצע&quot;. לחצו על פס כדי לטעון את המשחק למעלה.">One bar per match: how far the momentum shift across this break sits above (or
          below) the tournament’s ordinary window-to-window churn (μ). Bars past the dashed +1σ line are
          the “higher-than-average” games. Click a bar to load the match above.</p>
       <div id="bkStrip"></div>
@@ -803,12 +807,12 @@
     <div class="grid-2">
       <div class="card">
         <h3>Pace before → after</h3>
-        <p class="hint">Per in-play minute, both teams pooled, across all matches with this break.</p>
+        <p class="hint" data-he="לכל דקת משחק פעילה, שתי הקבוצות יחד, בכל המשחקים עם ההפסקה הזו.">Per in-play minute, both teams pooled, across all matches with this break.</p>
         <div id="bkPace"></div>
       </div>
       <div class="card">
         <h3>Dominant vs chasing side</h3>
-        <p class="hint">Mean momentum index before → after the break. The grey band is the
+        <p class="hint" data-he="מדד המומנטום הממוצע לפני ← אחרי ההפסקה. הרצועה האפורה היא בקרת הרגרסיה לממוצע: מה אותם צדדים עושים סביב גבול אקראי בלי הפסקה.">Mean momentum index before → after the break. The grey band is the
            regression-to-mean control: what the same sides do across a random boundary with no break.</p>
         <div class="controls">
           <div class="seg" id="bkDom">
