@@ -2701,11 +2701,13 @@
      ≈ 38), goalkeeper's view. Aggregates a team's placement across the whole tournament,
      the Team-Lab complement to the per-match on-target map on the match pages. */
   function tlGoalMouth(shots) {
-    var GW = 100, GROUND = 50, GY0 = 43, GYR = 14, GZTOP = 48;
+    // Z gets its own scale so the frame keeps a real goal's 3 : 1 shape (same as match.js)
+    var GW = 100, GROUND = 31, GY0 = 43, GYR = 14, GZTOP = 48;
+    var ZK = ((54.8 - 45.2) / GYR * GW / 3) / 38;
     function gxOf(gy) { return (Math.max(GY0, Math.min(GY0 + GYR, gy)) - GY0) / GYR * GW; }
-    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)); }
+    function gyOf(gz) { return GROUND - Math.max(0, Math.min(GZTOP, gz)) * ZK; }
     var postL = gxOf(45.2), postR = gxOf(54.8), barY = gyOf(38);
-    var svg = ['<svg viewBox="-2 -2 104 56" class="tl-goalmouth" preserveAspectRatio="xMidYMid meet" role="img">'];
+    var svg = ['<svg viewBox="-2 -2 104 ' + (GROUND + 6) + '" class="tl-goalmouth" preserveAspectRatio="xMidYMid meet" role="img">'];
     svg.push('<rect x="-2" y="-2" width="104" height="' + (GROUND + 6) + '" fill="#0b0d1f"/>');
     svg.push('<rect x="' + postL.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + (postR - postL).toFixed(1) +
       '" height="' + (GROUND - barY).toFixed(1) + '" fill="rgba(255,255,255,0.04)"/>');
@@ -2720,7 +2722,7 @@
     var onT = shots.filter(function (s) { return s.ot && s.gy != null && s.gz != null; });
     onT.sort(function (a, b) { return (a.g ? 1 : 0) - (b.g ? 1 : 0); }).forEach(function (s) {
       var cx = GW - gxOf(s.gy), cy = gyOf(s.gz);   // GW − x → goalkeeper's view (matches match.js)
-      var r = 1.1 + 2.6 * Math.sqrt(Math.max(0, s.xg));
+      var r = 0.9 + 2.0 * Math.sqrt(Math.max(0, s.xg));
       var fill = s.g ? "#ff4fa8" : "#9d6bff", op = s.g ? 0.95 : 0.55;
       var info = s.t + " vs " + s.o + " — xG " + s.xg.toFixed(2) + (s.g ? " (GOAL)" : " (saved)") + " · " + s.s + " · " + s.m + "'";
       svg.push('<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" fill-opacity="' + op + '"' + (s.g ? ' stroke="#050611" stroke-width="0.5"' : "") + ' data-info="' + esc(info) + '"></circle>');
